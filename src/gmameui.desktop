@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=GMAMEUI Arcade Machine Emulator Frontend
+GenericName=Arcade Machine Emulator Frontend
+Comment=Play and browse classic arcade games
+Exec=gmameui
+Icon=gmameui.png
+Terminal=false
+Type=Application
+Categories=GTK;Application;Game;ArcadeGame;
+StartupNotify=true
