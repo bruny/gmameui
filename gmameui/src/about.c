@@ -39,11 +39,12 @@ about_window_show (void)
 	
 	const char *authors [] = {
 		"Andrew Burton <adb@iinet.net.au",
-		"Stephane Pontier (maintainer) <shadow_walker@users.sourceforge.net>",
-		"Benoit Dumont (developer) <vertigo17@users.sourceforge.net>",
-		"Nicos Panayides (developer) <anarxia@gmx.net>",
-		"Priit Laes (developer) <x-laes@users.sourceforge.net>",
-		"William Jon McCann (developer) <mccann@jhu.edu>",
+		"Based on GXMame",
+		"Stephane Pontier <shadow_walker@users.sourceforge.net>",
+		"Benoit Dumont <vertigo17@users.sourceforge.net>",
+		"Nicos Panayides <anarxia@gmx.net>",
+		"Priit Laes <x-laes@users.sourceforge.net>",
+		"William Jon McCann <mccann@jhu.edu>",
 		NULL
 	};
 
@@ -58,9 +59,8 @@ about_window_show (void)
 			       "version", VERSION,
 			       "logo", pixbuf,
 			       "copyright", _("Copyright (c) 2007-2008 Andrew Burton"),
-			       "copyright", _("Copyright (c) 2002-2005 Stephane Pontier"),
 			       "website", "http://gmameui.sourceforge.net",
-			       "comments", _("A GTK+ frontend for XMame"),
+			       "comments", _("A program to play MAME under Linux"),
 			       "authors", authors,
 			       "translator-credits", translators,
 			       NULL);
@@ -122,17 +122,20 @@ create_CreditsWindow (GtkWindow *parent)
 	gtk_box_pack_start (GTK_BOX (dialog_vbox), GTK_WIDGET (credits_notebook), FALSE, FALSE, 0);
 
 	developers_label = gtk_label_new (_("Developers"));
-	developers = gtk_label_new(_("Stephane Pontier (maintainer) <shadow_walker@users.sourceforge.net>\n"
-				     "Benoit Dumont (developer) <vertigo17@users.sourceforge.net>\n"
-				     "Nicos Panayides (developer) <anarxia@gmx.net>\n"
-				     "Priit Laes (developer) <x-laes@users.sourceforge.net>\n"
-				     "William Jon McCann (developer) <mccann@jhu.edu>\n"));
+	developers = gtk_label_new(_("Andrew Burton\n"
+				     "Code based on GXMame\n"
+				     "Stephane Pontier <shadow_walker@users.sourceforge.net>\n"
+				     "Benoit Dumont <vertigo17@users.sourceforge.net>\n"
+				     "Nicos Panayides <anarxia@gmx.net>\n"
+				     "Priit Laes <x-laes@users.sourceforge.net>\n"
+				     "William Jon McCann <mccann@jhu.edu>\n"));
 	gtk_widget_show (developers);
 
 	gtk_notebook_append_page (credits_notebook, developers, developers_label);
 
 	translators_label = gtk_label_new (_("Translators"));
-	translators = gtk_label_new(_("German (de) - Tobias Wichtrey <tobias@tarphos.de>\n"
+	translators = gtk_label_new(_("The following people translated GXMame:\n"
+				      "German (de) - Tobias Wichtrey <tobias@tarphos.de>\n"
 				      "Greek (el) - Nicos Panayides <anarxia@gmx.net>\n"
 				      "Spanish (es) - Pablo Gonzalo del Campo <pablodc@bigfoot.com>\n"
 				      "French (fr) - Stephane Pontier <shadow_walker@users.sourceforge.net>\n"
@@ -235,11 +238,11 @@ create_AboutWindow (void)
 	gtk_widget_show (label2);
 	gtk_box_pack_start (GTK_BOX (vbox2), label2, TRUE, TRUE, 0);
 
-	label3 = gtk_label_new (_("A GTK+ frontend for XMame"));
+	label3 = gtk_label_new (_("A program to play MAME under Linux"));
 	gtk_widget_show (label3);
 	gtk_box_pack_start (GTK_BOX (vbox2), label3, TRUE, TRUE, 0);
 
-	text = g_strdup_printf ("<span size=\"small\">%s</span>", _("Copyright (c) 2002-2005 Stephane Pontier"));
+	text = g_strdup_printf ("<span size=\"small\">%s</span>", _("Copyright (c) 2007-2008 Andrew Burton"));
 	label4 = gtk_label_new (text);
 	g_free (text);
 	gtk_label_set_use_markup (GTK_LABEL (label4), TRUE);
