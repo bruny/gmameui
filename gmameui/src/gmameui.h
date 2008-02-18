@@ -90,7 +90,8 @@ typedef enum  {
 	FLYERS,
 	CABINETS,
 	MARQUEES,
-	TITLES
+	TITLES,
+	CONTROL_PANELS
 } screenshot_type;
 
 typedef enum  {
@@ -210,6 +211,7 @@ gint *ColumnShown;
 	gchar *CabinetDirectory;
 	gchar *MarqueeDirectory;
 	gchar *TitleDirectory;
+	gchar *CPanelDirectory;
 	gchar *DiffDirectory;
 
 	gchar *IconDirectory;

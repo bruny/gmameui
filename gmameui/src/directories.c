@@ -105,6 +105,7 @@ static GtkWidget *flyer_path_entry;
 static GtkWidget *cabinet_path_entry;
 static GtkWidget *marquee_path_entry;
 static GtkWidget *title_path_entry;
+static GtkWidget *cpanel_path_entry;
 
 static GtkWidget *cheatfile_path_entry;
 static GtkWidget *hiscorefile_path_entry;
@@ -304,6 +305,9 @@ create_directories_selection (void)
 	gtk_entry_set_text (GTK_ENTRY (marquee_path_entry), gui_prefs.MarqueeDirectory);
 	title_path_entry = glade_xml_get_widget (xml, "title_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (title_path_entry), gui_prefs.TitleDirectory);
+	cpanel_path_entry = glade_xml_get_widget (xml, "cpanel_path_entry");
+	gtk_entry_set_text (GTK_ENTRY (cpanel_path_entry), gui_prefs.CPanelDirectory);
+	
 	icons_path_entry = glade_xml_get_widget (xml, "icons_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (icons_path_entry), gui_prefs.IconDirectory);	
 	
@@ -608,6 +612,7 @@ directories_selection_save_changes (GtkWidget *widget)
 	g_free (gui_prefs.CabinetDirectory);
 	g_free (gui_prefs.MarqueeDirectory);
 	g_free (gui_prefs.TitleDirectory);
+	g_free (gui_prefs.CPanelDirectory);
 	g_free (gui_prefs.IconDirectory);
 	/* XMame basic */
 	g_strfreev (gui_prefs.SamplePath);
@@ -659,6 +664,7 @@ directories_selection_save_changes (GtkWidget *widget)
 	gui_prefs.CabinetDirectory = gtk_editable_get_chars (GTK_EDITABLE (cabinet_path_entry), 0, -1);
 	gui_prefs.MarqueeDirectory = gtk_editable_get_chars (GTK_EDITABLE (marquee_path_entry), 0, -1);
 	gui_prefs.TitleDirectory = gtk_editable_get_chars (GTK_EDITABLE (title_path_entry), 0, -1);
+	gui_prefs.CPanelDirectory = gtk_editable_get_chars (GTK_EDITABLE (cpanel_path_entry), 0, -1);
 	gui_prefs.IconDirectory = gtk_editable_get_chars (GTK_EDITABLE (icons_path_entry), 0, -1);
 
 	/* XMame additional */

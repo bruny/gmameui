@@ -571,6 +571,9 @@ get_pixbuf (RomEntry       *rom,
 	case (TITLES):
 		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.TitleDirectory, rom->romname);
 		break;
+	case (CONTROL_PANELS):
+		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CPanelDirectory, rom->romname);
+		break;
 	default:
 		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->romname);
 	}
@@ -597,6 +600,9 @@ get_pixbuf (RomEntry       *rom,
 			break;
 		case (TITLES):
 			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.TitleDirectory, rom->cloneof);
+			break;
+		case (CONTROL_PANELS):
+			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CPanelDirectory, rom->cloneof);
 			break;
 		default:
 			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->cloneof);
@@ -645,6 +651,9 @@ get_pixbuf (RomEntry       *rom,
 			break;
 		case (TITLES):
 			zipfile = g_build_filename (gui_prefs.TitleDirectory, "titles.zip", NULL);
+			break;
+		case (CONTROL_PANELS):
+			zipfile = g_build_filename (gui_prefs.TitleDirectory, "cpanels.zip", NULL);
 			break;
 		default:
 			zipfile = g_build_filename (gui_prefs.SnapshotDirectory, "snap.zip", NULL);
@@ -819,6 +828,11 @@ update_screenshot_panel (RomEntry *rom)
 				pict = get_pixbuf (rom, 4, wwidth, wheight);
 				main_gui.screenshot5 = pict;
 				break;
+			case (CONTROL_PANELS):
+				gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_box6), main_gui.screenshot6);
+				pict = get_pixbuf (rom, 5, wwidth, wheight);
+				main_gui.screenshot6 = pict;
+				break;	
 			}
 		}
 
@@ -865,6 +879,11 @@ update_screenshot_panel (RomEntry *rom)
 				gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box5), GTK_WIDGET (main_gui.screenshot5));
 				gtk_widget_show (main_gui.screenshot_box5);
 				gtk_widget_show (main_gui.screenshot5);
+				break;
+			case (CONTROL_PANELS):
+				gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box6), GTK_WIDGET (main_gui.screenshot6));
+				gtk_widget_show (main_gui.screenshot_box6);
+				gtk_widget_show (main_gui.screenshot6);
 				break;
 			}
 		}
@@ -1109,11 +1128,6 @@ create_columns_popupmenu (void)
 void
 init_gui (void)
 {
-	GtkWidget *screenshot_label1;
-	GtkWidget *screenshot_label2;
-	GtkWidget *screenshot_label3;
-	GtkWidget *screenshot_label4;
-	GtkWidget *screenshot_label5;
 	GtkTooltips *tooltips;
 	gchar *filename;
 
@@ -1222,6 +1236,10 @@ init_gui (void)
 	main_gui.screenshot_box5 = glade_xml_get_widget (xml, "screenshot_box5");
 	gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box5), GTK_WIDGET (main_gui.screenshot5));
 
+	/* Control Panels */
+	main_gui.screenshot6 = gmameui_get_image_from_stock ("gmameui-screen");
+	main_gui.screenshot_box6 = glade_xml_get_widget (xml, "screenshot_box6");
+	gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box6), GTK_WIDGET (main_gui.screenshot6));
 
 	g_signal_connect (G_OBJECT (main_gui.screenshot_notebook), "switch-page",
 			    G_CALLBACK (on_screenshot_notebook_switch_page),

@@ -633,6 +633,7 @@ GMAMEUI_DEBUG ("Loading directories ini file");
 	gui_prefs.CabinetDirectory = g_key_file_get_string (dirsini_list, "Directories", "CabinetDirectory", &error);
 	gui_prefs.MarqueeDirectory = g_key_file_get_string (dirsini_list, "Directories", "MarqueeDirectory", &error);
 	gui_prefs.TitleDirectory = g_key_file_get_string (dirsini_list, "Directories", "TitleDirectory", &error);
+	gui_prefs.CPanelDirectory = g_key_file_get_string (dirsini_list, "Directories", "CPanelDirectory", &error);
 	
 	gui_prefs.CtrlrDirectory = g_key_file_get_string (dirsini_list, "Directories", "CtrlrDirectory", &error);
 	gui_prefs.IconDirectory = g_key_file_get_string (dirsini_list, "Directories", "IconDirectory", &error);
@@ -651,6 +652,7 @@ GMAMEUI_DEBUG ("Finished loading directories ini file");
 	if (!gui_prefs.CabinetDirectory) gui_prefs.CabinetDirectory = g_build_filename (XMAME_ROOT, "cabinets", NULL);
 	if (!gui_prefs.MarqueeDirectory) gui_prefs.MarqueeDirectory = g_build_filename (XMAME_ROOT, "marquees", NULL);
 	if (!gui_prefs.TitleDirectory) gui_prefs.TitleDirectory = g_build_filename (XMAME_ROOT, "titles", NULL);
+	if (!gui_prefs.CPanelDirectory) gui_prefs.CPanelDirectory = g_build_filename (XMAME_ROOT, "cpanel", NULL);
 
 	if (!gui_prefs.CtrlrDirectory) gui_prefs.CtrlrDirectory = g_build_filename (XMAME_ROOT, "ctrlr", NULL);
 	if (!gui_prefs.IconDirectory) gui_prefs.IconDirectory = g_build_filename (XMAME_ROOT, "icons", NULL);
@@ -688,6 +690,7 @@ save_dirs_ini (void)
 	g_key_file_set_string (dirsini_list, "Directories", "CabinetDirectory", gui_prefs.CabinetDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "MarqueeDirectory", gui_prefs.MarqueeDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "TitleDirectory", gui_prefs.TitleDirectory);
+	g_key_file_set_string (dirsini_list, "Directories", "CPanelDirectory", gui_prefs.CPanelDirectory);
 	
 	g_key_file_set_string (dirsini_list, "Directories", "CtrlrDirectory", gui_prefs.CtrlrDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "IconDirectory", gui_prefs.IconDirectory);

@@ -107,11 +107,13 @@ struct main_gui_struct {
 	GtkWidget *screenshot_box3;
 	GtkWidget *screenshot_box4;
 	GtkWidget *screenshot_box5;
+	GtkWidget *screenshot_box6;
 	GtkWidget *screenshot1;
 	GtkWidget *screenshot2;
 	GtkWidget *screenshot3;
 	GtkWidget *screenshot4;
 	GtkWidget *screenshot5;
+	GtkWidget *screenshot6;
 	GtkWidget *history_scrollwin;
 	GtkWidget *history_box;
 	GtkTextBuffer *history_buffer;
