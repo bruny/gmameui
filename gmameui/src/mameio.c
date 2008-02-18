@@ -255,7 +255,7 @@ static void XMLStartHandler(TCreateGameList *_this,
 
 			if(!strcmp(type, "cpu"))
 			{
-				_this->cpu_count++;
+				//_this->cpu_count++;
 
 				if(_this->cpu_count <= NB_CPU) {
 					CPUInfo *cpu;
@@ -272,12 +272,12 @@ static void XMLStartHandler(TCreateGameList *_this,
 							cpu->sound_flag = !strcmp(atts[i+1], "yes");
 						}
 					}
-
+_this->cpu_count++;
 				}
 			}
 			else if(!strcmp(type, "audio"))
 			{
-				_this->sound_count++;
+				//_this->sound_count++;
 
 				if(_this->sound_count <= NB_CPU) {
 					SoundCPUInfo *cpu;
@@ -293,6 +293,7 @@ static void XMLStartHandler(TCreateGameList *_this,
 					}
 
 				}
+_this->sound_count++;
 			}
 		}
 		else if(!strcmp(name, "input"))

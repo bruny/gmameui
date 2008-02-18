@@ -361,7 +361,7 @@ static char *
 get_rom_cpu_value (RomEntry *rom)
 {
 	char *value = NULL;
-	char *values [NB_CPU];
+	char *values [NB_CPU + 1];
 	gint  i, j;
 
 	j = 0;
@@ -389,7 +389,7 @@ static char *
 get_rom_sound_value (RomEntry *rom)
 {
 	char *value = NULL;
-	char *values [NB_CPU];
+	char *values [NB_CPU + 1];
 	gint  i, j;
 
 	j = 0;
@@ -482,7 +482,17 @@ add_general_tab (GtkWidget    *properties_window,
 		gtk_widget_hide (label);
 		gtk_widget_hide (clone_label);
 	}
-
+	
+	/* Driver details - TODO 
+	label = glade_xml_get_widget (xml, "lbl_emulation_status");
+	gtk_label_set_text (GTK_LABEL (label), rom->driver_status_emulation);
+	label = glade_xml_get_widget (xml, "lbl_color_status");
+	gtk_label_set_text (GTK_LABEL (label), rom->driver_status_color);
+	label = glade_xml_get_widget (xml, "lbl_sound_status");
+	gtk_label_set_text (GTK_LABEL (label), rom->driver_status_sound);
+	label = glade_xml_get_widget (xml, "lbl_graphic_status");
+	gtk_label_set_text (GTK_LABEL (label), rom->driver_status_graphic);*/
+	
 	/* Set default labels for the check result labels - these will be changed */
 	rom_check_result = glade_xml_get_widget (xml, "rom_check_result");
 	gtk_label_set_text (GTK_LABEL (rom_check_result), _("Checking..."));
