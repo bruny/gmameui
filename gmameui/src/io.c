@@ -89,10 +89,8 @@ gboolean
 load_games_ini (void)
 {
 	gchar *filename;
-	GList *listpointer;
 	RomEntry *tmprom = NULL;
-	gboolean game_found = FALSE;
-	
+		
 	GMAMEUI_DEBUG ("Loading games.ini");
 
 	filename = g_build_filename (g_get_home_dir (), ".gmameui", "games.ini", NULL);
@@ -612,30 +610,7 @@ gboolean
 load_dirs_ini (void)
 {
 	gchar *filename;
-//	gsize paths[10];	/* FIXME Define max number of rom/sample dirs */
 	gsize paths;	/* FIXME Define max number of rom/sample dirs */
-	
-		/* Set defaults */
-	gui_prefs.RomPath = g_strsplit (g_build_filename (XMAME_ROOT, "roms", NULL), ";", 0);
-	gui_prefs.SamplePath = g_strsplit (g_build_filename (XMAME_ROOT, "samples", NULL), ";", 0);
-	gui_prefs.SnapshotDirectory = g_build_filename (XMAME_ROOT, "snap", NULL);
-	gui_prefs.ArtworkDirectory = g_build_filename (XMAME_ROOT, "artwork", NULL);
-	gui_prefs.HiscoreDirectory = g_build_filename (g_get_home_dir () , ".xmame", "hi", NULL);
-	gui_prefs.FlyerDirectory = g_build_filename (XMAME_ROOT, "flyers", NULL);
-	gui_prefs.CabinetDirectory = g_build_filename (XMAME_ROOT, "cabinets", NULL);
-	gui_prefs.MarqueeDirectory = g_build_filename (XMAME_ROOT, "marquees", NULL);
-	gui_prefs.TitleDirectory = g_build_filename (XMAME_ROOT, "titles", NULL);
-	gui_prefs.IconDirectory = g_build_filename (XMAME_ROOT, "icons", NULL);
-	
-	gui_prefs.DiffDirectory = g_build_filename (g_get_home_dir (), ".xmame", "diff", NULL);
-	gui_prefs.CtrlrDirectory = g_build_filename (XMAME_ROOT, "ctrlr", NULL);
-	
-	gui_prefs.InputDirectory = g_build_filename (g_get_home_dir (), ".xmame", "inp", NULL);
-	gui_prefs.NVRamDirectory = g_build_filename (g_get_home_dir (), ".xmame", "nvram", NULL);
-	gui_prefs.MemCardDirectory = g_build_filename (g_get_home_dir (), ".xmame", "memcard", NULL);
-	gui_prefs.ConfigDirectory = g_build_filename (g_get_home_dir (), ".xmame" , "cfg", NULL);
-	gui_prefs.StateDirectory = g_build_filename (g_get_home_dir (), ".xmame", "sta", NULL);
-	gui_prefs.inipath = g_build_filename (g_get_home_dir (), ".xmame" , "ini", NULL);
 	
 	filename = g_build_filename (g_get_home_dir (), ".gmameui", "dirs.ini", NULL);	
 GMAMEUI_DEBUG ("Loading directories ini file");
@@ -652,24 +627,43 @@ GMAMEUI_DEBUG ("Loading directories ini file");
 	gui_prefs.RomPath = g_key_file_get_string_list (dirsini_list, "Directories", "RomPath", &paths, &error);
 	gui_prefs.SamplePath = g_key_file_get_string_list (dirsini_list, "Directories", "SamplePath", &paths, &error);
 
-	gui_prefs.ConfigDirectory = g_key_file_get_string (dirsini_list, "Directories", "ConfigDirectory", &error);
-	gui_prefs.NVRamDirectory = g_key_file_get_string (dirsini_list, "Directories", "NVRamDirectory", &error);
-	gui_prefs.CtrlrDirectory = g_key_file_get_string (dirsini_list, "Directories", "CtrlrDirectory", &error);
-	gui_prefs.MemCardDirectory = g_key_file_get_string (dirsini_list, "Directories", "MemCardDirectory", &error);
-	gui_prefs.InputDirectory = g_key_file_get_string (dirsini_list, "Directories", "InputDirectory", &error);
-	gui_prefs.HiscoreDirectory = g_key_file_get_string (dirsini_list, "Directories", "HiscoreDirectory", &error);
-	gui_prefs.StateDirectory = g_key_file_get_string (dirsini_list, "Directories", "StateDirectory", &error);
-	gui_prefs.ArtworkDirectory = g_key_file_get_string (dirsini_list, "Directories", "ArtworkDirectory", &error);
 	gui_prefs.SnapshotDirectory = g_key_file_get_string (dirsini_list, "Directories", "SnapshotDirectory", &error);
+	gui_prefs.ArtworkDirectory = g_key_file_get_string (dirsini_list, "Directories", "ArtworkDirectory", &error);
 	gui_prefs.FlyerDirectory = g_key_file_get_string (dirsini_list, "Directories", "FlyerDirectory", &error);
 	gui_prefs.CabinetDirectory = g_key_file_get_string (dirsini_list, "Directories", "CabinetDirectory", &error);
 	gui_prefs.MarqueeDirectory = g_key_file_get_string (dirsini_list, "Directories", "MarqueeDirectory", &error);
 	gui_prefs.TitleDirectory = g_key_file_get_string (dirsini_list, "Directories", "TitleDirectory", &error);
-	gui_prefs.DiffDirectory = g_key_file_get_string (dirsini_list, "Directories", "DiffDirectory", &error);
+	
+	gui_prefs.CtrlrDirectory = g_key_file_get_string (dirsini_list, "Directories", "CtrlrDirectory", &error);
 	gui_prefs.IconDirectory = g_key_file_get_string (dirsini_list, "Directories", "IconDirectory", &error);
 	gui_prefs.inipath = g_key_file_get_string (dirsini_list, "Directories", "inipath", &error);
-
+	
 	g_key_file_free (dirsini_list);
+GMAMEUI_DEBUG ("Finished loading directories ini file");
+	
+	/* Set defaults if the values were not available in the ini file */
+	if (!gui_prefs.RomPath) gui_prefs.RomPath = g_strsplit (g_build_filename (XMAME_ROOT, "roms", NULL), ";", 0);
+	if (!gui_prefs.SamplePath) gui_prefs.SamplePath = g_strsplit (g_build_filename (XMAME_ROOT, "samples", NULL), ";", 0);
+	
+	if (!gui_prefs.SnapshotDirectory) gui_prefs.SnapshotDirectory = g_build_filename (XMAME_ROOT, "snap", NULL);
+	if (!gui_prefs.ArtworkDirectory) gui_prefs.ArtworkDirectory = g_build_filename (XMAME_ROOT, "artwork", NULL);
+	if (!gui_prefs.FlyerDirectory) gui_prefs.FlyerDirectory = g_build_filename (XMAME_ROOT, "flyers", NULL);
+	if (!gui_prefs.CabinetDirectory) gui_prefs.CabinetDirectory = g_build_filename (XMAME_ROOT, "cabinets", NULL);
+	if (!gui_prefs.MarqueeDirectory) gui_prefs.MarqueeDirectory = g_build_filename (XMAME_ROOT, "marquees", NULL);
+	if (!gui_prefs.TitleDirectory) gui_prefs.TitleDirectory = g_build_filename (XMAME_ROOT, "titles", NULL);
+
+	if (!gui_prefs.CtrlrDirectory) gui_prefs.CtrlrDirectory = g_build_filename (XMAME_ROOT, "ctrlr", NULL);
+	if (!gui_prefs.IconDirectory) gui_prefs.IconDirectory = g_build_filename (XMAME_ROOT, "icons", NULL);
+	
+	/* The following configuration options are all stored under .gmameui */
+	gui_prefs.HiscoreDirectory = g_build_filename (g_get_home_dir () , ".gmameui", "hi", NULL);
+	gui_prefs.DiffDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "diff", NULL);
+	gui_prefs.InputDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "inp", NULL);
+	gui_prefs.NVRamDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "nvram", NULL);
+	gui_prefs.MemCardDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "memcard", NULL);
+	gui_prefs.ConfigDirectory = g_build_filename (g_get_home_dir (), ".gmameui" , "cfg", NULL);
+	gui_prefs.StateDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "sta", NULL);
+	gui_prefs.inipath = g_build_filename (g_get_home_dir (), ".gmameui" , "ini", NULL);
 	
 	return TRUE;
 }
@@ -688,21 +682,16 @@ save_dirs_ini (void)
 	g_key_file_set_string_list (dirsini_list, "Directories", "RomPath", gui_prefs.RomPath, g_strv_length (gui_prefs.RomPath));
 	g_key_file_set_string_list (dirsini_list, "Directories", "SamplePath", gui_prefs.SamplePath, g_strv_length (gui_prefs.RomPath));
 
-	g_key_file_set_string (dirsini_list, "Directories", "ConfigDirectory", gui_prefs.ConfigDirectory);
-	g_key_file_set_string (dirsini_list, "Directories", "NVRamDirectory", gui_prefs.NVRamDirectory);
-	g_key_file_set_string (dirsini_list, "Directories", "CtrlrDirectory", gui_prefs.CtrlrDirectory);
-	g_key_file_set_string (dirsini_list, "Directories", "MemCardDirectory", gui_prefs.MemCardDirectory);
-	g_key_file_set_string (dirsini_list, "Directories", "InputDirectory", gui_prefs.InputDirectory);
-	g_key_file_set_string (dirsini_list, "Directories", "HiscoreDirectory", gui_prefs.HiscoreDirectory);
-	g_key_file_set_string (dirsini_list, "Directories", "StateDirectory", gui_prefs.StateDirectory);
-	g_key_file_set_string (dirsini_list, "Directories", "ArtworkDirectory", gui_prefs.ArtworkDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "SnapshotDirectory", gui_prefs.SnapshotDirectory);
+	g_key_file_set_string (dirsini_list, "Directories", "ArtworkDirectory", gui_prefs.ArtworkDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "FlyerDirectory", gui_prefs.FlyerDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "CabinetDirectory", gui_prefs.CabinetDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "MarqueeDirectory", gui_prefs.MarqueeDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "TitleDirectory", gui_prefs.TitleDirectory);
-	g_key_file_set_string (dirsini_list, "Directories", "DiffDirectory", gui_prefs.DiffDirectory);
+	
+	g_key_file_set_string (dirsini_list, "Directories", "CtrlrDirectory", gui_prefs.CtrlrDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "IconDirectory", gui_prefs.IconDirectory);
+	
 	g_key_file_set_string (dirsini_list, "Directories", "inipath", gui_prefs.inipath);
 	
 	g_key_file_save_to_file (dirsini_list, filename, NULL);
