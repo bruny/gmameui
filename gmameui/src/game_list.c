@@ -286,7 +286,7 @@ gamelist_free (void)
 	gamelist_init ();
 }
 
-#define FIELDS_PER_RECORD 26 + (NB_CPU * 4)
+#define FIELDS_PER_RECORD 27 + (NB_CPU * 4)
 
 /**
 * Adds a rom entry to the gamelist.
@@ -431,23 +431,24 @@ gamelist_load (void)
 			rom->gamename = g_strdup (tmp_array[1]);
 			rom->gamenameext = g_strdup (tmp_array[2]);
 			rom->the_trailer = !strcmp (tmp_array[3], "true");
-			rom_entry_set_year (rom, tmp_array[4]);
-			rom->manu = g_strdup (tmp_array[5]);
-			rom->cloneof = g_strdup (tmp_array[6]);
-			rom->romof = g_strdup (tmp_array[7]);
-			rom_entry_set_driver (rom, tmp_array[8]);
+			rom->is_bios = !strcmp (tmp_array[4], "true");
+			rom_entry_set_year (rom, tmp_array[5]);
+			rom->manu = g_strdup (tmp_array[6]);
+			rom->cloneof = g_strdup (tmp_array[7]);
+			rom->romof = g_strdup (tmp_array[8]);
+			rom_entry_set_driver (rom, tmp_array[9]);
 			
-			if (!strcmp (tmp_array[9], "true"))
+			if (!strcmp (tmp_array[10], "true"))
 				rom->status = TRUE;
 			else
 				rom->status = FALSE;
-			rom->driver_status_color = g_strdup (tmp_array[10]);
-			rom->driver_status_sound = g_strdup (tmp_array[11]);
-			rom->driver_status_graphic = g_strdup (tmp_array[12]);
-			rom->colors = atoi (tmp_array[13]);
+			rom->driver_status_color = g_strdup (tmp_array[11]);
+			rom->driver_status_sound = g_strdup (tmp_array[12]);
+			rom->driver_status_graphic = g_strdup (tmp_array[13]);
+			rom->colors = atoi (tmp_array[14]);
 
 			/* offset of cpu infos in the array */
-			offset = 14;
+			offset = 15;
 			for (j = 0; j < NB_CPU; j++)
 			{
 				if (!strncmp (tmp_array[ (j * 2) + offset], "(sound)", 7)) {
@@ -467,7 +468,7 @@ gamelist_load (void)
 			}
 
 			/* calculate offset of sound cpu infos in the array */
-			offset = 14 + (NB_CPU * 2);
+			offset = 15 + (NB_CPU * 2);
 
 			for (j = 0; j < NB_CPU; j++)
 			{
@@ -479,7 +480,7 @@ gamelist_load (void)
 				rom->sound_info[j].clock = atoi (tmp_array[offset + (j * 2) + 1]);
 			}
 
-			offset = 14 + (NB_CPU * 4);
+			offset = 15 + (NB_CPU * 4);
 
 			rom->num_players = atoi (tmp_array[offset + 0]);
 			rom->num_buttons = atoi (tmp_array[offset + 1]);
@@ -587,6 +588,7 @@ gamelist_prefix_print (FILE *handle)
 		"gamename"
 		"gamenameext"
 		"the_trailer"
+		"is_bios"
 		"year"
 		"manufacturer"
 		"cloneof"
@@ -649,6 +651,7 @@ gamelist_print (FILE     *handle,
 		"%s" SEP	/* gamename */
 		"%s" SEP	/* gamenameext */
 		"%s" SEP	/* the trailer */
+		"%s" SEP	/* is_bios */
 		"%s" SEP	/* year */
 		"%s" SEP	/* manu */
 		"%s" SEP	/* clone of */
@@ -664,6 +667,7 @@ gamelist_print (FILE     *handle,
 		rom->gamename,
 		rom->gamenameext,
 		rom->the_trailer ? "true" : "false",
+		rom->is_bios ? "true" : "false",
 		rom->year,
 		rom->manu,
 		rom->cloneof,

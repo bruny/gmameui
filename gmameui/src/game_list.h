@@ -78,7 +78,9 @@ typedef struct {
 	gchar *cloneof;
 	gchar *romof;
 	gchar *sampleof;
-
+	
+	gboolean is_bios;
+	
 	/** The driver for the game.
 	This is a pointer to a string in the game_list.drivers g_list
 	*/

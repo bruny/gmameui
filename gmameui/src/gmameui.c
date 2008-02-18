@@ -233,6 +233,15 @@ game_filtered (RomEntry * rom)
 	if (!current_filter)
 		return FALSE;
 
+	/* Only display a BIOS rom if the BIOS filter is explicitly stated */
+	if (rom->is_bios) { 
+		if (current_filter->type == IS_BIOS) {
+			return ( (current_filter->is && rom->is_bios) ||
+				 (!current_filter->is && !rom->is_bios));
+		} else
+			return FALSE;
+	}
+	
 	switch (current_filter->type) {
 	case DRIVER:
 		return ( (current_filter->is && !g_strcasecmp (rom->driver, current_filter->value)) ||
@@ -812,6 +821,8 @@ column_title (int column_num)
 		return _("Favorite");
 	case CHANNELS:
 		return _("Channels");
+	case IS_BIOS:
+		return _("BIOS");
 	default:
 		return NULL;
 	}

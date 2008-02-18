@@ -1836,6 +1836,11 @@ create_filterslist_content (void)
 				      NULL, 2, TRUE);
 	add_filter_to_list (_("Stereo"), folder_filter, &iter);
 
+	/* BIOS */
+     	folder_filter = create_folder_filter (FILTER_BIOS, IS_BIOS, TRUE,
+				      NULL, 0, TRUE);
+	add_filter_to_list (_("BIOS"), folder_filter, &iter);
+	
 	/* Drivers */
 	folder_filter = create_folder_filter (DRIVERS, DRIVER, FALSE,
 			      empty_value, 0, FALSE);
@@ -2209,6 +2214,7 @@ get_icon_for_filter (simple_filter *current_filter)
 	case NEOGEO:
 	case CPS1:
 	case CPS2:
+	case FILTER_BIOS:
 	case CATEGORIES:
 	case VERSIONS:
 		icon_pixbuf = gmameui_get_icon_from_stock ("gmameui-folder");
@@ -2671,6 +2677,7 @@ g_timer_start (timer);
 							     G_TYPE_STRING,
 							     G_TYPE_STRING,
 							     G_TYPE_INT,
+							     G_TYPE_STRING,
 							     G_TYPE_POINTER,     /* Rom Entry */
 							     GDK_TYPE_COLOR,     /* Text Color */
 							     GDK_TYPE_PIXBUF);   /* Pixbuf */
@@ -2707,6 +2714,7 @@ g_timer_start (timer);
 							     G_TYPE_STRING,
 							     G_TYPE_STRING,
 							     G_TYPE_INT,
+							     G_TYPE_STRING,
 							     G_TYPE_POINTER,     /* Rom Entry */
 							     GDK_TYPE_COLOR,     /* Text Color */
 							     GDK_TYPE_PIXBUF);   /* Pixbuf */
@@ -2809,6 +2817,7 @@ g_timer_start (timer);
 						    CATEGORY,     tmprom->category,
 						    FAVORITE,     tmprom->favourite ? _("Yes") : _("No"),
 						    CHANNELS,     tmprom->channels,
+						    IS_BIOS,      tmprom->is_bios ? _("Yes") : _("No"),
 						    ROMENTRY,     tmprom,                 /* rom entry */
 						    TEXTCOLOR,    my_txtcolor,            /* text color */
 						    PIXBUF,       pixbuf,                 /* pixbuf */
@@ -2849,6 +2858,7 @@ g_timer_start (timer);
 						    CATEGORY,     tmprom->category,
 						    FAVORITE,     tmprom->favourite ? _("Yes") : _("No"),
 						    CHANNELS,     tmprom->channels,
+						    IS_BIOS,      tmprom->is_bios ? _("Yes") : _("No"),
 						    ROMENTRY,     tmprom,                 /* rom entry */
 						    TEXTCOLOR,    my_txtcolor,            /* text color */
 						    PIXBUF,       pixbuf,                 /* pixbuf */
@@ -3362,6 +3372,7 @@ update_game_in_list (RomEntry *tmprom)
 				    CATEGORY,                   tmprom->category,
 				    FAVORITE,                   tmprom->favourite ? _("Yes") : _("No"),
 				    CHANNELS,                   tmprom->channels,
+				    IS_BIOS,      tmprom->is_bios ? _("Yes") : _("No"),
 				    TEXTCOLOR,                  my_txtcolor,            /* text color */
 				    PIXBUF,                     pixbuf,                 /* pixbuf */
 				    -1);
@@ -3398,6 +3409,7 @@ update_game_in_list (RomEntry *tmprom)
 				    CATEGORY,                   tmprom->category,
 				    FAVORITE,                   tmprom->favourite ? _("Yes") : _("No"),
 				    CHANNELS,                   tmprom->channels,
+				    IS_BIOS,      tmprom->is_bios ? _("Yes") : _("No"),
 				    TEXTCOLOR,                  my_txtcolor,            /* text color */
 				    PIXBUF,                     pixbuf,                 /* pixbuf */
 				    -1);

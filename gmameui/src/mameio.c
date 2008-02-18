@@ -225,7 +225,8 @@ static void XMLStartHandler(TCreateGameList *_this,
 
 			} else if (!strcmp(atts[i], "romof")) {
 				rom->romof = g_strdup(atts[i+1]);
-
+			} else if (!strcmp(atts[i], "isbios")) {
+				rom->is_bios = !strcmp(atts[i+1], "yes");
 			} else if (!strcmp(atts[i], "sourcefile")) {
 
 				tmp = g_strdup(atts[i+1]);
