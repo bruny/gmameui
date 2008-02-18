@@ -80,19 +80,19 @@ on_samples_path_tree_view_select         (GtkTreeSelection *selection, gpointer 
 
 static GtkWidget *directories_selection;
 
-static GtkWidget *xmame_execs_entry;
+//static GtkWidget *xmame_execs_entry;
 static GtkTreeView *xmame_execs_tree_view;
 static GtkTreeModel *xmame_execs_tree_model;
 static GtkWidget *xmame_execs_add_button;
 static GtkWidget *xmame_execs_remove_button;
 
-static GtkWidget *roms_path_entry;
+//static GtkWidget *roms_path_entry;
 static GtkTreeView *roms_path_tree_view;
 static GtkTreeModel *roms_path_tree_model;
 static GtkWidget *roms_add_button;
 static GtkWidget *roms_remove_button;
 
-static GtkWidget *samples_path_entry;
+//static GtkWidget *samples_path_entry;
 static GtkTreeView *samples_path_tree_view;
 static GtkTreeModel *samples_path_tree_model;
 static GtkWidget *samples_add_button;
@@ -119,7 +119,7 @@ static GtkWidget *directories_selection_apply_button;
 /* gboolean refresh_game_list; */
 
 
-static GtkWidget *
+/*static GtkWidget *
 options_frame_new (const char *text)
 {
 	PangoFontDescription *font_desc;
@@ -159,7 +159,7 @@ options_frame_create_child (GtkWidget *widget)
 	gtk_widget_show (vbox);
 
 	return vbox;
-}
+}*/
 
 void
 create_folderselection (gpointer current_entry,
@@ -202,9 +202,6 @@ directories_selection_response (GtkWidget *dialog,
 	switch (response_id) {
 	case GTK_RESPONSE_OK:
 		directories_selection_save_and_close (dialog);
-		break;
-	case GTK_RESPONSE_APPLY:
-		directories_selection_save_changes (dialog);
 		break;
 	case GTK_RESPONSE_CANCEL:
 	default:
@@ -363,10 +360,15 @@ create_directories_selection (void)
 			    G_CALLBACK (remove_path_from_tree_view),
 			    roms_path_tree_view);
 
-	GtkWidget *catver_browse_button = glade_xml_get_widget (xml, "catver_browse_button");
-	g_signal_connect (G_OBJECT (catver_browse_button), "clicked",
+	/* MAME Paths */
+	GtkWidget *snapshot_browse_button = glade_xml_get_widget (xml, "snapshot_browse_button");
+	g_signal_connect (G_OBJECT (snapshot_browse_button), "clicked",
 			    G_CALLBACK (on_dir_browse_button_clicked),
-			    catver_path_entry);
+			    snapshot_path_entry);
+	GtkWidget *artwork_browse_button = glade_xml_get_widget (xml, "artwork_browse_button");
+	g_signal_connect (G_OBJECT (artwork_browse_button), "clicked",
+			    G_CALLBACK (on_dir_browse_button_clicked),
+			    artwork_path_entry);
 	GtkWidget *flyer_browse_button = glade_xml_get_widget (xml, "flyer_browse_button");
 	g_signal_connect (G_OBJECT (flyer_browse_button), "clicked",
 			    G_CALLBACK (on_dir_browse_button_clicked),
@@ -383,40 +385,40 @@ create_directories_selection (void)
 	g_signal_connect (G_OBJECT (title_browse_button), "clicked",
 			    G_CALLBACK (on_dir_browse_button_clicked),
 			    title_path_entry);
-	GtkWidget *icons_browse_button = glade_xml_get_widget (xml, "icons_browse_button");
-	g_signal_connect (G_OBJECT (icons_browse_button), "clicked",
+	
+	/* Support files */
+	GtkWidget *catver_browse_button = glade_xml_get_widget (xml, "catver_browse_button");
+	g_signal_connect (G_OBJECT (catver_browse_button), "clicked",
 			    G_CALLBACK (on_dir_browse_button_clicked),
-			    icons_path_entry);
-	
-	GtkWidget *artwork_browse_button = glade_xml_get_widget (xml, "artwork_browse_button");
-	g_signal_connect (G_OBJECT (artwork_browse_button), "clicked",
-			    G_CALLBACK (on_dir_browse_button_clicked),
-			    artwork_path_entry);
-
-	GtkWidget *cheat_browse_button = glade_xml_get_widget (xml, "cheat_browse_button");
-	g_signal_connect (G_OBJECT (cheat_browse_button), "clicked",
+			    catver_path_entry);
+	GtkWidget *historyfile_browse_button = glade_xml_get_widget (xml, "historyfile_browse_button");
+	g_signal_connect (G_OBJECT (historyfile_browse_button), "clicked",
 			    G_CALLBACK (on_file_browse_button_clicked),
-			    cheatfile_path_entry);
-	
-	/*GtkWidget *hiscore_browse_button = glade_xml_get_widget (xml, "hiscore_browse_button");
-	g_signal_connect (G_OBJECT (hiscore_browse_button), "clicked",
-			    G_CALLBACK (on_file_browse_button_clicked),
-			    hiscore_path_entry);*/
-	
+			    historyfile_path_entry);
 	GtkWidget *mameinfofile_browse_button = glade_xml_get_widget (xml, "mameinfofile_browse_button");
 	g_signal_connect (G_OBJECT (mameinfofile_browse_button), "clicked",
 			    G_CALLBACK (on_file_browse_button_clicked),
 			    mameinfofile_path_entry);
 	
-	GtkWidget *historyfile_browse_button = glade_xml_get_widget (xml, "historyfile_browse_button");
-	g_signal_connect (G_OBJECT (historyfile_browse_button), "clicked",
+	GtkWidget *cheat_browse_button = glade_xml_get_widget (xml, "cheat_browse_button");
+	g_signal_connect (G_OBJECT (cheat_browse_button), "clicked",
 			    G_CALLBACK (on_file_browse_button_clicked),
-			    historyfile_path_entry);
+			    cheatfile_path_entry);
 	
-	GtkWidget *snapshot_browse_button = glade_xml_get_widget (xml, "snapshot_browse_button");
-	g_signal_connect (G_OBJECT (snapshot_browse_button), "clicked",
+	GtkWidget *hiscore_browse_button = glade_xml_get_widget (xml, "hiscore_browse_button");
+	g_signal_connect (G_OBJECT (hiscore_browse_button), "clicked",
+			    G_CALLBACK (on_file_browse_button_clicked),
+			    hiscorefile_path_entry);
+
+	GtkWidget *ctrlr_browse_button = glade_xml_get_widget (xml, "ctrlr_browse_button");
+	g_signal_connect (G_OBJECT (ctrlr_browse_button), "clicked",
 			    G_CALLBACK (on_dir_browse_button_clicked),
-			    snapshot_path_entry);
+			    ctrlr_directory_entry);
+	
+	GtkWidget *icons_browse_button = glade_xml_get_widget (xml, "icons_browse_button");
+	g_signal_connect (G_OBJECT (icons_browse_button), "clicked",
+			    G_CALLBACK (on_dir_browse_button_clicked),
+			    icons_path_entry);
 	
 	/* XMame Execs List */
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (xmame_execs_tree_view));
