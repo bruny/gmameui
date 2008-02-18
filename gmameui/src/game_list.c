@@ -463,7 +463,6 @@ gamelist_load (void)
 						    "%s", tmp_array[ (j * 2) + offset]);
 					rom->cpu_info[j].sound_flag = FALSE;
 				}
-GMAMEUI_DEBUG ("CPU at position %d is %s", j, rom->cpu_info[j].name);
 				rom->cpu_info[j].clock = atoi (tmp_array[ (j * 2) + offset + 1]);
 			}
 
@@ -476,7 +475,6 @@ GMAMEUI_DEBUG ("CPU at position %d is %s", j, rom->cpu_info[j].name);
 					g_snprintf (rom->sound_info[j].name, MAX_CPU,
 						    "%s", tmp_array[offset + (j * 2)]);
 				}
-GMAMEUI_DEBUG ("Sound CPU at position %d is %s", j, rom->sound_info[j].name);
 				rom->sound_info[j].clock = atoi (tmp_array[offset + (j * 2) + 1]);
 			}
 
