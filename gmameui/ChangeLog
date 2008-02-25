@@ -1,0 +1,94 @@
+2008-02-19 00:51  adburton
+
+	* src/about.c: Updated About dialog
+
+2008-02-19 00:29  adburton
+
+	* src/game_list.c: Removed debugging code
+
+2008-02-19 00:27  adburton
+
+	* src/: game_list.c, mameio.c, properties.c: Fixed handling in
+	  gamelist and Properties page for ROMs with 4 CPU or Sound chips
+
+2008-02-18 23:22  adburton
+
+	* src/: game_list.c, game_list.h, gmameui.c, gmameui.h, gui.c,
+	  mameio.c: Removed BIOS ROMs from view unless explicitly chosen in
+	  the BIOS filter, added BIOS filter
+
+2008-02-18 21:56  adburton
+
+	* data/directories.glade, data/sidebar.glade, src/directories.c,
+	  src/gmameui.h, src/gui.c, src/gui.h, src/io.c: Add support for
+	  control panel images
+
+2008-02-18 20:16  adburton
+
+	* src/directories.c: Modified directory handling, revised
+	  Directories dialog
+
+2008-02-18 19:40  adburton
+
+	* data/directories.glade, src/io.c, src/io.h: Modified directory
+	  handling, revised Directories dialog
+
+2008-02-18 19:40  adburton
+
+	* AUTHORS: Updated AUTHORS
+
+2008-02-17 16:46  adburton
+
+	* AUTHORS, BUGS, COPYING, ChangeLog, INSTALL, Makefile.am, NEWS,
+	  README, TODO, autogen.sh, configure.ac, gmameui-general.png,
+	  gmameui-screen.png, gmameui.6, gmameui.desktop,
+	  gmameui.desktop.in, gmameui.png, setup-gettext, src/common.h,
+	  src/directories.c, src/game_list.h, src/gtkjoy.h, src/gui.h,
+	  src/io.h, src/mameio.c, src/options.c, src/audit.c, src/common.c,
+	  src/game_options.c, src/gtkjoy.c, src/gui.c, src/interface.h,
+	  src/network_game.c, src/properties.h, src/column_layout.c,
+	  src/column_layout.h, src/gmameui.c, src/gui_prefs.c,
+	  src/gui_prefs.h, src/network_game.h, src/options.h,
+	  src/properties.c, src/xmame_executable.h, src/about.h,
+	  src/callbacks.h, src/game_options.h, src/unzip.c, src/unzip.h,
+	  src/about.c, src/gmameui.h, src/interface.c, src/keyboard.h,
+	  src/Makefile.am, src/audit.h, src/game_list.c, src/io.c,
+	  src/progression_window.c, src/xmame_options.h, src/callbacks.c,
+	  src/keyboard.c, src/options_string.c, src/progression_window.h,
+	  src/directories.h, src/options_string.h, src/xmame_executable.c,
+	  src/xmame_options.c, data/directories.glade,
+	  data/properties.glade, data/Makefile.am,
+	  data/directories.glade.original, data/sidebar.glade,
+	  po/ChangeLog, po/Makefile.in.in, po/Makevars.template,
+	  po/POTFILES.in, po/Rules-quot, po/boldquot.sed,
+	  po/en@boldquot.header, po/en@quot.header, po/insert-header.sin,
+	  po/quot.sed, po/remove-potcdate.sin, po/stamp-it: Initial import
+
+2008-02-17 16:46  adburton
+
+	* AUTHORS, BUGS, COPYING, ChangeLog, INSTALL, Makefile.am, NEWS,
+	  README, TODO, autogen.sh, configure.ac, gmameui-general.png,
+	  gmameui-screen.png, gmameui.6, gmameui.desktop,
+	  gmameui.desktop.in, gmameui.png, setup-gettext, src/common.h,
+	  src/directories.c, src/game_list.h, src/gtkjoy.h, src/gui.h,
+	  src/io.h, src/mameio.c, src/options.c, src/audit.c, src/common.c,
+	  src/game_options.c, src/gtkjoy.c, src/gui.c, src/interface.h,
+	  src/network_game.c, src/properties.h, src/column_layout.c,
+	  src/column_layout.h, src/gmameui.c, src/gui_prefs.c,
+	  src/gui_prefs.h, src/network_game.h, src/options.h,
+	  src/properties.c, src/xmame_executable.h, src/about.h,
+	  src/callbacks.h, src/game_options.h, src/unzip.c, src/unzip.h,
+	  src/about.c, src/gmameui.h, src/interface.c, src/keyboard.h,
+	  src/Makefile.am, src/audit.h, src/game_list.c, src/io.c,
+	  src/progression_window.c, src/xmame_options.h, src/callbacks.c,
+	  src/keyboard.c, src/options_string.c, src/progression_window.h,
+	  src/directories.h, src/options_string.h, src/xmame_executable.c,
+	  src/xmame_options.c, data/directories.glade,
+	  data/properties.glade, data/Makefile.am,
+	  data/directories.glade.original, data/sidebar.glade,
+	  po/ChangeLog, po/Makefile.in.in, po/Makevars.template,
+	  po/POTFILES.in, po/Rules-quot, po/boldquot.sed,
+	  po/en@boldquot.header, po/en@quot.header, po/insert-header.sin,
+	  po/quot.sed, po/remove-potcdate.sin, po/stamp-it: Initial
+	  revision
+

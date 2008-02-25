@@ -1,0 +1,16 @@
+Overview of changes in GMAMEUI 0.1
+==================================
+
+Note these changes are made against the baseline of CVS GXMame
+
+* Support for SDLMAME, which tracks against more recent versions of MAME
+* Start migration to Glade
+* Fixed audit handling to parse more recent MAME outputs correctly
+* Fixed MAME output parsing to support more fields
+* Fixed neogeo filter after driver name was changed
+* Added more filters for preliminary/broken drivers, incorrect ROMs
+* Remove BIOS ROMs from all filters except the BIOS-specific filter
+* Add support for Control Panel images
+* Streamlined directories window
+* Migrated .ini file parsing to use GKeyFile
+* Many bug fixes against GXMame
