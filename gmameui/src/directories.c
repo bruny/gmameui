@@ -295,8 +295,11 @@ create_directories_selection (void)
 	gtk_tree_view_append_column (GTK_TREE_VIEW (samples_path_tree_view), column);
 	gtk_tree_view_set_model (GTK_TREE_VIEW (samples_path_tree_view), GTK_TREE_MODEL (store));
     
-	catver_path_entry = glade_xml_get_widget (xml, "catver_path_entry");
-	gtk_entry_set_text (GTK_ENTRY (catver_path_entry), gui_prefs.catverDirectory);
+	
+	snapshot_path_entry = glade_xml_get_widget (xml, "snapshot_path_entry");
+	gtk_entry_set_text (GTK_ENTRY (snapshot_path_entry), gui_prefs.SnapshotDirectory);	
+	artwork_path_entry = glade_xml_get_widget (xml, "artwork_path_entry");
+	gtk_entry_set_text (GTK_ENTRY (artwork_path_entry), gui_prefs.ArtworkDirectory);
 	flyer_path_entry = glade_xml_get_widget (xml, "flyer_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (flyer_path_entry), gui_prefs.FlyerDirectory);
 	cabinet_path_entry = glade_xml_get_widget (xml, "cabinet_path_entry");
@@ -307,34 +310,22 @@ create_directories_selection (void)
 	gtk_entry_set_text (GTK_ENTRY (title_path_entry), gui_prefs.TitleDirectory);
 	cpanel_path_entry = glade_xml_get_widget (xml, "cpanel_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (cpanel_path_entry), gui_prefs.CPanelDirectory);
-	
-	icons_path_entry = glade_xml_get_widget (xml, "icons_path_entry");
-	gtk_entry_set_text (GTK_ENTRY (icons_path_entry), gui_prefs.IconDirectory);	
-	
-	
 
-	artwork_path_entry = glade_xml_get_widget (xml, "artwork_path_entry");
-	gtk_entry_set_text (GTK_ENTRY (artwork_path_entry), gui_prefs.ArtworkDirectory);
-	
-	
-	snapshot_path_entry = glade_xml_get_widget (xml, "snapshot_path_entry");
-	gtk_entry_set_text (GTK_ENTRY (snapshot_path_entry), gui_prefs.SnapshotDirectory);	
-	
+	catver_path_entry = glade_xml_get_widget (xml, "catver_path_entry");
+	gtk_entry_set_text (GTK_ENTRY (catver_path_entry), gui_prefs.catverDirectory);
 	historyfile_path_entry = glade_xml_get_widget (xml, "historyfile_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (historyfile_path_entry), gui_prefs.HistoryFile);
-
 	mameinfofile_path_entry = glade_xml_get_widget (xml, "mameinfofile_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (mameinfofile_path_entry), gui_prefs.MameInfoFile);
-
 	cheatfile_path_entry = glade_xml_get_widget (xml, "cheatfile_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (cheatfile_path_entry), gui_prefs.CheatFile);
-
 	hiscorefile_path_entry = glade_xml_get_widget (xml, "hiscorefile_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (hiscorefile_path_entry), gui_prefs.HiscoreFile);
-	
 	ctrlr_directory_entry = glade_xml_get_widget (xml, "ctrlr_directory_entry");
 	gtk_entry_set_text (GTK_ENTRY (ctrlr_directory_entry), gui_prefs.CtrlrDirectory);
-	
+	icons_path_entry = glade_xml_get_widget (xml, "icons_path_entry");
+	gtk_entry_set_text (GTK_ENTRY (icons_path_entry), gui_prefs.IconDirectory);
+
 	/* Button Cicked */
 	/* GMAMEUI */
 	xmame_execs_add_button = glade_xml_get_widget (xml, "xmame_execs_add_button");

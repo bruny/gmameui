@@ -617,30 +617,31 @@ GMAMEUI_DEBUG ("Loading directories ini file");
 	GKeyFile *dirsini_list = g_key_file_new ();
 	GError *error = NULL;
 	gboolean result = g_key_file_load_from_file (dirsini_list, filename, G_KEY_FILE_KEEP_COMMENTS, &error);
-	g_free (filename);
+	
 	if (!result) {
-		GMAMEUI_DEBUG ("Error loading dirs.ini file: %s\n", error->message);
+		GMAMEUI_DEBUG ("Error loading %s - %s - setting default values", filename, error->message);	
+	
 		g_error_free (error);
-		return FALSE;
-	}
+	} else {
 
-	gui_prefs.RomPath = g_key_file_get_string_list (dirsini_list, "Directories", "RomPath", &paths, &error);
-	gui_prefs.SamplePath = g_key_file_get_string_list (dirsini_list, "Directories", "SamplePath", &paths, &error);
+		gui_prefs.RomPath = g_key_file_get_string_list (dirsini_list, "Directories", "RomPath", &paths, &error);
+		gui_prefs.SamplePath = g_key_file_get_string_list (dirsini_list, "Directories", "SamplePath", &paths, &error);
 
-	gui_prefs.SnapshotDirectory = g_key_file_get_string (dirsini_list, "Directories", "SnapshotDirectory", &error);
-	gui_prefs.ArtworkDirectory = g_key_file_get_string (dirsini_list, "Directories", "ArtworkDirectory", &error);
-	gui_prefs.FlyerDirectory = g_key_file_get_string (dirsini_list, "Directories", "FlyerDirectory", &error);
-	gui_prefs.CabinetDirectory = g_key_file_get_string (dirsini_list, "Directories", "CabinetDirectory", &error);
-	gui_prefs.MarqueeDirectory = g_key_file_get_string (dirsini_list, "Directories", "MarqueeDirectory", &error);
-	gui_prefs.TitleDirectory = g_key_file_get_string (dirsini_list, "Directories", "TitleDirectory", &error);
-	gui_prefs.CPanelDirectory = g_key_file_get_string (dirsini_list, "Directories", "CPanelDirectory", &error);
+		gui_prefs.SnapshotDirectory = g_key_file_get_string (dirsini_list, "Directories", "SnapshotDirectory", &error);
+		gui_prefs.ArtworkDirectory = g_key_file_get_string (dirsini_list, "Directories", "ArtworkDirectory", &error);
+		gui_prefs.FlyerDirectory = g_key_file_get_string (dirsini_list, "Directories", "FlyerDirectory", &error);
+		gui_prefs.CabinetDirectory = g_key_file_get_string (dirsini_list, "Directories", "CabinetDirectory", &error);
+		gui_prefs.MarqueeDirectory = g_key_file_get_string (dirsini_list, "Directories", "MarqueeDirectory", &error);
+		gui_prefs.TitleDirectory = g_key_file_get_string (dirsini_list, "Directories", "TitleDirectory", &error);
+		gui_prefs.CPanelDirectory = g_key_file_get_string (dirsini_list, "Directories", "CPanelDirectory", &error);
 	
-	gui_prefs.CtrlrDirectory = g_key_file_get_string (dirsini_list, "Directories", "CtrlrDirectory", &error);
-	gui_prefs.IconDirectory = g_key_file_get_string (dirsini_list, "Directories", "IconDirectory", &error);
-	gui_prefs.inipath = g_key_file_get_string (dirsini_list, "Directories", "inipath", &error);
+		gui_prefs.CtrlrDirectory = g_key_file_get_string (dirsini_list, "Directories", "CtrlrDirectory", &error);
+		gui_prefs.IconDirectory = g_key_file_get_string (dirsini_list, "Directories", "IconDirectory", &error);
+		gui_prefs.inipath = g_key_file_get_string (dirsini_list, "Directories", "inipath", &error);
 	
-	g_key_file_free (dirsini_list);
+		g_key_file_free (dirsini_list);
 GMAMEUI_DEBUG ("Finished loading directories ini file");
+	}
 	
 	/* Set defaults if the values were not available in the ini file */
 	if (!gui_prefs.RomPath) gui_prefs.RomPath = g_strsplit (g_build_filename (XMAME_ROOT, "roms", NULL), ";", 0);
@@ -655,6 +656,7 @@ GMAMEUI_DEBUG ("Finished loading directories ini file");
 	if (!gui_prefs.CPanelDirectory) gui_prefs.CPanelDirectory = g_build_filename (XMAME_ROOT, "cpanel", NULL);
 
 	if (!gui_prefs.CtrlrDirectory) gui_prefs.CtrlrDirectory = g_build_filename (XMAME_ROOT, "ctrlr", NULL);
+
 	if (!gui_prefs.IconDirectory) gui_prefs.IconDirectory = g_build_filename (XMAME_ROOT, "icons", NULL);
 	
 	/* The following configuration options are all stored under .gmameui */
@@ -666,6 +668,8 @@ GMAMEUI_DEBUG ("Finished loading directories ini file");
 	gui_prefs.ConfigDirectory = g_build_filename (g_get_home_dir (), ".gmameui" , "cfg", NULL);
 	gui_prefs.StateDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "sta", NULL);
 	gui_prefs.inipath = g_build_filename (g_get_home_dir (), ".gmameui" , "ini", NULL);
+	
+	g_free (filename);
 	
 	return TRUE;
 }
