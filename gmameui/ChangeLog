@@ -1,3 +1,17 @@
+2008-02-26 18:07  adburton
+
+	* Makefile.am: Update EXTRA_DIST section of Makefile.am
+
+2008-02-25 21:53  adburton
+
+	* src/: directories.c, io.c: Set default directory values when no
+	  .ini file exists
+
+2008-02-25 20:53  adburton
+
+	* ChangeLog, NEWS: Updated ChangeLog and NEWS files in preparation
+	  for release
+
 2008-02-19 00:51  adburton
 
 	* src/about.c: Updated About dialog
