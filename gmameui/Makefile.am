@@ -4,20 +4,18 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = src data po intl
 
-EXTRA_DIST = autogen.sh
+EXTRA_DIST = autogen.sh \
 	gmameui.desktop.in \
 	gmameui.png \
+	gmameui-screen.png \
+	gmameui-general.png \
 	gmameui.6 \
 	BUGS \
-	pixmaps-builtin \
 	setup-gettext \
 	intltool-update.in \
 	intltool-merge.in \
 	intltool-extract.in \
-	m4 \
-	Doxyfile \
-	po/LINGUAS \
-	debian 
+	m4 
 
 Graphicsdir = $(datadir)/applications
 Graphics_in_files = gmameui.desktop.in
