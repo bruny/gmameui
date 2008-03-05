@@ -1,0 +1,5 @@
+* If the Stop button is clicked during auditing, the auditing doesn't stop immediately. It seems to continue until the pipe has finished processing.
+* SDLMAME uses a different process to perform the audit, so counting of the total available ROMs can't be performed prior to execution.
+  - We could have a lookup table that provides this information.
+* In process_audit_romset, a ROM is reported as 'bad' even if the error is just an incorrect length on one of the ROMs
+
