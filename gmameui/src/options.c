@@ -232,7 +232,7 @@ static GtkWidget *debug_size_combo;
 static GtkWidget *bios_label;
 static GtkWidget *bios_combo;
 static GtkWidget *artwork_resolution_combo;
-static GtkWidget *artwork_frame;
+// ADB TO DELETE static GtkWidget *artwork_frame;
 
 static GtkWidget *use_backdrops_checkbutton;
 static GtkWidget *use_bezels_checkbutton;
@@ -1091,91 +1091,41 @@ GMAMEUI_DEBUG ("Finished adding display options tab");
 static GtkWidget *
 get_x11_rendering_frame (GameOptions *target,
 			 GtkWidget *apply_button,
-			 GtkWidget *reset_button)
+			 GtkWidget *reset_button,
+			 GladeXML *xml)
 {
 	GtkWidget *x11_frame_parent;
-	GtkWidget *x11_frame;
-	GtkWidget *x11_table;
-	GtkWidget *yuv_label;
-	GtkWidget *video_mode_label;	
 	int i;
 
 	xmame_get_options (current_exec);
 
 	/* X11 */
-	x11_frame_parent = options_frame_new (_("X11 options"));
-	x11_frame = options_frame_create_child (x11_frame_parent);
+	x11_frame_parent = glade_xml_get_widget (xml, "x11_rendering_frame");
 
-	x11_table = gtk_table_new (9, 1, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (x11_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (x11_table), 6);
-	gtk_widget_show (x11_table);
-	gtk_box_pack_start (GTK_BOX (x11_frame), x11_table, FALSE, FALSE, 0);
-
-	/* Video mode label */	
-	video_mode_label = gtk_label_new (_("Video mode:"));
-	gtk_misc_set_alignment (GTK_MISC (video_mode_label), 0, 0.5);
-	gtk_widget_show (video_mode_label);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), video_mode_label, 0, 1, 0, 1);
-	
-	video_mode_combo = combo_new("video-mode", G_TYPE_INT);
-	gtk_widget_show (video_mode_combo);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), video_mode_combo, 1, 2, 0, 1);
+	video_mode_combo = glade_xml_get_widget (xml, "video_mode_combo");
+	video_mode_combo = combo_new_from_glade (video_mode_combo, "video-mode", G_TYPE_INT);
 	combo_set_index (video_mode_combo, target->x11_mode);
 
-	xvfullscreen_checkbutton = gtk_check_button_new_with_label (_("Fullscreen"));
-	gtk_widget_show (xvfullscreen_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), xvfullscreen_checkbutton, 0, 2, 1, 2);
-
-	cursor_checkbutton = gtk_check_button_new_with_label (_("Show cursor"));
-	gtk_widget_show (cursor_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), cursor_checkbutton, 0, 2, 2, 3);
-
-	mitshm_checkbutton = gtk_check_button_new_with_label (_("Use MIT shared memory"));
-	gtk_widget_show (mitshm_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), mitshm_checkbutton, 0, 2, 3, 4);
+	xvfullscreen_checkbutton = glade_xml_get_widget (xml, "xvfullscreen_checkbutton");
+	cursor_checkbutton = glade_xml_get_widget (xml, "cursor_checkbutton");
+	mitshm_checkbutton = glade_xml_get_widget (xml, "mitshm_checkbutton");
 
 	/* XV Geometry */
-	xvgeom_checkbutton = gtk_check_button_new_with_label (_("Geometry:"));
-	gtk_widget_show (xvgeom_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), xvgeom_checkbutton, 0, 1, 4, 5);
+	xvgeom_checkbutton = glade_xml_get_widget (xml, "xvgeom_checkbutton");
 
-	xvgeom_combo = combo_new_empty (G_TYPE_STRING);
-	gtk_widget_show (xvgeom_combo);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), xvgeom_combo, 1, 2, 4, 5);
-
+	xvgeom_combo = glade_xml_get_widget (xml, "xvgeom_combo");
+	xvgeom_combo = combo_new_empty_from_glade (xvgeom_combo, G_TYPE_STRING);
 	for (i=0; resolution_table[i]; i++)
 		combo_append_string_value(xvgeom_combo, resolution_table[i], resolution_table[i]);
 
-	/* Force YUV Mode */
-	yuv_label = gtk_label_new (_("Force YUV mode:"));
-	gtk_widget_show (yuv_label);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), yuv_label, 0, 1, 5, 6);
-
-	yuv_combo = combo_new ("force-yuv", G_TYPE_INT);
+	yuv_combo = glade_xml_get_widget (xml, "yuv_combo");
+	yuv_combo = combo_new_from_glade (yuv_combo, "force-yuv", G_TYPE_INT);
 	combo_set_index(yuv_combo, target->force_yuv);
 
-	gtk_widget_show (yuv_combo);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), yuv_combo, 1, 2, 5, 6);
-
-
-	/* X Sync */
-	xsync_checkbutton = gtk_check_button_new_with_label (_("X Synch"));
-	gtk_widget_show (xsync_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), xsync_checkbutton, 0, 2, 6, 7);
-
-	/* Private C map */
-	privatecmap_checkbutton = gtk_check_button_new_with_label (_("Private colormap"));
-	gtk_widget_show (privatecmap_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), privatecmap_checkbutton, 0, 2, 7, 8);
-
-	xil_checkbutton = gtk_check_button_new_with_label (_("XIL scaling"));
-	gtk_widget_show (xil_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), xil_checkbutton, 0, 1, 8, 9);
-	
-	mtxil_checkbutton = gtk_check_button_new_with_label (_("XIL multi-threading"));
-	gtk_widget_show (mtxil_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (x11_table), mtxil_checkbutton, 1, 2, 8, 9);
+	xsync_checkbutton = glade_xml_get_widget (xml, "xsync_checkbutton");
+	privatecmap_checkbutton = glade_xml_get_widget (xml, "privatecmap_checkbutton");
+	xil_checkbutton = glade_xml_get_widget (xml, "xil_checkbutton");
+	mtxil_checkbutton = glade_xml_get_widget (xml, "mtxil_checkbutton");
 	
 	/* x11 frame */
 	gtk_widget_set_sensitive (GTK_WIDGET (mitshm_checkbutton), xmame_has_option (current_exec, "mitshm"));
@@ -1203,198 +1153,60 @@ get_x11_rendering_frame (GameOptions *target,
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (privatecmap_checkbutton), target->privatecmap);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (xil_checkbutton), target->xil);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mtxil_checkbutton), target->mtxil);
-
-	g_signal_connect (G_OBJECT (video_mode_combo), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (cursor_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (cursor_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (mitshm_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (mitshm_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-
-	g_signal_connect (G_OBJECT (xvgeom_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (xvgeom_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (xvgeom_combo), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (xvgeom_combo), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (yuv_combo), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (yuv_combo), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (xvfullscreen_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (xvfullscreen_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-		
+	
 	g_signal_connect_after (G_OBJECT (xvgeom_checkbutton), "toggled",
 			    G_CALLBACK (button_toggled),
 			    xvgeom_combo);
 
-	g_signal_connect (G_OBJECT (xsync_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (xsync_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (privatecmap_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (privatecmap_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (xil_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (xil_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
 	g_signal_connect_after (G_OBJECT (xil_checkbutton), "toggled",
 				  G_CALLBACK (button_toggled),
 				  G_OBJECT (mtxil_checkbutton));
-	g_signal_connect (G_OBJECT (mtxil_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (mtxil_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
 
+	gtk_widget_show_all (x11_frame_parent);
 	return x11_frame_parent;
 }
 
+/* XGL (OpenGL) rendering is used with the X11 version of XMAME as a compile option */
 static GtkWidget *
 get_xgl_rendering_frame (GameOptions *target,
 			 GtkWidget    *apply_button,
-			 GtkWidget    *reset_button)
+			 GtkWidget    *reset_button,
+			 GladeXML     *xml)
 {
 	GtkWidget *gl_frame_parent;
-	GtkWidget *gl_frame;
-	GtkWidget *ogl_table;
-	GtkWidget *gltexture_size_label;
-	GtkWidget *gllib_label;
-	GtkWidget *glulib_label;
+
 	int i;
 
 	xmame_get_options (current_exec);
+	gl_frame_parent = glade_xml_get_widget (xml, "opengl_rendering_frame");
 
-	gl_frame_parent = options_frame_new (_("OpenGL options"));
-	gl_frame = options_frame_create_child (gl_frame_parent);
+	gltexture_size_spinbutton = glade_xml_get_widget (xml, "gltexture_size_spinbutton");
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON (gltexture_size_spinbutton), target->gltexture_size);
 
-	ogl_table = gtk_table_new (9, 4, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (ogl_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (ogl_table), 6);
-	gtk_widget_show (ogl_table);
-	gtk_container_add (GTK_CONTAINER (gl_frame), ogl_table);
+	glext78_checkbutton = glade_xml_get_widget (xml, "glext78_checkbutton");
+	glbilinear_checkbutton = glade_xml_get_widget (xml, "glbilinear_checkbutton");
+	gldrawbitmap_checkbutton = glade_xml_get_widget (xml, "gldrawbitmap_checkbutton");
+	glantialias_checkbutton = glade_xml_get_widget (xml, "glantialias_checkbutton");
+	glalphablending_checkbutton = glade_xml_get_widget (xml, "glalphablending_checkbutton");
+	gldblbuffer_checkbutton = glade_xml_get_widget (xml, "gldblbuffer_checkbutton");
+	glforceblitmode_checkbutton = glade_xml_get_widget (xml, "glforceblitmode_checkbutton");
+	glcolormod_checkbutton = glade_xml_get_widget (xml, "glcolormod_checkbutton");
+	cabview_checkbutton = glade_xml_get_widget (xml, "cabview_checkbutton");
 
-	gltexture_size_label = gtk_label_new (_("Texture size:"));
-	gtk_widget_show (gltexture_size_label);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), gltexture_size_label, 0, 1, 0, 1);
-	gtk_misc_set_alignment (GTK_MISC (gltexture_size_label), 0, 0.5);
+	cabinet_entry = glade_xml_get_widget (xml, "cabinet_entry");
 
-	gltexture_size_spinbutton_adj = gtk_adjustment_new (target->gltexture_size, 0, 1000, 1, 10, 10);
-	gltexture_size_spinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (gltexture_size_spinbutton_adj), 1, 0);
-	gtk_widget_show (gltexture_size_spinbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), gltexture_size_spinbutton, 1, 2, 0, 1);
-
-	glext78_checkbutton = gtk_check_button_new_with_label (_("GL extension #78"));
-	gtk_widget_show (glext78_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glext78_checkbutton, 0, 1, 1, 2);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glext78_checkbutton), TRUE);
+	glres_checkbutton = glade_xml_get_widget (xml, "glres_checkbutton");
 	
-	glbilinear_checkbutton = gtk_check_button_new_with_label (_("Bilinear filtering"));
-	gtk_widget_show (glbilinear_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glbilinear_checkbutton, 1, 2, 1, 2);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glbilinear_checkbutton), TRUE);
-
-	gldrawbitmap_checkbutton = gtk_check_button_new_with_label (_("Draw bitmap"));
-	gtk_widget_show (gldrawbitmap_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), gldrawbitmap_checkbutton, 0, 1, 2, 3);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gldrawbitmap_checkbutton), TRUE);
-	
-
-	glantialias_checkbutton = gtk_check_button_new_with_label (_("Antialiasing"));
-	gtk_widget_show (glantialias_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glantialias_checkbutton, 1, 2, 2, 3);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glantialias_checkbutton), TRUE);
-
-	glalphablending_checkbutton = gtk_check_button_new_with_label (_("Alphablending"));
-	gtk_widget_show (glalphablending_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glalphablending_checkbutton, 0, 1, 3, 4);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glalphablending_checkbutton), TRUE);
-
-	gldblbuffer_checkbutton = gtk_check_button_new_with_label (_("Double buffering"));
-	gtk_widget_show (gldblbuffer_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), gldblbuffer_checkbutton, 1, 2, 3, 4);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gldblbuffer_checkbutton), TRUE);
-
-	glforceblitmode_checkbutton = gtk_check_button_new_with_label (_("True color blitter"));
-	gtk_widget_show (glforceblitmode_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glforceblitmode_checkbutton, 1, 2, 4, 5);
-
-	glcolormod_checkbutton = gtk_check_button_new_with_label (_("Color modulation"));
-	gtk_widget_show (glcolormod_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glcolormod_checkbutton, 0, 1, 4, 5);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glcolormod_checkbutton), TRUE);
-
-	cabview_checkbutton = gtk_check_button_new_with_label (_("Cabinet model:"));
-	gtk_widget_show (cabview_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), cabview_checkbutton, 0, 1, 5, 6);
-
-	cabinet_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (cabinet_entry), 20);
-	gtk_widget_show (cabinet_entry);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), cabinet_entry, 1, 2, 5, 6);
-
-	glres_checkbutton = gtk_check_button_new_with_label (_("Resolution"));
-	gtk_widget_show (glres_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glres_checkbutton, 0, 1, 6, 7);
-
-	glres_combo = combo_new_empty (G_TYPE_STRING);
-	gtk_widget_show (glres_combo);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glres_combo, 1, 2, 6, 7);
-
+	glres_combo = glade_xml_get_widget (xml, "glres_combo");
+	glres_combo = combo_new_empty_from_glade (glres_combo, G_TYPE_STRING);
 	combo_append_string_value(glres_combo, "", "");
 	for (i=0; resolution_table[i]; i++)
 		combo_append_string_value(glres_combo, resolution_table[i], resolution_table[i]);
 	
-	gllib_label = gtk_label_new (_("OpenGL library:"));
-	gtk_widget_show (gllib_label);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), gllib_label, 0, 1, 7, 8);
-	gtk_misc_set_alignment (GTK_MISC (gllib_label), 0, 0.5);
-
-	gllib_entry = gtk_entry_new ();
-	gtk_widget_show (gllib_entry);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), gllib_entry, 1, 2, 7, 8);
-
+	gllib_entry = glade_xml_get_widget (xml, "gllib_entry");
 	gtk_entry_set_text (GTK_ENTRY (gllib_entry), "libGL.so.1");
 
-	glulib_label = gtk_label_new (_("GLU library:"));
-	gtk_widget_show (glulib_label);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glulib_label, 0, 1, 8, 9);
-	gtk_misc_set_alignment (GTK_MISC (glulib_label), 0, 0.5);
-	
-	glulib_entry = gtk_entry_new ();
-	gtk_widget_show (glulib_entry);
-	gtk_table_attach_defaults (GTK_TABLE (ogl_table), glulib_entry, 1, 2, 8, 9);
-
+	glulib_entry = glade_xml_get_widget (xml, "glulib_entry");
 	gtk_entry_set_text (GTK_ENTRY (glulib_entry), "libGLU.so.1");
 
 	/* set sensitivity */
@@ -1424,102 +1236,14 @@ get_xgl_rendering_frame (GameOptions *target,
 	gtk_entry_set_text (GTK_ENTRY (gllib_entry), target->gllibname);
 	gtk_entry_set_text (GTK_ENTRY (glulib_entry), target->glulibname);
 
-	g_signal_connect (G_OBJECT (gldblbuffer_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (gldblbuffer_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (gltexture_size_spinbutton), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (gltexture_size_spinbutton), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (glbilinear_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (glbilinear_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (glext78_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (glext78_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (glforceblitmode_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (glforceblitmode_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (gldrawbitmap_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (gldrawbitmap_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (glcolormod_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (glcolormod_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (glantialias_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (glantialias_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (glalphablending_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (glalphablending_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (cabview_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (cabview_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
 	g_signal_connect_after (G_OBJECT (cabview_checkbutton), "toggled",
 				  G_CALLBACK (button_toggled),
 				  G_OBJECT (cabinet_entry));
-	g_signal_connect (G_OBJECT (cabinet_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (cabinet_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (glres_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (glres_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
+
 	g_signal_connect_after (G_OBJECT (glres_checkbutton), "toggled",
 				  G_CALLBACK (button_toggled),
 				  G_OBJECT (glres_combo));
-	g_signal_connect (G_OBJECT (glres_combo), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (glres_combo), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (gllib_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (gllib_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (glulib_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (glulib_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
+
 
 	return gl_frame_parent;
 }
@@ -1527,75 +1251,34 @@ get_xgl_rendering_frame (GameOptions *target,
 static GtkWidget *
 get_sdl_rendering_frame (GameOptions *target,
 			 GtkWidget    *apply_button,
-			 GtkWidget    *reset_button)
+			 GtkWidget    *reset_button,
+			 GladeXML     *xml)
 {
 	GtkWidget *sdl_frame_parent;
-	GtkWidget *sdl_frame;
-	GtkWidget *sdl_table;
 	
 	xmame_get_options (current_exec);
-
-	sdl_frame_parent = options_frame_new (_("SDL options"));
-	sdl_frame = options_frame_create_child (sdl_frame_parent);
-
-	sdl_table = gtk_table_new (4, 2, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (sdl_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (sdl_table), 6);
-	gtk_widget_show (sdl_table);
-	gtk_container_add (GTK_CONTAINER (sdl_frame), sdl_table);
+	sdl_frame_parent = glade_xml_get_widget (xml, "sdl_rendering_frame");
 
 	/* Full screen */
-	fullscreen_checkbutton = gtk_check_button_new_with_label (_("Full Screen"));
-	gtk_widget_show (fullscreen_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (sdl_table), fullscreen_checkbutton, 0, 1, 0, 1);
+	fullscreen_checkbutton = glade_xml_get_widget (xml, "fullscreen_checkbutton");
 
 	/* Double buffering */
-	doublebuf_checkbutton = gtk_check_button_new_with_label (_("Double Buffering"));
-	gtk_widget_show (doublebuf_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (sdl_table), doublebuf_checkbutton, 0, 1, 1, 2);
+	doublebuf_checkbutton = glade_xml_get_widget (xml, "doublebuf_checkbutton");
 
-	sdl_modes_checkbutton = gtk_check_button_new_with_label (_("Auto Resolution"));
-	gtk_widget_show (sdl_modes_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (sdl_table), sdl_modes_checkbutton, 0, 2, 2, 3);
+	sdl_modes_checkbutton = glade_xml_get_widget (xml, "sdl_modes_checkbutton");
 
-	sdl_modes_label = gtk_label_new (_("SDL Modes:"));
-	gtk_widget_show (sdl_modes_label);
-	gtk_table_attach_defaults (GTK_TABLE (sdl_table), sdl_modes_label, 0, 1, 3, 4);
-
-	gtk_misc_set_alignment (GTK_MISC (sdl_modes_label), 0.9, 0.5);
-
-	sdl_modes_spinbutton_adj = gtk_adjustment_new (target->modenumber, 0, 15, 1, 10, 10);
-	sdl_modes_spinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (sdl_modes_spinbutton_adj), 1, 0);
-	gtk_table_attach_defaults (GTK_TABLE (sdl_table), sdl_modes_spinbutton, 1, 2, 4, 5);
+	sdl_modes_spinbutton = glade_xml_get_widget (xml, "sdl_modes_spinbutton");
+	gtk_spin_button_set_value (GTK_SPIN_BUTTON (sdl_modes_spinbutton), target->modenumber);
 	
-	sdl_modes_combo = combo_new ("modenumber", G_TYPE_INT);
+	sdl_modes_combo = glade_xml_get_widget (xml, "sdl_modes_combo");
+	sdl_modes_combo = combo_new_from_glade (sdl_modes_combo, "modenumber", G_TYPE_INT);
 	combo_set_index(sdl_modes_combo, target->modenumber);
-
-	gtk_table_attach_defaults (GTK_TABLE (sdl_table), sdl_modes_combo, 1, 2, 3, 4);
 
 	/*** SDL related ***/
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (fullscreen_checkbutton), target->fullscreen);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (doublebuf_checkbutton), target->sdl_doublebuf);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sdl_modes_checkbutton), (target->sdl_auto_mode));
 
-	g_signal_connect (G_OBJECT (fullscreen_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (fullscreen_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (doublebuf_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (doublebuf_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (sdl_modes_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (sdl_modes_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
 	g_signal_connect_after (G_OBJECT (sdl_modes_checkbutton), "toggled",
 				  G_CALLBACK (not_button_toggled),
 				  sdl_modes_label);
@@ -1604,32 +1287,24 @@ get_sdl_rendering_frame (GameOptions *target,
 	if (xmame_get_option_value_count (current_exec, "") > 0) {
 		gtk_widget_set_sensitive (GTK_WIDGET (sdl_modes_combo), !(target->sdl_auto_mode));
 		gtk_widget_show (sdl_modes_combo);
-		g_signal_connect (G_OBJECT (sdl_modes_combo), "changed",
-				  G_CALLBACK (on_dirty_option),
-				    apply_button);
-		g_signal_connect (G_OBJECT (sdl_modes_combo), "changed",
-				    G_CALLBACK (on_dirty_option),
-				    reset_button);
+
 		g_signal_connect_after (G_OBJECT (sdl_modes_checkbutton), "toggled",
 					  G_CALLBACK (not_button_toggled),
 					  sdl_modes_combo);
 	} else {
 		gtk_widget_set_sensitive (GTK_WIDGET (sdl_modes_spinbutton), !(target->sdl_auto_mode));
 		gtk_widget_show (sdl_modes_spinbutton);
-		g_signal_connect (G_OBJECT (sdl_modes_spinbutton), "changed",
-				    G_CALLBACK (on_dirty_option),
-				    apply_button);
-		g_signal_connect (G_OBJECT (sdl_modes_spinbutton), "changed",
-				    G_CALLBACK (on_dirty_option),
-				    reset_button);
+
 		g_signal_connect_after (G_OBJECT (sdl_modes_checkbutton), "toggled",
 					  G_CALLBACK (not_button_toggled),
 					  sdl_modes_spinbutton);
 	}
 
+	gtk_widget_show_all (sdl_frame_parent);
 	return sdl_frame_parent;
 }
 
+/* FX (Glide) is used as a compile option within the X11 version */
 static GtkWidget *
 get_fx_rendering_frame (GameOptions *target,
 			GtkWidget   *apply_button,
@@ -1943,16 +1618,14 @@ add_rendering_options_tab (GtkWidget    *properties_windows,
 	GtkWidget *image;
 	GtkWidget *rendering_table;
 
-	GtkWidget *video_mode_frame;
-	GtkWidget *video_mode_table;
-	GtkWidget *disablemode_label;
-	
 	GtkWidget *rendering_label;
 
 	GtkWidget *rendering_frame;
 	GtkWidget *rendering_frame2;
 	
 	gchar *used_text;
+	
+	GladeXML *xml = glade_xml_new (GLADEDIR "properties.glade", "rendering_vbox", NULL);
 	
 	xmame_get_options (current_exec);
 	dirty_options_flag = FALSE;
@@ -1967,15 +1640,24 @@ add_rendering_options_tab (GtkWidget    *properties_windows,
 
 	switch (current_exec->type) {
 	case XMAME_EXEC_X11:
+		rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
+		break;
 	case XMAME_EXEC_XGL:
-		rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button);
-		rendering_frame2 = get_xgl_rendering_frame (target, apply_button, reset_button);
+		/* X11 with OpenGL */
+		rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
+		rendering_frame2 = get_xgl_rendering_frame (target, apply_button, reset_button, xml);
 		break;
 	case XMAME_EXEC_SDL:
-		rendering_frame = get_sdl_rendering_frame (target, apply_button, reset_button);
+		/* SDL */
+		rendering_frame = get_sdl_rendering_frame (target, apply_button, reset_button, xml);
 		break;
 	case XMAME_EXEC_XFX:
+		/* X11 with Glide */
+		rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
+		rendering_frame2 = get_fx_rendering_frame (target, apply_button, reset_button);
+		break;
 	case XMAME_EXEC_SVGAFX:
+		/* Glide in Console mode */
 		rendering_frame = get_fx_rendering_frame (target, apply_button, reset_button);
 		break;
 	case XMAME_EXEC_PHOTON2:
@@ -1994,54 +1676,21 @@ add_rendering_options_tab (GtkWidget    *properties_windows,
 		break;
 	}
 
-	if (rendering_frame) {
+	if (rendering_frame)
 		gtk_widget_show (rendering_frame);
-		gtk_table_attach (GTK_TABLE (rendering_table), rendering_frame, 0, 1, 2, 3,
-				  (GTK_SHRINK | GTK_FILL),
-				  (GTK_SHRINK | GTK_FILL), 0, 0);
+	if (!rendering_frame2)
+		gtk_widget_hide (rendering_frame2);
+	else
+		gtk_widget_show (rendering_frame2);
 
-		if (rendering_frame2) {
-			gtk_widget_show (rendering_frame2);
-			gtk_table_attach (GTK_TABLE (rendering_table), rendering_frame2, 1, 2, 2, 3,
-					  (GTK_SHRINK | GTK_FILL),
-					  (GTK_SHRINK | GTK_FILL), 0, 0);
-		}
-	}
 
 	/* Video Mode */
-	video_mode_frame = options_frame_new (_("Video mode"));
-	gtk_widget_show (video_mode_frame);
-	gtk_table_attach (GTK_TABLE (rendering_table), video_mode_frame, 0, 1, 3, 4,
-			  (GTK_SHRINK | GTK_FILL),
-			  (GTK_SHRINK | GTK_FILL), 0, 0);
-	video_mode_frame = options_frame_create_child (video_mode_frame);
+	keepaspect_checkbutton = glade_xml_get_widget (xml, "keepaspect_checkbutton");
 
-	video_mode_table = gtk_table_new (2, 2, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (video_mode_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (video_mode_table), 6);
-	gtk_widget_show (video_mode_table);
-	gtk_container_add (GTK_CONTAINER (video_mode_frame), video_mode_table);
-
-	keepaspect_checkbutton = gtk_check_button_new_with_label (_("Keep aspect ratio:"));
-	gtk_widget_show (keepaspect_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (video_mode_table), keepaspect_checkbutton, 0, 1, 0, 1);
-
-	displayaspectratio_entry = gtk_entry_new ();
-	gtk_widget_show (displayaspectratio_entry);
-	gtk_table_attach_defaults (GTK_TABLE (video_mode_table), displayaspectratio_entry, 1, 2, 0, 1);
+	displayaspectratio_entry = glade_xml_get_widget (xml, "displayaspectratio_entry");
 	gtk_entry_set_text (GTK_ENTRY (displayaspectratio_entry), "1.33");
 
-	disablemode_label = gtk_label_new (_("Disable mode:"));
-	gtk_widget_show (disablemode_label);
-	gtk_table_attach_defaults (GTK_TABLE (video_mode_table), disablemode_label, 0, 1, 1, 2);
-	gtk_misc_set_alignment (GTK_MISC (disablemode_label), 0, 0.5);
-
-	disable_mode_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (disable_mode_entry), 14);
-	gtk_widget_show (disable_mode_entry);
-	gtk_table_attach_defaults (GTK_TABLE (video_mode_table), disable_mode_entry, 1, 2, 1, 2);
-
-/*end modes*/
+	disable_mode_entry = glade_xml_get_widget (xml, "disable_mode_entry");
 
 	image = gmameui_get_image_from_stock ("gmameui-display-toolbar");
 
@@ -2050,39 +1699,21 @@ add_rendering_options_tab (GtkWidget    *properties_windows,
 	gtk_box_pack_start (GTK_BOX (rendering_label), gtk_label_new (_("Rendering")), FALSE, FALSE, 0);
 	gtk_widget_show_all (rendering_label);
 
-	gtk_notebook_append_page (GTK_NOTEBOOK (target_notebook), rendering_table, rendering_label);
+	GtkWidget *rendering_vbox = glade_xml_get_widget (xml, "rendering_vbox");
+	gtk_notebook_append_page (GTK_NOTEBOOK (target_notebook), rendering_vbox, rendering_label);
 
-	gtk_widget_set_sensitive (GTK_WIDGET (video_mode_frame), TRUE);
-	
 	/*** Video Mode related ***/
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (keepaspect_checkbutton), target->keepaspect);
 	gtk_widget_set_sensitive (GTK_WIDGET (displayaspectratio_entry), (target->keepaspect));
+
 	used_text = g_strdup_printf ("%f", target->displayaspectratio);
 	gtk_entry_set_text (GTK_ENTRY (displayaspectratio_entry), used_text);
 	g_free (used_text);
 	gtk_entry_set_text (GTK_ENTRY (disable_mode_entry), target->disablemode);
 
-	g_signal_connect (G_OBJECT (keepaspect_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (keepaspect_checkbutton), "toggled",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
 	g_signal_connect_after (G_OBJECT (keepaspect_checkbutton), "toggled",
 				  G_CALLBACK (button_toggled),
 				  displayaspectratio_entry);
-	g_signal_connect (G_OBJECT (displayaspectratio_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (displayaspectratio_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
-	g_signal_connect (G_OBJECT (disable_mode_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    apply_button);
-	g_signal_connect (G_OBJECT (disable_mode_entry), "changed",
-			    G_CALLBACK (on_dirty_option),
-			    reset_button);
 
 }
 
@@ -2995,8 +2626,8 @@ add_misc_options_tab (GtkWidget *properties_windows,
 {
 	GtkWidget *image;
 	GtkWidget *misc_vbox;
-	GtkWidget *artwork_table;
-/*	GtkWidget *other_misc_frame;
+/*	GtkWidget *artwork_table;
+	GtkWidget *other_misc_frame;
 	GtkWidget *other_misc_table;*/
 	GtkWidget *misc_label;
 /*	GtkWidget *label;*/
