@@ -286,6 +286,22 @@ const char *resolution_table[] = {
 	NULL
 };
 
+/* MAME overlay effects were a replacement for scanlines in MAME v.107
+   (or thereabouts). Currently, they need to be specified in the commandline.
+   This char* array documents the main known ones in http://www.mameworld.info/ 
+   ubbthreads/showthreaded.php?Cat=&Number=92158&page=0&view=expanded&sb=5&o=&fpart=1&vc=1
+   and tries to find the files in the artwork directories */
+const char *overlay_effects[] = {
+	/* Aaron Giles */
+	"aperture1x2rb",
+	"aperture1x3rb",
+	"aperture2x4rb",
+	"aperture2x4bg",
+	"aperture4x6",
+	"scanlines",
+	NULL
+};
+
 static GtkWidget *
 options_frame_new (const char *text)
 {
@@ -776,6 +792,7 @@ GMAMEUI_DEBUG ("Adding display options tab\n");
 	effect_vbox = glade_xml_get_widget (xml, "effect_vbox");
 	if (xmame_get_option_value_count (current_exec, "effect") == -1) {
 		gtk_widget_hide (effect_combo);
+		/* FIXME Use a combo consisting of elements in overlay_effects */
 		effect_name = glade_xml_get_widget (xml, "effect_name");
 		gtk_entry_set_text (GTK_ENTRY (effect_name),
 				    target->effect_name);
