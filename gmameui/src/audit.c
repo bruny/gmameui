@@ -29,6 +29,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <gdk/gdkkeysyms.h>
+#include <glade/glade.h>
 
 #include "gui.h"
 #include "audit.h"
@@ -101,10 +102,10 @@ static gboolean
 stop_audit (GtkWidget *widget,
 	    GtkWidget *button)
 {
-	audit_cancelled = 1;
+	audit_cancelled = TRUE;
 	gtk_widget_set_sensitive (button, FALSE);
-	close_audit = 0;
-
+	close_audit = FALSE;
+GMAMEUI_DEBUG("Audit stopped");
 	return TRUE;
 }
 
@@ -128,240 +129,40 @@ audit_response (GtkWidget *dialog,
 GtkWidget *
 create_checking_games_window (void)
 {
-	GtkWidget *table3;
-	GtkWidget *details_frame;
-	GtkWidget *frame;
-	GtkWidget *scrolledwindow6;
-	GtkWidget *ROMs_frame;
-	GtkWidget *table4;
-	GtkWidget *total_roms_label;
-	GtkWidget *incorrect_roms_label;
-	GtkWidget *correct_roms_label;
-	GtkWidget *bestavailable_roms_label;
-	GtkWidget *notfound_roms_label;
-	GtkWidget *samples_frame;
-	GtkWidget *table5;
-	GtkWidget *incorrect_samples_label;
-	GtkWidget *total_samples_label;
-	GtkWidget *correct_samples_label;
+	GladeXML *xml = glade_xml_new (GLADEDIR "audit_window.glade", NULL, NULL);
+	if (!xml) {
+		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "audit_window.glade");
+		return NULL;
+	}
+	checking_games_window = glade_xml_get_widget (xml, "checking_games_window");
+	gtk_widget_show (checking_games_window);
 
-	checking_games_window = gtk_dialog_new_with_buttons (_("Checking Games"),
-							     GTK_WINDOW (MainWindow),
-							     GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_NO_SEPARATOR,
-							     NULL);
-	gtk_container_set_border_width (GTK_CONTAINER (checking_games_window), 5);
-	gtk_window_set_type_hint (GTK_WINDOW (checking_games_window), GDK_WINDOW_TYPE_HINT_UTILITY);
-
-	table3 = gtk_table_new (3, 4, FALSE);
-	gtk_widget_show (table3);
-	gtk_container_add (GTK_CONTAINER (GTK_DIALOG (checking_games_window)->vbox), table3);
-	gtk_table_set_row_spacings (GTK_TABLE (table3), 5);
-	gtk_table_set_col_spacings (GTK_TABLE (table3), 5);
-
-/*
-	pause_audit_button = gtk_button_new_with_label (_("Pause"));
-	gtk_widget_show (pause_audit_button);
-	gtk_table_attach (GTK_TABLE (table3), pause_audit_button, 1, 2, 2, 3,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-*/
-
-	stop_audit_button = gtk_dialog_add_button (GTK_DIALOG (checking_games_window),
-						   GTK_STOCK_STOP,
-						   GTK_RESPONSE_REJECT);
-
-	/* Close Button */
-	close_audit_button = gtk_dialog_add_button (GTK_DIALOG (checking_games_window),
-						    GTK_STOCK_CLOSE,
-						    GTK_RESPONSE_CLOSE);
+	stop_audit_button = glade_xml_get_widget (xml, "stop_audit_button");
+	close_audit_button = glade_xml_get_widget (xml, "close_audit_button");
 
 	/* only allows to click it when the audit is done */
 	gtk_widget_set_sensitive (close_audit_button, FALSE);
 
-	details_frame = options_frame_new (_("Details"));
-	gtk_widget_show (details_frame);
-	gtk_table_attach (GTK_TABLE (table3), details_frame, 0, 4, 2, 3,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-	details_frame = options_frame_create_child (details_frame);
-
-	scrolledwindow6 = gtk_scrolled_window_new (NULL, NULL);
-	gtk_widget_show (scrolledwindow6);
-	gtk_container_add (GTK_CONTAINER (details_frame), scrolledwindow6);
-	gtk_container_set_border_width (GTK_CONTAINER (scrolledwindow6), 5);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow6), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-
 	details_check_buffer = gtk_text_buffer_new (NULL);
-	details_check_text = gtk_text_view_new_with_buffer (details_check_buffer);
-	gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (details_check_text), FALSE);
-	gtk_text_view_set_editable (GTK_TEXT_VIEW (details_check_text), FALSE);
-	gtk_widget_show (details_check_text);
-	gtk_container_add (GTK_CONTAINER (scrolledwindow6), details_check_text);
+	details_check_text = glade_xml_get_widget (xml, "details_check_text");
+	gtk_text_view_set_buffer (GTK_TEXT_VIEW (details_check_text), details_check_buffer);
 
-	frame = options_frame_new (_("Checking Game"));
-	gtk_widget_show (frame);
-	gtk_table_attach (GTK_TABLE (table3), frame, 0, 4, 0, 1,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-			  (GtkAttachOptions) (GTK_FILL), 0, 0);
-	frame = options_frame_create_child (frame);
-	checking_games_label = gtk_label_new (NULL);
-	gtk_container_add (GTK_CONTAINER (frame), checking_games_label);
-	gtk_misc_set_alignment (GTK_MISC (checking_games_label), 0, 0.5);
+	checking_games_label = glade_xml_get_widget (xml, "checking_games_label");
 #if GTK_CHECK_VERSION(2,6,0)
 	gtk_label_set_ellipsize (GTK_LABEL (checking_games_label), PANGO_ELLIPSIZE_MIDDLE);
 #endif
-	gtk_widget_show (checking_games_label);
 
-	ROMs_frame = options_frame_new (_("ROMs"));
-	gtk_widget_show (ROMs_frame);
-	gtk_table_attach (GTK_TABLE (table3), ROMs_frame, 0, 2, 1, 2,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-			  (GtkAttachOptions) (GTK_FILL), 0, 0);
-	ROMs_frame = options_frame_create_child (ROMs_frame);
+	correct_roms_value = glade_xml_get_widget (xml, "correct_roms_value");
+	bestavailable_roms_value = glade_xml_get_widget (xml, "bestavailable_roms_value");
+	incorrect_roms_value = glade_xml_get_widget (xml, "incorrect_roms_value");
+	notfound_roms_value = glade_xml_get_widget (xml, "notfound_roms_value");
+	total_roms_value = glade_xml_get_widget (xml, "total_roms_value");
+	roms_check_progressbar = glade_xml_get_widget (xml, "roms_check_progressbar");
 
-	table4 = gtk_table_new (4, 3, FALSE);
-	gtk_widget_show (table4);
-	gtk_container_add (GTK_CONTAINER (ROMs_frame), table4);
-	gtk_container_set_border_width (GTK_CONTAINER (table4), 5);
-	gtk_table_set_row_spacings (GTK_TABLE (table4), 2);
-
-	correct_roms_value = gtk_label_new ("0");
-	gtk_widget_show (correct_roms_value);
-	gtk_table_attach (GTK_TABLE (table4), correct_roms_value, 2, 3, 1, 2,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (correct_roms_value), 0, 0.5);
-
-	bestavailable_roms_value = gtk_label_new ("0");
-	gtk_widget_show (bestavailable_roms_value);
-	gtk_table_attach (GTK_TABLE (table4), bestavailable_roms_value, 2, 3, 2, 3,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (bestavailable_roms_value), 0, 0.5);
-
-	incorrect_roms_value = gtk_label_new ("0");
-	gtk_widget_show (incorrect_roms_value);
-	gtk_table_attach (GTK_TABLE (table4), incorrect_roms_value, 2, 3, 3, 4,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (incorrect_roms_value), 0, 0.5);
-
-	notfound_roms_value = gtk_label_new ("0");
-	gtk_widget_show (notfound_roms_value);
-	gtk_table_attach (GTK_TABLE (table4), notfound_roms_value, 2, 3, 4, 5,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (notfound_roms_value), 0, 0.5);
-
-	total_roms_value = gtk_label_new ("0");
-	gtk_widget_show (total_roms_value);
-	gtk_table_attach (GTK_TABLE (table4), total_roms_value, 2, 3, 5, 6,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (total_roms_value), 0, 0.5);
-
-	total_roms_label = gtk_label_new (_("Total:"));
-	gtk_widget_show (total_roms_label);
-	gtk_table_attach (GTK_TABLE (table4), total_roms_label, 1, 2, 5, 6,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (total_roms_label), 0, 0.5);
-
-	notfound_roms_label = gtk_label_new (_("Not found:"));
-	gtk_widget_show (notfound_roms_label);
-	gtk_table_attach (GTK_TABLE (table4), notfound_roms_label, 1, 2, 4, 5,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (notfound_roms_label), 0, 0.5);
-
-	incorrect_roms_label = gtk_label_new (_("Incorrect:"));
-	gtk_widget_show (incorrect_roms_label);
-	gtk_table_attach (GTK_TABLE (table4), incorrect_roms_label, 1, 2, 3, 4,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (incorrect_roms_label), 0, 0.5);
-
-	bestavailable_roms_label = gtk_label_new (_("Best available:"));
-	gtk_widget_show (bestavailable_roms_label);
-	gtk_table_attach (GTK_TABLE (table4), bestavailable_roms_label, 1, 2, 2, 3,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (bestavailable_roms_label), 0, 0.5);
-
-	correct_roms_label = gtk_label_new (_("Correct:"));
-	gtk_widget_show (correct_roms_label);
-	gtk_table_attach (GTK_TABLE (table4), correct_roms_label, 1, 2, 1, 2,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (correct_roms_label), 0, 0.5);
-
-	roms_check_progressbar = gtk_progress_bar_new ();
-	gtk_widget_show (roms_check_progressbar);
-	gtk_table_attach (GTK_TABLE (table4), roms_check_progressbar, 0, 3, 0, 1,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	samples_frame = options_frame_new (_("Samples"));
-	gtk_widget_show (samples_frame);
-	gtk_table_attach (GTK_TABLE (table3), samples_frame, 2, 4, 1, 2,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-			  (GtkAttachOptions) (GTK_FILL), 0, 0);
-	samples_frame = options_frame_create_child (samples_frame);
-
-	table5 = gtk_table_new (4, 3, FALSE);
-	gtk_widget_show (table5);
-	gtk_container_add (GTK_CONTAINER (samples_frame), table5);
-	gtk_container_set_border_width (GTK_CONTAINER (table5), 5);
-	gtk_table_set_row_spacings (GTK_TABLE (table5), 2);
-
-	correct_samples_value = gtk_label_new ("0");
-	gtk_widget_show (correct_samples_value);
-	gtk_table_attach (GTK_TABLE (table5), correct_samples_value, 2, 3, 1, 2,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (correct_samples_value), 0, 0.5);
-
-	incorrect_samples_value = gtk_label_new ("0");
-	gtk_widget_show (incorrect_samples_value);
-	gtk_table_attach (GTK_TABLE (table5), incorrect_samples_value, 2, 3, 2, 3,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (incorrect_samples_value), 0, 0.5);
-
-	incorrect_samples_label = gtk_label_new (_("Incorrect:"));
-	gtk_widget_show (incorrect_samples_label);
-	gtk_table_attach (GTK_TABLE (table5), incorrect_samples_label, 1, 2, 2, 3,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (incorrect_samples_label), 0, 0.5);
-
-	total_samples_label = gtk_label_new (_("Total:"));
-	gtk_widget_show (total_samples_label);
-	gtk_table_attach (GTK_TABLE (table5), total_samples_label, 1, 2, 3, 4,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (total_samples_label), 0, 0.5);
-
-	total_samples_value = gtk_label_new ("0");
-	gtk_widget_show (total_samples_value);
-	gtk_table_attach (GTK_TABLE (table5), total_samples_value, 2, 3, 3, 4,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (total_samples_value), 0, 0.5);
-
-	correct_samples_label = gtk_label_new (_("Correct:"));
-	gtk_widget_show (correct_samples_label);
-	gtk_table_attach (GTK_TABLE (table5), correct_samples_label, 1, 2, 1, 2,
-			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (correct_samples_label), 0, 0.5);
-
-	samples_check_progressbar = gtk_progress_bar_new ();
-	gtk_widget_show (samples_check_progressbar);
-	gtk_table_attach (GTK_TABLE (table5), samples_check_progressbar, 0, 3, 0, 1,
-			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-	gtk_widget_show (checking_games_window);
+	correct_samples_value = glade_xml_get_widget (xml, "correct_samples_value");
+	incorrect_samples_value = glade_xml_get_widget (xml, "incorrect_samples_value");
+	total_samples_value = glade_xml_get_widget (xml, "total_samples_value");
+	samples_check_progressbar = glade_xml_get_widget (xml, "samples_check_progressbar");
 
 	g_signal_connect (checking_games_window, "response",
 			  G_CALLBACK (audit_response), stop_audit_button);
@@ -443,8 +244,8 @@ launch_checking_games_window (void)
 	if (!xmame_get_options (current_exec))
 		return;
 
-	audit_cancelled = 0;
-	close_audit = 0;
+	audit_cancelled = FALSE;
+	close_audit = FALSE;
 	option_name = xmame_get_option_name (current_exec, "verifyroms");
 
 	if (!option_name) {
@@ -524,6 +325,9 @@ launch_checking_games_window (void)
 				g_snprintf (title, BUFFER_SIZE, "%s", rom_entry_get_list_name (tmprom));
 			}
 			
+			g_snprintf (title, BUFFER_SIZE, "%s", name);
+			gtk_label_set_text (GTK_LABEL (checking_games_label), title);
+			
 			gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (roms_check_progressbar), done);
 		} else {
 			gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_check_buffer), &text_iter, line, -1);
@@ -558,7 +362,7 @@ launch_checking_games_window (void)
 		/* jump the last comments */
 		if (line[0] == '\0' || line[1] == '\0')
 			break;
-//GMAMEUI_DEBUG ("Line before is %s", line);		
+	
 		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_check_buffer), &text_iter);
 		auditresult = process_audit_romset (line, error_during_check);
 		
@@ -580,8 +384,7 @@ launch_checking_games_window (void)
 			
 			/* find the rom in the list - need to skip leading romset/sampleset */
 			name = g_strrstr (line, " ") + 1;
-//GMAMEUI_DEBUG ("Line is %s", line);
-//GMAMEUI_DEBUG ("Name is %s", name);
+
 			listpointer = g_list_find_custom (game_list.roms, name,
 							  (GCompareFunc) g_ascii_strcasecmp);
 			if (listpointer) {
@@ -626,7 +429,7 @@ audit_finished:
 	create_gamelist_content ();
 	if (close_audit)
 		gtk_widget_destroy (checking_games_window);
-	audit_cancelled = 0;
+	audit_cancelled = FALSE;
 
 	while (gtk_events_pending ())
 		gtk_main_iteration ();
