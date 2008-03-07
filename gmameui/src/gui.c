@@ -1845,8 +1845,9 @@ create_filterslist_content (void)
 		is_root = TRUE;
 	}
 
+	GtkTreePath *tree_path;
 	if (is_root) {
-		GtkTreePath *tree_path;
+		/*GtkTreePath *tree_path;*/
 		g_signal_handlers_block_by_func (G_OBJECT (select), (gpointer)on_filter_row_selected, NULL);
 		tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.filters_tree_model), &iter);
 		gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.filters_displayed_list),
@@ -1864,15 +1865,14 @@ create_filterslist_content (void)
 				    -1);
 		/* Scroll to selection */
 		tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.filters_tree_model), &iter);
-		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.filters_displayed_list), tree_path, NULL, TRUE, 0.5, 0);
-		gtk_tree_path_free (tree_path);
 	} else {
-		GtkTreePath *tree_path;
+		/*GtkTreePath *tree_path;*/
 		tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.filters_tree_model), &iter);
 		valid = gtk_tree_view_expand_row (GTK_TREE_VIEW (main_gui.filters_displayed_list),
 						  tree_path,
 						  TRUE);
 		gtk_tree_path_free (tree_path);
+
 		g_signal_handlers_block_by_func (G_OBJECT (select), (gpointer)on_filter_row_selected, NULL);
 		tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.filters_tree_model), &sub_iter);
 		gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.filters_displayed_list),
@@ -1888,9 +1888,9 @@ create_filterslist_content (void)
 				    -1);
 		/* Scroll to selection */
 		tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.filters_tree_model), &sub_iter);
-		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.filters_displayed_list), tree_path, NULL, TRUE, 0.5, 0);
-		gtk_tree_path_free (tree_path);
 	}
+	gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.filters_displayed_list), tree_path, NULL, TRUE, 0.5, 0);
+	gtk_tree_path_free (tree_path);
 }
 
 void
@@ -2473,6 +2473,23 @@ gamelist_get_selected_game (void)
 	return game_data;
 }
 
+
+void set_list_sortable_column ()
+{
+	if ((gui_prefs.current_mode == DETAILS) || (gui_prefs.current_mode == DETAILS_TREE)) {
+		GMAMEUI_DEBUG("Sorting - using sort order %d", gui_prefs.SortColumn);
+		if (gui_prefs.SortReverse)
+			gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), gui_prefs.SortColumn, GTK_SORT_DESCENDING);
+		else
+			gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), gui_prefs.SortColumn, GTK_SORT_ASCENDING);
+	} else {
+		g_signal_handlers_block_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
+		/* FIXME we sometimes have here a gtk warning why????? */
+		gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), GAMENAME, GTK_SORT_ASCENDING);
+		g_signal_handlers_unblock_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
+	}	/* Select the correct row */
+}
+
 void
 create_gamelist_content (void)
 {
@@ -2625,21 +2642,12 @@ g_timer_start (timer);
 				my_txtcolor = NULL; /* Black */
 			}
 			/* Pixbuf */
-			if (tmprom->has_roms == UNKNOWN) {
-				pixbuf = Status_Icons [UNKNOWN];
-			} else if (tmprom->has_roms == INCORRECT) {
-				pixbuf = Status_Icons [INCORRECT];
-			} else if (tmprom->has_roms == NOT_AVAIL) {
-				pixbuf = Status_Icons [NOT_AVAIL];
-			} else if (!tmprom->status) {
-				pixbuf = Status_Icons [PROBLEMS];
-			} else {
-				if (tmprom->icon_pixbuf) {
-					pixbuf = tmprom->icon_pixbuf;
-				} else {
-					pixbuf = Status_Icons [CORRECT];
-				}
-			}
+			if (tmprom->icon_pixbuf)
+				pixbuf = tmprom->icon_pixbuf;
+			else
+				pixbuf = Status_Icons [tmprom->has_roms];
+			if (!pixbuf)
+				pixbuf = Status_Icons [CORRECT];
 
 			/* Determine if the row is a root */
 			if ( (j == 0) || !(strcmp (tmprom->cloneof, "-")) || !my_romname_root || (strcmp (tmprom->cloneof, my_romname_root)) ) {
@@ -2751,13 +2759,11 @@ g_timer_start (timer);
 	visible_games = j;
 
 	/* Callbacks - Sorting order has changed */
+	main_gui.tree_model = GTK_TREE_MODEL (store);
 	if (main_gui.tree_model == NULL) {
-		main_gui.tree_model = GTK_TREE_MODEL (store);
 		g_signal_connect (G_OBJECT (main_gui.tree_model), "sort-column-changed",
 				  G_CALLBACK (on_displayed_list_sort_column_changed),
 				  NULL);
-	} else {
-		main_gui.tree_model = GTK_TREE_MODEL (store);
 	}
 
 	/* Update the corresponding tree view */
@@ -2766,19 +2772,11 @@ g_timer_start (timer);
 		gtk_tree_view_set_model (GTK_TREE_VIEW (main_gui.displayed_list), GTK_TREE_MODEL (main_gui.tree_model));
 		/* Get the selection */
 		select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_gui.displayed_list));
-		/* Sort the list */
-		if ((gui_prefs.current_mode == DETAILS) || (gui_prefs.current_mode == DETAILS_TREE)) {
-			if (gui_prefs.SortReverse)
-				gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), gui_prefs.SortColumn, GTK_SORT_DESCENDING);
-			else
-				gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), gui_prefs.SortColumn, GTK_SORT_ASCENDING);
-		} else {
-			g_signal_handlers_block_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
-			/* FIXME we sometimes have here a gtk warning why????? */
-			gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), GAMENAME, GTK_SORT_ASCENDING);
-			g_signal_handlers_unblock_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
-		}		/* Select the correct row */
 
+		/* Sort the list */
+		set_list_sortable_column ();
+
+		/* Find the selected game in the gamelist, and scroll to it, opening any expanders */
 		if (visible_games > 0) {
 			RomEntry *curr_rom;
 
@@ -2819,17 +2817,13 @@ g_timer_start (timer);
 				valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (main_gui.tree_model), &iter);
 				is_root = TRUE;
 			}
-
+	
+			GtkTreePath *tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
 			if (is_root) {
-				GtkTreePath *tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
 				gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list),
 							  tree_path,
 							  NULL, FALSE);
-				/* Scroll to selection */
-				gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list), tree_path, NULL, TRUE, 0.5, 0);
-				gtk_tree_path_free (tree_path);
 			} else {
-				GtkTreePath *tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
 				valid=gtk_tree_view_expand_row (GTK_TREE_VIEW (main_gui.displayed_list),
 								tree_path,
 								TRUE);
@@ -2838,10 +2832,13 @@ g_timer_start (timer);
 				gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list),
 							  tree_path,
 							  NULL, FALSE);
-				/* Scroll to selection */
-				gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list), tree_path, NULL, TRUE, 0.5, 0);
-				gtk_tree_path_free (tree_path);
 			}
+			/* Scroll to selection */
+			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list), tree_path, NULL, TRUE, 0.5, 0);
+			gtk_tree_path_free (tree_path);
+			
+			
+			
 		}
 		/* Header clickable. */
 		if ( (gui_prefs.current_mode == DETAILS) || (gui_prefs.current_mode == DETAILS_TREE))
@@ -2953,23 +2950,11 @@ create_gamelist (ListMode list_mode)
 				NULL);
 	}
 
-
-	/* We sort the list */
-	if (main_gui.tree_model) {
-		if ( (gui_prefs.current_mode == DETAILS) || (gui_prefs.current_mode == DETAILS_TREE)) {
-			if (gui_prefs.SortReverse)
-				gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), gui_prefs.SortColumn, GTK_SORT_DESCENDING);
-			else
-				gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), gui_prefs.SortColumn, GTK_SORT_ASCENDING);
-		} else {
-			g_signal_handlers_block_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
-			gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), GAMENAME, GTK_SORT_ASCENDING);
-			g_signal_handlers_unblock_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
-		}
-	}
-
 	/* Header clickable Tree Model must exist. */
 	if (main_gui.tree_model) {
+		/* We sort the list */
+		set_list_sortable_column();
+		
 		if ( (list_mode == DETAILS) || (list_mode == DETAILS_TREE))
 			gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
 							     TRUE);
