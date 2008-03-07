@@ -539,6 +539,8 @@ get_pixbuf (RomEntry       *rom,
 	GdkPixbuf *pixbuf;
 	GtkWidget *pict = NULL;
 	gchar *filename;
+	gchar *filename_parent;
+	gchar *zipfile;
 	int width = 0;
 	int height = 0;
 	GError **error = NULL;
@@ -558,24 +560,38 @@ get_pixbuf (RomEntry       *rom,
 	switch (sctype) {
 	case (SNAPSHOTS):
 		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->romname);
+		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->cloneof);
+		zipfile = g_build_filename (gui_prefs.SnapshotDirectory, "snap.zip", NULL);
 		break;
 	case (FLYERS):
 		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.FlyerDirectory, rom->romname);
+		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.FlyerDirectory, rom->cloneof);
+		zipfile = g_build_filename (gui_prefs.FlyerDirectory, "flyers.zip", NULL);
 		break;
 	case (CABINETS):
 		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CabinetDirectory, rom->romname);
+		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CabinetDirectory, rom->cloneof);
+		zipfile = g_build_filename (gui_prefs.CabinetDirectory, "cabinets.zip", NULL);
 		break;
 	case (MARQUEES):
 		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.MarqueeDirectory, rom->romname);
+		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.MarqueeDirectory, rom->cloneof);
+		zipfile = g_build_filename (gui_prefs.MarqueeDirectory, "marquees.zip", NULL);
 		break;
 	case (TITLES):
 		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.TitleDirectory, rom->romname);
+		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.TitleDirectory, rom->cloneof);
+		zipfile = g_build_filename (gui_prefs.TitleDirectory, "titles.zip", NULL);
 		break;
 	case (CONTROL_PANELS):
 		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CPanelDirectory, rom->romname);
+		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CPanelDirectory, rom->cloneof);
+		zipfile = g_build_filename (gui_prefs.TitleDirectory, "cpanels.zip", NULL);
 		break;
 	default:
 		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->romname);
+		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->cloneof);
+		zipfile = g_build_filename (gui_prefs.SnapshotDirectory, "snap.zip", NULL);
 	}
 
 	GMAMEUI_DEBUG ("Looking for image %s", filename);
@@ -585,33 +601,11 @@ get_pixbuf (RomEntry       *rom,
 	
 	/* no picture found try parent game if any*/
 	if ( (!pixbuf) && strcmp (rom->cloneof,"-")) {
-		switch (sctype) {
-		case (SNAPSHOTS):
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->cloneof);
-			break;
-		case (FLYERS):
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.FlyerDirectory, rom->cloneof);
-			break;
-		case (CABINETS):
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CabinetDirectory, rom->cloneof);
-			break;
-		case (MARQUEES):
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.MarqueeDirectory, rom->cloneof);
-			break;
-		case (TITLES):
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.TitleDirectory, rom->cloneof);
-			break;
-		case (CONTROL_PANELS):
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CPanelDirectory, rom->cloneof);
-			break;
-		default:
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->cloneof);
-		}
-		GMAMEUI_DEBUG ("Looking for image from parent set %s", filename);
-		pixbuf = gdk_pixbuf_new_from_file (filename,error);
-		if (filename)
-			g_free (filename);
+		GMAMEUI_DEBUG ("Looking for image from parent set %s", filename_parent);
+		pixbuf = gdk_pixbuf_new_from_file (filename_parent,error);
 	}
+	if (filename_parent)
+		g_free (filename_parent);
 	
 	if (!pixbuf) {
 		if (sctype == SNAPSHOTS) {
@@ -629,35 +623,11 @@ get_pixbuf (RomEntry       *rom,
 	if (!pixbuf) {
 		ZIP *zip;
 		struct zipent* zipent;
-		gchar *zipfile;
 		gchar *tmp_buffer;
 		gchar *parent_tmp_buffer = NULL;
 		gsize parent_buf_size = 0
 ;
 		gchar *parent_filename;
-
-		switch (sctype) {
-		case (SNAPSHOTS):
-			zipfile = g_build_filename (gui_prefs.SnapshotDirectory, "snap.zip", NULL);
-			break;
-		case (FLYERS):
-			zipfile = g_build_filename (gui_prefs.FlyerDirectory, "flyers.zip", NULL);
-			break;
-		case (CABINETS):
-			zipfile = g_build_filename (gui_prefs.CabinetDirectory, "cabinets.zip", NULL);
-			break;
-		case (MARQUEES):
-			zipfile = g_build_filename (gui_prefs.MarqueeDirectory, "marquees.zip", NULL);
-			break;
-		case (TITLES):
-			zipfile = g_build_filename (gui_prefs.TitleDirectory, "titles.zip", NULL);
-			break;
-		case (CONTROL_PANELS):
-			zipfile = g_build_filename (gui_prefs.TitleDirectory, "cpanels.zip", NULL);
-			break;
-		default:
-			zipfile = g_build_filename (gui_prefs.SnapshotDirectory, "snap.zip", NULL);
-		}
 
 		zip = openzip (zipfile);
 
@@ -1561,6 +1531,27 @@ simple_filter *create_folder_filter (folder_filters_list FolderID, Columns_type 
         return folder_filter;
 }
 
+void create_sub_folder_filter (simple_filter *folder_filter, gchar *folder_name, GtkTreeIter *sub_iter, GtkTreeIter *iter) {
+     	GdkPixbuf *icon_pixbuf;
+	gchar *filter_key;
+	
+	icon_pixbuf = get_icon_for_filter (folder_filter);
+	gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), sub_iter, iter);
+	gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), sub_iter,
+			    0,		folder_name,
+			    1,		folder_filter,
+			    2,		icon_pixbuf,
+			    3,		folder_filter->FolderID,
+			    -1);
+	filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
+	g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
+	g_free (filter_key);
+
+	filter_key = g_strdup_printf ("Filter%i_image", folder_filter->FolderID);
+	g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, icon_pixbuf, g_object_unref);
+	g_free (filter_key);
+}
+	
 /* FIXME: Possible memory leak */
 void
 create_filterslist_content (void)
@@ -1653,50 +1644,17 @@ create_filterslist_content (void)
 	/* IMPERFECT - COLORS */
      	folder_filter = create_folder_filter (IMPERFECT_COLORS, COLOR_STATUS, FALSE,
 				      status_good, 0, TRUE);
-	icon_pixbuf = get_icon_for_filter (folder_filter);
-	gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-	gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-			    0,		_("Imperfect Colors"),
-			    1,		folder_filter,
-			    2,		icon_pixbuf,
-			    3,		folder_filter->FolderID,
-			    -1);
-
-	filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-	g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-	g_free (filter_key);
+	create_sub_folder_filter (folder_filter, _("Imperfect Colors"), &sub_iter, &iter);
 
 	/* IMPERFECT - SOUND */
      	folder_filter = create_folder_filter (IMPERFECT_SOUND, SOUND_STATUS, FALSE,
 				      status_good, 0, TRUE);
-	icon_pixbuf = get_icon_for_filter (folder_filter);
-	gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-	gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-			    0,		_("Imperfect Sound"),
-			    1,		folder_filter,
-			    2,		icon_pixbuf,
-			    3,		folder_filter->FolderID,
-			    -1);
-
-	filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-	g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-	g_free (filter_key);
+	create_sub_folder_filter (folder_filter, _("Imperfect Sound"), &sub_iter, &iter);
 
 	/* IMPERFECT - GRAPHICS */
      	folder_filter = create_folder_filter (IMPERFECT_GRAPHIC, GRAPHIC_STATUS, FALSE,
 				      status_good, 0, TRUE);
-	icon_pixbuf = get_icon_for_filter (folder_filter);
-	gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-	gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-			    0,		_("Imperfect Graphics"),
-			    1,		folder_filter,
-			    2,		icon_pixbuf,
-			    3,		folder_filter->FolderID,
-			    -1);
-
-	filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-	g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-	g_free (filter_key);
+	create_sub_folder_filter (folder_filter, _("Imperfect Graphics"), &sub_iter, &iter);
 
 	/* SAMPLES */
 	folder_filter = create_folder_filter (SAMPLES, HAS_SAMPLES, FALSE,
@@ -1714,18 +1672,7 @@ create_filterslist_content (void)
 	     listpointer = g_list_next (listpointer)) {
 		folder_filter = create_folder_filter (folder_ID_selected++, MANU, TRUE,
 						      (gchar *) listpointer->data, 0, TRUE);
-		icon_pixbuf = get_icon_for_filter (folder_filter);
-		gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-		gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-				    0,		 (gchar *)listpointer->data,
-				    1,		folder_filter,
-				    2,		icon_pixbuf,
-				    3,		folder_filter->FolderID,
-				    -1);
-
-		filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-		g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-		g_free (filter_key);
+		create_sub_folder_filter (folder_filter, (gchar *)listpointer->data, &sub_iter, &iter);
 	}
 
 	/* YEARS */
@@ -1744,18 +1691,7 @@ create_filterslist_content (void)
 
 	     	folder_filter = create_folder_filter (folder_ID_selected++, YEAR, TRUE,
 					      (gchar *) listpointer->data, 0, TRUE);
-		icon_pixbuf = get_icon_for_filter (folder_filter);
-		gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-		gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-				    0,		text,
-				    1,		folder_filter,
-				    2,		icon_pixbuf,
-				    3,		folder_filter->FolderID,
-				    -1);
-
-		filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-		g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-		g_free (filter_key);
+		create_sub_folder_filter (folder_filter, text, &sub_iter, &iter);
 	}
 
 
@@ -1777,34 +1713,12 @@ create_filterslist_content (void)
 	/* CUSTOM - FAVORITES */
      	folder_filter = create_folder_filter (FAVORITES, FAVORITE, TRUE,
 				      NULL, 0, TRUE);
-	icon_pixbuf = get_icon_for_filter (folder_filter);
-	gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-	gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-			    0,		_("Favorites"),
-			    1,		folder_filter,
-			    2,		icon_pixbuf,
-			    3,		folder_filter->FolderID,
-			    -1);
-
-	filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-	g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-	g_free (filter_key);
+	create_sub_folder_filter (folder_filter, _("Favorites"), &sub_iter, &iter);
 
 	/* CUSTOM - PLAYED */
      	folder_filter = create_folder_filter (PLAYED, TIMESPLAYED, FALSE,
 				      NULL, 0, TRUE);
-	icon_pixbuf = get_icon_for_filter (folder_filter);
-	gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-	gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-			    0,		_("Played"),
-			    1,		folder_filter,
-			    2,		icon_pixbuf,
-			    3,		folder_filter->FolderID,
-			    -1);
-
-	filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-	g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-	g_free (filter_key);
+	create_sub_folder_filter (folder_filter, _("Played"), &sub_iter, &iter);
 
 	/* ORIGINALS */
      	folder_filter = create_folder_filter (ORIGINALS, CLONE, TRUE,
@@ -1841,12 +1755,12 @@ create_filterslist_content (void)
 				      NULL, 0, TRUE);
 	add_filter_to_list (_("BIOS"), folder_filter, &iter);
 	
-	/* Drivers */
+	/* DRIVERS */
 	folder_filter = create_folder_filter (DRIVERS, DRIVER, FALSE,
 			      empty_value, 0, FALSE);
 	add_filter_to_list (_("Driver"), folder_filter, &iter);
 
-	/* Drivers - LIST*/
+	/* DRIVERS - LIST*/
 	for (listpointer = g_list_first (game_list.drivers);
 	     (listpointer);
 	     listpointer = g_list_next (listpointer)) {
@@ -1857,21 +1771,7 @@ create_filterslist_content (void)
 
 		folder_filter = create_folder_filter (folder_ID_selected++, DRIVER, TRUE,
 				      (gchar *)listpointer->data, 0, TRUE);
-		gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-		gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-				    0,		text,
-				    1,		folder_filter,
-				    2,		icon_pixbuf,
-				    3,		folder_filter->FolderID,
-				    -1);
-
-		filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-		g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-		g_free (filter_key);
-
-		filter_key = g_strdup_printf ("Filter%i_image", folder_filter->FolderID);
-		g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, icon_pixbuf, g_object_unref);
-		g_free (filter_key);
+		create_sub_folder_filter (folder_filter, text, &sub_iter, &iter);
 	}
 
 	/* CATEGORY - Requires catver.ini */
@@ -1888,18 +1788,7 @@ create_filterslist_content (void)
 
 			folder_filter = create_folder_filter (folder_ID_selected++, CATEGORY, TRUE,
 					      (gchar *)listpointer->data, 0, TRUE);
-			icon_pixbuf = get_icon_for_filter (folder_filter);
-			gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-			gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-					    0,		 (gchar *)listpointer->data,
-					    1,		folder_filter,
-					    2,		icon_pixbuf,
-					    3,		folder_filter->FolderID,
-					    -1);
-
-			filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-			g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-			g_free (filter_key);
+			create_sub_folder_filter (folder_filter, (gchar *) listpointer->data, &sub_iter, &iter);
 		}
 
 
@@ -1914,18 +1803,7 @@ create_filterslist_content (void)
 		     listpointer = g_list_next (listpointer)) {
 			folder_filter = create_folder_filter (folder_ID_selected++, MAMEVER, TRUE,
 					      (gchar *)listpointer->data, 0, TRUE);
-			icon_pixbuf = get_icon_for_filter (folder_filter);
-			gtk_tree_store_append (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter, &iter);
-			gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-					    0,		 (gchar *) listpointer->data,
-					    1,		folder_filter,
-					    2,		icon_pixbuf,
-					    3,		folder_filter->FolderID,
-					    -1);
-
-			filter_key = g_strdup_printf ("Filter%i", folder_filter->FolderID);
-			g_object_set_data_full (G_OBJECT (main_gui.filters_tree_model), filter_key, folder_filter, g_free);
-			g_free (filter_key);
+			create_sub_folder_filter (folder_filter, (gchar *) listpointer->data, &sub_iter, &iter);		     
 		}
 /*	}*/
 
@@ -2105,7 +1983,6 @@ show_status_bar (void)
 	gui_prefs.ShowStatusBar = 1;
 	gtk_widget_show (GTK_WIDGET (main_gui.tri_status_bar));
 }
-
 
 /* get an icon for a rom, if not found, try the original game if the game is a clone */
 GdkPixbuf *
