@@ -10,6 +10,7 @@ gmameui_SOURCES = \
 	io.c io.h \
 	game_list.h game_list.c \
 	game_options.h game_options.c \
+	rom_entry.h rom_entry.c \
 	mameio.c \
 	gui.c gui.h \
 	progression_window.c progression_window.h \

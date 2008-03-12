@@ -28,133 +28,9 @@
 #include <stdio.h>
 #include "xmame_executable.h"
 
-#define MAX_ROMNAME 20
-#define MAX_CPU 20
-#define MAX_CONTROL 20
+#include "rom_entry.h"
 
-/* Maximum number of CPUs/Sound CPUs per game
-changing this will break the gamelist compatibility
-*/
-#define NB_CPU 4
 
-typedef struct {
-	gchar name[MAX_CPU];
-	guint clock;
-	gboolean sound_flag;
-} CPUInfo;
-
-typedef struct {
-	gchar name[MAX_CPU];
-	guint clock;
-} SoundCPUInfo;
-
-typedef enum {
-	INCORRECT,
-	CORRECT,
-	UNKNOWN,
-	PROBLEMS,
-	BEST_AVAIL,
-	NOT_AVAIL,
-	NOTROMSET,
-	NUMBER_STATUS
-} RomStatus;
-
-/** 
-* Information for a loaded game.
-* A RomEntry is invalid when the gamelist changes because there
-* are several pointers to the list.
-*
-*/
-typedef struct {
-	gchar romname[MAX_ROMNAME];
-	gchar *gamename;
-	gchar *gamenameext;
-
-	/** The year for the game.
-	* This is a pointer to a string in the game_list.years g_list
-	*/
-	const gchar *year;
-	gchar *manu;
-	gchar *cloneof;
-	gchar *romof;
-	gchar *sampleof;
-	
-	gboolean is_bios;
-	
-	/** The driver for the game.
-	This is a pointer to a string in the game_list.drivers g_list
-	*/
-	const gchar *driver;
-	CPUInfo cpu_info[NB_CPU];
-	SoundCPUInfo sound_info[NB_CPU];
-	gchar control[MAX_CONTROL];
-
-	/** The category for the game.
-	This is a pointer to a string in the game_list.categories g_list
-	*/
-	const gchar *category;
-	const gchar *mame_ver_added;
-	gint num_players;
-	gint num_buttons;
-	gint channels;
-	gboolean vector;
-	gboolean status;
-
-	/** Driver status
-	Recent versions of MAME have good | imperfect or | preliminary
-	*/
-	gchar *driver_status_emulation;
-	gchar *driver_status_color;
-	gchar *driver_status_sound;
-	gchar *driver_status_graphic;
-	
-	gboolean horizontal;
-	guint screen_x;
-	guint screen_y;
-	gfloat screen_freq;
-	guint colors;
-
-	gint nb_roms;
-	gint nb_samples;
-	gboolean the_trailer;
-
-	/* gmameui information 
-	  (from game.ini)
-	*/
-	gint timesplayed;
-	RomStatus has_roms;
-	RomStatus has_samples;
-	gboolean favourite;
-
-	/* Runtime information */
-
-	/** position of the game in the GTKTreeView */
-	GtkTreeIter position;
-	gboolean is_in_list;
-	/** string in order to sort the clones with the original */
-	gchar *clonesort;
-	/** store the icon of the game in the RomEntry struct
-	   when game is visible on the list, used as cache  */
-	GdkPixbuf *icon_pixbuf;
-	/** Name in list */
-	gchar *name_in_list;
-} RomEntry;
-
-/**
-* Frees a rom entry.
-*/
-void rom_entry_free (RomEntry *rom_entry);
-
-/**
-* Creates a new rom entry.
-* Use rom_entry_free () to free this.
-*/
-RomEntry * rom_entry_new (void);
-
-void rom_entry_set_driver (RomEntry *rom, const gchar *driver);
-void rom_entry_set_year   (RomEntry *rom, const gchar *year);
-void rom_entry_set_name   (RomEntry *rom, gchar *value);
-gchar **rom_entry_get_manufacturers (RomEntry * rom);
 
 typedef struct {
 	gchar *name;
@@ -183,6 +59,8 @@ void gamelist_check (XmameExecutable *exec);
 int xmame_exec_get_game_count(XmameExecutable *exec);
 
 RomEntry* get_rom_from_gamelist_by_name (gchar *romname);
+void rom_entry_set_driver (RomEntry *rom, const gchar *driver);
+void rom_entry_set_year   (RomEntry *rom, const gchar *year);
 
 /**
 * Creates a new gamelist using current_exec
