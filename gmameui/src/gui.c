@@ -530,6 +530,7 @@ set_game_info (const RomEntry *rom,
 	return set_info (entry_name, text_buffer);
 }
 
+/* Returns a GtkWidget representing a GtkImage */
 static GtkWidget *
 get_pixbuf (RomEntry       *rom,
 	    screenshot_type sctype,
@@ -766,12 +767,22 @@ update_screenshot_panel (RomEntry *rom)
 		had_info = set_game_info (rom, main_gui.history_buffer);
 
 		if (gui_prefs.ShowScreenShotTab == 0) {
+			/* Remove the elements from the container */
 			gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_event_box), main_gui.main_screenshot);
 			gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_hist_vbox), main_gui.screenshot_event_box);
 			pict = get_pixbuf (rom, gui_prefs.ShowFlyer, wwidth, wheight);
 			main_gui.main_screenshot = pict;
 			main_gui.screenshot_event_box = gtk_event_box_new ();
+			
+			/* And add them again */
+			gtk_container_add (GTK_CONTAINER (main_gui.screenshot_event_box), GTK_WIDGET (main_gui.main_screenshot));
+			gtk_widget_show (main_gui.screenshot_event_box);
+			gtk_widget_show (main_gui.main_screenshot);
+			g_signal_connect (G_OBJECT (main_gui.screenshot_event_box), "button-release-event",
+					  G_CALLBACK (change_screenshot),
+					  NULL);
 		} else {
+			/* Remove the elements from the container */
 			switch (gui_prefs.ShowFlyer) {
 			case (SNAPSHOTS):
 				gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_box1), main_gui.screenshot1);
@@ -804,26 +815,8 @@ update_screenshot_panel (RomEntry *rom)
 				main_gui.screenshot6 = pict;
 				break;	
 			}
-		}
-
-		if (had_history || had_info) {
-			gtk_widget_show (GTK_WIDGET (main_gui.history_scrollwin));
-			if (gui_prefs.ShowScreenShotTab == 0)
-				gtk_box_pack_end (main_gui.screenshot_hist_vbox, main_gui.screenshot_event_box, FALSE, TRUE, 5);
-		} else {
-			gtk_widget_hide (GTK_WIDGET (main_gui.history_scrollwin));
-			if (gui_prefs.ShowScreenShotTab == 0)
-				gtk_box_pack_end (main_gui.screenshot_hist_vbox, main_gui.screenshot_event_box, TRUE, TRUE, 5);
-		}
-
-		if (gui_prefs.ShowScreenShotTab == 0) {
-			gtk_container_add (GTK_CONTAINER (main_gui.screenshot_event_box), GTK_WIDGET (main_gui.main_screenshot));
-			gtk_widget_show (main_gui.screenshot_event_box);
-			gtk_widget_show (main_gui.main_screenshot);
-			g_signal_connect (G_OBJECT (main_gui.screenshot_event_box), "button-release-event",
-					  G_CALLBACK (change_screenshot),
-					  NULL);
-		} else {
+			
+			/* And add them again */
 			switch (gui_prefs.ShowFlyer) {
 			case (SNAPSHOTS):
 				gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box1), GTK_WIDGET (main_gui.screenshot1));
@@ -855,8 +848,19 @@ update_screenshot_panel (RomEntry *rom)
 				gtk_widget_show (main_gui.screenshot_box6);
 				gtk_widget_show (main_gui.screenshot6);
 				break;
-			}
+			}					
 		}
+		
+		if (had_history || had_info) {
+			gtk_widget_show (GTK_WIDGET (main_gui.history_scrollwin));
+			if (gui_prefs.ShowScreenShotTab == 0)
+				gtk_box_pack_end (main_gui.screenshot_hist_vbox, main_gui.screenshot_event_box, FALSE, TRUE, 5);
+		} else {
+			gtk_widget_hide (GTK_WIDGET (main_gui.history_scrollwin));
+			if (gui_prefs.ShowScreenShotTab == 0)
+				gtk_box_pack_end (main_gui.screenshot_hist_vbox, main_gui.screenshot_event_box, TRUE, TRUE, 5);
+		}
+		
 	} else {
 		/* no roms selected display the default picture */ 
 		if (gui_prefs.ShowScreenShotTab == 0) {
