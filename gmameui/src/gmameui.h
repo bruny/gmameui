@@ -186,8 +186,7 @@ struct gui_prefs_struct {
 
 	//gint Splitters[2];
 	gint *Splitters;
-	gchar *ListFont;
-	GdkFont *ListFontStruct;
+
 	guint ListFontHeight;
 	/* Width of each column ex: width of "game name" column is ColumnWidth[0] */
 	//gint ColumnWidth[NUMBER_COLUMN];

@@ -524,49 +524,6 @@ on_clone_color_menu_activate           (GtkMenuItem     *menuitem,
 	gtk_widget_show (main_gui.clone_selector);
 }
 
-static void
-font_selected (GtkButton       *button,
-	       gpointer         user_data)
-{
-	if ( (gui_prefs.ListFont = gtk_font_selection_dialog_get_font_name (user_data))) {
-		/*got a font*/
-		create_gamelist (gui_prefs.current_mode);
-	} else {
-		gui_prefs.ListFontStruct = NULL;
-		if (gui_prefs.ListFontHeight != 16)
-			dirty_icon_cache = TRUE;
-		gui_prefs.ListFontHeight = 16;
-	}
-	gtk_widget_destroy (user_data);
-
-}
-
-void
-on_game_list_font_activate             (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-	GtkWidget *fontselector;
-
-	fontselector = gtk_font_selection_dialog_new (_("Game list Font"));
-	gtk_window_set_transient_for (GTK_WINDOW (fontselector), GTK_WINDOW (MainWindow));
-	gtk_window_set_modal (GTK_WINDOW (fontselector), TRUE);
-	
-	if (gui_prefs.ListFont)
-		gtk_font_selection_dialog_set_font_name (GTK_FONT_SELECTION_DIALOG (fontselector), gui_prefs.ListFont);
-	
-	g_signal_connect (G_OBJECT (GTK_FONT_SELECTION_DIALOG (fontselector)->ok_button), "clicked",
-			    G_CALLBACK (font_selected),
-			    (gpointer) fontselector);
-	g_signal_connect_swapped (G_OBJECT (GTK_FONT_SELECTION_DIALOG (fontselector)->cancel_button), "clicked",
-			    G_CALLBACK (gtk_widget_destroy),
-			    (gpointer) fontselector);
-	g_signal_connect (G_OBJECT (fontselector), "delete_event",
-			    G_CALLBACK (gtk_widget_destroy),
-			    NULL);
-	gtk_widget_show (fontselector);
-}
-
-
 void
 on_rebuild_game_list_menu_activate     (GtkMenuItem     *menuitem,
                                         gpointer         user_data)

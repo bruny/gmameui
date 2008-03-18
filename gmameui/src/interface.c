@@ -106,7 +106,6 @@ create_MainWindow (void)
   GtkWidget *option_menu;
   GtkWidget *option_menu_menu;
   GtkWidget *clone_color_menu;
-  GtkWidget *game_list_font;
   GtkWidget *rebuild_game_list_menu;
   GtkWidget *separator6;
   GtkWidget *directories_menu;
@@ -431,12 +430,6 @@ create_MainWindow (void)
   gtk_container_add (GTK_CONTAINER (option_menu_menu), clone_color_menu);
   gtk_tooltips_set_tip (tooltips, clone_color_menu, _("Set clones color in gamelist"), NULL);
 
-  game_list_font = gtk_image_menu_item_new_from_stock (GTK_STOCK_SELECT_FONT, accel_group);
-  gtk_label_set_text_with_mnemonic (GTK_LABEL (GTK_BIN (game_list_font)->child), _("Game List _Font..."));
-  gtk_widget_show (game_list_font);
-  gtk_container_add (GTK_CONTAINER (option_menu_menu), game_list_font);
-  gtk_tooltips_set_tip (tooltips, game_list_font, _("Set game list and folder font"), NULL);
-
   rebuild_game_list_menu = gtk_menu_item_new_with_mnemonic (_("_Rebuild Game List"));
   gtk_widget_show (rebuild_game_list_menu);
   gtk_container_add (GTK_CONTAINER (option_menu_menu), rebuild_game_list_menu);
@@ -642,9 +635,9 @@ create_MainWindow (void)
   g_signal_connect (G_OBJECT (clone_color_menu), "activate",
                       G_CALLBACK (on_clone_color_menu_activate),
                       NULL);
-  g_signal_connect (G_OBJECT (game_list_font), "activate",
+/*  g_signal_connect (G_OBJECT (game_list_font), "activate",
                       G_CALLBACK (on_game_list_font_activate),
-                      NULL);
+                      NULL);*/
   g_signal_connect (G_OBJECT (rebuild_game_list_menu), "activate",
                       G_CALLBACK (on_rebuild_game_list_menu_activate),
                       NULL);

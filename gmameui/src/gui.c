@@ -1120,7 +1120,7 @@ init_gui (void)
 	MainWindow = create_MainWindow ();
 	
 	/* if the ListFont is empty or not loadable, use default font */
-	gui_prefs.ListFontStruct = NULL;
+/*	gui_prefs.ListFontStruct = NULL;*/
 	gui_prefs.ListFontHeight = 16;
 
 	main_gui.filters_tree_model = NULL;
@@ -3001,16 +3001,6 @@ create_gamelist (ListMode list_mode)
 	for (i = 0; i < NUMBER_COLUMN; i++) {
 		column = gtk_tree_view_get_column (GTK_TREE_VIEW (main_gui.displayed_list), gui_prefs.ColumnOrder[i]);
 
-		/* Font */
-		j = 0;
-		col_list = gtk_tree_view_column_get_cell_renderers (GTK_TREE_VIEW_COLUMN (column));
-		for (listpointer = g_list_first (col_list); (listpointer); listpointer = g_list_next (listpointer)) {
-			if (j == 0) {		/* Text */
-				g_object_set (G_OBJECT (listpointer->data), "font", gui_prefs.ListFont, NULL);
-				j = 1;
-			}
-		}
-		g_list_free (col_list);
 		/* Columns visible, Column size,... */
 		if ( (list_mode == DETAILS) || (list_mode == DETAILS_TREE)) {	/* COLUMNS */
 			if (gui_prefs.ColumnShown[i]==FALSE) {
