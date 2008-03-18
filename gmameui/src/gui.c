@@ -3048,6 +3048,16 @@ create_gamelist (ListMode list_mode)
 }
 
 void
+set_status_bar (gchar *game_name, gchar *game_status)
+{
+	gtk_statusbar_pop (main_gui.statusbar1, 1);
+	gtk_statusbar_push (main_gui.statusbar1, 1, game_name);
+
+	gtk_statusbar_pop (main_gui.statusbar2, 1);
+	gtk_statusbar_push (main_gui.statusbar2, 1, game_status);
+}
+
+void
 select_game (RomEntry *rom)
 {
 	gui_prefs.current_game = rom;
@@ -3060,17 +3070,9 @@ select_game (RomEntry *rom)
 		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.remove_from_favorites), rom->favourite);
 
 		/* update statusbar */
-		gtk_statusbar_pop (main_gui.statusbar1, 1);
-		gtk_statusbar_push (main_gui.statusbar1, 1, rom_entry_get_list_name (rom));
-		gtk_statusbar_pop (main_gui.statusbar2, 1);
-		if (rom->has_roms == UNKNOWN)
-			gtk_statusbar_push (main_gui.statusbar2, 1, _("Unknown"));
-		else if (rom->has_roms == INCORRECT)
-			gtk_statusbar_push (main_gui.statusbar2, 1, _("ROMs missing"));
-		else if (!rom->status)
-			gtk_statusbar_push (main_gui.statusbar2, 1, _("Not working"));
-		else
-			gtk_statusbar_push (main_gui.statusbar2, 1, _("Working"));
+		set_status_bar (rom_entry_get_list_name (rom),
+				rom_status_string_value [rom->has_roms]);
+
 GMAMEUI_DEBUG ("ROM Selected: %s", rom->romname);
 GMAMEUI_DEBUG ("   Emulation status: %s", rom->driver_status_emulation);
 GMAMEUI_DEBUG ("   Color status: %s", rom->driver_status_color);
@@ -3089,10 +3091,7 @@ GMAMEUI_DEBUG ("   Graphic status: %s", rom->driver_status_graphic);
 		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.remove_from_favorites), FALSE);
 
 		/* update statusbar */
-		gtk_statusbar_pop (main_gui.statusbar1, 1);
-		gtk_statusbar_push (main_gui.statusbar1, 1, _("No game selected"));
-		gtk_statusbar_pop (main_gui.statusbar2, 1);
-		gtk_statusbar_push (main_gui.statusbar2, 1, " ");
+		set_status_bar (_("No game selected"), "");
 
 		/* update screenshot panel */
 		update_screenshot_panel (NULL);

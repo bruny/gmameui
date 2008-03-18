@@ -57,6 +57,16 @@ typedef enum {
 	NUMBER_STATUS
 } RomStatus;
 
+static gchar* rom_status_string_value[NUMBER_STATUS] = {
+	N_("Incorrect"),
+	N_("Correct"),
+	N_("Unknown"),
+	N_("Problems"),
+	N_("Best Available"),
+	N_("Not Available"),
+	N_("Not a valid set")
+};
+
 /** 
 * Information for a loaded game.
 * A RomEntry is invalid when the gamelist changes because there
