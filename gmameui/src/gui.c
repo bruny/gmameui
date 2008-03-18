@@ -612,11 +612,18 @@ get_pixbuf (RomEntry       *rom,
 		if (sctype == SNAPSHOTS) {
 			/* Since MAME 0.111, snapshots are now in a subdirectory per game
 			   with numeric names 0000.png, 0001.png, etc. */
-			/* TODO Need to do the same for the roms parent if this is a clone */
 			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", gui_prefs.SnapshotDirectory, rom->romname);
 			GMAMEUI_DEBUG ("Looking for image %s", filename);
 			pixbuf = gdk_pixbuf_new_from_file (filename,error);
 			g_free (filename);
+
+			/* If not found, look in parent folder */
+			if ((!pixbuf) && strcmp (rom->cloneof,"-")) {
+				filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", gui_prefs.SnapshotDirectory, rom->cloneof);
+				GMAMEUI_DEBUG ("Looking for parent image %s", filename);
+				pixbuf = gdk_pixbuf_new_from_file (filename,error);
+				g_free (filename);
+			}
 		}
 	}
 	
