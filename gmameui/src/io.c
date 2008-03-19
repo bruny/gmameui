@@ -302,13 +302,11 @@ load_gmameui_ini (void)
 	gui_prefs.gui_joy = TRUE;
 	gui_prefs.use_xmame_options = FALSE;
 	gui_prefs.ColumnWidth = g_new0 (gint, NUMBER_COLUMN);
-	gui_prefs.ColumnOrder = g_new0 (gint, NUMBER_COLUMN);
 	gui_prefs.ColumnShown = g_new0 (gint, NUMBER_COLUMN);
 	/* FIXME Have default value set only if they cannot be loaded below */
 	for (i = 0; i < NUMBER_COLUMN; i++)
 	{
 		gui_prefs.ColumnWidth[i] = 0;  /* 0 --> Auto Size */
-		gui_prefs.ColumnOrder[i] = i;
 		gui_prefs.ColumnShown[i] = 0;
 	}
 	gui_prefs.ColumnShown[GAMENAME] = 1;
@@ -360,7 +358,7 @@ load_gmameui_ini (void)
 
 	gui_prefs.Splitters = g_key_file_get_integer_list (gmameui_ini_file, "Default", "Splitters", &sizes, &error);
 	gui_prefs.ColumnWidth = g_key_file_get_integer_list (gmameui_ini_file, "Default", "ColumnWidth", &columnsize, &error);
-	gui_prefs.ColumnOrder = g_key_file_get_integer_list (gmameui_ini_file, "Default", "ColumnOrder", &columnsize, &error);
+/*	gui_prefs.ColumnOrder = g_key_file_get_integer_list (gmameui_ini_file, "Default", "ColumnOrder", &columnsize, &error);*/
 	gui_prefs.ColumnShown = g_key_file_get_integer_list (gmameui_ini_file, "Default", "ColumnShown", &columnsize, &error);
 
 	g_key_file_free (gmameui_ini_file);
@@ -429,7 +427,7 @@ save_gmameui_ini (void)
 			gui_prefs.ShowScreenShot ? main_gui.scrolled_window_games->allocation.width : gui_prefs.Splitters[1]);*/
 
 	g_key_file_set_integer_list (gmameui_ini_file, "Default", "ColumnWidth", gui_prefs.ColumnWidth, NUMBER_COLUMN);
-	g_key_file_set_integer_list (gmameui_ini_file, "Default", "ColumnOrder", gui_prefs.ColumnOrder, NUMBER_COLUMN);
+/*	g_key_file_set_integer_list (gmameui_ini_file, "Default", "ColumnOrder", gui_prefs.ColumnOrder, NUMBER_COLUMN);*/
 	g_key_file_set_integer_list (gmameui_ini_file, "Default", "ColumnShown", gui_prefs.ColumnShown, NUMBER_COLUMN);
 
 	g_key_file_save_to_file (gmameui_ini_file, filename, NULL);

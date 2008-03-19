@@ -124,21 +124,7 @@ column_debug	 (void)
 		printf ("%2d|", gui_prefs.ColumnShown[i]);
 	}
 	printf ("\n");
-	printf ("Order: ");
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		printf ("%2d|", gui_prefs.ColumnOrder[i]);
-	}
-	printf ("\n");
-	printf ("SId  : ");
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		printf ("%2d|", gui_prefs.ColumnShownId[i]);
-	}
-	printf ("\n");
-	printf ("HId  : ");
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		printf ("%2d|", gui_prefs.ColumnHiddenId[i]);
-	}
-	printf ("\n");
+
 #endif
 }
 
@@ -219,8 +205,6 @@ gmameui_init (void)
 	/* doesn't matter if joystick is enabled or not but easier to handle after */
 	joy_focus_on ();
 
-	/* Update the columns table */
-	update_columns_tab ();
 }
 
 
@@ -662,98 +646,25 @@ GMAMEUI_DEBUG ("Destroying window - done");
 	gtk_main_quit ();
 }
 
-void
-update_columns_tab (void)
-{
-	gint i, j, k;
-	/* Shown */
-	for (i = 0; i < NUMBER_COLUMN; i++)
-		gui_prefs.ColumnShownId[i] = -1;
-	k = 0;
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		j = 0;
-		while ( (i != gui_prefs.ColumnOrder[j]) && (j < NUMBER_COLUMN))
-			j++;
-		if (gui_prefs.ColumnShown[j] == FALSE)
-			continue;
-		gui_prefs.ColumnShownId[k++] = j;
-	}
-	/* Hide */
-	for (i = 0; i < NUMBER_COLUMN; i++)
-		gui_prefs.ColumnHiddenId[i] = -1;
-	k = 0;
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		for (j = 0; (i != gui_prefs.ColumnOrder[j]) && (j < NUMBER_COLUMN); j++);
-
-		if (gui_prefs.ColumnShown[j] != FALSE)
-			continue;
-
-		gui_prefs.ColumnHiddenId[k++] = j;
-	}
-}
-
 #if 0
-static GList *
-get_columns_list (void)
-{
-	GList *MyColumns;
-	gint i, j, k;
-
-	MyColumns = NULL;
-	for (i = 0; i < NUMBER_COLUMN; i++)
-		gui_prefs.ColumnShownId[i] = -1;
-	k = 0;
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		for (j = 0; (i != gui_prefs.ColumnOrder[j]) && (j < NUMBER_COLUMN); j++);
-
-		gui_prefs.ColumnShownId[k++] = j;
-		MyColumns = g_list_append (MyColumns, GINT_TO_POINTER (j));
-	}
-	return MyColumns;
-}
-#endif
-
 GList *
 get_columns_shown_list (void)
 {
 	GList *MyColumns;
-	gint i, j, k;
+	gint i;
 
 	MyColumns = NULL;
-	for (i = 0; i < NUMBER_COLUMN; i++)
-		gui_prefs.ColumnShownId[i] = -1;
-	k = 0;
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		for (j = 0; (i != gui_prefs.ColumnOrder[j]) && (j < NUMBER_COLUMN); j++);
 
-		if (gui_prefs.ColumnShown[j] == FALSE)
+	for (i = 0; i < NUMBER_COLUMN; i++) {
+
+		if (gui_prefs.ColumnShown[i] == FALSE)
 			continue;
-		gui_prefs.ColumnShownId[k++] = j;
-		MyColumns = g_list_append (MyColumns, GINT_TO_POINTER (j));
+
+		MyColumns = g_list_append (MyColumns, GINT_TO_POINTER (i));
 	}
 	return MyColumns;
 }
-
-GList *
-get_columns_hidden_list (void)
-{
-	GList *MyColumns;
-	gint i, j, k;
-
-	MyColumns = NULL;
-	for (i = 0; i < NUMBER_COLUMN; i++)
-		gui_prefs.ColumnHiddenId[i] = -1;
-	k = 0;
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		for (j = 0; (i != gui_prefs.ColumnOrder[j]) && (j < NUMBER_COLUMN); j++);
-
-		if (gui_prefs.ColumnShown[j] != FALSE)
-			continue;
-		gui_prefs.ColumnHiddenId[k++] = j;
-		MyColumns = g_list_append (MyColumns, GINT_TO_POINTER (j));
-	}
-	return MyColumns;
-}
+#endif
 
 const char *
 column_title (int column_num)

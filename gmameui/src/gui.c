@@ -2882,13 +2882,11 @@ g_timer_start (timer);
 void
 create_gamelist (ListMode list_mode)
 {
-	gint i, j, k;
+	gint i;
 	GtkTreeViewColumn *column;
-	GtkTreeViewColumn *base_column;
 	GtkCellRenderer *renderer;
 	GtkTreeSelection *select;
-	GList *col_list = NULL;
-	GList *listpointer = NULL;
+
 	static gboolean first_run = TRUE;
 
 	GMAMEUI_DEBUG ("DISPLAY GAME LIST");
@@ -2943,10 +2941,6 @@ create_gamelist (ListMode list_mode)
 				  G_CALLBACK (on_row_selected),
 				  NULL);
 
-		/* Callback - Column Order has changed */
-		g_signal_connect (G_OBJECT (main_gui.displayed_list), "columns-changed",
-				G_CALLBACK (on_columns_changed),
-				NULL);
 		/* Callback - Click on the list */
 		g_signal_connect (G_OBJECT (main_gui.displayed_list), "button-press-event",
 				G_CALLBACK (on_list_clicked),
@@ -2980,33 +2974,14 @@ create_gamelist (ListMode list_mode)
 	else
 		gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (main_gui.displayed_list), FALSE);
 
-	/* Reorder the columns */
-	base_column=NULL;
-	g_signal_handlers_block_by_func (G_OBJECT (main_gui.displayed_list), (gpointer)on_columns_changed, NULL);
-	
-	col_list = gtk_tree_view_get_columns (GTK_TREE_VIEW (main_gui.displayed_list));
-	
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		for (j = 0; gui_prefs.ColumnOrder[j] != i; j++)
-			{}
-		for (listpointer = g_list_first (col_list), k = 0;
-		     ((listpointer) && (k < NUMBER_COLUMN) && (j != gtk_tree_view_column_get_sort_column_id (listpointer->data)) );
-		     listpointer = g_list_next (listpointer), k++)
-			{}
-		column = listpointer->data;
-		gtk_tree_view_move_column_after (GTK_TREE_VIEW (main_gui.displayed_list),
-						 GTK_TREE_VIEW_COLUMN (column),
-						 GTK_TREE_VIEW_COLUMN (base_column));
-		base_column = column;
-	}
-	g_signal_handlers_unblock_by_func (G_OBJECT (main_gui.displayed_list), (gpointer)on_columns_changed, NULL);
-	g_list_free (col_list);
 	/* Update the columns */
 	/* FIXME When switching from LIST mode to DETAILS, it puts a mess in the size of the
 	GAMENAME column even if I block the callback?????? */
 	g_signal_handlers_block_by_func (G_OBJECT (main_gui.displayed_list), (gpointer)on_displayed_list_resize_column, NULL);
 	for (i = 0; i < NUMBER_COLUMN; i++) {
-		column = gtk_tree_view_get_column (GTK_TREE_VIEW (main_gui.displayed_list), gui_prefs.ColumnOrder[i]);
+		/* Iterate over the columns, in the order in which they are ordered */
+
+		column = gtk_tree_view_get_column (GTK_TREE_VIEW (main_gui.displayed_list), i);
 
 		/* Columns visible, Column size,... */
 		if ( (list_mode == DETAILS) || (list_mode == DETAILS_TREE)) {	/* COLUMNS */
@@ -3021,14 +2996,12 @@ create_gamelist (ListMode list_mode)
 					gtk_tree_view_column_set_fixed_width (column, gui_prefs.ColumnWidth[i]);
 				}
 				gtk_tree_view_column_set_resizable (column, TRUE);
-				gtk_tree_view_column_set_reorderable (column, TRUE);
 			}
 		} else {	/* NO COLUMNS */
 			if (i == GAMENAME) {
 				gtk_tree_view_column_set_visible (column, TRUE);
 				gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 				gtk_tree_view_column_set_resizable (column, FALSE);
-				gtk_tree_view_column_set_reorderable (column, FALSE);
 			} else {
 				gtk_tree_view_column_set_visible (column, FALSE);
 			}

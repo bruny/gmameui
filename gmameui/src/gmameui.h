@@ -172,9 +172,7 @@ struct gui_prefs_struct {
 /*	gint ChatDrawMode;*/
 	gint SortColumn;
 	gboolean SortReverse;
-	/* Link table between absolute column Id and displayed column number */
-	gint ColumnShownId[NUMBER_COLUMN];
-	gint ColumnHiddenId[NUMBER_COLUMN];  /* Only needed on column_layout */
+
 	gint GUIPosX;
 	gint GUIPosY;
 	gint GUIWidth;
@@ -191,9 +189,7 @@ struct gui_prefs_struct {
 	/* Width of each column ex: width of "game name" column is ColumnWidth[0] */
 	//gint ColumnWidth[NUMBER_COLUMN];
 gint *ColumnWidth;
-	/* Order of each column ex: "game name" column is the ColumnOrder[0] th column */
-	//gint ColumnOrder[NUMBER_COLUMN];
-gint *ColumnOrder;
+
 	/* ColumnShown[0]==true -> "game name" column is shown */
 	//gboolean ColumnShown[NUMBER_COLUMN];
 gint *ColumnShown;
@@ -295,11 +291,10 @@ record_game (RomEntry *rom, gchar *user_data);
 void
 update_columns_tab (void);
 
+#if 0
 GList*
 get_columns_shown_list (void);
-
-GList*
-get_columns_hidden_list (void);
+#endif
 
 const char *
 column_title (int column_num);
