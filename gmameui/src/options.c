@@ -80,7 +80,7 @@ static GtkWidget *norotate_checkbutton;
 static GtkWidget *flipx_checkbutton;
 static GtkWidget *flipy_checkbutton;
 static GtkWidget *autoframeskip_checkbutton;
-static GtkWidget *fts_label;
+static GtkWidget *fs_label;
 static GtkWidget *fs_method_label;
 static GtkWidget *maxfs_label;
 /* misc */
@@ -365,15 +365,15 @@ autoframeskip_toggled   (GtkObject       *autoframeskip_checkbutton,
                          gpointer         user_data)
 {
 	gtk_widget_set_sensitive (frameskip_combo, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
-	gtk_widget_set_sensitive (frameskipper_combo, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
-	gtk_widget_set_sensitive (maxautoframeskip_combo, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
-	gtk_widget_set_sensitive (fts_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
-	gtk_widget_set_sensitive (fs_method_label, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
-	gtk_widget_set_sensitive (maxfs_label, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
+	gtk_widget_set_sensitive (frameskipper_combo, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
+	gtk_widget_set_sensitive (maxautoframeskip_combo, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
+	gtk_widget_set_sensitive (fs_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
+	gtk_widget_set_sensitive (fs_method_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
+	gtk_widget_set_sensitive (maxfs_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
 }
 
 
-static GtkWidget *
+/*static GtkWidget *
 combo_new_empty(GType key_type) {
 	GtkWidget *combo;
 	GtkListStore *model;
@@ -382,9 +382,9 @@ combo_new_empty(GType key_type) {
 	model = gtk_list_store_new(2, key_type, G_TYPE_STRING);
 	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(model));
 
-	/* Add a renderer only for the 2nd column.
+	* Add a renderer only for the 2nd column.
 	* The first one is a key so the user shouldn't see it.
-	*/
+	*
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), renderer, TRUE);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), renderer,
@@ -392,7 +392,7 @@ combo_new_empty(GType key_type) {
                                 NULL);
 
 	return combo;
-}
+}*/
 
 /* Same as above, but assume widget has been built in Glade, so we pass widget in, don't create it */
 static GtkWidget *
@@ -419,7 +419,7 @@ combo_new_empty_from_glade(GtkWidget *combo, GType key_type) {
 * Creates a new combo for the given option.
 *
 * The GtkListStore with the data is saved in the combo as "model"
-*/
+*
 static GtkWidget *
 combo_new(const gchar *option, GType key_type) {
 
@@ -461,9 +461,9 @@ combo_new(const gchar *option, GType key_type) {
 	
 	combo = gtk_combo_box_new_with_model(GTK_TREE_MODEL(model));
 
-	/* Add a renderer only for the 2nd column.
+	* Add a renderer only for the 2nd column.
 	* The first one is a key so the user shouldn't see it.
-	*/
+	*
 	renderer = gtk_cell_renderer_text_new ();
 	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), renderer, TRUE);
 	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), renderer,
@@ -473,7 +473,7 @@ combo_new(const gchar *option, GType key_type) {
 
 	gtk_widget_set_sensitive(combo, xmame_has_option(current_exec, option));
 	return combo;
-}
+}*/
 
 /**
 * Creates a new combo for the given option.
@@ -714,8 +714,10 @@ on_dirty_option     (GtkObject       *object,
                      gpointer         user_data)
 {
 	dirty_options_flag = TRUE;
-	if (user_data)
+	if (user_data) {
+GMAMEUI_DEBUG ("In on_dirty_option - triggered by %s", gtk_widget_get_name(user_data));
 		gtk_widget_set_sensitive (GTK_WIDGET (user_data), TRUE);
+	}
 }
 
 
@@ -770,7 +772,7 @@ add_display_options_tab (GtkWidget    *properties_windows,
 	dirty_options_flag = FALSE;
 
 	image = gmameui_get_image_from_stock ("gmameui-display-toolbar");
-GMAMEUI_DEBUG ("Adding display options tab\n");
+GMAMEUI_DEBUG ("Adding display options tab");
 	display_label = gtk_hbox_new (FALSE, 5);
 	gtk_box_pack_start (GTK_BOX (display_label), image, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (display_label), gtk_label_new (_("Display")), FALSE, FALSE, 0);
@@ -860,7 +862,7 @@ GMAMEUI_DEBUG ("Adding display options tab\n");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton), target->autoframeskip);
 	
 	/* Frames to skip */
-	fts_label = glade_xml_get_widget (xml, "fts_label");
+	fs_label = glade_xml_get_widget (xml, "fs_label");
 
 	frameskip_combo = glade_xml_get_widget (xml, "frameskip_combo");
 	frameskip_combo = combo_new_from_glade (frameskip_combo, "frameskip", G_TYPE_INT);
@@ -876,7 +878,7 @@ GMAMEUI_DEBUG ("Adding display options tab\n");
 	gtk_widget_set_sensitive (frameskip_combo, !(target->autoframeskip));
 	
 	/* Frameskip method -frameskipper option unavailable since XXX */
-	fs_method_label = glade_xml_get_widget (xml, "fts_method_label");
+	fs_method_label = glade_xml_get_widget (xml, "fs_method_label");
 	frameskipper_combo = glade_xml_get_widget (xml, "frameskipper_combo");
 	if (xmame_has_option (current_exec, "frameskipper")) {
 		frameskipper_combo = combo_new_from_glade (frameskipper_combo, "frameskipper", G_TYPE_INT);
@@ -899,7 +901,7 @@ GMAMEUI_DEBUG ("Adding display options tab\n");
 	} 
 	combo_set_int_key(maxautoframeskip_combo, target->maxautoframeskip);
 	
-	gtk_widget_set_sensitive (maxautoframeskip_combo, target->autoframeskip);
+	gtk_widget_set_sensitive (maxautoframeskip_combo, !target->autoframeskip);
 
 	/* Display - Resolution */
 	heightscale_label = glade_xml_get_widget (xml, "heightscale_lable");
@@ -962,11 +964,29 @@ GMAMEUI_DEBUG ("Adding display options tab\n");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (flipy_checkbutton), target->flipy);
 			
 	gtk_widget_set_sensitive ( GTK_WIDGET (dirty_checkbutton), xmame_has_option (current_exec, "dirty"));
-	gtk_widget_set_sensitive (fts_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
-	gtk_widget_set_sensitive (fs_method_label, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
-	gtk_widget_set_sensitive (maxfs_label, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
+	gtk_widget_set_sensitive (fs_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
+	gtk_widget_set_sensitive (fs_method_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
+	gtk_widget_set_sensitive (maxfs_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
 
-	g_signal_connect (G_OBJECT (dirty_checkbutton), "toggled",
+	GtkWidget *vbox12 = glade_xml_get_widget (xml, "vbox12");
+GMAMEUI_DEBUG("Getting child widgets and setting event handler");
+	GList *children = gtk_container_get_children (GTK_CONTAINER (vbox12));
+	int tempi;
+	for (tempi = 0; tempi < g_list_length (children); tempi++) {
+		
+		gpointer widget = g_list_nth_data (children, tempi);
+GMAMEUI_DEBUG("Found child widget %s", gtk_widget_get_name (GTK_WIDGET(widget)));
+		g_signal_connect (G_OBJECT (widget), "toggled",
+			    G_CALLBACK (on_dirty_option),
+			    apply_button);
+		g_signal_connect (G_OBJECT (widget), "toggled",
+			    G_CALLBACK (on_dirty_option),
+			    reset_button);
+	}
+	g_list_free (children);
+
+GMAMEUI_DEBUG("Getting child widgets and setting event handler - done");	  
+/*	g_signal_connect (G_OBJECT (dirty_checkbutton), "toggled",
 			    G_CALLBACK (on_dirty_option),
 			    apply_button);
 	g_signal_connect (G_OBJECT (dirty_checkbutton), "toggled",
@@ -983,7 +1003,7 @@ GMAMEUI_DEBUG ("Adding display options tab\n");
 			    apply_button);
 	g_signal_connect (G_OBJECT (sleepidle_checkbutton), "toggled",
 			    G_CALLBACK (on_dirty_option),
-			    reset_button);
+			    reset_button);*/
 	g_signal_connect (G_OBJECT (scanlines_checkbutton), "toggled",
 			    G_CALLBACK (on_dirty_option),
 			    apply_button);
@@ -1325,45 +1345,27 @@ get_sdl_rendering_frame (GameOptions *target,
 static GtkWidget *
 get_fx_rendering_frame (GameOptions *target,
 			GtkWidget   *apply_button,
-			GtkWidget   *reset_button)
+			GtkWidget   *reset_button,
+			GladeXML    *xml)
 {
 	GtkWidget *xfx_frame_parent;
-	GtkWidget *xfx_frame;
-	GtkWidget *fxglide_table;
-	GtkWidget *fxresolution_label;
 	int i;
 
 	xmame_get_options (current_exec);
 
-	xfx_frame_parent = options_frame_new (_("FX (Glide) options"));
-	xfx_frame = options_frame_create_child (xfx_frame_parent);
-
-	fxglide_table = gtk_table_new (2, 2, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (fxglide_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (fxglide_table), 6);
-	gtk_widget_show (fxglide_table);
-	gtk_container_add (GTK_CONTAINER (xfx_frame), fxglide_table);
-
-	fxresolution_label = gtk_label_new (_("Resolution:"));
-	gtk_widget_show (fxresolution_label);
-	gtk_table_attach_defaults (GTK_TABLE (fxglide_table), fxresolution_label, 0, 1, 1, 2);
-	gtk_misc_set_alignment (GTK_MISC (fxresolution_label), 0, 0.5);
-
-	fxgkeepaspect_checkbutton = gtk_check_button_new_with_label (_("keep aspect ratio"));
-	gtk_widget_show (fxgkeepaspect_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (fxglide_table), fxgkeepaspect_checkbutton, 0, 2, 0, 1);
-
-	fx_combo = combo_new_empty(G_TYPE_STRING);
-	gtk_widget_show (fx_combo);
-	gtk_table_attach_defaults (GTK_TABLE (fxglide_table), fx_combo, 1, 2, 1, 2);
+	xfx_frame_parent = glade_xml_get_widget (xml, "fxglide_rendering_frame");
+	
+	fxgkeepaspect_checkbutton = glade_xml_get_widget (xml, "fxgkeepaspect_checkbutton");
+	
+	fx_combo = glade_xml_get_widget (xml, "fx_combo");
+	fx_combo = combo_new_empty_from_glade (fx_combo, G_TYPE_STRING);
 
 	combo_append_string_value(fx_combo, "", "");
 	for (i=0; resolution_table[i]; i++)
 		combo_append_string_value(fx_combo, resolution_table[i], resolution_table[i]);
 
 	combo_set_key(fx_combo, target->resolution);
-
-	/*** FX glide related ***/
+	
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (fxgkeepaspect_checkbutton), target->fxgkeepaspect);
 	gtk_widget_set_sensitive (GTK_WIDGET (sdl_modes_label), !(target->sdl_auto_mode));
 
@@ -1380,38 +1382,25 @@ get_fx_rendering_frame (GameOptions *target,
 			    G_CALLBACK (on_dirty_option),
 			    reset_button);
 
+	gtk_widget_show_all (xfx_frame_parent);
 	return xfx_frame_parent;
 }
 
 static GtkWidget *
 get_photon_rendering_frame (GameOptions *target,
 			    GtkWidget  *apply_button,
-			    GtkWidget  *reset_button)
+			    GtkWidget  *reset_button,
+			    GladeXML   *xml)
 {
 	GtkWidget *photon_frame_parent;
-	GtkWidget *photon_frame;
-	GtkWidget *photon_table;
 	
 	xmame_get_options (current_exec);
 
-	photon_frame_parent = options_frame_new (_("Photon options"));
-	photon_frame = options_frame_create_child (photon_frame_parent);
+	photon_frame_parent = glade_xml_get_widget (xml, "photon_rendering_frame");
+	
+	render_mode_checkbutton = glade_xml_get_widget (xml, "render_mode_checkbutton");
+	phcursor_checkbutton = glade_xml_get_widget (xml, "phcursor_checkbutton");
 
-	photon_table = gtk_table_new (2, 1, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (photon_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (photon_table), 6);
-	gtk_widget_show (photon_table);
-	gtk_container_add (GTK_CONTAINER (photon_frame), photon_table);
-
-	render_mode_checkbutton = gtk_check_button_new_with_label (_("Full Screen"));
-	gtk_widget_show (render_mode_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (photon_table), render_mode_checkbutton, 0, 1, 0, 1);
-
-	phcursor_checkbutton = gtk_check_button_new_with_label (_("Show cursor"));
-	gtk_widget_show (phcursor_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (photon_table), phcursor_checkbutton, 0, 1, 1, 2);
-
-	/*** Photon2 related ***/
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (render_mode_checkbutton), target->render_mode);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (phcursor_checkbutton), !(target->phcursor));
 
@@ -1428,6 +1417,8 @@ get_photon_rendering_frame (GameOptions *target,
 			    G_CALLBACK (on_dirty_option),
 			    reset_button);
 
+	gtk_widget_show_all (photon_frame_parent);
+	
 	return photon_frame_parent;
 }
 
@@ -1671,14 +1662,14 @@ add_rendering_options_tab (GtkWidget    *properties_windows,
 	case XMAME_EXEC_XFX:
 		/* X11 with Glide */
 		rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
-		rendering_frame2 = get_fx_rendering_frame (target, apply_button, reset_button);
+		rendering_frame2 = get_fx_rendering_frame (target, apply_button, reset_button, xml);
 		break;
 	case XMAME_EXEC_SVGAFX:
 		/* Glide in Console mode */
-		rendering_frame = get_fx_rendering_frame (target, apply_button, reset_button);
+		rendering_frame = get_fx_rendering_frame (target, apply_button, reset_button, xml);
 		break;
 	case XMAME_EXEC_PHOTON2:
-		rendering_frame = get_photon_rendering_frame (target, apply_button, reset_button);
+		rendering_frame = get_photon_rendering_frame (target, apply_button, reset_button, xml);
 		break;
 	case XMAME_EXEC_GGI:
 		rendering_frame = get_ggi_rendering_frame (target, apply_button, reset_button);
@@ -1695,9 +1686,7 @@ add_rendering_options_tab (GtkWidget    *properties_windows,
 
 	if (rendering_frame)
 		gtk_widget_show (rendering_frame);
-	if (!rendering_frame2)
-		gtk_widget_hide (rendering_frame2);
-	else
+	if (rendering_frame2)
 		gtk_widget_show (rendering_frame2);
 
 
@@ -1760,7 +1749,7 @@ add_sound_options_tab (GtkWidget    *properties_windows,
 	dirty_options_flag = FALSE;
 
 	image = gmameui_get_image_from_stock ("gmameui-sound-toolbar");
-GMAMEUI_DEBUG ("Adding sound options tab\n");
+GMAMEUI_DEBUG ("Adding sound options tab");
 	sound_label = gtk_hbox_new (FALSE, 5);
 	gtk_box_pack_start (GTK_BOX (sound_label), image, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (sound_label), gtk_label_new (_("Sound")), FALSE, FALSE, 0);
@@ -1899,9 +1888,8 @@ GMAMEUI_DEBUG ("Adding sound options tab\n");
 	if (target->mixerdevice)
 		gtk_entry_set_text (GTK_ENTRY (GTK_BIN(mixerdevice_combo)->child), target->mixerdevice);
 
-	/*gtk_entry_set_text (GTK_ENTRY (soundfile_entry), target->soundfile);*/
-	printf("target sound filename is %s\n", target->soundfile);/* TODO */
-	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (soundfile_entry), target->soundfile);
+	gtk_entry_set_text (GTK_ENTRY (soundfile_entry), target->soundfile);
+	
 
 	if (target->dsp_plugin && !strcmp (target->dsp_plugin, "waveout"))
 	{
@@ -1997,14 +1985,13 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 			    GtkWidget    *apply_button,
 			    GtkWidget    *reset_button)
 {
-	GtkWidget *controllers_vbox;
+GtkWidget *controllers_vbox;
 	GtkWidget *keyboard_frame;
 	GtkWidget *keyboard_table;
 	GtkWidget *keymapping_frame;
 	GtkWidget *keymapping_table;
 	GtkWidget *ctrlr_frame;
 	GtkWidget *ctrlr_table;
-	GtkWidget *ctrlr_label;
 	GList *ctrlr_list = NULL;
 	GList *my_list = NULL;
 	GtkWidget *keymaptype_label;
@@ -2013,21 +2000,12 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 	GtkWidget *image;
 	GtkWidget *Xinput_trackball_frame;
 	GtkWidget *Xinput_trackball_table;
-	GtkWidget *XInput_trackball1_label;
-	GtkWidget *XInput_trackball2_label;
-	GtkWidget *XInput_trackball3_label;
-	GtkWidget *XInput_trackball4_label;
 	GtkWidget *joystick_frame;
 	GtkWidget *joystick_table;
-	GtkWidget *joytype_label;
 	GtkWidget *xinput_joy_table;
-	GtkWidget *XInput_joystick1_label;
-	GtkWidget *XInput_joystick2_label;
-	GtkWidget *XInput_joystick3_label;
-	GtkWidget *XInput_joystick4_label;
 	GtkWidget *control_label;
 	int i;
-	GtkSizeGroup *group = gtk_size_group_new (GTK_SIZE_GROUP_HORIZONTAL);
+
 
 	xmame_get_options (current_exec);
 	dirty_options_flag = FALSE;
@@ -2039,268 +2017,78 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 	gtk_box_pack_start (GTK_BOX (control_label), gtk_label_new (_("Controllers")), FALSE, FALSE, 0);
 	gtk_widget_show_all (control_label);
 
-	controllers_vbox = gtk_vbox_new (FALSE, 6);
-	gtk_widget_show (controllers_vbox);
+	
+	GladeXML *xml = glade_xml_new (GLADEDIR "properties.glade", "controllers_vbox", NULL);
+	controllers_vbox = glade_xml_get_widget (xml, "controllers_vbox");
+	
 	gtk_notebook_append_page (GTK_NOTEBOOK (target_notebook), controllers_vbox, control_label);
+	
+	/* Set the images on the left hand side */
+	GtkWidget *joystick_image = gmameui_get_image_from_stock ("gmameui-joystick");
+	joystick_table = glade_xml_get_widget (xml, "joystick_table");
+	gtk_table_attach (joystick_table, joystick_image, 0, 1, 0, 2, 0, 0, 0, 0);
+	gtk_widget_show (joystick_image);
+	
+	GtkWidget *mouse_image = gmameui_get_image_from_stock ("gmameui-mouse");
+	mouse_table = glade_xml_get_widget (xml, "mouse_table");
+	gtk_table_attach (mouse_table, mouse_image, 0, 1, 0, 2, 0, 0, 0, 0);
+	gtk_widget_show (mouse_image);
+	
+	GtkWidget *keyboard_image = gmameui_get_image_from_stock ("gmameui-keyboard");
+	keyboard_table = glade_xml_get_widget (xml, "keyboard_table");
+	gtk_table_attach (keyboard_table, keyboard_image, 0, 1, 0, 2, 0, 0, 0, 0);
+	gtk_widget_show (keyboard_image);
+	
 
-/*** Joystick ***/
-	joystick_frame = options_frame_new (_("Joystick"));
-	gtk_widget_show (joystick_frame);
-	gtk_box_pack_start (GTK_BOX (controllers_vbox), joystick_frame, FALSE, FALSE, 0);
 
-	joystick_table = gtk_table_new (5, 7, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (joystick_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (joystick_table), 6);
-	gtk_widget_show (joystick_table);
-	gtk_container_add (GTK_CONTAINER (joystick_frame), joystick_table);
 
-	image = gmameui_get_image_from_stock ("gmameui-joystick");
-	gtk_widget_show (image);
-	gtk_table_attach (GTK_TABLE (joystick_table), image, 0, 1, 0, 5, 0, GTK_EXPAND | GTK_FILL, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0);
-	gtk_misc_set_padding (GTK_MISC (image), 5, 5);
-	gtk_size_group_add_widget (GTK_SIZE_GROUP (group), image);
+/*** Joystick ***
 
-/* Joytype */
-	joytype_label = gtk_label_new (_("Joystick type:"));
-	gtk_widget_show (joytype_label);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), joytype_label, 1, 2, 0, 1);
-	gtk_misc_set_alignment (GTK_MISC (joytype_label), 0, 0.5);
 
 	joytype_combo = combo_new ("joytype", G_TYPE_INT);
 	gtk_widget_show (joytype_combo);
 	gtk_table_attach_defaults (GTK_TABLE (joystick_table), joytype_combo, 2, 4, 0, 1);
 
-/* joystick prefix */
-	joydevname_label = gtk_label_new (_("Joystick device prefix:"));
-	gtk_widget_show (joydevname_label);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), joydevname_label, 1, 3, 1, 2);
-	gtk_misc_set_alignment (GTK_MISC (joydevname_label), 0, 0.5);
 
-	joydevname_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (joydevname_entry), 20);
-	gtk_widget_show (joydevname_entry);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), joydevname_entry, 3, 4, 1, 2);
-	gtk_entry_set_text (GTK_ENTRY (joydevname_entry), "/dev/joy");
-
-/* FM Townpad */
-	paddevname_label = gtk_label_new (_("Name of pad device:\n (FM townpad)"));
-	gtk_widget_show (paddevname_label);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), paddevname_label, 1, 3, 2, 3);
-	gtk_label_set_justify (GTK_LABEL (paddevname_label), GTK_JUSTIFY_LEFT);
-	gtk_misc_set_alignment (GTK_MISC (paddevname_label), 0, 0.5);
-
-	paddevname_entry = gtk_entry_new ();
-	gtk_widget_show (paddevname_entry);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), paddevname_entry, 3, 4, 2, 3);
-	gtk_entry_set_text (GTK_ENTRY (paddevname_entry), "/dev/pad00");
-
-/* X-based joy */
-	x11joyname_label = gtk_label_new (_("X-based device:"));
-	gtk_widget_show (x11joyname_label);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), x11joyname_label, 1, 3, 3, 4);
-	gtk_misc_set_alignment (GTK_MISC (x11joyname_label), 0, 0.5);
-
-	x11joyname_entry = gtk_entry_new ();
-	gtk_widget_show (x11joyname_entry);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), x11joyname_entry, 3, 4, 3, 4);
-
-/* analog joystick */
-	analogstick_checkbutton = gtk_check_button_new_with_label (_("Analog joystick"));
-	gtk_widget_show (analogstick_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), analogstick_checkbutton, 5, 6, 0, 1);
-
-/* rapid fire */
-	rapidfire_checkbutton = gtk_check_button_new_with_label (_("Rapid-fire"));
-	gtk_widget_show (rapidfire_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), rapidfire_checkbutton, 5, 6, 1, 2);
-
-/* USB PAD*/
-	usbpspad_checkbutton = gtk_check_button_new_with_label (_("USB PS Game Pads"));
-	gtk_widget_show (usbpspad_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), usbpspad_checkbutton, 5, 6, 2, 3);
-
-/* Xinput */
-	Xinput_joy_frame = options_frame_new (_("Xinput joystick"));
-	gtk_widget_show (Xinput_joy_frame);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), Xinput_joy_frame, 1, 7, 4, 5);
-	Xinput_joy_frame = options_frame_create_child (Xinput_joy_frame);
-
-	xinput_joy_table = gtk_table_new (2, 4, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (xinput_joy_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (xinput_joy_table), 6);
-	gtk_widget_show (xinput_joy_table);
-	gtk_container_add (GTK_CONTAINER (Xinput_joy_frame), xinput_joy_table);
-
-	XInput_joystick1_label = gtk_label_new ("1:");
-	gtk_widget_show (XInput_joystick1_label);
-	gtk_table_attach (GTK_TABLE (xinput_joy_table), XInput_joystick1_label, 0, 1, 0, 1, 0, 0, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (XInput_joystick1_label), 0, 0.5);
-
-	XInput_joystick1_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (XInput_joystick1_entry), 20);
-	gtk_widget_show (XInput_joystick1_entry);
-	gtk_table_attach_defaults (GTK_TABLE (xinput_joy_table), XInput_joystick1_entry, 1, 2, 0, 1);
-
-	XInput_joystick2_label = gtk_label_new ("2:");
-	gtk_widget_show (XInput_joystick2_label);
-	gtk_table_attach (GTK_TABLE (xinput_joy_table), XInput_joystick2_label, 2, 3, 0, 1, 0, 0, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (XInput_joystick2_label), 0, 0.5);
-
-	XInput_joystick3_label = gtk_label_new ("3:");
-	gtk_widget_show (XInput_joystick3_label);
-	gtk_table_attach (GTK_TABLE (xinput_joy_table), XInput_joystick3_label, 0, 1, 1, 2, 0, 0, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (XInput_joystick3_label), 0, 0.5);
-
-	XInput_joystick4_label = gtk_label_new ("4:");
-	gtk_widget_show (XInput_joystick4_label);
-	gtk_table_attach (GTK_TABLE (xinput_joy_table), XInput_joystick4_label, 2, 3, 1, 2, 0, 0, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (XInput_joystick4_label), 0, 0.5);
-
-	XInput_joystick3_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (XInput_joystick3_entry), 20);
-	gtk_widget_show (XInput_joystick3_entry);
-	gtk_table_attach_defaults (GTK_TABLE (xinput_joy_table), XInput_joystick3_entry, 1, 2, 1, 2);
-
-	XInput_joystick2_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (XInput_joystick2_entry), 20);
-	gtk_widget_show (XInput_joystick2_entry);
-	gtk_table_attach_defaults (GTK_TABLE (xinput_joy_table), XInput_joystick2_entry, 3, 4, 0, 1);
-
-	XInput_joystick4_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (XInput_joystick4_entry), 20);
-	gtk_widget_show (XInput_joystick4_entry);
-	gtk_table_attach_defaults (GTK_TABLE (xinput_joy_table), XInput_joystick4_entry, 3, 4, 1, 2);
-
-/*** Mouse ***/
-	mouse_frame = options_frame_new (_("Mouse / Trackball"));
-	gtk_widget_show (mouse_frame);
-	gtk_box_pack_start (GTK_BOX (controllers_vbox), mouse_frame, FALSE, FALSE, 0);
-
-	mouse_table = gtk_table_new (2, 3, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (mouse_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (mouse_table), 6);
-	gtk_widget_show (mouse_table);
-	gtk_container_add (GTK_CONTAINER (mouse_frame), mouse_table);
-
-	image = gmameui_get_image_from_stock ("gmameui-mouse");
-	gtk_widget_show (image);
-	gtk_table_attach (GTK_TABLE (mouse_table), image, 0, 1, 0, 2, 0, GTK_EXPAND | GTK_FILL, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0);
-	gtk_misc_set_padding (GTK_MISC (image), 5, 5);
-	gtk_size_group_add_widget (GTK_SIZE_GROUP (group), image);
-
-/* use mouse */
-	mouse_checkbutton = gtk_check_button_new_with_label (_("Use mouse"));
-	gtk_widget_show (mouse_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (mouse_table), mouse_checkbutton, 1, 2, 0, 1);
-
-/* grab mouse */
-	grabmouse_checkbutton = gtk_check_button_new_with_label (_("Grab mouse"));
-	gtk_widget_show (grabmouse_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (mouse_table), grabmouse_checkbutton, 2, 3, 0, 1);
-
-/* Xinput */
-	Xinput_trackball_frame = options_frame_new (_("Xinput trackball"));
-	gtk_widget_show (Xinput_trackball_frame);
-	gtk_table_attach_defaults (GTK_TABLE (mouse_table), Xinput_trackball_frame, 1, 3, 1, 2);
-	Xinput_trackball_frame = options_frame_create_child (Xinput_trackball_frame);
-
-	Xinput_trackball_table = gtk_table_new (2, 4, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (Xinput_trackball_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (Xinput_trackball_table), 6);
-	gtk_widget_show (Xinput_trackball_table);
-	gtk_container_add (GTK_CONTAINER (Xinput_trackball_frame), Xinput_trackball_table);
-
-	XInput_trackball1_label = gtk_label_new ("1:");
-	gtk_widget_show (XInput_trackball1_label);
-	gtk_table_attach (GTK_TABLE (Xinput_trackball_table), XInput_trackball1_label, 0, 1, 0, 1, 0, 0, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (XInput_trackball1_label), 0, 0.5);
-
-	XInput_trackball1_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (XInput_trackball1_entry), 20);
-	gtk_widget_show (XInput_trackball1_entry);
-	gtk_table_attach_defaults (GTK_TABLE (Xinput_trackball_table), XInput_trackball1_entry, 1, 2, 0, 1);
-
-	XInput_trackball2_label = gtk_label_new ("2:");
-	gtk_widget_show (XInput_trackball2_label);
-	gtk_table_attach (GTK_TABLE (Xinput_trackball_table), XInput_trackball2_label, 2, 3, 0, 1, 0, 0, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (XInput_trackball2_label), 0, 0.5);
-
-	XInput_trackball3_label = gtk_label_new ("3:");
-	gtk_widget_show (XInput_trackball3_label);
-	gtk_table_attach (GTK_TABLE (Xinput_trackball_table), XInput_trackball3_label, 0, 1, 1, 2, 0, 0, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (XInput_trackball3_label), 0, 0.5);
-
-	XInput_trackball4_label = gtk_label_new ("4:");
-	gtk_widget_show (XInput_trackball4_label);
-	gtk_table_attach (GTK_TABLE (Xinput_trackball_table), XInput_trackball4_label, 2, 3, 1, 2, 0, 0, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (XInput_trackball4_label), 0, 0.5);
-
-	XInput_trackball3_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (XInput_trackball3_entry), 20);
-	gtk_widget_show (XInput_trackball3_entry);
-	gtk_table_attach_defaults (GTK_TABLE (Xinput_trackball_table), XInput_trackball3_entry, 1, 2, 1, 2);
-
-	XInput_trackball2_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (XInput_trackball2_entry), 20);
-	gtk_widget_show (XInput_trackball2_entry);
-	gtk_table_attach_defaults (GTK_TABLE (Xinput_trackball_table), XInput_trackball2_entry, 3, 4, 0, 1);
-
-	XInput_trackball4_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (XInput_trackball4_entry), 20);
-	gtk_widget_show (XInput_trackball4_entry);
-	gtk_table_attach_defaults (GTK_TABLE (Xinput_trackball_table), XInput_trackball4_entry, 3, 4, 1, 2);
-
-/*** Keyboard ***/
-	keyboard_frame = options_frame_new (_("Keyboard"));
-	gtk_widget_show (keyboard_frame);
-	gtk_box_pack_start (GTK_BOX (controllers_vbox), keyboard_frame, FALSE, FALSE, 0);
-
-	keyboard_table = gtk_table_new (3, 4, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (keyboard_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (keyboard_table), 6);
-	gtk_widget_show (keyboard_table);
-	gtk_container_add (GTK_CONTAINER (keyboard_frame), keyboard_table);
-
-	image = gmameui_get_image_from_stock ("gmameui-keyboard");
-	gtk_widget_show (image);
-	gtk_table_attach (GTK_TABLE (keyboard_table), image, 0, 1, 0, 3, 0, GTK_EXPAND | GTK_FILL, 0, 0);
-	gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0);
-	gtk_misc_set_padding (GTK_MISC (image), 5, 5);
-	gtk_size_group_add_widget (GTK_SIZE_GROUP (group), image);
-
-/* use config */
- 	config_name_checkbutton = gtk_check_button_new_with_label (_("Use config name:"));
- 	gtk_widget_show (config_name_checkbutton);
- 	gtk_table_attach_defaults (GTK_TABLE (keyboard_table), config_name_checkbutton, 1, 2, 0, 1);
-
-	config_name_entry = (GtkWidget *) gtk_entry_new ();
-	gtk_entry_set_max_length (GTK_ENTRY (config_name_entry), 20);
-	gtk_widget_show (config_name_entry);
-	gtk_table_attach_defaults (GTK_TABLE (keyboard_table), config_name_entry, 2, 3, 0, 1);
-
-	/* Ctrlr */
-	ctrlr_frame = options_frame_new (_("Control Panel"));
-	gtk_widget_show (ctrlr_frame);
-	gtk_table_attach_defaults (GTK_TABLE (keyboard_table), ctrlr_frame, 3, 4, 0, 3);
-	ctrlr_frame = options_frame_create_child (ctrlr_frame);
-
-	ctrlr_table = gtk_table_new (2, 3, FALSE);
-	gtk_table_set_row_spacings (GTK_TABLE (ctrlr_table), 6);
-	gtk_table_set_col_spacings (GTK_TABLE (ctrlr_table), 6);
-	gtk_widget_show (ctrlr_table);
-	gtk_container_add (GTK_CONTAINER (ctrlr_frame), ctrlr_table);
-
-	ctrlr_label = gtk_label_new (_("Controller:"));
-	gtk_widget_show (ctrlr_label);
-	gtk_table_attach_defaults (GTK_TABLE (ctrlr_table), ctrlr_label, 0, 1, 0, 1);
-	gtk_misc_set_alignment (GTK_MISC (ctrlr_label), 0, 0.5);
-
-	ctrlr_combo = combo_new_empty(G_TYPE_STRING);
-	gtk_widget_show (ctrlr_combo);
-	gtk_table_attach_defaults (GTK_TABLE (ctrlr_table), ctrlr_combo, 1, 2, 0, 1);
+*/
 	
+	/* Joystick */
+	joytype_combo = glade_xml_get_widget (xml, "joytype_combo");
+	joytype_combo = combo_new_from_glade(effect_combo, "joytype", G_TYPE_INT);
+	
+	joydevname_entry = glade_xml_get_widget (xml, "joydevname_entry");
+	gtk_entry_set_text (GTK_ENTRY (joydevname_entry), "/dev/joy");
+	paddevname_entry = glade_xml_get_widget (xml, "paddevname_entry");
+	gtk_entry_set_text (GTK_ENTRY (paddevname_entry), "/dev/pad00");
+	x11joyname_entry = glade_xml_get_widget (xml, "x11joyname_entry");
+	
+	analogstick_checkbutton = glade_xml_get_widget (xml, "analogstick_checkbutton");
+	rapidfire_checkbutton = glade_xml_get_widget (xml, "rapidfire_checkbutton");
+	usbpspad_checkbutton = glade_xml_get_widget (xml, "usbpspad_checkbutton");
+	ugcicoin_checkbutton = glade_xml_get_widget (xml, "ugcicoin_checkbutton");
+	
+	xinput_joy_table = glade_xml_get_widget (xml, "xinput_joy_table");
+	XInput_joystick1_entry = glade_xml_get_widget (xml, "XInput_joystick1_entry");
+	XInput_joystick2_entry = glade_xml_get_widget (xml, "XInput_joystick2_entry");
+	XInput_joystick3_entry = glade_xml_get_widget (xml, "XInput_joystick3_entry");
+	XInput_joystick4_entry = glade_xml_get_widget (xml, "XInput_joystick4_entry");
+
+	/* Mouse */
+	mouse_checkbutton = glade_xml_get_widget (xml, "mouse_checkbutton");
+	grabmouse_checkbutton = glade_xml_get_widget (xml, "grabmouse_checkbutton");
+	
+	XInput_trackball1_entry = glade_xml_get_widget (xml, "XInput_trackball1_entry");
+	XInput_trackball2_entry = glade_xml_get_widget (xml, "XInput_trackball2_entry");
+	XInput_trackball3_entry = glade_xml_get_widget (xml, "XInput_trackball3_entry");
+	XInput_trackball4_entry = glade_xml_get_widget (xml, "XInput_trackball4_entry");
+	
+	/* Keyboard */
+ 	config_name_checkbutton = glade_xml_get_widget (xml, "config_name_checkbutton");
+	config_name_entry = glade_xml_get_widget (xml, "config_name_entry");
+	
+	ctrlr_combo = glade_xml_get_widget (xml, "ctrlr_combo");
+	ctrlr_combo = combo_new_empty_from_glade(ctrlr_combo, G_TYPE_STRING);
+
 	combo_append_string_value(ctrlr_combo, "", "");
 	/* Getting ctrlr list */
 	ctrlr_list = get_ctrlr_list ();
@@ -2313,60 +2101,23 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 	}
 	g_list_free (ctrlr_list);
 
-/* HotRod */
-	hotrod_checkbutton = gtk_check_button_new_with_label (_("HotRod support"));
-	gtk_widget_show (hotrod_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ctrlr_table), hotrod_checkbutton, 0, 2, 1, 2);
+	/* Keyboard - HotRod and HotRod Second Edition */
+	hotrod_checkbutton = glade_xml_get_widget (xml, "hotrod_checkbutton");
+	hotrodse_checkbutton = glade_xml_get_widget (xml, "hotrodse_checkbutton");
 
-/* HotRod Second Edition */
-	hotrodse_checkbutton = gtk_check_button_new_with_label (_("HotRod SE support"));
-	gtk_widget_show (hotrodse_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (ctrlr_table), hotrodse_checkbutton, 0, 2, 2, 3);
-
-/* grab keyboard */
-	grabkeyboard_checkbutton = gtk_check_button_new_with_label (_("Grab keyboard"));
-	gtk_widget_show (grabkeyboard_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (keyboard_table), grabkeyboard_checkbutton, 1, 2, 1, 2);
-
-/* winkeys */
-	winkeys_checkbutton = gtk_check_button_new_with_label (_("Enable Windows keys"));
-	gtk_widget_show (winkeys_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (keyboard_table), winkeys_checkbutton, 2, 3, 1, 2);
-
-/* key mapping... one day maybe :-) */
-	keymapping_frame = options_frame_new (_("Key mapping"));
-	gtk_widget_show (keymapping_frame);
-	gtk_table_attach_defaults (GTK_TABLE (keyboard_table), keymapping_frame, 1, 3, 2, 3);
-	keymapping_frame = options_frame_create_child (keymapping_frame);
-
-	keymapping_table = gtk_table_new (2, 1, FALSE);
-	gtk_widget_show (keymapping_table);
-	gtk_container_add (GTK_CONTAINER (keymapping_frame), keymapping_table);
-
-	keymaptype_label = gtk_label_new (_("Keyboard Layout type:"));
-	gtk_widget_show (keymaptype_label);
-	gtk_table_attach_defaults (GTK_TABLE (keymapping_table), keymaptype_label, 0, 1, 0, 1);
-	gtk_misc_set_alignment (GTK_MISC (keymaptype_label), 0, 0.5);
-
-	keymaptype_combo = combo_new_empty(G_TYPE_STRING);
-
-	gtk_widget_show (keymaptype_combo);
-	gtk_table_attach_defaults (GTK_TABLE (keymapping_table), keymaptype_combo, 1, 2, 0, 1);
+	grabkeyboard_checkbutton = glade_xml_get_widget (xml, "grabkeyboard_checkbutton");
+	winkeys_checkbutton = glade_xml_get_widget (xml, "winkeys_checkbutton");
 	
-
+	/* key mapping... one day maybe :-) */
+	keymaptype_combo = glade_xml_get_widget (xml, "keymaptype_combo");
+	keymaptype_combo = combo_new_empty_from_glade(keymaptype_combo, G_TYPE_STRING);
+	
 	combo_append_string_value(keymaptype_combo, "", _("Default Layout"));
-
-	for (i=0;x11_keymaps_layout[i].shortname;i++)
-	{
-		combo_append_string_value(keymaptype_combo, x11_keymaps_layout[i].shortname, _(x11_keymaps_layout[i].name));
-	}
-	
-/* ugcicoin */
-	ugcicoin_checkbutton = gtk_check_button_new_with_label (_("UGCI (tm) Coin/Play support"));
-	gtk_widget_show (ugcicoin_checkbutton);
-	gtk_table_attach_defaults (GTK_TABLE (joystick_table), ugcicoin_checkbutton, 5, 7, 3, 4);
-
-/* end controllers*/
+	for (i = 0; x11_keymaps_layout[i].shortname; i++)
+		combo_append_string_value(keymaptype_combo,
+					  x11_keymaps_layout[i].shortname,
+					  _(x11_keymaps_layout[i].name));
+	combo_set_key(keymaptype_combo, target->keymap);
 
 	gtk_widget_set_sensitive (paddevname_label, FALSE);
 	gtk_widget_set_sensitive (paddevname_entry, FALSE);
@@ -2397,32 +2148,39 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 			break;
 	}
 
-
+/*
 	combo_set_index(joytype_combo, target->joytype);
-
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (analogstick_checkbutton), target->analogstick);
-
-	combo_set_key(ctrlr_combo, target->ctrlr);
+*/
 	
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (hotrod_checkbutton), target->hotrod);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (hotrodse_checkbutton), target->hotrodse);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (usbpspad_checkbutton), target->usbpspad);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rapidfire_checkbutton), target->rapidfire);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ugcicoin_checkbutton), target->ugcicoin);
 	gtk_entry_set_text (GTK_ENTRY (joydevname_entry), target->joydevname);
 	gtk_entry_set_text (GTK_ENTRY (paddevname_entry), target->paddevname);
 	gtk_entry_set_text (GTK_ENTRY (x11joyname_entry), target->x11joyname);
-/*	gtk_entry_set_text (GTK_ENTRY (XInput_joystick1_entry), target->XInput_joystick1);
+	
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (analogstick_checkbutton), target->analogstick);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (usbpspad_checkbutton), target->usbpspad);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (rapidfire_checkbutton), target->rapidfire);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (ugcicoin_checkbutton), target->ugcicoin);
+	
+/*
+	combo_set_key(ctrlr_combo, target->ctrlr);
+	*/
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (hotrod_checkbutton), target->hotrod);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (hotrodse_checkbutton), target->hotrodse);
+	
+/*	
+*	gtk_entry_set_text (GTK_ENTRY (XInput_joystick1_entry), target->XInput_joystick1);
 	gtk_entry_set_text (GTK_ENTRY (XInput_joystick2_entry), target->XInput_joystick2);
 	gtk_entry_set_text (GTK_ENTRY (XInput_joystick3_entry), target->XInput_joystick3);
-	gtk_entry_set_text (GTK_ENTRY (XInput_joystick4_entry), target->XInput_joystick4);*/
-	
+	gtk_entry_set_text (GTK_ENTRY (XInput_joystick4_entry), target->XInput_joystick4);*
+*/	
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mouse_checkbutton), target->mouse);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (grabmouse_checkbutton), target->grabmouse);
 	gtk_entry_set_text (GTK_ENTRY (XInput_trackball1_entry), target->XInput_trackball1);
 	gtk_entry_set_text (GTK_ENTRY (XInput_trackball2_entry), target->XInput_trackball2);
 	gtk_entry_set_text (GTK_ENTRY (XInput_trackball3_entry), target->XInput_trackball3);
 	gtk_entry_set_text (GTK_ENTRY (XInput_trackball4_entry), target->XInput_trackball4);
+
+	
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (grabkeyboard_checkbutton), target->grabkeyboard);
 	
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (winkeys_checkbutton), target->winkeys);
@@ -2438,7 +2196,7 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 	gtk_widget_set_sensitive (hotrodse_checkbutton,
 				  xmame_has_option (current_exec, "hotrodse"));
 
-	gtk_widget_set_sensitive (GTK_WIDGET (Xinput_joy_frame), FALSE);
+	gtk_widget_set_sensitive (GTK_WIDGET (xinput_joy_table), FALSE);
 
 	gtk_widget_set_sensitive (GTK_WIDGET (grabmouse_checkbutton),
 				  target->mouse && xmame_has_option (current_exec, "grabmouse"));
@@ -2454,20 +2212,20 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 				  target->cfgname_flag && 
 				  (xmame_has_option (current_exec, "cfgname") ||
 				   xmame_has_option (current_exec, "cfg_directory")));
+/*
 
-
-	combo_set_key(keymaptype_combo, target->keymap);
+	
 
 	g_signal_connect (G_OBJECT (joytype_combo), "changed",
 			    G_CALLBACK (on_dirty_option),
 			    apply_button);
 	g_signal_connect (G_OBJECT (joytype_combo), "changed",
 			    G_CALLBACK (on_dirty_option),
-			    reset_button);
+			    reset_button);*/
 	g_signal_connect_after (G_OBJECT (joytype_combo), "changed",
 			          G_CALLBACK (joystick_choosen),
 			          NULL);
-	g_signal_connect (G_OBJECT (analogstick_checkbutton), "toggled",
+	/*g_signal_connect (G_OBJECT (analogstick_checkbutton), "toggled",
 			    G_CALLBACK (on_dirty_option),
 			    apply_button);
 	g_signal_connect (G_OBJECT (analogstick_checkbutton), "toggled",
@@ -2521,7 +2279,7 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 	g_signal_connect (G_OBJECT (x11joyname_entry), "changed",
 			    G_CALLBACK (on_dirty_option),
 			    reset_button);
-/*	g_signal_connect (G_OBJECT (XInput_joystick1_entry), "changed",
+*	g_signal_connect (G_OBJECT (XInput_joystick1_entry), "changed",
 			    G_CALLBACK (on_dirty_option),
 			    apply_button);
 	g_signal_connect (G_OBJECT (XInput_joystick1_entry), "changed",
@@ -2544,17 +2302,19 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 			    apply_button);
 	g_signal_connect (G_OBJECT (XInput_joystick4_entry), "changed",
 			    G_CALLBACK (on_dirty_option),
-			    reset_button);*/
+			    reset_button);*
 	g_signal_connect (G_OBJECT (mouse_checkbutton), "toggled",
 			    G_CALLBACK (on_dirty_option),
 			    apply_button);
 	g_signal_connect (G_OBJECT (mouse_checkbutton), "toggled",
 			    G_CALLBACK (on_dirty_option),
 			    reset_button);
+			    */
 	if (xmame_has_option (current_exec, "grabmouse"))
 		g_signal_connect_after (G_OBJECT (mouse_checkbutton), "toggled",
 				          G_CALLBACK (button_toggled),
 				          grabmouse_checkbutton);
+/*
 	g_signal_connect (G_OBJECT (grabmouse_checkbutton), "toggled",
 			    G_CALLBACK (on_dirty_option),
 			    apply_button);
@@ -2603,9 +2363,10 @@ add_controller_options_tab (GtkWidget    *properties_windows,
  	g_signal_connect (G_OBJECT (keymaptype_combo), "changed",
  			    G_CALLBACK (on_dirty_option),
  			    reset_button);
+*/
 	if (xmame_has_option (current_exec, "cfgname") || xmame_has_option (current_exec, "cfg_directory"))
 	{
-		g_signal_connect (G_OBJECT (config_name_checkbutton), "toggled",
+/*		g_signal_connect (G_OBJECT (config_name_checkbutton), "toggled",
 				    G_CALLBACK (on_dirty_option),
 				    apply_button);
 		g_signal_connect (G_OBJECT (config_name_checkbutton), "toggled",
@@ -2616,22 +2377,22 @@ add_controller_options_tab (GtkWidget    *properties_windows,
 				    apply_button);
 		g_signal_connect (G_OBJECT (config_name_entry), "changed",
 				    G_CALLBACK (on_dirty_option),
-				    reset_button);
+				    reset_button);*/
 		g_signal_connect_after (G_OBJECT (config_name_checkbutton), "toggled",
 				          G_CALLBACK (button_toggled),
 				          config_name_entry);
 	}
-	if (xmame_has_option (current_exec, "ctrlr")) {
+	/*if (xmame_has_option (current_exec, "ctrlr")) {
 		g_signal_connect (G_OBJECT (ctrlr_combo), "changed",
 				  G_CALLBACK (on_dirty_option),
 				  apply_button);
 		g_signal_connect (G_OBJECT (ctrlr_combo), "changed",
 				  G_CALLBACK (on_dirty_option),
 				  reset_button);
-	}
-
+	}*/
+	
+	
 }
-
 
 void
 add_misc_options_tab (GtkWidget *properties_windows,
@@ -2643,9 +2404,6 @@ add_misc_options_tab (GtkWidget *properties_windows,
 {
 	GtkWidget *image;
 	GtkWidget *misc_vbox;
-/*	GtkWidget *artwork_table;
-	GtkWidget *other_misc_frame;
-	GtkWidget *other_misc_table;*/
 	GtkWidget *misc_label;
 /*	GtkWidget *label;*/
 	int i;
@@ -2665,25 +2423,24 @@ add_misc_options_tab (GtkWidget *properties_windows,
 	gtk_notebook_append_page (GTK_NOTEBOOK (target_notebook), misc_vbox, misc_label);
 	gtk_widget_show_all (misc_vbox);
 
-	/* additional artwork */
+	/* Additional Artwork */
 	artwork_checkbutton = glade_xml_get_widget (xml, "artwork_checkbutton");
 	use_backdrops_checkbutton = glade_xml_get_widget (xml, "use_backdrops_checkbutton");
 	use_bezels_checkbutton = glade_xml_get_widget (xml, "use_bezels_checkbutton");
 	use_overlays_checkbutton = glade_xml_get_widget (xml, "use_overlays_checkbutton");
 
-	/* artwork_resolution */
+	/* Artwork Resolution */
 	artwork_resolution_combo = glade_xml_get_widget (xml, "artwork_resolution_combo");
 	artwork_resolution_combo = combo_new_empty_from_glade(artwork_resolution_combo, G_TYPE_INT);
 	combo_append_int_value(artwork_resolution_combo, 0, _("Auto"));
 	combo_append_int_value(artwork_resolution_combo, 1, _("Standard"));
 	combo_append_int_value(artwork_resolution_combo, 2, _("High"));
-/* FIXME Do we hide these options, or disable them? Need to come up with a policy */
 	gtk_widget_set_sensitive(artwork_resolution_combo, xmame_has_option(current_exec, "artwork_resolution"));
 	
-	/* artwork crop */
+	/* Artwork Crop */
 	artcrop_checkbutton = glade_xml_get_widget (xml, "artcrop_checkbutton");
 
-	/* misc options */
+	/* Misc Options */
 	keyboard_leds_checkbutton = glade_xml_get_widget (xml, "keyboard_leds_checkbutton");
 	additional_options_checkbutton = glade_xml_get_widget (xml, "additional_options_checkbutton");
 	additional_options_entry = glade_xml_get_widget (xml, "additional_options_entry");
@@ -2714,8 +2471,6 @@ add_misc_options_tab (GtkWidget *properties_windows,
 		i++;
 	} while (bios_version[i]);
 	
-	/* end misc options */
-	
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (artwork_checkbutton), target->artwork);
 	/* the use_backdrops option will be used for all new backdrop option maybe change after */
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (use_backdrops_checkbutton), target->use_backdrops);
@@ -2745,7 +2500,6 @@ add_misc_options_tab (GtkWidget *properties_windows,
 	
 	gtk_widget_set_sensitive (GTK_WIDGET (artwork_resolution_combo),
 				  xmame_has_option (current_exec, "artwork_resolution") && target->artwork);
-
 	gtk_widget_set_sensitive (GTK_WIDGET (use_backdrops_checkbutton),
 				  xmame_has_option (current_exec, "use_backdrops") && target->artwork);
 	gtk_widget_set_sensitive (GTK_WIDGET (use_bezels_checkbutton),
@@ -2939,7 +2693,7 @@ GMAMEUI_DEBUG ("Getting xmame options");
 		target = &default_options;
 
 /*** Video Related ***/
-GMAMEUI_DEBUG ("Getting arbheight");
+GMAMEUI_DEBUG ("Getting video options values");
 
 	target->bpp = combo_get_int_key(bpp_combo);
 
@@ -2957,11 +2711,9 @@ GMAMEUI_DEBUG ("Getting arbheight");
 	target->widthscale = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (widthscale_spinbutton));
 
 	target->effect = combo_get_index(effect_combo);
-GMAMEUI_DEBUG ("Getting effect details");
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (effect_name), 0, -1);
-	target->effect_name = g_strdup (used_text);
-	g_free (used_text);
-GMAMEUI_DEBUG ("Done getting effect details");	
+GMAMEUI_DEBUG ("  Getting effect details");
+	target->effect_name = g_strdup (gtk_entry_get_text (GTK_ENTRY (effect_name)));
+GMAMEUI_DEBUG ("  Done getting effect details - %s", target->effect_name);
 	target->autodouble = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autodouble_checkbutton));
 	target->dirty = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (dirty_checkbutton));
 	target->scanlines = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (scanlines_checkbutton));
@@ -2972,6 +2724,8 @@ GMAMEUI_DEBUG ("Done getting effect details");
 		target->frameskipper = 0;
 		
 	target->throttle = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (throttle_checkbutton));
+GMAMEUI_DEBUG("  Target throttle is %d", target->throttle);
+GMAMEUI_DEBUG("  Original throttle is %d", default_options.throttle);
 	target->sleepidle = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (sleepidle_checkbutton));
 	target->autoframeskip = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton));
 
@@ -2999,11 +2753,11 @@ GMAMEUI_DEBUG ("Done getting effect details");
 	target->flipx = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (flipx_checkbutton));
 	target->flipy = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (flipy_checkbutton));
 		
-	/* from misc tab */
-	target->artwork = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (artwork_checkbutton));
-GMAMEUI_DEBUG ("Got artwork details");
 	/* Rendering Options */
-
+	target->keepaspect = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (keepaspect_checkbutton));
+	target->displayaspectratio = atof (gtk_entry_get_text (GTK_ENTRY (displayaspectratio_entry)));
+	target->disablemode = gtk_entry_get_text (GTK_ENTRY (disable_mode_entry));
+	
 	switch (current_exec->type)
 	{
 		case XMAME_EXEC_X11:
@@ -3040,10 +2794,10 @@ GMAMEUI_DEBUG ("Got artwork details");
 			target->glalphablending = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (glalphablending_checkbutton));
 			target->cabview = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (cabview_checkbutton));
 
-			used_text = gtk_editable_get_chars (GTK_EDITABLE (cabinet_entry), 0, -1);
+			
 			//strncpy (target->cabinet, used_text, 20);
-			target->cabinet = g_strdup (used_text);
-			g_free (used_text);
+			target->cabinet = gtk_entry_get_text (GTK_ENTRY (cabinet_entry));
+			
 			target->glres_flag = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (glres_checkbutton));
 			
 			value = combo_get_key(glres_combo);
@@ -3055,15 +2809,11 @@ GMAMEUI_DEBUG ("Got artwork details");
 			//strncpy (target->glres, value, 9);
 			
 
-			used_text = gtk_editable_get_chars (GTK_EDITABLE (gllib_entry), 0, -1);
 			//strncpy (target->gllibname, used_text, 20);
-			target->gllibname = g_strdup (used_text);
-			g_free (used_text);
-
-			used_text = gtk_editable_get_chars (GTK_EDITABLE (glulib_entry), 0, -1);
+			target->gllibname = gtk_entry_get_text (GTK_ENTRY (gllib_entry));
 			//strncpy (target->glulibname, used_text, 20);
-			target->glulibname = g_strdup (used_text);
-			g_free (used_text);
+			target->glulibname = gtk_entry_get_text (GTK_ENTRY (glulib_entry));
+			
 			break;
 
 		case XMAME_EXEC_SDL:
@@ -3117,18 +2867,10 @@ GMAMEUI_DEBUG ("Got artwork details");
 			/* nothing */
 			break;
 	}
-				
-/*** Video Mode related ***/
-	target->keepaspect = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (keepaspect_checkbutton));
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (displayaspectratio_entry), 0, -1);
-	target->displayaspectratio = atof (used_text);
-	g_free (used_text);
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (disable_mode_entry), 0, -1);
-	//strncpy (target->disablemode, used_text, 14);
-	target->disablemode = g_strdup (used_text);
-	g_free (used_text);
-GMAMEUI_DEBUG ("Got video details");
+
+GMAMEUI_DEBUG ("Getting video options values - finished");
 /* Sound */
+GMAMEUI_DEBUG ("Getting sound options values");
 	target->sound = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (sound_checkbutton));
 	target->samples = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (samples_checkbutton));
 	target->fakesound = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (fakesound_checkbutton));
@@ -3136,9 +2878,7 @@ GMAMEUI_DEBUG ("Got video details");
 	target->volume = gtk_range_get_adjustment (GTK_RANGE (db_hscale))->value;
 	target->bufsize = gtk_range_get_adjustment (GTK_RANGE (bufsize_hscale))->value;
 
-	//strncpy (target->audiodevice, gtk_entry_get_text(GTK_ENTRY(GTK_BIN(audiodevice_combo)->child)), 20);
 	target->audiodevice = g_strdup (gtk_entry_get_text(GTK_ENTRY(GTK_BIN(audiodevice_combo)->child)));
-	//strncpy (target->mixerdevice, gtk_entry_get_text(GTK_ENTRY(GTK_BIN(mixerdevice_combo)->child)), 20);
 	target->mixerdevice = g_strdup (gtk_entry_get_text(GTK_ENTRY(GTK_BIN(mixerdevice_combo)->child)));
 
 	if (combo_get_key(dsp_plugin_combo))
@@ -3149,23 +2889,18 @@ GMAMEUI_DEBUG ("Got video details");
 		target->sound_mixer_plugin = g_strdup (combo_get_key(mixer_plugin_combo));
 		//strncpy(target->sound_mixer_plugin, combo_get_key(mixer_plugin_combo), 20);
 	
-	used_text = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (soundfile_entry));
-	//strncpy (target->soundfile, used_text, 50);
-	target->soundfile = g_strdup (used_text);
-	g_free (used_text);
+	target->soundfile = gtk_entry_get_text (GTK_ENTRY (soundfile_entry));
 			
 	target->timer = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (timer_checkbutton));
 	target->artsBufferTime = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (arts_spinbutton));
 	target->audio_preferred = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (audio_preferred_checkbutton));
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (pcm_entry), 0, -1);
-	//strncpy (target->alsa_pcm, used_text, 20);
-	target->alsa_pcm = g_strdup (used_text);
-	g_free (used_text);
+	target->alsa_pcm = gtk_entry_get_text (GTK_ENTRY (pcm_entry));
 	target->alsa_buffer = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (alsa_buffer_spinbutton));
 	target->alsacard = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (alsacard_spinbutton));
 	target->alsadevice = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (alsadevice_spinbutton));
-GMAMEUI_DEBUG ("Got sound details");
+GMAMEUI_DEBUG ("Getting sound options values - finished");
 /* controllers */
+GMAMEUI_DEBUG ("Getting controller options values");
 	target->joytype = combo_get_index (joytype_combo);
 	
 	target->analogstick = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (analogstick_checkbutton));
@@ -3197,7 +2932,7 @@ GMAMEUI_DEBUG ("Got sound details");
 	//strncpy (target->x11joyname, used_text, 20);
 	target->x11joyname = g_strdup (used_text);
 	g_free (used_text);
-GMAMEUI_DEBUG("Got joystick details");
+GMAMEUI_DEBUG("  Got joystick details");
 /*	used_text = gtk_editable_get_chars (GTK_EDITABLE (XInput_joystick1_entry), 0, -1);
 	strncpy (target->XInput_joystick1, used_text, 20);
 	g_free (used_text);
@@ -3212,31 +2947,22 @@ GMAMEUI_DEBUG("Got joystick details");
 	g_free (used_text);*/
 	target->mouse = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (mouse_checkbutton));
 	target->grabmouse = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (grabmouse_checkbutton));
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (XInput_trackball1_entry), 0, -1);
-	//strncpy (target->XInput_trackball1, used_text, 20);
-	target->XInput_trackball1 = g_strdup (used_text);
-	g_free (used_text);
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (XInput_trackball2_entry), 0, -1);
-	//strncpy (target->XInput_trackball2, used_text, 20);
-	target->XInput_trackball2 = g_strdup (used_text);
-	g_free (used_text);
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (XInput_trackball3_entry), 0, -1);
-	target->XInput_trackball3 = g_strdup (used_text);
-	//strncpy (target->XInput_trackball3, used_text, 20);
-	g_free (used_text);
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (XInput_trackball4_entry), 0, -1);
-	target->XInput_trackball4 = g_strdup (used_text);
-	//strncpy (target->XInput_trackball4, used_text, 20);
-	g_free (used_text);
-/* TODO
+	
+	target->XInput_trackball1 = gtk_entry_get_text (GTK_ENTRY (XInput_trackball1_entry));
+	target->XInput_trackball2 = gtk_entry_get_text (GTK_ENTRY (XInput_trackball2_entry));
+	target->XInput_trackball3 = gtk_entry_get_text (GTK_ENTRY (XInput_trackball3_entry));
+	target->XInput_trackball4 = gtk_entry_get_text (GTK_ENTRY (XInput_trackball4_entry));
+
+	/* Keyboard */
 	target->winkeys = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (winkeys_checkbutton));
 	target->grabkeyboard = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (grabkeyboard_checkbutton));
-
+/*
 	strncpy (target->keymap, combo_get_key(keymaptype_combo), 4);
 	target->keymap = g_strdup (combo_get_key(keymaptype_combo));
 */
-GMAMEUI_DEBUG ("Got controller details");
+GMAMEUI_DEBUG ("Getting controller options values - finished");
 	/* vector */
+GMAMEUI_DEBUG ("Getting vector options values");
 	if (!rom || rom->vector)
 	{
 		target->antialias = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (antialias_checkbutton));
@@ -3250,7 +2976,6 @@ GMAMEUI_DEBUG ("Got controller details");
 
 		if (value)
 			target->vectorres = g_strdup (value);
-			//strncpy (target->vectorres, value, 9);
 		else
 			target->vectorres[0] = '\0';
 			
@@ -3258,15 +2983,15 @@ GMAMEUI_DEBUG ("Got controller details");
 		target->gldrawbitmapvec = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gldrawbitmapvec_checkbutton));
 		target->glantialiasvec = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (glantialiasvec_checkbutton));
 	}
-	
+GMAMEUI_DEBUG ("Getting vector options values - finished");	
 /* misc */
-	/*artwork*/
+GMAMEUI_DEBUG ("Getting miscellaneous options values");
+	/* Miscellaneous - artwork*/
 	target->artwork = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (artwork_checkbutton));
 	target->use_backdrops = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (use_backdrops_checkbutton));
 	target->use_bezels = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (use_bezels_checkbutton));
 	target->use_overlays = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (use_overlays_checkbutton));
 	target->artwork_resolution = combo_get_int_key(artwork_resolution_combo);
-
 	target->artwork_crop = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (artcrop_checkbutton));
 	/* misc */
 	target->keyboard_leds = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (keyboard_leds_checkbutton));
@@ -3275,7 +3000,6 @@ GMAMEUI_DEBUG ("Got controller details");
 	target->skip_disclaimer = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (disclaimer_checkbutton));
 	target->skip_gameinfo = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (gameinfo_checkbutton));
 
-	//strncpy (target->debug_size, combo_get_key(debug_size_combo), 20);
 	target->debug_size = g_strdup (combo_get_key(debug_size_combo));
 	
 	target->use_additional_options = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (additional_options_checkbutton));
@@ -3283,21 +3007,20 @@ GMAMEUI_DEBUG ("Got controller details");
 	g_free (target->additional_options);
 	target->additional_options = gtk_editable_get_chars (GTK_EDITABLE (additional_options_entry), 0, -1);
 	target->log_flag = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (log_flag_checkbutton));
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (log_entry), 0, -1);
-	//strncpy (target->log, used_text, 20);
-	target->log = g_strdup (used_text);
-	g_free (used_text);
-	target->cfgname_flag = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (config_name_checkbutton));
-	used_text = gtk_editable_get_chars (GTK_EDITABLE (config_name_entry), 0, -1);
-	//strncpy (target->cfgname, used_text, 20);
-	target->cfgname = g_strdup (used_text);
-	g_free (used_text);
 	
-	target->bios = combo_get_int_key(bios_combo);
+	target->log = gtk_entry_get_text (GTK_ENTRY (log_entry));
+	
+	target->cfgname_flag = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (config_name_checkbutton));
+	
+	//strncpy (target->cfgname, used_text, 20);
+	target->cfgname = gtk_entry_get_text (GTK_ENTRY (config_name_entry));
 		
+	target->bios = combo_get_int_key(bios_combo);
+GMAMEUI_DEBUG ("Getting miscellaneous options values - finished");
 	dirty_options_flag = FALSE;
 }
 
+/* FIXME This is only ever called from properties_reset() */
 void
 load_properties_options (RomEntry  *rom,
 			 GtkWidget *properties_window)
