@@ -19,7 +19,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
+ *add_controller_options_tab_new
  */
 
 #include "common.h"
@@ -56,49 +56,6 @@ static GtkWidget     *sample_check_result;
 static GtkWidget     *rom_check_result;
 
 static gboolean       game_checked = FALSE;
-static gint           audit_page_no;
-
-static GtkWidget *
-options_frame_new (const char *text)
-{
-	PangoFontDescription *font_desc;
-	GtkWidget *label;
-	GtkWidget *frame = gtk_frame_new (text);
-
-	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_NONE);
-
-	label = gtk_frame_get_label_widget (GTK_FRAME (frame));
-
-	font_desc = pango_font_description_new ();
-	pango_font_description_set_weight (font_desc,
-					   PANGO_WEIGHT_BOLD);
-	gtk_widget_modify_font (label, font_desc);
-	pango_font_description_free (font_desc);
-
-	return frame;
-}
-
-static GtkWidget *
-options_frame_create_child (GtkWidget *widget)
-{
-	GtkWidget *vbox;
-	GtkWidget *hbox;
-	GtkWidget *label;
-
-	hbox = gtk_hbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (widget), hbox);
-	gtk_widget_show (hbox);
-
-	label = gtk_label_new ("    ");
-	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-	gtk_widget_show (label);
-
-	vbox = gtk_vbox_new (FALSE, 6);
-	gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 0);
-	gtk_widget_show (vbox);
-
-	return vbox;
-}
 
 static void
 audit_game (RomEntry *rom) 
@@ -106,7 +63,7 @@ audit_game (RomEntry *rom)
 	FILE       *xmame_pipe = NULL;
 	gchar       line [BUFFER_SIZE];
 	const       gchar *title;
-	gchar      *command, *p;
+	gchar      *command;
 	gchar      *rompath_option;
 	RomStatus   status;
 	gboolean    error_during_check = FALSE;
@@ -291,35 +248,6 @@ properties_save (GtkWidget *properties_window)
 
 	save_properties_options (rom, opts);
 	save_options (rom, opts);
-}
-
-static GtkWidget *
-bold_label_new (const char *str)
-{
-	GtkWidget *label;
-	char      *text;
-
-	text = g_strdup_printf ("<b>%s:</b>", str);
-	label = gtk_label_new (text);
-	g_free (text);
-	gtk_label_set_use_markup (GTK_LABEL (label), TRUE);
-	gtk_misc_set_alignment (GTK_MISC (label), 0, 0);
-	gtk_widget_show (label);
-
-	return label;
-}
-
-static GtkWidget *
-value_label_new (const char *str)
-{
-	GtkWidget *label;
-
-	label = gtk_label_new (str);
-	gtk_misc_set_alignment (GTK_MISC (label), 0, 0);
-	gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
-	gtk_widget_show (label);
-
-	return label;
 }
 
 static char *
