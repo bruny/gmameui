@@ -622,7 +622,7 @@ exit_gmameui (void)
 	if (game_list.roms)
 		save_games_ini ();
 	save_gmameui_ini ();
-	save_dirs_ini ();
+
 	save_options (NULL, NULL);
 
 	joystick_close (joydata);

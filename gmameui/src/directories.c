@@ -758,6 +758,9 @@ directories_selection_save_changes (GtkWidget *widget)
 		xmame_table_add (text);
 	}
 
+	/* Save the directories file */
+	save_dirs_ini();
+	
 	GMAMEUI_DEBUG ("Setting current executable to the 1st one");
 
 	/* remove and destroy the submenu */
