@@ -301,6 +301,12 @@ load_gmameui_ini (void)
 	gui_prefs.VersionCheck = TRUE;
 	gui_prefs.gui_joy = TRUE;
 	gui_prefs.use_xmame_options = FALSE;
+	
+	gui_prefs.clone_color.red = 47031;
+	gui_prefs.clone_color.green = 47031;
+	gui_prefs.clone_color.blue = 47031;
+	gui_prefs.Joystick_in_GUI = g_strdup (get_joy_dev ());
+	
 	gui_prefs.ColumnWidth = g_new0 (gint, NUMBER_COLUMN);
 	gui_prefs.ColumnShown = g_new0 (gint, NUMBER_COLUMN);
 	/* FIXME Have default value set only if they cannot be loaded below */
@@ -356,9 +362,13 @@ load_gmameui_ini (void)
 	gui_prefs.GUIHeight = g_key_file_get_integer (gmameui_ini_file, "Default", "GUIHeight", &error);
 	gui_prefs.current_mode = g_key_file_get_integer (gmameui_ini_file, "Default", "ListMode", &error);
 
+	gui_prefs.clone_color.red = g_key_file_get_integer (gmameui_ini_file, "Default", "CloneColorRed", &error);
+	gui_prefs.clone_color.green = g_key_file_get_integer (gmameui_ini_file, "Default", "CloneColorGreen", &error);
+	gui_prefs.clone_color.blue = g_key_file_get_integer (gmameui_ini_file, "Default", "CloneColorBlue", &error);
+	gui_prefs.Joystick_in_GUI = g_key_file_get_string (gmameui_ini_file, "Default", "Joystick_in_GUI", &error);
+	
 	gui_prefs.Splitters = g_key_file_get_integer_list (gmameui_ini_file, "Default", "Splitters", &sizes, &error);
 	gui_prefs.ColumnWidth = g_key_file_get_integer_list (gmameui_ini_file, "Default", "ColumnWidth", &columnsize, &error);
-/*	gui_prefs.ColumnOrder = g_key_file_get_integer_list (gmameui_ini_file, "Default", "ColumnOrder", &columnsize, &error);*/
 	gui_prefs.ColumnShown = g_key_file_get_integer_list (gmameui_ini_file, "Default", "ColumnShown", &columnsize, &error);
 
 	g_key_file_free (gmameui_ini_file);
@@ -422,12 +432,17 @@ save_gmameui_ini (void)
 	g_key_file_set_integer (gmameui_ini_file, "Default", "ListMode", gui_prefs.current_mode);
 	g_key_file_set_integer_list (gmameui_ini_file, "Default", "Splitters", gui_prefs.Splitters, 2); /* TODO */
 
+	g_key_file_set_integer (gmameui_ini_file, "Default", "CloneColorRed", gui_prefs.clone_color.red);
+	g_key_file_set_integer (gmameui_ini_file, "Default", "CloneColorGreen", gui_prefs.clone_color.green);
+	g_key_file_set_integer (gmameui_ini_file, "Default", "CloneColorBlue", gui_prefs.clone_color.blue);
+	
+	g_key_file_set_string (gmameui_ini_file, "Default", "Joystick_in_GUI", gui_prefs.Joystick_in_GUI);
+	
 /*	fprintf (gmameui_ini_file, "Splitters=%i,%i\r\n",
 			gui_prefs.ShowFolderList ? main_gui.scrolled_window_filters->allocation.width : gui_prefs.Splitters[0],
 			gui_prefs.ShowScreenShot ? main_gui.scrolled_window_games->allocation.width : gui_prefs.Splitters[1]);*/
 
 	g_key_file_set_integer_list (gmameui_ini_file, "Default", "ColumnWidth", gui_prefs.ColumnWidth, NUMBER_COLUMN);
-/*	g_key_file_set_integer_list (gmameui_ini_file, "Default", "ColumnOrder", gui_prefs.ColumnOrder, NUMBER_COLUMN);*/
 	g_key_file_set_integer_list (gmameui_ini_file, "Default", "ColumnShown", gui_prefs.ColumnShown, NUMBER_COLUMN);
 
 	g_key_file_save_to_file (gmameui_ini_file, filename, NULL);
@@ -440,174 +455,13 @@ save_gmameui_ini (void)
 	return TRUE;
 }
 
-/* this the master config file, it will contain the path to every other config file
-   when we will share these config files with another mame32 application */
-gboolean
-load_gmameuirc (void)
-{
-	FILE *gamerc_file;
-	gchar *filename;
-	gchar line[2000];
-	gchar **option_value = NULL;
-	gchar *mame_executable = NULL;
-	gchar **xmame_executables;
-
-	GMAMEUI_DEBUG ("Loading gmameuirc");
-
-	gui_prefs.catverDirectory = g_build_filename (g_get_home_dir (), ".gmameui", NULL);
-	gui_prefs.CheatFile = g_build_filename (XMAME_ROOT, "cheat.dat", NULL);
-	gui_prefs.HiscoreFile = g_build_filename (XMAME_ROOT, "hiscore.dat", NULL);
-	gui_prefs.HistoryFile = g_build_filename (XMAME_ROOT, "history.dat", NULL);
-	gui_prefs.MameInfoFile = g_build_filename (XMAME_ROOT, "mameinfo.dat", NULL);
-	
-	gui_prefs.clone_color.red = 47031;
-	gui_prefs.clone_color.green = 47031;
-	gui_prefs.clone_color.blue = 47031;
-	gui_prefs.Joystick_in_GUI = g_strdup (get_joy_dev ());
-
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "gmameuirc", NULL);	
-	gamerc_file = fopen (filename, "r");
-	g_free (filename);
-	if (!gamerc_file)
-	{
-		xmame_table_add ("xmame");
-		GMAMEUI_DEBUG ("gmameuirc not found");
-		return FALSE;
-	}
-
-	while (fgets (line, 500, gamerc_file))
-	{
-		/* skip comments */
-		if (*line != '#')
-		{	
-			if (*line == '\n')
-				break;
-			/* FIXME: leaks here */
-			option_value = g_strsplit (g_strstrip (g_strdelimit (line, "[]\n", ' ')), "=", 0);
-			if (option_value[1] != NULL)
-			{
-				if (!strcmp (option_value[0], "mame_executable"))
-				{
-					if (mame_executable)
-						g_free (mame_executable);
-					mame_executable = g_strdup (option_value[1]);
-				} else if (!strcmp (option_value[0], "xmame_executables_array"))
-				{
-					gint i;
-					xmame_executables = g_strsplit (option_value[1], ";", 0);
-					if (xmame_executables)
-					{
-						for (i = 0; xmame_executables[i]; i++)
-							xmame_table_add (xmame_executables[i]);
-						g_strfreev (xmame_executables);
-					}			
-				} else if (!strcmp (option_value[0], "catverDirectory"))
-				{
-					g_free (gui_prefs.catverDirectory);
-					gui_prefs.catverDirectory = g_strdup (option_value[1]);
-				} else if (!strcmp (option_value[0], "CheatFile"))
-				{	
-					g_free (gui_prefs.CheatFile);
-					gui_prefs.CheatFile = g_strdup (option_value[1]);
-				} else if (!strcmp (option_value[0], "HiscoreFile"))
-				{	
-					g_free (gui_prefs.HiscoreFile);
-					gui_prefs.HiscoreFile = g_strdup (option_value[1]);
-				} else if (!strcmp (option_value[0], "HistoryFile"))
-				{	
-					g_free (gui_prefs.HistoryFile);
-					gui_prefs.HistoryFile = g_strdup (option_value[1]);
-				} else if (!strcmp (option_value[0], "MameInfoFile"))
-				{	
-					g_free (gui_prefs.MameInfoFile);
-					gui_prefs.MameInfoFile = g_strdup (option_value[1]);
-				} else if (!strcmp (option_value[0], "Joystick_in_GUI"))
-				{	
-					g_free (gui_prefs.Joystick_in_GUI);
-					gui_prefs.Joystick_in_GUI = g_strdup (option_value[1]);
-				} else if (!strcmp (option_value[0], "clone_color.red"))
-				{	
-					gui_prefs.clone_color.red = atoi (option_value[1]);
-				} else if (!strcmp (option_value[0], "clone_color.green"))
-				{	
-					gui_prefs.clone_color.green = atoi (option_value[1]);
-				} else if (!strcmp (option_value[0], "clone_color.blue"))
-				{	
-					gui_prefs.clone_color.blue = atoi (option_value[1]);
-				}
-			}
-			g_strfreev (option_value);
-		}
-	}
-	fclose (gamerc_file);
-
-	if (mame_executable)
-	{
-		current_exec = xmame_table_get (mame_executable);
-		g_free (mame_executable);
-	}
-	
-	if (!current_exec)
-		current_exec = xmame_table_get_by_index (0);
-
-	return TRUE;
-}
-
-
-gboolean
-save_gmameuirc (void)
-{
-	FILE *gamerc_file;
-	gchar *filename;
-	guint i;
-	
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "gmameuirc", NULL);	
-	gamerc_file = fopen (filename, "w");
-	g_free (filename);
-	if (!gamerc_file)
-	{
-		GMAMEUI_DEBUG ("unable to write gmameuirc");
-		return (FALSE);
-	}
-	fputs ("# master config file of GMAMEUI\n", gamerc_file);
-	if (current_exec)
-		fprintf (gamerc_file, "mame_executable=%s\n", current_exec->path);
-
-	if (xmame_table_size () > 0)
-	{
-		gchar **exec_paths;
-		exec_paths = xmame_table_get_all ();
-		fputs ("xmame_executables_array=", gamerc_file);
-		for (i = 0; exec_paths[i] != NULL; i++)
-		{	
-			fputs (exec_paths[i], gamerc_file);
-			if (exec_paths[i + 1] != NULL)
-				fputs (";", gamerc_file);
-		}
-		g_free (exec_paths);
-	}
-
-	fprintf (gamerc_file, "\ncatverDirectory=%s", gui_prefs.catverDirectory);
-	fprintf (gamerc_file, "\nCheatFile=%s", gui_prefs.CheatFile);
-	fprintf (gamerc_file, "\nHiscoreFile=%s", gui_prefs.HiscoreFile);
-	fprintf (gamerc_file, "\nHistoryFile=%s", gui_prefs.HistoryFile);
-	fprintf (gamerc_file, "\nMameInfoFile=%s", gui_prefs.MameInfoFile);
-	fprintf (gamerc_file, "\nJoystick_in_GUI=%s", gui_prefs.Joystick_in_GUI);
-	fprintf (gamerc_file, "\nclone_color.red=%i", gui_prefs.clone_color.red);
-	fprintf (gamerc_file, "\nclone_color.green=%i", gui_prefs.clone_color.green);
-	fprintf (gamerc_file, "\nclone_color.blue=%i\n", gui_prefs.clone_color.blue);
-	
-	fclose (gamerc_file);
-	
-	return TRUE;
-}
-
-
 /* this is where directory paths are set (common with mame32k) */
 gboolean
 load_dirs_ini (void)
 {
 	gchar *filename;
+	gchar *mame_executable = NULL;
+	gchar **xmame_executables;
 	gsize paths;	/* FIXME Define max number of rom/sample dirs */
 	
 	filename = g_build_filename (g_get_home_dir (), ".gmameui", "dirs.ini", NULL);	
@@ -621,6 +475,19 @@ GMAMEUI_DEBUG ("Loading directories ini file");
 	
 		g_error_free (error);
 	} else {
+		mame_executable = g_key_file_get_string (dirsini_list, "Directories", "mame_executable", &error);
+		xmame_executables = g_key_file_get_string_list (dirsini_list, "Directories", "xmame_executables_array", &paths, &error);
+
+		int i;
+		for (i = 0; i < paths; i++)
+			xmame_table_add (xmame_executables[i]);
+		if (mame_executable) {
+			current_exec = xmame_table_get (mame_executable);
+			g_free (mame_executable);
+		}
+	
+		if (!current_exec)
+			current_exec = xmame_table_get_by_index (0);
 
 		gui_prefs.RomPath = g_key_file_get_string_list (dirsini_list, "Directories", "RomPath", &paths, &error);
 		gui_prefs.SamplePath = g_key_file_get_string_list (dirsini_list, "Directories", "SamplePath", &paths, &error);
@@ -636,7 +503,14 @@ GMAMEUI_DEBUG ("Loading directories ini file");
 		gui_prefs.CtrlrDirectory = g_key_file_get_string (dirsini_list, "Directories", "CtrlrDirectory", &error);
 		gui_prefs.IconDirectory = g_key_file_get_string (dirsini_list, "Directories", "IconDirectory", &error);
 		gui_prefs.inipath = g_key_file_get_string (dirsini_list, "Directories", "inipath", &error);
-	
+
+		gui_prefs.catverDirectory = g_key_file_get_string (dirsini_list, "Directories", "CatverDirectory", &error);
+		gui_prefs.CheatFile = g_key_file_get_string (dirsini_list, "Directories", "CheatFile", &error);
+		gui_prefs.HiscoreFile = g_key_file_get_string (dirsini_list, "Directories", "HiscoreFile", &error);
+		gui_prefs.HistoryFile = g_key_file_get_string (dirsini_list, "Directories", "HistoryFile", &error);
+		gui_prefs.MameInfoFile = g_key_file_get_string (dirsini_list, "Directories", "MameInfoFile", &error);
+			
+		
 		g_key_file_free (dirsini_list);
 GMAMEUI_DEBUG ("Finished loading directories ini file");
 	}
@@ -667,6 +541,12 @@ GMAMEUI_DEBUG ("Finished loading directories ini file");
 	gui_prefs.StateDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "sta", NULL);
 	gui_prefs.inipath = g_build_filename (g_get_home_dir (), ".gmameui" , "ini", NULL);
 	
+	gui_prefs.catverDirectory = g_build_filename (g_get_home_dir (), ".gmameui", NULL);
+	gui_prefs.CheatFile = g_build_filename (XMAME_ROOT, "cheat.dat", NULL);
+	gui_prefs.HiscoreFile = g_build_filename (XMAME_ROOT, "hiscore.dat", NULL);
+	gui_prefs.HistoryFile = g_build_filename (XMAME_ROOT, "history.dat", NULL);
+	gui_prefs.MameInfoFile = g_build_filename (XMAME_ROOT, "mameinfo.dat", NULL);
+	
 	g_free (filename);
 	
 	return TRUE;
@@ -683,6 +563,12 @@ save_dirs_ini (void)
 
 	GKeyFile *dirsini_list = g_key_file_new ();
 
+	if (current_exec)
+		g_key_file_set_string (dirsini_list, "Directories", "mame_executable", current_exec->path);
+
+	if (xmame_table_size () > 0)
+		g_key_file_set_string_list (dirsini_list, "Directories", "xmame_executables_array", xmame_table_get_all(), g_strv_length (gui_prefs.RomPath));
+
 	g_key_file_set_string_list (dirsini_list, "Directories", "RomPath", gui_prefs.RomPath, g_strv_length (gui_prefs.RomPath));
 	g_key_file_set_string_list (dirsini_list, "Directories", "SamplePath", gui_prefs.SamplePath, g_strv_length (gui_prefs.RomPath));
 
@@ -698,6 +584,12 @@ save_dirs_ini (void)
 	g_key_file_set_string (dirsini_list, "Directories", "IconDirectory", gui_prefs.IconDirectory);
 	
 	g_key_file_set_string (dirsini_list, "Directories", "inipath", gui_prefs.inipath);
+	
+	g_key_file_set_string (dirsini_list, "Directories", "CatverDirectory", gui_prefs.catverDirectory);
+	g_key_file_set_string (dirsini_list, "Directories", "CheatFile", gui_prefs.CheatFile);
+	g_key_file_set_string (dirsini_list, "Directories", "HiscoreFile", gui_prefs.HiscoreFile);
+	g_key_file_set_string (dirsini_list, "Directories", "HistoryFile", gui_prefs.HistoryFile);
+	g_key_file_set_string (dirsini_list, "Directories", "MameInfoFile", gui_prefs.MameInfoFile);
 	
 	g_key_file_save_to_file (dirsini_list, filename, NULL);
 	

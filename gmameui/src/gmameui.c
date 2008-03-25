@@ -160,10 +160,6 @@ gmameui_init (void)
 	xmame_options_init ();
 	xmame_table_init ();
 	
-	/* Load master config file*/
-	if (!load_gmameuirc ())
-		g_message (_("gmameuirc not loaded, using default values"));
-
 	if (!current_exec)
 		GMAMEUI_DEBUG ("No executable!");
 
@@ -627,7 +623,6 @@ exit_gmameui (void)
 		save_games_ini ();
 	save_gmameui_ini ();
 	save_dirs_ini ();
-	save_gmameuirc ();
 	save_options (NULL, NULL);
 
 	joystick_close (joydata);

@@ -48,9 +48,6 @@ load_dirs_ini(void);
 gboolean
 load_catver_ini(void);
 
-gboolean
-load_gmameuirc(void);
-
 void
 quick_check(void);
 
@@ -62,9 +59,6 @@ save_gmameui_ini(void);
 
 gboolean
 save_dirs_ini(void);
-
-gboolean
-save_gmameuirc(void);
 
 GList *
 get_ctrlr_list (void);
