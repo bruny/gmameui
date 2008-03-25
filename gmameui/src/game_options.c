@@ -210,7 +210,6 @@ load_options (RomEntry *rom)
 	target->volume = -3;
 	target->audiodevice = g_strdup (" ");
 	target->mixerdevice = g_strdup (" ");
-	target->soundfile = g_strdup ("xmameout.wav");
 
 	/*** Input Related ***/
 	target->joytype = 0;
@@ -227,8 +226,7 @@ load_options (RomEntry *rom)
 	target->joydevname = g_strdup (get_joy_dev ());
 	target->joydevname[strlen (target->joydevname) - 1] = '\0';
 
-	/***joy_pad_opts***  *FM townpad ***/
-	target->paddevname = g_strdup ("/dev/pad00");
+	
 	/***joy_x11_opts***/
 	target->x11joyname = g_strdup (" ");
 	/***Xinput***/
@@ -514,6 +512,16 @@ load_options (RomEntry *rom)
 	g_list_free (ctrlr_list);
 
 	g_key_file_free (options_file);
+	
+	/* Set default values */
+	
+	/* Sound */
+	if (!target->soundfile) target->soundfile = g_strdup ("xmameout.wav");
+	
+	/* Controllers */
+	/**joy_pad_opts***  *FM townpad ***/
+	if (!target->paddevname) target->paddevname = g_strdup ("/dev/pad00");
+	
 	
 	return target;
 }
