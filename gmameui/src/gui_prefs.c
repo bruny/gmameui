@@ -30,6 +30,7 @@
 #include <gtk/gtklabel.h>
 #include <gtk/gtkstock.h>
 #include <gtk/gtktable.h>
+#include <glade/glade.h>
 
 #include "gmameui.h"
 #include "gui.h"
@@ -106,14 +107,23 @@ create_gui_prefs_window (void)
 	GtkWidget *gui_prefs_window;
 	GtkWidget *gui_prefs_table;
 	GtkWidget *gui_joy_label;
-	GtkWidget *hbox1;
+/*	GtkWidget *hbox1;*/
 	GtkWidget *gui_joy_entry;
 	GtkWidget *gui_joy_checkbutton;
 	GtkWidget *gui_use_xmame_options_checkbutton;
 	GtkWidget *checkgames_checkbutton;
 	GtkWidget *VersionCheck_checkbutton;
 
-	gui_prefs_window = gtk_dialog_new_with_buttons (_("Startup Options"),
+	GladeXML *xml = glade_xml_new (GLADEDIR "startup_prefs.glade", NULL, NULL);
+	if (!xml) {
+		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "startup_prefs.glade");
+		return NULL;
+	}
+	gui_prefs_window = glade_xml_get_widget (xml, "gui_prefs_window");
+	gtk_widget_show (gui_prefs_window);
+	
+	
+/*	gui_prefs_window = gtk_dialog_new_with_buttons (_("Startup Options"),
 							GTK_WINDOW (MainWindow),
 							GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_NO_SEPARATOR,
 							GTK_STOCK_CANCEL,
@@ -142,22 +152,23 @@ create_gui_prefs_window (void)
 	gtk_widget_show (checkgames_checkbutton);
 	gtk_table_attach (GTK_TABLE (gui_prefs_table), checkgames_checkbutton, 0, 4, 0, 1,
 			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
+			  (GtkAttachOptions) (0), 0, 0);*/
+checkgames_checkbutton = glade_xml_get_widget (xml, "checkgames_checkbutton");
 
-	VersionCheck_checkbutton = gtk_check_button_new_with_mnemonic (_("_Enable version mismatch warning"));
+/*	VersionCheck_checkbutton = gtk_check_button_new_with_mnemonic (_("_Enable version mismatch warning"));
 	gtk_widget_show (VersionCheck_checkbutton);
 	gtk_table_attach (GTK_TABLE (gui_prefs_table), VersionCheck_checkbutton, 0, 4, 1, 2,
 			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	gui_use_xmame_options_checkbutton =
+			  (GtkAttachOptions) (0), 0, 0);*/
+VersionCheck_checkbutton = glade_xml_get_widget (xml, "VersionCheck_checkbutton");
+/*	gui_use_xmame_options_checkbutton =
 			gtk_check_button_new_with_mnemonic (_("Use xmame default options"));
 	gtk_widget_show (gui_use_xmame_options_checkbutton);
 	gtk_table_attach (GTK_TABLE (gui_prefs_table), gui_use_xmame_options_checkbutton, 0, 4, 2, 3,
 			  (GtkAttachOptions) (GTK_FILL),
-			  (GtkAttachOptions) (0), 0, 0);
-
-	gui_joy_checkbutton = gtk_check_button_new_with_mnemonic (_("Allow game selection by a _Joystick"));
+			  (GtkAttachOptions) (0), 0, 0);*/
+gui_use_xmame_options_checkbutton = glade_xml_get_widget (xml, "gui_use_xmame_options_checkbutton");
+/*	gui_joy_checkbutton = gtk_check_button_new_with_mnemonic (_("Allow game selection by a _Joystick"));
 	gtk_table_attach (GTK_TABLE (gui_prefs_table), gui_joy_checkbutton, 0, 4, 3, 4,
 			  (GtkAttachOptions) (GTK_FILL),
 			  (GtkAttachOptions) (0), 0, 0);
@@ -173,7 +184,10 @@ create_gui_prefs_window (void)
 	gtk_table_attach (GTK_TABLE (gui_prefs_table), gui_joy_entry, 0, 4, 5, 6,
 			  (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
 			  (GtkAttachOptions) (0), 10, 0);
-
+*/
+	gui_joy_checkbutton = glade_xml_get_widget (xml, "gui_joy_checkbutton");
+	gui_joy_label = glade_xml_get_widget (xml, "gui_joy_label");
+	gui_joy_entry = glade_xml_get_widget (xml, "gui_joy_entry");
 #ifdef ENABLE_JOYSTICK
 	gtk_widget_show (gui_joy_checkbutton);
 	gtk_widget_show (gui_joy_label);
