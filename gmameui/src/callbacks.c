@@ -923,14 +923,12 @@ on_displayed_list_resize_column (GtkWidget      *widget,
 		     pointer_list != NULL;
 		     pointer_list = g_list_next (pointer_list), i++)
 			if (gtk_tree_view_column_get_visible (GTK_TREE_VIEW_COLUMN (pointer_list->data)))
-				if (gtk_tree_view_column_get_min_width (GTK_TREE_VIEW_COLUMN (pointer_list->data)) != gtk_tree_view_column_get_width (GTK_TREE_VIEW_COLUMN (pointer_list->data)))
-				{
-					gui_prefs.ColumnWidth[gtk_tree_view_column_get_sort_column_id (GTK_TREE_VIEW_COLUMN (pointer_list->data))] = gtk_tree_view_column_get_width (GTK_TREE_VIEW_COLUMN (pointer_list->data));
+				gui_prefs.ColumnWidth[gtk_tree_view_column_get_sort_column_id (GTK_TREE_VIEW_COLUMN (pointer_list->data))] = gtk_tree_view_column_get_width (GTK_TREE_VIEW_COLUMN (pointer_list->data));
   /* This is to debug the fact that this callback is called when switching fron LIST to DETAIL mode
 	even if I block it??? (See the create_gamelist in gui.c)
 	if (gtk_tree_view_column_get_sort_column_id (GTK_TREE_VIEW_COLUMN (pointer_list->data))==GAMENAME)
 	GMAMEUI_DEBUG ("Gamename column: %i",gtk_tree_view_column_get_width (GTK_TREE_VIEW_COLUMN (pointer_list->data))); */
-				}
+
 		g_list_free (column_list);
 		g_list_free (pointer_list);
 	}
