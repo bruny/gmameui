@@ -2989,6 +2989,8 @@ create_gamelist (ListMode list_mode)
 	}
 	g_signal_handlers_unblock_by_func (G_OBJECT (main_gui.displayed_list), (gpointer)on_displayed_list_resize_column, NULL);
 
+	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (main_gui.displayed_list), TRUE);
+	
 	first_run = FALSE;
 	dirty_icon_cache = FALSE;
 
