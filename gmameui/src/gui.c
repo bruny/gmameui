@@ -907,7 +907,9 @@ create_gamelist_popupmenu (void)
 	GtkWidget *playback_game;
 	GtkWidget *properties;
 	GtkWidget *play_game;
+#ifdef NETWORK_ENABLED
 	GtkWidget *play_network_game;
+#endif
 	GtkWidget *add_to_favorites;
 	GtkWidget *remove_from_favorites;
 	GtkTooltips *tooltips;
@@ -929,7 +931,7 @@ create_gamelist_popupmenu (void)
 	gtk_widget_show (play_game);
 	gtk_container_add (GTK_CONTAINER (popup_menu), play_game);
 	gtk_tooltips_set_tip (tooltips, play_game, _("Play selected game"), NULL);
-  
+#ifdef NETWORK_GAME
 	/* Play network game */
 	play_network_game = gtk_image_menu_item_new_from_stock (GTK_STOCK_NETWORK, NULL);
 	gtk_label_set_text_with_mnemonic (GTK_LABEL (GTK_BIN (play_network_game)->child), _("Play network game"));
@@ -943,7 +945,7 @@ create_gamelist_popupmenu (void)
 	gtk_widget_show (play_network_game);
 	gtk_container_add (GTK_CONTAINER (popup_menu), play_network_game);
 	gtk_tooltips_set_tip (tooltips, play_network_game, _("Play selected game over a network"), NULL);
-  	
+#endif
 	separator = gtk_menu_item_new ();
 	gtk_widget_show (separator);
 	gtk_container_add (GTK_CONTAINER (popup_menu), separator);
@@ -1024,11 +1026,11 @@ create_gamelist_popupmenu (void)
 	g_signal_connect (G_OBJECT (play_game), "activate",
                       	    G_CALLBACK (on_play_activate),
                             NULL);
-
+#ifdef NETWORK_GAME
 	g_signal_connect (G_OBJECT (play_network_game), "activate",
                       	    G_CALLBACK (on_network_play_activate),
                             NULL);
-
+#endif
 	g_signal_connect (G_OBJECT (record_game), "activate",
 			    G_CALLBACK (on_play_and_record_input_activate),
 			    NULL);
@@ -2461,30 +2463,6 @@ get_status_icons (void)
 	}
 }
 
-RomEntry *
-gamelist_get_selected_game (void)
-{
-	RomEntry *game_data;
-	GtkTreeIter iter;
-	GtkTreeModel *model;
-	GtkTreeSelection *select;
-
-	game_data = NULL;
-
-	if (!main_gui.displayed_list)
-		return NULL;
-
-	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_gui.displayed_list));
-
-	if (gtk_tree_selection_get_selected (select, &model, &iter))
-	{
-		gtk_tree_model_get (model, &iter, ROMENTRY, &game_data, -1);
-	}
-
-	return game_data;
-}
-
-
 void set_list_sortable_column ()
 {
 	if ((gui_prefs.current_mode == DETAILS) || (gui_prefs.current_mode == DETAILS_TREE)) {
@@ -2979,8 +2957,7 @@ create_gamelist (ListMode list_mode)
 	GAMENAME column even if I block the callback?????? */
 	g_signal_handlers_block_by_func (G_OBJECT (main_gui.displayed_list), (gpointer)on_displayed_list_resize_column, NULL);
 	for (i = 0; i < NUMBER_COLUMN; i++) {
-		/* Iterate over the columns, in the order in which they are ordered */
-
+		/* Iterate over the columns */
 		column = gtk_tree_view_get_column (GTK_TREE_VIEW (main_gui.displayed_list), i);
 
 		/* Columns visible, Column size,... */
