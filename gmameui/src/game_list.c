@@ -704,6 +704,29 @@ gamelist_check (XmameExecutable *exec)
 	}		
 }
 
+RomEntry *
+gamelist_get_selected_game (void)
+{
+	RomEntry *game_data;
+	GtkTreeIter iter;
+	GtkTreeModel *model;
+	GtkTreeSelection *select;
+
+	game_data = NULL;
+
+	if (!main_gui.displayed_list)
+		return NULL;
+
+	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_gui.displayed_list));
+
+	if (gtk_tree_selection_get_selected (select, &model, &iter))
+	{
+		gtk_tree_model_get (model, &iter, ROMENTRY, &game_data, -1);
+	}
+
+	return game_data;
+}
+
 RomEntry* get_rom_from_gamelist_by_name (gchar *romname) {
 	GList *listpointer;
 	RomEntry *tmprom = NULL;
