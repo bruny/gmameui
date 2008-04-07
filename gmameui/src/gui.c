@@ -2444,6 +2444,10 @@ get_status_icons (void)
 				g_object_unref (Status_Icons [PROBLEMS]);
 				Status_Icons [PROBLEMS] = NULL;
 			}
+			if (Status_Icons [BEST_AVAIL]) {
+				g_object_unref (Status_Icons [BEST_AVAIL]);
+				Status_Icons [BEST_AVAIL] = NULL;
+			}
 			if (Status_Icons[NOT_AVAIL]) {
 				g_object_unref (Status_Icons [NOT_AVAIL]);
 				Status_Icons [NOT_AVAIL] = NULL;
@@ -2458,6 +2462,8 @@ get_status_icons (void)
 			Status_Icons [UNKNOWN] =  gmameui_get_icon_from_stock ("gmameui-rom-unknown");
 	 	if (Status_Icons [PROBLEMS] == NULL)
 			Status_Icons [PROBLEMS] = gmameui_get_icon_from_stock ("gmameui-rom-problems");
+	 	if (Status_Icons [BEST_AVAIL] == NULL)
+			Status_Icons [BEST_AVAIL] = gmameui_get_icon_from_stock ("gmameui-rom-problems");
 		if (Status_Icons [NOT_AVAIL] == NULL)
 			Status_Icons [NOT_AVAIL] = gmameui_get_icon_from_stock ("gmameui-rom-unavailable");
 	}
@@ -2630,13 +2636,9 @@ g_timer_start (timer);
 			} else { /* Original */
 				my_txtcolor = NULL; /* Black */
 			}
-			/* Pixbuf */
-			if (tmprom->icon_pixbuf)
-				pixbuf = tmprom->icon_pixbuf;
-			else
-				pixbuf = Status_Icons [tmprom->has_roms];
-			if (!pixbuf)
-				pixbuf = Status_Icons [CORRECT];
+
+			/* Set the pixbuf for the status icon */
+			pixbuf = Status_Icons [tmprom->has_roms];
 
 			/* Determine if the row is a root */
 			if ( (j == 0) || !(strcmp (tmprom->cloneof, "-")) || !my_romname_root || (strcmp (tmprom->cloneof, my_romname_root)) ) {
@@ -3135,23 +3137,9 @@ update_game_in_list (RomEntry *tmprom)
 		pixbuf_width = 20;
 		my_txtcolor = NULL; /* Black */
 	}
-	/* Pixbuf */
-/* FIXME This is also done in create_gamelist_content above - consolidate */
-	if (tmprom->has_roms == UNKNOWN) {
-		pixbuf = Status_Icons [UNKNOWN];
-	} else if (tmprom->has_roms == INCORRECT) {
-		pixbuf = Status_Icons [INCORRECT];
-	} else if (!tmprom->status) {
-		pixbuf = Status_Icons [PROBLEMS];
-	} else if (tmprom->has_roms == NOT_AVAIL) {
-		pixbuf = Status_Icons [NOT_AVAIL];
-	} else {
-		if (tmprom->icon_pixbuf) {
-			pixbuf = tmprom->icon_pixbuf;
-		} else {
-			pixbuf = Status_Icons [CORRECT];
-		}
-	}
+
+	/* Set the pixbuf for the status icon */
+	pixbuf = Status_Icons [tmprom->has_roms];
 
 	if (is_tree_store) {
 		gtk_tree_store_set (GTK_TREE_STORE (main_gui.tree_model), &tmprom->position,
