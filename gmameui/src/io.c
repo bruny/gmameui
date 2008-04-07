@@ -599,6 +599,46 @@ save_dirs_ini (void)
 	return TRUE;
 }
 
+gboolean
+check_rom_exists_as_file (gchar *romname) {
+	gchar *filename;
+	int i;
+	
+	filename = g_malloc (200);
+	for (i=0;gui_prefs.RomPath[i]!=NULL;i++) {
+		g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s.zip", gui_prefs.RomPath[i], romname);
+		if (g_file_test (filename, g_file_test (filename, G_FILE_TEST_EXISTS)))
+			return TRUE;
+
+		g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s", gui_prefs.RomPath[i], romname);
+		if (g_file_test (filename, G_FILE_TEST_IS_DIR))
+			return TRUE;
+
+	}
+
+	return FALSE;
+}
+
+gboolean
+check_samples_exists_as_file (gchar *samplename) {
+	gchar *filename;
+	int i;
+	
+	filename = g_malloc (200);
+	for (i=0;gui_prefs.SamplePath[i]!=NULL;i++) {
+		g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s.zip", gui_prefs.SamplePath[i], samplename);
+		if (g_file_test (filename, g_file_test (filename, G_FILE_TEST_EXISTS)))
+			return TRUE;
+
+		g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s", gui_prefs.SamplePath[i], samplename);
+		if (g_file_test (filename, G_FILE_TEST_IS_DIR))
+			return TRUE;
+
+	}
+
+	return FALSE;
+}
+
 void
 quick_check (void)
 {
@@ -636,83 +676,35 @@ quick_check (void)
 	{
 		rom = (RomEntry *)list_pointer->data;
 
-		/* Looking for roms */
-		for (i=0;gui_prefs.RomPath[i]!=NULL;i++)
-		{
-			g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s.zip", gui_prefs.RomPath[i], rom->romname);
-			if (g_file_test (filename, g_file_test (filename, G_FILE_TEST_EXISTS)))
-			{
+		/* Check for the existence of the ROM; if the ROM is a clone, the
+		   parent set must exist as well */
+		if (strcmp (rom->cloneof, "-"))
+			if ((check_rom_exists_as_file (rom->romname)) &&
+			    (check_rom_exists_as_file (rom->cloneof)))
 				rom->has_roms = CORRECT;
-			}
 			else
-			{	/*test of directories*/
-				g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s", gui_prefs.RomPath[i], rom->romname);
-				if (g_file_test (filename, G_FILE_TEST_IS_DIR))
-				{
-					rom->has_roms = CORRECT;
-				}
-				else if (strcmp (rom->cloneof, "-"))
-				{
-					g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s.zip", gui_prefs.RomPath[i], rom->cloneof);
-					if (g_file_test (filename, G_FILE_TEST_EXISTS))
-					{
-						rom->has_roms = CORRECT;
-					}
-					else
-					{
-						g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s", gui_prefs.RomPath[i], rom->cloneof);
-						if (g_file_test (filename, G_FILE_TEST_IS_DIR))
-						{
-							rom->has_roms = CORRECT;
-						}
-					}
-				}
-			}
-			/* prevent to look into other folders if we already find the rom*/
-			if (rom->has_roms) break;
-		}
+				rom->has_roms = NOT_AVAIL;
+		else if (check_rom_exists_as_file (rom->romname))
+			rom->has_roms = CORRECT;
+		else
+			rom->has_roms = NOT_AVAIL;
+
 
 		/* Looking for samples */
 		rom->has_samples = 0;
 
 		if (rom->nb_samples > 0)
 		{
-			for (i = 0; gui_prefs.SamplePath[i] != NULL; i++)
-			{
-				g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s.zip", gui_prefs.SamplePath[i], rom->romname);
-				if (g_file_test (filename, G_FILE_TEST_EXISTS))
-		        {
-		        	rom->has_samples = 1;
-		        }
-		        else
-		        {	/*test of directories*/
-					g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s", gui_prefs.SamplePath[i], rom->romname);
-					if (g_file_test (filename, G_FILE_TEST_IS_DIR))
-					{
-						rom->has_samples = 1;
-					}
-					else if (strcmp (rom->sampleof, "-"))
-			       	{
-			       		g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s.zip", gui_prefs.SamplePath[i], rom->sampleof);
-			       		if (g_file_test (filename, G_FILE_TEST_EXISTS))
-			       		{
-			      			rom->has_samples = 1;
-			       		}
-						else
-						{
-							g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s", gui_prefs.SamplePath[i], rom->sampleof);
-							if (g_file_test (filename, G_FILE_TEST_IS_DIR))
-							{
-								rom->has_samples = 1;
-							}
-						}
-					}
-				}
-				/* prevent to look into other folders if we already find the sample*/
-				if (rom->has_samples) break;
-			}
+			/* Check for the existence of the samples; if the samples is a clone, the
+			   parent set must exist as well */
+			if (strcmp (rom->sampleof, "-"))
+				if ((check_rom_exists_as_file (rom->romname)) &&
+				    (check_rom_exists_as_file (rom->sampleof)))
+					rom->has_samples = CORRECT;
+			else if (check_rom_exists_as_file (rom->romname))
+				rom->has_samples = CORRECT;
 		}
-
+		
 		list_pointer->data = NULL;
 		nb_rom_not_checked--;
 
