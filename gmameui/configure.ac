@@ -26,6 +26,10 @@ PKG_CHECK_MODULES(GLADE2, libglade-2.0, [], AC_MSG_ERROR([*** libglade2 not foun
 AC_SUBST(GLADE2_CFLAGS)
 AC_SUBST(GLADE2_LIBS)
 
+PKG_CHECK_MODULES(GNOME, libgnome-2.0, [], AC_MSG_ERROR([*** libgnome2 not found!]))
+AC_SUBST(GNOME_CFLAGS)
+AC_SUBST(GNOME_LIBS)
+
 AC_PATH_PROG(gmameuipath, gmameui)
 dnl Subst PACKAGE_PIXMAPS_DIR.
 PACKAGE_PIXMAPS_DIR="${prefix}/${DATADIRNAME}/pixmaps/${PACKAGE}"

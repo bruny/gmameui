@@ -27,11 +27,14 @@ gmameui_SOURCES = \
 	keyboard.c keyboard.h \
 	network_game.h network_game.c \
 	xmame_options.h xmame_options.c \
-	xmame_executable.h xmame_executable.c
+	xmame_executable.h xmame_executable.c \
+	mame_options.c mame_options.h \
+	mame_options_dialog.c mame_options_dialog.h \
+	cell-renderer-captioned-image.c cell-renderer-captioned-image.h
 
-gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(INTLLIBS)
+gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(GNOME_LIBS) $(INTLLIBS)
 
-AM_CPPFLAGS = $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
+AM_CPPFLAGS = $(GTK_CFLAGS) $(GLADE2_CFLAGS) $(GNOME_CFLAGS) \
 		-DDATADIR=\""$(datadir)"\" \
 		-DGLADEDIR=\"${datadir}/gmameui/glade/\" \
 		-DPACKAGE_LOCALE_DIR=\""$(datadir)/locale"\"
