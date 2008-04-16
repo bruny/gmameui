@@ -43,50 +43,147 @@ xmame_options_init (void)
 {
 	option_map = g_hash_table_new (g_str_hash, g_str_equal);
 
+	/* Core search path options */
+	ADD_OPTION ("rompath");
+	ADD_OPTION ("samplepath");
+	ADD_OPTION ("artwork_directory");
+	ADD_OPTION ("ctrlr_directory");
+	ADD_OPTION ("inipath");
+	ADD_OPTION ("fontpath");
+	
+	/* Core output directory options */
+	ADD_OPTION ("cfg_directory");
+	ADD_OPTION ("nvram_directory");
+	ADD_OPTION ("memcard_directory");
+	ADD_OPTION ("input_directory");
+	ADD_OPTION ("state_directory");
+	ADD_OPTION ("snapshot_directory");
+	ADD_OPTION ("diff_directory");
+	ADD_OPTION ("comment_directory");
+	
+	/* Core filename options */
+	ADD_OPTION ("cheat_file");
+	
+	/* Core performance options */
+	ADD_OPTION ("autoframeskip");
+	ADD_OPTION ("frameskip");
+	ADD_OPTION ("seconds_to_run");
+	ADD_OPTION ("throttle");
+	ADD_OPTION ("sleep");
+	ADD_OPTION ("speed");
+	ADD_OPTION ("refreshspeed");
+	
+	/* Core rotation options */
+	ADD_OPTION ("rotate");
+	ADD_OPTION ("ror");
+	ADD_OPTION ("rol");
+	ADD_OPTION ("autoror");
+	ADD_OPTION ("autorol");
+	ADD_OPTION ("flipx");
+	ADD_OPTION ("flipy");
+	
+	/* Core artwork options */
+	ADD_OPTION ("artwork_crop");
+	ADD_OPTION ("use_backdrops");
+	ADD_OPTION ("use_overlays");
+	ADD_OPTION ("use_bezels");
+	
+	/* Core screen options */
+	ADD_OPTION ("brightness");
+	ADD_OPTION ("contrast");
+	ADD_OPTION ("gamma");
+	ADD_OPTION ("pause_brightness");
+	
+	/* Core vector options */
+	ADD_OPTION ("antialias");
+	ADD_OPTION ("beam");
+	ADD_OPTION ("flicker");
+	
+	/* Core sound options */
+	ADD_OPTION ("sound");
+	ADD_OPTION ("samplerate");
+	ADD_OPTION ("samples");
+	ADD_OPTION ("volume");
+	
+	/* Core input options TODO */
+	
+	/* Core input automatic enable options TODO */
+	
+	/* Core misc options */
+	ADD_OPTION ("bios");
+	ADD_OPTION ("cheat");
+	ADD_OPTION ("skip_gameinfo");
+	
+	/* Core debugging options */
+	ADD_OPTION ("log");
+	ADD_OPTION ("verbose");
+	ADD_OPTION ("update_in_pause");
+	/* Debugging options */
+	ADD_OPTION ("oslog");
+	
+	/* Performance options */
+	ADD_OPTION ("multithreading");
+	ADD_OPTION ("sdlvideofps");
+	
+	/* Video options */
+	ADD_OPTION ("video");
+	ADD_OPTION ("numscreens");
+	ADD_OPTION ("window");
+	ADD_OPTION ("maximise");
+	ADD_OPTION ("keepaspect");
+	ADD_OPTION ("unevenstretch");
+	ADD_OPTION ("effect");
+	ADD_OPTION ("centerh");
+	ADD_OPTION ("centerv");
+	ADD_OPTION ("waitvsync");
+	ADD_OPTION ("yuvmode");
+	
+	/* OpenGL-specific options TODO */
+	
+	/* Per-window video options TODO */
+	
+	/* Full screen options */
+	ADD_OPTION ("switchres");
+	ADD_OPTION ("useallheads");
+	
+	/* Sound options */
+	ADD_OPTION ("audio_latency");
+	
+	/* SDL keyboard mapping TODO */
+	
+	/* SDL joystick mapping TODO */
+	
+	
+	/* XMAME or redundant options */
 	ADD_OPTION ("alsa-buffer");
 	ADD_OPTION ("alsa-pcm");
 	ADD_OPTION ("alsacard");
 	ADD_OPTION ("alsadevice");
 	ADD_OPTION ("analogstick");
-	ADD_OPTION ("antialias");
 	ADD_OPTION ("arbheight");
 	ADD_OPTION ("artsBufferTime");
 	ADD_OPTION ("artwork");
-	ADD_OPTION ("artwork_crop");
-	ADD_OPTION ("artwork_directory");
 	ADD_OPTION ("artwork_resolution");
 	ADD_OPTION ("audiodevice");
 	ADD_OPTION ("audio_preferred");
 	ADD_OPTION ("autodouble");
-	ADD_OPTION ("autoframeskip");
 	ADD_OPTION ("bind");
-	ADD_OPTION ("bios");
 	ADD_OPTION ("bpp");
-	ADD_OPTION ("brightness");
 	ADD_OPTION ("bufsize");
 	ADD_OPTION ("cabview");
 	ADD_OPTION ("centerx");
 	ADD_OPTION ("centery");
-	ADD_OPTION ("cfg_directory");
 	ADD_OPTION ("cfgname");
-	ADD_OPTION ("cheat");
-	ADD_OPTION ("cheat_file");
 	ADD_OPTION ("ctrlr");
-	ADD_OPTION ("ctrlr_directory");
 	ADD_OPTION ("cursor");
 	ADD_OPTION ("debug");
 	ADD_OPTION ("debug-size");
-	ADD_OPTION ("diff_directory");
 	ADD_OPTION ("dirty");
 	ADD_OPTION ("displayaspectratio");
 	ADD_OPTION ("doublebuf");
 	ADD_OPTION ("dsp-plugin");
-	ADD_OPTION ("effect");
 	ADD_OPTION ("fakesound");
-	ADD_OPTION ("flipx");
-	ADD_OPTION ("flipy");
 	ADD_OPTION ("force-yuv");
-	ADD_OPTION ("frameskip");
 	ADD_OPTION ("frameskipper");
 	ADD_OPTION ("fullscreen");
 	ADD_OPTION ("gamma-correction");
@@ -114,12 +211,9 @@ xmame_options_init (void)
 	ADD_OPTION ("history_file");
 	ADD_OPTION ("hotrod");
 	ADD_OPTION ("hotrodse");
-	ADD_OPTION ("inipath");
-	ADD_OPTION ("input_directory");
 	ADD_OPTION ("intensity");
 	ADD_OPTION ("joydevname");
 	ADD_OPTION ("joytype");
-	ADD_OPTION ("keepaspect");
 	ADD_OPTION ("keyboard_leds");
 	ADD_OPTION ("linear");
 	ADD_OPTION ("list");
@@ -140,7 +234,6 @@ xmame_options_init (void)
 	ADD_OPTION ("mapkey");
 	ADD_OPTION ("master");
 	ADD_OPTION ("maxautoframeskip");
-	ADD_OPTION ("memcard_directory");
 	ADD_OPTION ("mitshm");
 	ADD_OPTION ("mixerdevice");
 	ADD_OPTION ("modenumber");
@@ -148,7 +241,6 @@ xmame_options_init (void)
 	ADD_OPTION ("mtxil");
 	ADD_OPTION ("netmapkey");
 	ADD_OPTION ("norotate");
-	ADD_OPTION ("nvram_directory");
 	ADD_OPTION ("paddevname");
 	ADD_OPTION ("parallelsync");
 	ADD_OPTION ("phcursor");
@@ -158,31 +250,18 @@ xmame_options_init (void)
 	ADD_OPTION ("rapidfire");
 	ADD_OPTION ("render-mode");
 	ADD_OPTION ("resolution");
-	ADD_OPTION ("rol");
-	ADD_OPTION ("rompath");
-	ADD_OPTION ("ror");
 	ADD_OPTION ("samplefreq");
-	ADD_OPTION ("samplepath");
-	ADD_OPTION ("samples");
 	ADD_OPTION ("scanlines");
 	ADD_OPTION ("skip_disclaimer");
-	ADD_OPTION ("skip_gameinfo");
 	ADD_OPTION ("slave");
 	ADD_OPTION ("sleepidle");
-	ADD_OPTION ("snapshot_directory");
-	ADD_OPTION ("sound");
 	ADD_OPTION ("sound-mixer-plugin");
 	ADD_OPTION ("statedebug");
-	ADD_OPTION ("state_directory");
-	ADD_OPTION ("throttle");
 	ADD_OPTION ("timer");
 	ADD_OPTION ("translucency");
 	ADD_OPTION ("tweak");
 	ADD_OPTION ("ugcicoin");
 	ADD_OPTION ("usbpspad");
-	ADD_OPTION ("use_backdrops");
-	ADD_OPTION ("use_bezels");
-	ADD_OPTION ("use_overlays");
 	ADD_OPTION ("vectorres");
 	ADD_OPTION ("verifyroms");
 	ADD_OPTION ("verifysamples");
@@ -190,7 +269,6 @@ xmame_options_init (void)
 	ADD_OPTION ("vidix");
 	ADD_OPTION ("vidmode_h");
 	ADD_OPTION ("vidmode_w");
-	ADD_OPTION ("volume");
 	ADD_OPTION ("widthscale");
 	ADD_OPTION ("winkeys");
 	ADD_OPTION ("x11joyname");
