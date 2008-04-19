@@ -532,20 +532,20 @@ GMAMEUI_DEBUG ("Finished loading directories ini file");
 	if (!gui_prefs.IconDirectory) gui_prefs.IconDirectory = g_build_filename (XMAME_ROOT, "icons", NULL);
 	
 	/* The following configuration options are all stored under .gmameui */
-	gui_prefs.HiscoreDirectory = g_build_filename (g_get_home_dir () , ".gmameui", "hi", NULL);
-	gui_prefs.DiffDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "diff", NULL);
-	gui_prefs.InputDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "inp", NULL);
-	gui_prefs.NVRamDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "nvram", NULL);
-	gui_prefs.MemCardDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "memcard", NULL);
-	gui_prefs.ConfigDirectory = g_build_filename (g_get_home_dir (), ".gmameui" , "cfg", NULL);
-	gui_prefs.StateDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "sta", NULL);
-	gui_prefs.inipath = g_build_filename (g_get_home_dir (), ".gmameui" , "ini", NULL);
+	if (!gui_prefs.HiscoreDirectory) gui_prefs.HiscoreDirectory = g_build_filename (g_get_home_dir () , ".gmameui", "hi", NULL);
+	if (!gui_prefs.DiffDirectory) gui_prefs.DiffDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "diff", NULL);
+	if (!gui_prefs.InputDirectory) gui_prefs.InputDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "inp", NULL);
+	if (!gui_prefs.NVRamDirectory) gui_prefs.NVRamDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "nvram", NULL);
+	if (!gui_prefs.MemCardDirectory) gui_prefs.MemCardDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "memcard", NULL);
+	if (!gui_prefs.ConfigDirectory) gui_prefs.ConfigDirectory = g_build_filename (g_get_home_dir (), ".gmameui" , "cfg", NULL);
+	if (!gui_prefs.StateDirectory) gui_prefs.StateDirectory = g_build_filename (g_get_home_dir (), ".gmameui", "sta", NULL);
+	if (!gui_prefs.inipath) gui_prefs.inipath = g_build_filename (g_get_home_dir (), ".gmameui" , "ini", NULL);
 	
-	gui_prefs.catverDirectory = g_build_filename (g_get_home_dir (), ".gmameui", NULL);
-	gui_prefs.CheatFile = g_build_filename (XMAME_ROOT, "cheat.dat", NULL);
-	gui_prefs.HiscoreFile = g_build_filename (XMAME_ROOT, "hiscore.dat", NULL);
-	gui_prefs.HistoryFile = g_build_filename (XMAME_ROOT, "history.dat", NULL);
-	gui_prefs.MameInfoFile = g_build_filename (XMAME_ROOT, "mameinfo.dat", NULL);
+	if (!gui_prefs.catverDirectory) gui_prefs.catverDirectory = g_build_filename (g_get_home_dir (), ".gmameui", NULL);
+	if (!gui_prefs.CheatFile) gui_prefs.CheatFile = g_build_filename (XMAME_ROOT, "cheat.dat", NULL);
+	if (!gui_prefs.HiscoreFile) gui_prefs.HiscoreFile = g_build_filename (XMAME_ROOT, "hiscore.dat", NULL);
+	if (!gui_prefs.HistoryFile) gui_prefs.HistoryFile  = g_build_filename (XMAME_ROOT, "history.dat", NULL);
+	if (!gui_prefs.MameInfoFile) gui_prefs.MameInfoFile = g_build_filename (XMAME_ROOT, "mameinfo.dat", NULL);
 	
 	g_free (filename);
 	
