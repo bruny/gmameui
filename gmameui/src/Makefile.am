@@ -37,4 +37,11 @@ gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(GNOME_LIBS) $(INTLLIBS)
 AM_CPPFLAGS = $(GTK_CFLAGS) $(GLADE2_CFLAGS) $(GNOME_CFLAGS) \
 		-DDATADIR=\""$(datadir)"\" \
 		-DGLADEDIR=\"${datadir}/gmameui/glade/\" \
+		-DGMAMEUI_UI_DIR=\"${datadir}/gmameui/ui/\" \
 		-DPACKAGE_LOCALE_DIR=\""$(datadir)/locale"\"
+
+ui_DATA = gmameui-ui.xml
+uidir = $(datadir)/gmameui/ui/
+
+EXTRA_DIST = $(ui_DATA)
+

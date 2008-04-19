@@ -1208,7 +1208,7 @@ void
 gamelist_popupmenu_show (RomEntry       *rom,
 			 GdkEventButton *event)
 {
-	gpointer popup_menu_ptr;
+/*	gpointer popup_menu_ptr;
 	GtkWidget *popup_menu;
 
 	GtkWidget *add_to_favorites;
@@ -1257,7 +1257,31 @@ gamelist_popupmenu_show (RomEntry       *rom,
 	}
 
 	gtk_menu_popup (GTK_MENU (popup_menu),NULL,NULL,
-			NULL,NULL, event->button, event->time);
+			NULL,NULL, event->button, event->time);*/
+	GtkWidget *popup_menu;
+
+	popup_menu = gtk_ui_manager_get_widget (main_gui.manager, "/GameListPopup");
+	g_return_val_if_fail (popup_menu != NULL, FALSE);
+
+	if (!current_exec) {
+		gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
+						FALSE);
+	} else {
+		xmame_get_options (current_exec);
+		gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
+						TRUE);
+	}
+	
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/GameListPopup/FileFavesAdd"),
+				  !rom->favourite);
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/GameListPopup/FileFavesRemove"),
+				  rom->favourite);
+
+	gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,
+			NULL, NULL,
+			event->button, event->time);
 }
 
 

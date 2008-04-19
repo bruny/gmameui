@@ -376,6 +376,35 @@ on_details_tree_view_menu_activate (GtkCheckMenuItem *menuitem,
 	gtk_toggle_tool_button_set_active (main_gui.details_tree_view_button, menuitem->active);
 }
 
+/* This function is called when the radio option defining the list mode is
+   changed */
+void     on_view_type_changed                   (GtkRadioAction *action,
+                                                 gpointer       user_data)
+{
+	gint val;
+	
+	val = gtk_radio_action_get_current_value (action);
+/*	
+	switch (val)
+		case 0:
+// TODO			gtk_toggle_tool_button_set_active (main_gui.list_view_button, menuitem->active);
+			break;
+		case 1:
+// TODO			gtk_toggle_tool_button_set_active (main_gui.list_tree_view_button, menuitem->active);
+			break;
+		case 2:
+// TODO			gtk_toggle_tool_button_set_active (main_gui.details_view_button, menuitem->active);
+			break;
+		case 3:
+// TODO			gtk_toggle_tool_button_set_active (main_gui.details_tree_view_button, menuitem->active);
+			break;
+
+	on_list_view_menu_activate
+	on_list_tree_view_menu_activate
+	on_details_view_menu_activate
+	on_details_tree_view_menu_activate
+*/
+}
 
 void
 on_expand_all_activate (GtkMenuItem *menuitem,

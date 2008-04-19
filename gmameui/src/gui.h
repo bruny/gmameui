@@ -38,6 +38,107 @@
 
 #include "gmameui.h"
 #include "unzip.h"
+#include "callbacks.h"
+
+/* The following menu entries are always enabled */
+static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
+{
+	/* Toplevel */
+	{ "File", NULL, N_("_File") },
+	{ "View", NULL, N_("_View") },
+	{ "Options", NULL, N_("_Options") },
+	{ "Help", NULL, N_("_Help") },
+
+	/* File menu */
+	{ "FileAuditAllGames", NULL, N_("_Audit All Games"), NULL,
+	  N_("Audit ROM and sample sets"), G_CALLBACK (on_audit_all_games_activate) },
+	{ "FileSelectRandom", NULL, N_("_Select Random Game"), NULL,
+	  N_("Play currently selected game"), G_CALLBACK (on_select_random_game_activate) },
+	{ "FileQuit", GTK_STOCK_QUIT, N_("_Quit"), "<control>Q",
+	  N_("Quit GMAMEUI"), G_CALLBACK (on_exit_activate) },
+	
+	/* View menu */
+	{ "ViewExpandAll", NULL, N_("Expand All"), NULL,
+	  N_("Expand all rows"), G_CALLBACK (on_expand_all_activate) },
+	{ "ViewCollapseAll", NULL, N_("Collapse All"), NULL,
+	  N_("Collapse all rows"), G_CALLBACK (on_collapse_all_activate) },
+	{ "ViewColumnLayout", NULL, N_("_Column Layout..."), NULL,
+	  N_("Set column layout"), G_CALLBACK (on_column_layout_activate) },
+	{ "ViewRefresh", GTK_STOCK_REFRESH, N_("Refresh"), "F5",
+	  N_("Refresh game list"), G_CALLBACK (on_refresh_activate) },
+
+	/* Option menu */
+	{ "OptionCloneColor", GTK_STOCK_SELECT_COLOR, N_("Clone Color..."), NULL,
+	  N_("Set clones color in gamelist"), G_CALLBACK (on_clone_color_menu_activate) },
+	{ "OptionRebuildGameList", NULL, N_("_Rebuild Game List"), NULL,
+	  N_("Rebuild the game list from executable information"), G_CALLBACK (on_rebuild_game_list_menu_activate) },
+	{ "OptionDirs", NULL, N_("_Directories..."), NULL,
+	  N_("Set directory configuration"), G_CALLBACK (on_directories_menu_activate) },  
+	{ "OptionDefaultOpts", NULL, N_("Default _Options..."), NULL,
+	  N_("Set default game options"), G_CALLBACK (on_default_option_menu_activate) },
+	{ "OptionStartupOpts", GTK_STOCK_PREFERENCES, N_("_Startup Options..."), NULL,
+	  N_("Set startup options"), G_CALLBACK (on_startup_option_activate) },  
+	  	  
+	/* Help menu */
+	{"HelpContents", GTK_STOCK_HELP, N_("_Contents"), "F1",
+	 N_("Open the GMAMEUI manual"), NULL/*G_CALLBACK (on_help_activate)*/ },
+	{ "HelpAbout", GTK_STOCK_ABOUT, NULL, NULL,
+	 N_("About this application"), G_CALLBACK (on_about_activate) }
+};
+
+/* The following menu entries are enabled when a ROM is selected */
+static const GtkActionEntry gmameui_rom_menu_entries[] =
+{
+	/* File menu */
+	{ "FilePlayGame", NULL, N_("Play"), NULL,
+	  N_("Play currently selected game"), G_CALLBACK (on_play_activate) },
+	{ "FilePlayRecord", GTK_STOCK_SAVE, N_("Play and Record Input..."), NULL,
+	  N_("Play currently selected game"), G_CALLBACK (on_play_and_record_input_activate) },
+	{ "FilePlaybackRecord", GTK_STOCK_OPEN, N_("Playback Input..."), NULL,
+	  N_("Play currently selected game"), G_CALLBACK (on_playback_input_activate) },
+	{ "FileFavesAdd", GTK_STOCK_ADD, N_("Add to 'Favorites'"), NULL,
+	  N_("Play currently selected game"), G_CALLBACK (on_add_to_favorites_activate) },
+	{ "FileFavesRemove", GTK_STOCK_REMOVE, N_("Remove from 'Favorites'"), NULL,
+	  N_("Play currently selected game"), G_CALLBACK (on_remove_from_favorites_activate) },
+	{ "FileProperties", GTK_STOCK_PROPERTIES, N_("Properties"), NULL,
+	  N_("Play currently selected game"), G_CALLBACK (on_properties_activate) },  
+
+};
+
+static const GtkToggleActionEntry gmameui_view_toggle_menu_entries[] = 
+{
+	{ "ViewToolbar", NULL, N_("_Toolbar"), "<alt>T",
+	  N_("Show or hide the toolbar"),
+	  G_CALLBACK (on_toolbar_view_menu_activate), TRUE },
+	{ "ViewStatusBar", NULL, N_("_Status Bar"), "<alt>S",
+	  N_("Show or hide the status bar"),
+	  G_CALLBACK (on_status_bar_view_menu_activate), TRUE },  
+	{ "ViewFolderList", NULL, N_("Fold_er List"), "<alt>D",
+	  N_("Show or hide the folder list"),
+	  G_CALLBACK (on_folder_list_activate), TRUE },  
+	{ "ViewSidebarPanel", NULL, N_("Scree_nshot Panel"), "<alt>N",
+	  N_("Show or hide the screenshot panel"),
+	  G_CALLBACK (on_screen_shot_activate), TRUE },   
+	{ "ViewSidebarPanelTab", NULL, N_("Scree_nshot Panel Tab"), "<alt>O",
+	  N_("Show or hide the screenshot panel tabulation"),
+	  G_CALLBACK (on_screen_shot_tab_activate), TRUE },  
+	  
+	{ "ViewThePrefix", NULL, N_("The _Prefix"), NULL,
+	  N_("Show \"The\" at the end."),
+	  G_CALLBACK (on_the_prefix_activate), TRUE },
+};
+
+static const GtkRadioActionEntry gmameui_view_radio_menu_entries[] =
+{
+	{ "ViewListView", NULL, N_("_List"), NULL,
+	  N_("Displays items in a list"), 0 },
+	{ "ViewTreeView", NULL, N_("List _Tree"), NULL,
+	  N_("Displays items in a tree list with clones indented"), 1 },
+	{ "ViewDetailsListView", NULL, N_("_Details"), NULL,
+	  N_("Displays detailed information about each item"), 2 },
+	{ "ViewDetailsTreeView", NULL, N_("Detai_ls Tree"), NULL,
+	  N_("Displays detailed information about each item with clones indented"), 3 },
+};
 
 /**** Sidebar functionality ****/
 #define GMAMEUI_TYPE_SIDEBAR        (gmameui_sidebar_get_type ())
@@ -149,7 +250,9 @@ struct main_gui_struct {
 	GtkWidget *executable_menu;
 
 	GtkWidget *clone_selector;
-
+	
+	GtkUIManager *manager;
+	GtkActionGroup *gmameui_rom_action_group;
 };
 
 struct main_gui_struct main_gui;

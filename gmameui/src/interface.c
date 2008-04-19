@@ -135,6 +135,9 @@ create_MainWindow (void)
   GtkTooltips *tooltips;
   PangoFontDescription *fontdesc;
   gint font_size;
+	
+	GtkActionGroup *action_group;
+	GError *error = NULL;
 
   tooltips = gtk_tooltips_new ();
 
@@ -480,6 +483,65 @@ create_MainWindow (void)
   gtk_container_add (GTK_CONTAINER (help_menu_menu), aboutMenu);
   gtk_tooltips_set_tip (tooltips, aboutMenu, _("Displays program and Copyright information"), NULL);
 
+	
+	main_gui.manager = gtk_ui_manager_new ();
+	
+	action_group = gtk_action_group_new ("GmameuiWindowAlwaysSensitiveActions");
+	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_add_actions (action_group,
+				      gmameui_always_sensitive_menu_entries,
+				      G_N_ELEMENTS (gmameui_always_sensitive_menu_entries),
+				      MainWindow);
+	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
+	g_object_unref (action_group);
+	/* TODO window->priv->always_sensitive_action_group = action_group;*/
+	
+	action_group = gtk_action_group_new ("GmameuiWindowROMActions");
+	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_add_actions (action_group,
+				      gmameui_rom_menu_entries,
+				      G_N_ELEMENTS (gmameui_rom_menu_entries),
+				      MainWindow);
+	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
+	g_object_unref (action_group);
+	main_gui.gmameui_rom_action_group = action_group;
+	
+	action_group = gtk_action_group_new ("GmameuiWindowToggleActions");
+	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_add_toggle_actions (action_group,
+					     gmameui_view_toggle_menu_entries,
+					     G_N_ELEMENTS (gmameui_view_toggle_menu_entries),
+					     MainWindow);
+	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
+	g_object_unref (action_group);
+
+	action_group = gtk_action_group_new ("GmameuiWindowToggleActions");
+	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_add_radio_actions (action_group,
+					    gmameui_view_radio_menu_entries,
+					    G_N_ELEMENTS (gmameui_view_radio_menu_entries),
+					    0,  /* TODO */
+					    G_CALLBACK (on_view_type_changed),
+					    MainWindow);
+	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
+	g_object_unref (action_group);
+	
+	/* Now load the UI definition */
+	gtk_ui_manager_add_ui_from_file (main_gui.manager, GMAMEUI_UI_DIR "gmameui-ui.xml", &error);
+	if (error != NULL)
+	{
+		GMAMEUI_DEBUG ("Error loading gmameui-ui.xml: %s", error->message);
+		g_error_free (error);
+	}
+	
+	/* TODO
+	menubar = gtk_ui_manager_get_widget (main_gui.manager, "/MenuBar");
+	gtk_box_pack_start (GTK_BOX (vbox1), 
+			    menubar, 
+			    FALSE, 
+			    FALSE, 
+			    0);*/
+	
   toolbar1 = gtk_toolbar_new ();
   gtk_toolbar_set_orientation (GTK_TOOLBAR (toolbar1), GTK_ORIENTATION_HORIZONTAL);
   gtk_toolbar_set_style (GTK_TOOLBAR (toolbar1), GTK_TOOLBAR_BOTH);

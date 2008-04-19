@@ -94,6 +94,9 @@ void     on_details_tree_view_menu_activate     (GtkCheckMenuItem *menuitem,
 void     on_column_layout_activate              (GtkCheckMenuItem *menuitem,
                                                  gpointer         user_data);
 
+void     on_view_type_changed                   (GtkRadioAction *action,
+                                                 gpointer       user_data);
+
 void     on_expand_all_activate                 (GtkMenuItem *menuitem,
                                                  gpointer         user_data);
 
