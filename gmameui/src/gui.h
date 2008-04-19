@@ -39,6 +39,51 @@
 #include "gmameui.h"
 #include "unzip.h"
 
+/**** Sidebar functionality ****/
+#define GMAMEUI_TYPE_SIDEBAR        (gmameui_sidebar_get_type ())
+#define GMAMEUI_SIDEBAR(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), GMAMEUI_TYPE_SIDEBAR, GMAMEUISidebar))
+#define GMAMEUI_SIDEBAR_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST((k), GMAMEUI_TYPE_SIDEBAR, GMAMEUISidebarClass))
+#define GMAMEUI_IS_SIDEBAR(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), GMAMEUI_TYPE_SIDEBAR))
+#define GMAMEUI_IS_SIDEBAR_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), GMAMEUI_TYPE_SIDEBAR))
+
+typedef struct _GMAMEUISidebar        GMAMEUISidebar;
+typedef struct _GMAMEUISidebarClass   GMAMEUISidebarClass;
+typedef struct _GMAMEUISidebarPrivate GMAMEUISidebarPrivate;
+
+/*
+ * Main object structure
+ */
+
+struct _GMAMEUISidebar 
+{
+	GtkFrame parent; /* Container for all the nested widgets */
+
+	/*< private > */
+	GMAMEUISidebarPrivate *priv;
+};
+
+struct _GMAMEUISidebarClass {
+	GtkFrameClass parent_class;
+};
+
+GType gmameui_sidebar_get_type (void);
+
+GtkWidget *gmameui_sidebar_new (void);
+
+static void
+gmameui_sidebar_set_page (GMAMEUISidebar *sidebar, RomEntry *rom, screenshot_type page);
+
+static void
+gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom);
+
+static gboolean
+gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, RomEntry *rom);
+
+static void
+gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);
+
+/**** End Sidebar functionality ****/
+
 GtkWidget *MainWindow;
 
 struct main_gui_struct {
@@ -97,26 +142,7 @@ struct main_gui_struct {
 	GtkWidget *displayed_list;   /* Tree View */
 	GtkTreeModel *tree_model;
 
-	GtkFrame  *screenshot_hist_frame;
-	GtkBox    *screenshot_hist_vbox;
-	GtkWidget *screenshot_event_box;
-	GtkWidget *main_screenshot;
-	GtkWidget *screenshot_notebook;
-	GtkWidget *screenshot_box1;
-	GtkWidget *screenshot_box2;
-	GtkWidget *screenshot_box3;
-	GtkWidget *screenshot_box4;
-	GtkWidget *screenshot_box5;
-	GtkWidget *screenshot_box6;
-	GtkWidget *screenshot1;
-	GtkWidget *screenshot2;
-	GtkWidget *screenshot3;
-	GtkWidget *screenshot4;
-	GtkWidget *screenshot5;
-	GtkWidget *screenshot6;
-	GtkWidget *history_scrollwin;
-	GtkWidget *history_box;
-	GtkTextBuffer *history_buffer;
+	GMAMEUISidebar *screenshot_hist_frame;
 
 	GtkWidget *xmame_executables_combo;
 	GtkMenuItem *executables_title;
@@ -146,8 +172,8 @@ void hide_filters (void);
 void show_filters (void);
 void hide_snaps (void);
 void show_snaps (void);
-void hide_snaps_tab (void);
-void show_snaps_tab (void);
+void hide_snaps_tab (GMAMEUISidebar *sidebar);
+void show_snaps_tab (GMAMEUISidebar *sidebar);
 void hide_toolbar (void);
 void show_toolbar (void);
 void hide_status_bar (void);

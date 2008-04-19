@@ -63,7 +63,35 @@
 
 static guint timeout_icon;
 
-static void        update_screenshot_panel (RomEntry *rom);
+/**** Sidebar functionality ****/
+struct _GMAMEUISidebarPrivate {
+
+	GtkBox    *screenshot_hist_vbox;
+	GtkWidget *screenshot_event_box;
+
+	GtkWidget *main_screenshot;
+	
+	GtkWidget *screenshot_notebook;
+	GtkWidget *screenshot_box1;
+	GtkWidget *screenshot_box2;
+	GtkWidget *screenshot_box3;
+	GtkWidget *screenshot_box4;
+	GtkWidget *screenshot_box5;
+	GtkWidget *screenshot_box6;
+	GtkWidget *screenshot1;
+	GtkWidget *screenshot2;
+	GtkWidget *screenshot3;
+	GtkWidget *screenshot4;
+	GtkWidget *screenshot5;
+	GtkWidget *screenshot6;
+
+	GtkWidget *history_scrollwin;
+	GtkWidget *history_box;
+	GtkTextBuffer *history_buffer;
+
+	
+};
+/**** Sidebar functionality ****/
 
 static void
 set_game_pixbuff_from_iter (GtkTreeIter *iter,
@@ -323,7 +351,7 @@ set_history (const gchar   *entry_name,
 	history_file = fopen (gui_prefs.HistoryFile, "r");
 
 	if (!history_file) {
-		GMAMEUI_DEBUG ("History.dat file not found");
+		GMAMEUI_DEBUG ("History.dat file %s not found", gui_prefs.HistoryFile);
 		return (FALSE);
 	}
 
@@ -450,7 +478,7 @@ set_info (const gchar   *entry_name,
 	mameinfo_dat = fopen (gui_prefs.MameInfoFile, "r");
 
 	if (!mameinfo_dat) {
-		GMAMEUI_DEBUG ("mameinfo_dat file not found");
+		GMAMEUI_DEBUG ("mameinfo.dat file %s not found", gui_prefs.MameInfoFile);
 		return (FALSE);
 	}
 
@@ -737,154 +765,8 @@ change_screenshot (GtkWidget       *widget,
 {	/* prevent the mouse wheel (button 4 & 5) to change the screenshot*/
 	if (event && event->button <= 3) {
 		gui_prefs.ShowFlyer = (++gui_prefs.ShowFlyer) % 5;
-		update_screenshot_panel (gui_prefs.current_game);
-	}
-}
-
-static void
-update_screenshot_panel (RomEntry *rom)
-{
-	gboolean had_info = FALSE, had_history = FALSE;
-	int wwidth, wheight;
-	GtkWidget *pict = NULL;
-	GtkTextIter text_iter;
-
-	wwidth = 0; wheight = 0;
-
-	if (rom) {
-		UPDATE_GUI;
-		if (gui_prefs.ShowScreenShotTab == 0) {
-			gdk_drawable_get_size ((main_gui.screenshot_event_box)->window, &wwidth, &wheight);
-		} else {
-			GtkRequisition requisition;
-			gtk_widget_size_request (main_gui.screenshot_box1, &requisition);
-			wwidth = requisition.width;
-			wheight = requisition.height;
-		}
-
-		/* erase, fill and show the history box */
-		/* should freeze the history_box here rather than each function otherwise, the position of the cursor will
-		    appear between mameinfo and history */
-		gtk_text_buffer_set_text (main_gui.history_buffer, "", -1);
-		had_history = set_game_history (rom, main_gui.history_buffer);
-		if (had_history) {
-			gtk_text_buffer_get_end_iter (main_gui.history_buffer, &text_iter);
-			gtk_text_buffer_insert (main_gui.history_buffer, &text_iter, "\n", -1);
-		}
-		had_info = set_game_info (rom, main_gui.history_buffer);
-
-		if (gui_prefs.ShowScreenShotTab == 0) {
-			/* Remove the elements from the container */
-			gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_event_box), main_gui.main_screenshot);
-			gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_hist_vbox), main_gui.screenshot_event_box);
-			pict = get_pixbuf (rom, gui_prefs.ShowFlyer, wwidth, wheight);
-			main_gui.main_screenshot = pict;
-			main_gui.screenshot_event_box = gtk_event_box_new ();
-			
-			/* And add them again */
-			gtk_container_add (GTK_CONTAINER (main_gui.screenshot_event_box), GTK_WIDGET (main_gui.main_screenshot));
-			gtk_widget_show (main_gui.screenshot_event_box);
-			gtk_widget_show (main_gui.main_screenshot);
-			g_signal_connect (G_OBJECT (main_gui.screenshot_event_box), "button-release-event",
-					  G_CALLBACK (change_screenshot),
-					  NULL);
-		} else {
-			/* Remove the elements from the container */
-			switch (gui_prefs.ShowFlyer) {
-			case (SNAPSHOTS):
-				gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_box1), main_gui.screenshot1);
-				pict = get_pixbuf (rom, 0, wwidth, wheight);
-				main_gui.screenshot1 = pict;
-				break;
-			case (FLYERS):
-				gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_box2), main_gui.screenshot2);
-				pict = get_pixbuf (rom, 1, wwidth, wheight);
-				main_gui.screenshot2 = pict;
-				break;
-			case (CABINETS):
-				gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_box3), main_gui.screenshot3);
-				pict = get_pixbuf (rom, 2, wwidth, wheight);
-				main_gui.screenshot3 = pict;
-				break;
-			case (MARQUEES):
-				gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_box4), main_gui.screenshot4);
-				pict = get_pixbuf (rom, 3, wwidth, wheight);
-				main_gui.screenshot4 = pict;
-				break;
-			case (TITLES):
-				gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_box5), main_gui.screenshot5);
-				pict = get_pixbuf (rom, 4, wwidth, wheight);
-				main_gui.screenshot5 = pict;
-				break;
-			case (CONTROL_PANELS):
-				gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_box6), main_gui.screenshot6);
-				pict = get_pixbuf (rom, 5, wwidth, wheight);
-				main_gui.screenshot6 = pict;
-				break;	
-			}
-			
-			/* And add them again */
-			switch (gui_prefs.ShowFlyer) {
-			case (SNAPSHOTS):
-				gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box1), GTK_WIDGET (main_gui.screenshot1));
-				gtk_widget_show (main_gui.screenshot_box1);
-				gtk_widget_show (main_gui.screenshot1);
-				break;
-			case (FLYERS):
-				gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box2), GTK_WIDGET (main_gui.screenshot2));
-				gtk_widget_show (main_gui.screenshot_box2);
-				gtk_widget_show (main_gui.screenshot2);
-				break;
-			case (CABINETS):
-				gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box3), GTK_WIDGET (main_gui.screenshot3));
-				gtk_widget_show (main_gui.screenshot_box3);
-				gtk_widget_show (main_gui.screenshot3);
-				break;
-			case (MARQUEES):
-				gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box4), GTK_WIDGET (main_gui.screenshot4));
-				gtk_widget_show (main_gui.screenshot_box4);
-				gtk_widget_show (main_gui.screenshot4);
-				break;
-			case (TITLES):
-				gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box5), GTK_WIDGET (main_gui.screenshot5));
-				gtk_widget_show (main_gui.screenshot_box5);
-				gtk_widget_show (main_gui.screenshot5);
-				break;
-			case (CONTROL_PANELS):
-				gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box6), GTK_WIDGET (main_gui.screenshot6));
-				gtk_widget_show (main_gui.screenshot_box6);
-				gtk_widget_show (main_gui.screenshot6);
-				break;
-			}					
-		}
-		
-		if (had_history || had_info) {
-			gtk_widget_show (GTK_WIDGET (main_gui.history_scrollwin));
-			if (gui_prefs.ShowScreenShotTab == 0)
-				gtk_box_pack_end (main_gui.screenshot_hist_vbox, main_gui.screenshot_event_box, FALSE, TRUE, 5);
-		} else {
-			gtk_widget_hide (GTK_WIDGET (main_gui.history_scrollwin));
-			if (gui_prefs.ShowScreenShotTab == 0)
-				gtk_box_pack_end (main_gui.screenshot_hist_vbox, main_gui.screenshot_event_box, TRUE, TRUE, 5);
-		}
-		
-	} else {
-		/* no roms selected display the default picture */ 
-		if (gui_prefs.ShowScreenShotTab == 0) {
-			gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_event_box), main_gui.main_screenshot);
-			gtk_container_remove (GTK_CONTAINER (main_gui.screenshot_hist_vbox), main_gui.screenshot_event_box);
-
-			main_gui.main_screenshot = gmameui_get_image_from_stock ("gmameui-screen");
-			main_gui.screenshot_event_box = gtk_event_box_new ();
-			gtk_box_pack_end (main_gui.screenshot_hist_vbox, main_gui.screenshot_event_box, TRUE, TRUE, 5);
-			gtk_container_add (GTK_CONTAINER (main_gui.screenshot_event_box), GTK_WIDGET (main_gui.main_screenshot));
-			gtk_widget_show (main_gui.screenshot_event_box);
-			gtk_widget_show (main_gui.main_screenshot);
-		}
-
-		/* erase and hide the history box */
-		gtk_text_buffer_set_text (GTK_TEXT_BUFFER (main_gui.history_buffer), "", -1);
-		gtk_widget_hide (GTK_WIDGET (main_gui.history_scrollwin));
+		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
+					      gui_prefs.current_game);
 	}
 }
 
@@ -895,7 +777,8 @@ on_screenshot_notebook_switch_page (GtkNotebook *notebook,
 				    gpointer user_data)
 {
 	gui_prefs.ShowFlyer = page_num;
-	update_screenshot_panel (gui_prefs.current_game);
+	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
+				  gui_prefs.current_game);
 }
 
 static void
@@ -1179,75 +1062,6 @@ init_gui (void)
 	gtk_check_menu_item_set_active (main_gui.folder_list_menu, gui_prefs.ShowFolderList);
 	gtk_check_menu_item_set_active (main_gui.screen_shot_menu, gui_prefs.ShowScreenShot);
 
-	/* Screenshot Event Box */
-	main_gui.main_screenshot = gmameui_get_image_from_stock ("gmameui-screen");
-
-	main_gui.screenshot_event_box = gtk_event_box_new ();
-	gtk_box_pack_start (main_gui.screenshot_hist_vbox,main_gui.screenshot_event_box, TRUE, TRUE, 5);
-	gtk_container_add (GTK_CONTAINER (main_gui.screenshot_event_box), GTK_WIDGET (main_gui.main_screenshot));
-	gtk_widget_show (main_gui.screenshot_event_box);
-	gtk_widget_show (main_gui.main_screenshot);
-
-	/* Screenshot Notebook */
-	GladeXML *xml = glade_xml_new (GLADEDIR "sidebar.glade", "screenshot_notebook", NULL);
-	
-	main_gui.screenshot_notebook = glade_xml_get_widget (xml, "screenshot_notebook");
-	gtk_box_pack_start (main_gui.screenshot_hist_vbox, main_gui.screenshot_notebook, TRUE, TRUE, 0);
-
-	/* Snap */
-	main_gui.screenshot1 = gmameui_get_image_from_stock ("gmameui-screen");
-	main_gui.screenshot_box1 = glade_xml_get_widget (xml, "screenshot_box1");
-	gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box1), GTK_WIDGET (main_gui.screenshot1));
-
-	/* Flyer */
-	main_gui.screenshot2 = gmameui_get_image_from_stock ("gmameui-screen");
-	main_gui.screenshot_box2 = glade_xml_get_widget (xml, "screenshot_box2");
-	gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box2), GTK_WIDGET (main_gui.screenshot2));
-
-	/* Cab */
-	main_gui.screenshot3 = gmameui_get_image_from_stock ("gmameui-screen");
-	main_gui.screenshot_box3 = glade_xml_get_widget (xml, "screenshot_box3");
-	gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box3), GTK_WIDGET (main_gui.screenshot3));
-
-	/* Marquee */
-	main_gui.screenshot4 = gmameui_get_image_from_stock ("gmameui-screen");
-	main_gui.screenshot_box4 = glade_xml_get_widget (xml, "screenshot_box4");
-	gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box4), GTK_WIDGET (main_gui.screenshot4));
-
-	/* Title */
-	main_gui.screenshot5 = gmameui_get_image_from_stock ("gmameui-screen");
-	main_gui.screenshot_box5 = glade_xml_get_widget (xml, "screenshot_box5");
-	gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box5), GTK_WIDGET (main_gui.screenshot5));
-
-	/* Control Panels */
-	main_gui.screenshot6 = gmameui_get_image_from_stock ("gmameui-screen");
-	main_gui.screenshot_box6 = glade_xml_get_widget (xml, "screenshot_box6");
-	gtk_container_add (GTK_CONTAINER (main_gui.screenshot_box6), GTK_WIDGET (main_gui.screenshot6));
-
-	g_signal_connect (G_OBJECT (main_gui.screenshot_notebook), "switch-page",
-			    G_CALLBACK (on_screenshot_notebook_switch_page),
-			    NULL);
-
-	xml = glade_xml_new (GLADEDIR "sidebar.glade", "history_scrollwin", NULL);
-	/* here we create the history box that will be filled later */
-	main_gui.history_scrollwin = glade_xml_get_widget (xml, "history_scrollwin");
-	gtk_box_pack_end (main_gui.screenshot_hist_vbox, main_gui.history_scrollwin, TRUE, TRUE, 5);
-
-	main_gui.history_buffer = gtk_text_buffer_new (NULL);
-	main_gui.history_box = glade_xml_get_widget (xml, "history_box");
-	gtk_text_view_set_buffer (GTK_TEXT_VIEW (main_gui.history_box), main_gui.history_buffer);
-	
-	gtk_widget_show (main_gui.history_scrollwin);
-	gtk_widget_show (main_gui.history_box);
-	
-	/* Show Hide Screenshot */
-	gtk_check_menu_item_set_active (main_gui.screen_shot_tab_menu,
-					gui_prefs.ShowScreenShotTab);
-	if (gui_prefs.ShowScreenShotTab == FALSE)
-		gtk_widget_hide (GTK_WIDGET (main_gui.screenshot_notebook));
-	else
-		gtk_widget_hide (GTK_WIDGET (main_gui.screenshot_event_box));
-
 	/* Create the popup menu */
 	create_gamelist_popupmenu ();
 	create_columns_popupmenu ();
@@ -1276,7 +1090,8 @@ init_gui (void)
 	                  NULL);
 
 	/* Need to set the notebook page here otherwise it segfault */
-	gtk_notebook_set_current_page (GTK_NOTEBOOK (main_gui.screenshot_notebook), gui_prefs.ShowFlyer);
+	gmameui_sidebar_set_current_page (main_gui.screenshot_hist_frame, gui_prefs.ShowFlyer);
+//	gtk_notebook_set_current_page (GTK_NOTEBOOK (main_gui.screenshot_notebook), gui_prefs.ShowFlyer);
 }
 
 static void
@@ -1946,23 +1761,26 @@ show_snaps (void)
 
 
 void
-hide_snaps_tab (void)
+hide_snaps_tab (GMAMEUISidebar *sidebar)
 {
 	gui_prefs.ShowScreenShotTab = 0;
-	gtk_widget_hide (GTK_WIDGET (main_gui.screenshot_notebook));
-	gtk_widget_show (GTK_WIDGET (main_gui.screenshot_event_box));
-	update_screenshot_panel (gui_prefs.current_game);
+	gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_notebook));
+	gtk_widget_show (GTK_WIDGET (sidebar->priv->screenshot_event_box));
+	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
+				      gui_prefs.current_game);
 }
 
 
 void
-show_snaps_tab (void)
+show_snaps_tab (GMAMEUISidebar *sidebar)
 {
 	gui_prefs.ShowScreenShotTab = 1;
-	gtk_widget_hide (GTK_WIDGET (main_gui.screenshot_event_box));
-	gtk_widget_show (GTK_WIDGET (main_gui.screenshot_notebook));
-	gtk_notebook_set_current_page (GTK_NOTEBOOK (main_gui.screenshot_notebook), gui_prefs.ShowFlyer);
-	update_screenshot_panel (gui_prefs.current_game);
+	gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));
+	gtk_widget_show (GTK_WIDGET (sidebar->priv->screenshot_notebook));
+	gtk_notebook_set_current_page (GTK_NOTEBOOK (sidebar->priv->screenshot_notebook),
+				       gui_prefs.ShowFlyer);
+	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
+				      gui_prefs.current_game);
 }
 
 
@@ -3030,7 +2848,9 @@ GMAMEUI_DEBUG ("   Color status: %s", rom->driver_status_color);
 GMAMEUI_DEBUG ("   Sound status: %s", rom->driver_status_sound);
 GMAMEUI_DEBUG ("   Graphic status: %s", rom->driver_status_graphic);
 		/* update screenshot panel */
-		update_screenshot_panel (rom);
+// DELETE		update_screenshot_panel (rom);
+	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
+				  gui_prefs.current_game);
 	} else {
 		/* no roms selected display the default picture */
 
@@ -3045,7 +2865,9 @@ GMAMEUI_DEBUG ("   Graphic status: %s", rom->driver_status_graphic);
 		set_status_bar (_("No game selected"), "");
 
 		/* update screenshot panel */
-		update_screenshot_panel (NULL);
+// DELETE		update_screenshot_panel (NULL);
+	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
+				  NULL);
 
 	}
 
@@ -3295,3 +3117,349 @@ select_inp (RomEntry *rom,
 	}
 	gtk_widget_destroy (inp_selection);
 }
+
+
+
+
+
+/**** Sidebar functionality ****/
+static void gmameui_sidebar_class_init    (GMAMEUISidebarClass *class);
+static void gmameui_sidebar_init (GMAMEUISidebar      *dlg);
+
+G_DEFINE_TYPE (GMAMEUISidebar, gmameui_sidebar,
+			   GTK_TYPE_FRAME)
+
+static void
+gmameui_sidebar_finalize (GObject *obj)
+{
+GMAMEUI_DEBUG ("Freeing sidebar");
+	GMAMEUISidebar *dlg = GMAMEUI_SIDEBAR (obj);	
+
+	g_free (dlg->priv);
+	
+	((GObjectClass *) gmameui_sidebar_parent_class)->finalize (obj);
+GMAMEUI_DEBUG ("Freeing sidebar - done");
+}
+
+static void
+gmameui_sidebar_class_init (GMAMEUISidebarClass *class)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS (class);
+
+	object_class->finalize = gmameui_sidebar_finalize;
+}
+
+/* Creates a hbox containing a treeview (the sidebar) and a notebook */
+static void
+gmameui_sidebar_init (GMAMEUISidebar *sidebar)
+{
+	GladeXML *xml;
+	
+GMAMEUI_DEBUG ("Creating sidebar");
+
+	sidebar->priv = g_new0 (GMAMEUISidebarPrivate, 1);
+	
+	sidebar->priv->main_screenshot = gmameui_get_image_from_stock ("gmameui-screen");
+
+	sidebar->priv->screenshot_event_box = gtk_event_box_new ();
+	gtk_box_pack_start (sidebar->priv->screenshot_hist_vbox,
+			    sidebar->priv->screenshot_event_box,
+			    TRUE, TRUE, 5);
+	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
+			   GTK_WIDGET (sidebar->priv->main_screenshot));
+	gtk_widget_show (sidebar->priv->screenshot_event_box);
+	gtk_widget_show (sidebar->priv->main_screenshot);
+	
+	xml = glade_xml_new (GLADEDIR "sidebar.glade", "screenshot_notebook", NULL);
+	
+	sidebar->priv->screenshot_hist_vbox = gtk_vbox_new (FALSE, 5);
+	gtk_container_set_border_width (GTK_CONTAINER (sidebar->priv->screenshot_hist_vbox), 6);
+	gtk_container_add (GTK_CONTAINER (sidebar),
+			   GTK_WIDGET (sidebar->priv->screenshot_hist_vbox));
+	gtk_widget_show (GTK_WIDGET (sidebar->priv->screenshot_hist_vbox));
+	
+	sidebar->priv->screenshot_notebook = glade_xml_get_widget (xml, "screenshot_notebook");
+	gtk_box_pack_start (sidebar->priv->screenshot_hist_vbox,
+			    sidebar->priv->screenshot_notebook,
+			    TRUE, TRUE, 0);
+	
+	/* Snap */
+	sidebar->priv->screenshot1 = gmameui_get_image_from_stock ("gmameui-screen");
+	sidebar->priv->screenshot_box1 = glade_xml_get_widget (xml, "screenshot_box1");
+	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box1),
+			   GTK_WIDGET (sidebar->priv->screenshot1));
+
+	/* Flyer */
+	sidebar->priv->screenshot2 = gmameui_get_image_from_stock ("gmameui-screen");
+	sidebar->priv->screenshot_box2 = glade_xml_get_widget (xml, "screenshot_box2");
+	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box2),
+			   GTK_WIDGET (sidebar->priv->screenshot2));
+
+	/* Cab */
+	sidebar->priv->screenshot3 = gmameui_get_image_from_stock ("gmameui-screen");
+	sidebar->priv->screenshot_box3 = glade_xml_get_widget (xml, "screenshot_box3");
+	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box3),
+			   GTK_WIDGET (sidebar->priv->screenshot3));
+
+	/* Marquee */
+	sidebar->priv->screenshot4 = gmameui_get_image_from_stock ("gmameui-screen");
+	sidebar->priv->screenshot_box4 = glade_xml_get_widget (xml, "screenshot_box4");
+	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box4),
+			   GTK_WIDGET (sidebar->priv->screenshot4));
+
+	/* Title */
+	sidebar->priv->screenshot5 = gmameui_get_image_from_stock ("gmameui-screen");
+	sidebar->priv->screenshot_box5 = glade_xml_get_widget (xml, "screenshot_box5");
+	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box5),
+			   GTK_WIDGET (sidebar->priv->screenshot5));
+
+	/* Control Panels */
+	sidebar->priv->screenshot6 = gmameui_get_image_from_stock ("gmameui-screen");
+	sidebar->priv->screenshot_box6 = glade_xml_get_widget (xml, "screenshot_box6");
+	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box6),
+			   GTK_WIDGET (sidebar->priv->screenshot6));
+
+	g_signal_connect (G_OBJECT (sidebar->priv->screenshot_notebook), "switch-page",
+			    G_CALLBACK (on_screenshot_notebook_switch_page),
+			    NULL);
+
+	xml = glade_xml_new (GLADEDIR "sidebar.glade", "history_scrollwin", NULL);
+	
+	/* here we create the history box that will be filled later */
+	sidebar->priv->history_scrollwin = glade_xml_get_widget (xml, "history_scrollwin");
+	gtk_box_pack_end (sidebar->priv->screenshot_hist_vbox,
+			  sidebar->priv->history_scrollwin,
+			  TRUE, TRUE, 5);
+
+	sidebar->priv->history_buffer = gtk_text_buffer_new (NULL);
+	sidebar->priv->history_box = glade_xml_get_widget (xml, "history_box");
+	gtk_text_view_set_buffer (GTK_TEXT_VIEW (sidebar->priv->history_box),
+				  sidebar->priv->history_buffer);
+	
+	gtk_widget_show (sidebar->priv->history_scrollwin);
+	gtk_widget_show (sidebar->priv->history_box);
+
+	gtk_widget_show_all (GTK_WIDGET (sidebar));
+	
+	if (gui_prefs.ShowScreenShotTab == FALSE)
+		gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_notebook));
+	else
+		gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));
+GMAMEUI_DEBUG ("Finished creating sidebar");
+}
+
+GtkWidget *
+gmameui_sidebar_new (void)
+{
+	return g_object_new (GMAMEUI_TYPE_SIDEBAR,
+			     NULL);
+
+}
+
+struct _sidebar_screenshot {
+	GtkWidget *screenshot_box;
+	GtkWidget *screenshot;
+};
+
+typedef struct _sidebar_screenshot sidebar_screenshot;
+
+static void
+gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom)
+{
+	GMAMEUI_DEBUG ("Setting page");
+	
+	int wwidth, wheight;
+	GtkWidget *pict = NULL;
+	
+	gboolean had_history;
+
+	wwidth = 0; wheight = 0;
+
+	if (rom) {
+		UPDATE_GUI;
+		if (gui_prefs.ShowScreenShotTab == 0) {
+			gdk_drawable_get_size ((sidebar->priv->screenshot_event_box)->window,
+					       &wwidth, &wheight);
+		} else {
+			GtkRequisition requisition;
+			gtk_widget_size_request (sidebar->priv->screenshot_box1,
+						 &requisition);
+			wwidth = requisition.width;
+			wheight = requisition.height;
+		}
+
+		had_history = FALSE;
+		had_history = gmameui_sidebar_set_history (sidebar, rom);
+		
+		if (gui_prefs.ShowScreenShotTab == 0) {
+			/* Remove the elements from the container */
+			gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
+					      sidebar->priv->main_screenshot);
+			gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_hist_vbox),
+					      sidebar->priv->screenshot_event_box);
+			pict = get_pixbuf (rom, gui_prefs.ShowFlyer, wwidth, wheight);
+			sidebar->priv->main_screenshot = pict;
+			sidebar->priv->screenshot_event_box = gtk_event_box_new ();
+			
+			/* And add them again */
+			gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
+					   GTK_WIDGET (sidebar->priv->main_screenshot));
+			gtk_widget_show (sidebar->priv->screenshot_event_box);
+			gtk_widget_show (sidebar->priv->main_screenshot);
+			g_signal_connect (G_OBJECT (sidebar->priv->screenshot_event_box),
+					  "button-release-event",
+					  G_CALLBACK (change_screenshot),
+					  NULL);
+		} else {
+			/* Remove the elements from the container */
+			switch (gui_prefs.ShowFlyer) {
+			case (SNAPSHOTS):
+				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box1),
+						      sidebar->priv->screenshot1);
+				pict = get_pixbuf (rom, 0, wwidth, wheight);
+				sidebar->priv->screenshot1 = pict;
+				break;
+			case (FLYERS):
+				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box2),
+						      sidebar->priv->screenshot2);
+				pict = get_pixbuf (rom, 1, wwidth, wheight);
+				sidebar->priv->screenshot2 = pict;
+				break;
+			case (CABINETS):
+				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box3),
+						      sidebar->priv->screenshot3);
+				pict = get_pixbuf (rom, 2, wwidth, wheight);
+				sidebar->priv->screenshot3 = pict;
+				break;
+			case (MARQUEES):
+				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box4),
+						      sidebar->priv->screenshot4);
+				pict = get_pixbuf (rom, 3, wwidth, wheight);
+				sidebar->priv->screenshot4 = pict;
+				break;
+			case (TITLES):
+				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box5),
+						      sidebar->priv->screenshot5);
+				pict = get_pixbuf (rom, 4, wwidth, wheight);
+				sidebar->priv->screenshot5 = pict;
+				break;
+			case (CONTROL_PANELS):
+				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box6),
+						      sidebar->priv->screenshot6);
+				pict = get_pixbuf (rom, 5, wwidth, wheight);
+				sidebar->priv->screenshot6 = pict;
+				break;	
+			}
+			
+			/* And add them again */
+			switch (gui_prefs.ShowFlyer) {
+			case (SNAPSHOTS):
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box1),
+						   GTK_WIDGET (sidebar->priv->screenshot1));
+				gtk_widget_show (sidebar->priv->screenshot_box1);
+				gtk_widget_show (sidebar->priv->screenshot1);
+				break;
+			case (FLYERS):
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box2),
+						   GTK_WIDGET (sidebar->priv->screenshot2));
+				gtk_widget_show (sidebar->priv->screenshot_box2);
+				gtk_widget_show (sidebar->priv->screenshot2);
+				break;
+			case (CABINETS):
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box3),
+						   GTK_WIDGET (sidebar->priv->screenshot3));
+				gtk_widget_show (sidebar->priv->screenshot_box3);
+				gtk_widget_show (sidebar->priv->screenshot3);
+				break;
+			case (MARQUEES):
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box4),
+						   GTK_WIDGET (sidebar->priv->screenshot4));
+				gtk_widget_show (sidebar->priv->screenshot_box4);
+				gtk_widget_show (sidebar->priv->screenshot4);
+				break;
+			case (TITLES):
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box5),
+						   GTK_WIDGET (sidebar->priv->screenshot5));
+				gtk_widget_show (sidebar->priv->screenshot_box5);
+				gtk_widget_show (sidebar->priv->screenshot5);
+				break;
+			case (CONTROL_PANELS):
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box6),
+						   GTK_WIDGET (sidebar->priv->screenshot6));
+				gtk_widget_show (sidebar->priv->screenshot_box6);
+				gtk_widget_show (sidebar->priv->screenshot6);
+				break;
+			}					
+		}
+		
+		if (had_history) {
+			gtk_widget_show (GTK_WIDGET (sidebar->priv->history_scrollwin));
+			if (gui_prefs.ShowScreenShotTab == 0)
+				gtk_box_pack_end (sidebar->priv->screenshot_hist_vbox,
+						  sidebar->priv->screenshot_event_box, FALSE, TRUE, 5);
+		} else {
+			gtk_widget_hide (GTK_WIDGET (sidebar->priv->history_scrollwin));
+			if (gui_prefs.ShowScreenShotTab == 0)
+				gtk_box_pack_end (sidebar->priv->screenshot_hist_vbox,
+						  sidebar->priv->screenshot_event_box, TRUE, TRUE, 5);
+		}
+		
+	} else {
+		/* no roms selected display the default picture */ 
+		if (gui_prefs.ShowScreenShotTab == 0) {
+			gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
+					      sidebar->priv->main_screenshot);
+			gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_hist_vbox),
+					      sidebar->priv->screenshot_event_box);
+
+			sidebar->priv->main_screenshot = gmameui_get_image_from_stock ("gmameui-screen");
+			sidebar->priv->screenshot_event_box = gtk_event_box_new ();
+			gtk_box_pack_end (sidebar->priv->screenshot_hist_vbox,
+					  sidebar->priv->screenshot_event_box,
+					  TRUE, TRUE, 5);
+			gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
+					   GTK_WIDGET (sidebar->priv->main_screenshot));
+			gtk_widget_show (sidebar->priv->screenshot_event_box);
+			gtk_widget_show (sidebar->priv->main_screenshot);
+		}
+
+		/* erase and hide the history box */
+		gtk_text_buffer_set_text (GTK_TEXT_BUFFER (sidebar->priv->history_buffer), "", -1);
+		gtk_widget_hide (GTK_WIDGET (sidebar->priv->history_scrollwin));
+	}
+	GMAMEUI_DEBUG ("Setting page - done");
+}
+
+static gboolean
+gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, RomEntry *rom)
+{
+	GtkTextIter text_iter;
+	
+	gboolean had_info = FALSE, had_history = FALSE;
+	/* erase, fill and show the history box */
+	/* should freeze the history_box here rather than each function otherwise, the position of the cursor will
+		    appear between mameinfo and history */
+	gtk_text_buffer_set_text (sidebar->priv->history_buffer, "", -1);
+	had_history = set_game_history (rom, sidebar->priv->history_buffer);
+
+	if (had_history) {
+		gtk_text_buffer_get_end_iter (sidebar->priv->history_buffer, &text_iter);
+		gtk_text_buffer_insert (sidebar->priv->history_buffer, &text_iter, "\n", -1);
+	}
+	had_info = set_game_info (rom, sidebar->priv->history_buffer);
+	
+	if ((had_info) || (had_history))
+		return TRUE;
+	else
+		return FALSE;
+}
+
+static void
+gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page)
+{
+	gtk_notebook_set_current_page (GTK_NOTEBOOK (sidebar->priv->screenshot_notebook),
+				       page);
+}
+
+/**** End Sidebar functionality ****/
+

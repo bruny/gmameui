@@ -322,10 +322,10 @@ on_screen_shot_tab_activate (GtkCheckMenuItem *menuitem,
 {
 	if (menuitem->active) {
 		GMAMEUI_DEBUG ("Show snaps tab menu");
-		show_snaps_tab ();
+		show_snaps_tab (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame));
 	} else {
 		GMAMEUI_DEBUG ("Hide snaps tab menu");
-		hide_snaps_tab ();
+		hide_snaps_tab (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame));
 	}
 }
 

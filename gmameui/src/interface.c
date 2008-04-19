@@ -58,6 +58,7 @@ on_MainWindow_delete_event (GtkWidget       *widget,
 GtkWidget *
 create_MainWindow (void)
 {
+
   GtkWidget *MainWindow;
   GtkWidget *vbox1;
   GtkWidget *menubar1;
@@ -509,17 +510,12 @@ create_MainWindow (void)
   gtk_paned_pack1 (GTK_PANED (hpanedRight), scrolledwindowGames, TRUE, TRUE);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindowGames), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  ScreenShot_hist_frame = gtk_frame_new (NULL);
-  gtk_widget_show (ScreenShot_hist_frame);
-  main_gui.screenshot_hist_frame = GTK_FRAME (ScreenShot_hist_frame);
-  gtk_paned_pack2 (GTK_PANED (hpanedRight), ScreenShot_hist_frame, FALSE, FALSE);
-
-  ScreenShot_hist_vbox = gtk_vbox_new (FALSE, 5);
-  gtk_widget_show (ScreenShot_hist_vbox);
-  main_gui.screenshot_hist_vbox = GTK_BOX (ScreenShot_hist_vbox);
-  gtk_container_add (GTK_CONTAINER (ScreenShot_hist_frame), ScreenShot_hist_vbox);
-  gtk_container_set_border_width (GTK_CONTAINER (ScreenShot_hist_vbox), 5);
-
+	/* Create the screenshot and history sidebar */
+	GMAMEUISidebar *sidebar = gmameui_sidebar_new ();
+	gtk_paned_pack2 (GTK_PANED (hpanedRight), sidebar, FALSE, FALSE);
+	main_gui.screenshot_hist_frame = GMAMEUI_SIDEBAR (sidebar);
+	
+	
   tri_status_bar = gtk_hbox_new (FALSE, 2);
   gtk_widget_show (tri_status_bar);
   main_gui.tri_status_bar = tri_status_bar;
