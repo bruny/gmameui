@@ -525,6 +525,16 @@ create_MainWindow (void)
 					    MainWindow);
 	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
 	g_object_unref (action_group);
+
+	/* Column popup */
+	action_group = gtk_action_group_new ("GmameuiColumnPopupActions");
+	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_add_actions (action_group,
+				      gmameui_column_entries,
+				      G_N_ELEMENTS (gmameui_column_entries),
+				      MainWindow);
+	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
+	g_object_unref (action_group);
 	
 	/* Now load the UI definition */
 	gtk_ui_manager_add_ui_from_file (main_gui.manager, GMAMEUI_UI_DIR "gmameui-ui.xml", &error);

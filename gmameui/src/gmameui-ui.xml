@@ -85,5 +85,12 @@
     <separator/>
     <menuitem action="FileProperties"/>
   </popup>
+
+  <popup name="ColumnPopup" action="ColumnPopupAction">
+    <menuitem action="ColumnHide"/>
+    <menuitem action="ColumnLayout"/>
+    <separator/>
+<!--    <menuitem action="ColumnCancel"/>-->
+  </popup>      
      
 </ui>

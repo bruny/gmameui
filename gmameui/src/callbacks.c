@@ -1016,20 +1016,33 @@ on_column_click (GtkWidget         *button,
 		 GtkTreeViewColumn *column)
 {
 	gchar *hide_column_menu_name;
+	GtkWidget *hide_menu_item;
+	
+	GtkWidget *popup_menu;
 
+	/* Only right-mouse clicks are catered for */
 	if (event->type == GDK_BUTTON_PRESS && ( (GdkEventButton*)event)->button == 3) {
-		hide_column_menu_name = g_strdup_printf (_("Hide \"%s\" Column"), column_title (gtk_tree_view_column_get_sort_column_id (GTK_TREE_VIEW_COLUMN (column))));
-		gtk_label_set_text (GTK_LABEL (GTK_BIN (main_gui.popup_column_hide)->child), hide_column_menu_name);
+		
+		popup_menu = gtk_ui_manager_get_widget (main_gui.manager, "/ColumnPopup");
+		g_return_val_if_fail (popup_menu != NULL, FALSE);
+
+		hide_menu_item = gtk_ui_manager_get_widget (main_gui.manager,
+							    "/ColumnPopup/ColumnHide");
+		
+		hide_column_menu_name = g_strdup_printf (_("Hide \"%s\" Column"),
+							 column_title (gtk_tree_view_column_get_sort_column_id (GTK_TREE_VIEW_COLUMN (column))));
+		gtk_label_set_text (GTK_LABEL (GTK_BIN (hide_menu_item)->child),
+				    hide_column_menu_name);
 		g_free (hide_column_menu_name);
-		ColumnHide_selected=gtk_tree_view_column_get_sort_column_id (GTK_TREE_VIEW_COLUMN (column));
-		if (ColumnHide_selected == GAMENAME) {
-			gtk_widget_set_sensitive (GTK_WIDGET (main_gui.popup_column_hide), FALSE);
-		} else {
-			gtk_widget_set_sensitive (GTK_WIDGET (main_gui.popup_column_hide), TRUE);
-		}
-		gtk_menu_popup (main_gui.popup_column_menu, NULL, NULL,
-				NULL, NULL, event->button, event->time);
-		return FALSE;
+
+		/* Don't allow user to hide the game name column */
+		ColumnHide_selected = gtk_tree_view_column_get_sort_column_id (GTK_TREE_VIEW_COLUMN (column));
+		gtk_widget_set_sensitive (GTK_WIDGET (hide_menu_item),
+					  !(ColumnHide_selected == GAMENAME));
+		
+		gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,
+				NULL, NULL,
+				event->button, event->time);
 	}
 	return FALSE;
 }

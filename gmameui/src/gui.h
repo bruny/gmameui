@@ -140,6 +140,14 @@ static const GtkRadioActionEntry gmameui_view_radio_menu_entries[] =
 	  N_("Displays detailed information about each item with clones indented"), 3 },
 };
 
+static const GtkActionEntry gmameui_column_entries[] =
+{
+	{ "ColumnHide", NULL, N_("Hide Column"), NULL,
+	  N_("Hide Column"), G_CALLBACK (on_column_hide_activate) },
+	{ "ColumnLayout", NULL, N_("Column Layout..."), NULL,
+	  N_("Show or Hide Column"), G_CALLBACK (on_column_layout_activate) },
+};
+
 /**** Sidebar functionality ****/
 #define GMAMEUI_TYPE_SIDEBAR        (gmameui_sidebar_get_type ())
 #define GMAMEUI_SIDEBAR(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), GMAMEUI_TYPE_SIDEBAR, GMAMEUISidebar))
@@ -188,9 +196,6 @@ gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);
 GtkWidget *MainWindow;
 
 struct main_gui_struct {
-	GtkMenu *popup_column_menu;
-	GtkWidget *popup_column_hide;
-	GtkWidget *popup_column_layout;
 
 	GtkMenuItem *play_menu;
 	GtkMenuItem *properties_menu;
