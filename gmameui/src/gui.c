@@ -296,21 +296,7 @@ create_toolbar (void)
 	main_gui.details_tree_view_button = GTK_TOGGLE_TOOL_BUTTON (item);
 
 	/* init the mode button */
-	switch (gui_prefs.current_mode) {
-	case (LIST):
-		gtk_toggle_tool_button_set_active (main_gui.list_view_button, TRUE);
-		break;
-	case (LIST_TREE):
-		gtk_toggle_tool_button_set_active (main_gui.list_tree_view_button, TRUE);
-		break;
-	case (DETAILS):
-		gtk_toggle_tool_button_set_active (main_gui.details_view_button, TRUE);
-		break;
-	case (DETAILS_TREE):
-	default:
-		gtk_toggle_tool_button_set_active (main_gui.details_tree_view_button, TRUE);
-		break;
-	}
+	gmameui_menu_set_view_mode_check (gui_prefs.current_mode, TRUE);
 
 	/* Connection of toolbar buttons signals */
 	g_signal_connect (G_OBJECT (main_gui.filterShowButton), "toggled",
@@ -781,6 +767,32 @@ on_screenshot_notebook_switch_page (GtkNotebook *notebook,
 }
 
 void
+gmameui_menu_set_view_mode_check (gint view_mode, gboolean state)
+{
+	GtkWidget *widget;
+	
+	switch (view_mode) {
+		case (LIST):
+			widget = gtk_ui_manager_get_widget (main_gui.manager,
+							    "/MenuBar/ViewMenu/ViewListViewMenu");
+			break;
+		case (LIST_TREE):
+			widget = gtk_ui_manager_get_widget (main_gui.manager,
+							    "/MenuBar/ViewMenu/ViewTreeViewMenu");
+			break;
+		case (DETAILS):
+			widget = gtk_ui_manager_get_widget (main_gui.manager,
+							    "/MenuBar/ViewMenu/ViewDetailsListViewMenu");
+			break;
+		case (DETAILS_TREE):
+			widget = gtk_ui_manager_get_widget (main_gui.manager,
+							    "/MenuBar/ViewMenu/ViewDetailsTreeViewMenu");
+			break;
+	}
+	gtk_check_menu_item_set_active (widget, state);
+}
+
+void
 init_gui (void)
 {
 	GtkTooltips *tooltips;
@@ -827,29 +839,15 @@ init_gui (void)
 	create_toolbar ();
 	add_exec_menu ();
 
-	switch (gui_prefs.current_mode) {
-	case (LIST):
-		gtk_check_menu_item_set_active (main_gui.list_view_menu, TRUE);
-		break;
-	case (LIST_TREE):
-		gtk_check_menu_item_set_active (main_gui.list_tree_view_menu, TRUE);
-		break;
-	case (DETAILS):
-		gtk_check_menu_item_set_active (main_gui.details_view_menu, TRUE);
-		break;
-	case (DETAILS_TREE):
-		gtk_check_menu_item_set_active (main_gui.details_tree_view_menu, TRUE);
-		break;
-	}
+	gmameui_menu_set_view_mode_check (gui_prefs.current_mode, TRUE);
 
 	if (! ((gui_prefs.current_mode == LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))) {
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.expand_all_menu), FALSE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.collapse_all_menu), FALSE);
+		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
 	}
-	gtk_check_menu_item_set_active (main_gui.toolbar_view_menu, gui_prefs.ShowToolBar);
-	gtk_check_menu_item_set_active (main_gui.status_bar_view_menu, gui_prefs.ShowStatusBar);
-	gtk_check_menu_item_set_active (main_gui.folder_list_menu, gui_prefs.ShowFolderList);
-	gtk_check_menu_item_set_active (main_gui.screen_shot_menu, gui_prefs.ShowScreenShot);
+// FIXME TODO	gtk_check_menu_item_set_active (main_gui.toolbar_view_menu, gui_prefs.ShowToolBar);
+// FIXME TODO	gtk_check_menu_item_set_active (main_gui.status_bar_view_menu, gui_prefs.ShowStatusBar);
+// FIXME TODO	gtk_check_menu_item_set_active (main_gui.folder_list_menu, gui_prefs.ShowFolderList);
+// FIXME TODO	gtk_check_menu_item_set_active (main_gui.screen_shot_menu, gui_prefs.ShowScreenShot);
 
 	/* Create the UI of the Game List */
 	create_gamelist (gui_prefs.current_mode);
@@ -876,7 +874,6 @@ init_gui (void)
 
 	/* Need to set the notebook page here otherwise it segfault */
 	gmameui_sidebar_set_current_page (main_gui.screenshot_hist_frame, gui_prefs.ShowFlyer);
-//	gtk_notebook_set_current_page (GTK_NOTEBOOK (main_gui.screenshot_notebook), gui_prefs.ShowFlyer);
 }
 
 static void
@@ -895,98 +892,139 @@ set_current_executable (XmameExecutable *new_exec)
 			gmameui_message (ERROR, NULL, _("%s is not a valid executable"), new_exec->path);
 		}
 
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.audit_all_games_menu), FALSE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.properties_menu), FALSE);
+/* TODO FIXME
+		 gtk_widget_set_sensitive (GTK_WIDGET (main_gui.audit_all_games_menu), FALSE);
+		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.properties_menu), FALSE);*/
 	} else {
 		gamelist_check (new_exec);
+/* TODO FIXME
 		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.audit_all_games_menu), TRUE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.properties_menu), TRUE);
+		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.properties_menu), TRUE);*/
 	}
 }
 
 /* executable selected from the menu */
 static void
-on_executable_selected (GtkCheckMenuItem *menuitem,
+on_executable_selected (GtkRadioAction *action,
 			gpointer          user_data)
 {
-	if (menuitem->active) {
-		gint index = GPOINTER_TO_INT (user_data);
-		XmameExecutable *exec;
+	gint index = GPOINTER_TO_INT (user_data);
 
-		exec = xmame_table_get_by_index (index);
+	XmameExecutable *exec;
 
-		GMAMEUI_DEBUG ("on executable selected");
-		set_current_executable (exec);
-	}
+	exec = xmame_table_get_by_index (index);
+
+	GMAMEUI_DEBUG ("Picking executable %d - %s", index, exec->name);
+	set_current_executable (exec);
 }
 
+/* Dynamically create the executables menu. */
 void
 add_exec_menu (void)
 {
-	gchar *full_name;
-	gint i;
+	int num_execs;
+	int i;
 	XmameExecutable *exec;
-	GtkWidget *temp_menu_item;
-	GSList *exec_group_group = NULL;
-
-	/* clean up the older menu */
-	if (main_gui.executable_menu) {
-		gtk_container_foreach (GTK_CONTAINER (main_gui.executable_menu), (GtkCallback)gtk_widget_destroy, NULL);
-		/* need to set the GList to NULL otherwise segfault as soon as I set new executables
-		   are all the other really needed ? */
-		gtk_menu_item_remove_submenu (GTK_MENU_ITEM (main_gui.executables_title));
-		gtk_widget_destroy (main_gui.executable_menu);
-	}
-
-	/* recreate the menu */
-	main_gui.executable_menu = gtk_menu_new ();
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM (main_gui.executables_title), main_gui.executable_menu);
-
-	/* Make sure we have a default executable
-	   if we have anything in the table
-	*/
-	if (!current_exec)
-		current_exec = xmame_table_get_by_index (0);
-
-	for (i = 0; ; i++) {
-		exec = xmame_table_get_by_index (i);
-
-		if (!exec)
-			break;
-
-		full_name = g_strdup_printf ("%s (%s) %s", exec->name, exec->target, exec->version);
-		GMAMEUI_DEBUG ("Adding %s", full_name);
-
-		/* add the executable to the menu */
-		temp_menu_item = gtk_radio_menu_item_new_with_label (exec_group_group, full_name);
-		g_free (full_name);
-		exec_group_group = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (temp_menu_item));
-		gtk_widget_ref (temp_menu_item);
-
-		/* the menu is referenced by the path of the executable */
-		g_object_set_data_full (G_OBJECT (MainWindow), exec->path, temp_menu_item,
-					(GtkDestroyNotify) gtk_widget_unref);
-		gtk_widget_show (temp_menu_item);
-
-		gtk_container_add (GTK_CONTAINER (main_gui.executable_menu), temp_menu_item);
-
-		GMAMEUI_DEBUG ("Comparing %s", exec->path);
 	
-		if (exec == current_exec) {
-			gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (temp_menu_item), TRUE);
+	/* This is really hard to understand from the API. Why do they make it so hard?
+	   Ref: http://log.emmanuelebassi.net/archives/2006/08/boogie-woogie-bugle-boy/ */
 
-			set_current_executable (exec);
-		}
+	/* Create a new radio action group for the executables */
+	GtkActionGroup *exec_radio_action_group;
+	GSList *radio_group = NULL;
+	exec_radio_action_group = gtk_action_group_new ("GmameuiWindowRadioExecActions");
+	gtk_ui_manager_insert_action_group (main_gui.manager, exec_radio_action_group, 0);
+	
+	num_execs = xmame_table_size ();
 
-		g_signal_connect (G_OBJECT (temp_menu_item), "activate",
+	/* No items - attach an insensitive place holder */
+	if (num_execs == 0) {
+		GtkAction *action;
+		action = g_object_new (GTK_TYPE_ACTION,
+				       "name", "execs-empty",
+				       "label", "No executables",
+				       "sensitive", FALSE,
+				       NULL);
+		gtk_action_group_add_action (exec_radio_action_group, action);
+		g_object_unref (action);
+		gtk_ui_manager_add_ui (main_gui.manager,
+				       gtk_ui_manager_new_merge_id (main_gui.manager),
+				       "/MenuBar/OptionsMenu/OptionMameExecutables",
+				       "execs-empty",
+				       "execs-empty",
+				       GTK_UI_MANAGER_MENUITEM,
+				       FALSE);
+		return;
+	};
+	
+	for (i = 0; i < num_execs; i++) {
+		
+		exec = xmame_table_get_by_index (i);
+		gchar *exec_name = g_strdup_printf ("%s (%s) %s", exec->name, exec->target, exec->version);
+		
+		/* Create a new radio action for the executable */
+		gchar *name = g_strdup_printf ("exec-%d", i);
+		gchar *action_name = g_strdup (name);
+		GtkRadioAction *action;
+		action = g_object_new (GTK_TYPE_RADIO_ACTION,
+				       "name", action_name,
+				       "label", exec_name,
+				       "stock_id", NULL,
+				       NULL);
+		g_signal_connect (action, "activate",
 				  G_CALLBACK (on_executable_selected),
 				  GINT_TO_POINTER (i));
-
-		GMAMEUI_DEBUG ("\t %s exec added checked to %i", exec->path, !strcmp (exec->path, current_exec->path));
+		gtk_action_group_add_action (exec_radio_action_group, action);
+		gtk_radio_action_set_group (action, radio_group);
+		radio_group = gtk_radio_action_get_group (action);
+		g_object_unref (action);
 		
+		gtk_ui_manager_add_ui (main_gui.manager,
+				       gtk_ui_manager_new_merge_id (main_gui.manager),
+				       "/MenuBar/OptionsMenu/OptionMameExecutables",
+				       name, action_name,
+				       GTK_UI_MANAGER_MENUITEM,
+				       FALSE);
+		GMAMEUI_DEBUG ("Adding action '%s'", action_name);
+		
+		/* TODO Free the executable */
+		
+		g_free (action_name);
+		g_free (exec_name);
+		g_free (name);
 	}
-	
-	while (gtk_events_pending ()) gtk_main_iteration ();
+}
+
+void gmameui_toolbar_set_favourites_sensitive (gboolean rom_is_favourite)
+{
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/MenuBar/FileMenu/FileFavesAddMenu"),
+				  !rom_is_favourite);
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/MenuBar/FileMenu/FileFavesRemoveMenu"),
+				  rom_is_favourite);
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/GameListPopup/FileFavesAdd"),
+				  !rom_is_favourite);
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/GameListPopup/FileFavesRemove"),
+				  rom_is_favourite);
+}
+
+void gmameui_menubar_set_favourites_sensitive (gboolean state)
+{
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/MenuBar/FileMenu/FileFavesAddMenu"),
+				  state);
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/MenuBar/FileMenu/FileFavesRemoveMenu"),
+				  state);
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/GameListPopup/FileFavesAdd"),
+				  state);
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/GameListPopup/FileFavesRemove"),
+				  state);
 }
 
 void
@@ -1007,12 +1045,7 @@ gamelist_popupmenu_show (RomEntry       *rom,
 						TRUE);
 	}
 	
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/GameListPopup/FileFavesAdd"),
-				  !rom->favourite);
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/GameListPopup/FileFavesRemove"),
-				  rom->favourite);
+	gmameui_toolbar_set_favourites_sensitive (rom->favourite);
 
 	gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,
 			NULL, NULL,
@@ -2585,6 +2618,17 @@ set_status_bar (gchar *game_name, gchar *game_status)
 	gtk_statusbar_push (main_gui.statusbar2, 1, game_status);
 }
 
+static void
+gmameui_toolbar_set_play_sensitive (gboolean state)
+{
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/MenuBar/FileMenu/FilePlayGameMenu"),
+				  state);
+	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
+							     "/MenuBar/FileMenu/FilePropertiesMenu"),
+				  state);
+}
+
 void
 select_game (RomEntry *rom)
 {
@@ -2592,10 +2636,8 @@ select_game (RomEntry *rom)
 
 	if (rom) {
 		/* update menus */
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.play_menu), TRUE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.properties_menu), TRUE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.add_to_favorites), !rom->favourite);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.remove_from_favorites), rom->favourite);
+		gmameui_toolbar_set_favourites_sensitive (rom->favourite);
+		gmameui_toolbar_set_play_sensitive (TRUE);
 
 		/* update statusbar */
 		set_status_bar (rom_entry_get_list_name (rom),
@@ -2607,26 +2649,24 @@ GMAMEUI_DEBUG ("   Color status: %s", rom->driver_status_color);
 GMAMEUI_DEBUG ("   Sound status: %s", rom->driver_status_sound);
 GMAMEUI_DEBUG ("   Graphic status: %s", rom->driver_status_graphic);
 		/* update screenshot panel */
-// DELETE		update_screenshot_panel (rom);
-	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
-				  gui_prefs.current_game);
+
+		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
+					      gui_prefs.current_game);
 	} else {
 		/* no roms selected display the default picture */
 
 		GMAMEUI_DEBUG ("no games selected");
 		/* update menus */
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.play_menu), FALSE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.properties_menu), FALSE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.add_to_favorites), FALSE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.remove_from_favorites), FALSE);
+		gmameui_menubar_set_favourites_sensitive (FALSE);
+		gmameui_toolbar_set_play_sensitive (FALSE);
+
 
 		/* update statusbar */
 		set_status_bar (_("No game selected"), "");
 
 		/* update screenshot panel */
-// DELETE		update_screenshot_panel (NULL);
-	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
-				  NULL);
+		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
+					      NULL);
 
 	}
 

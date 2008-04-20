@@ -168,8 +168,8 @@ on_select_random_game_activate         (GtkMenuItem     *menuitem,
 
 void update_favourites_list (gboolean add) {
 	gui_prefs.current_game->favourite = add;
-	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.add_to_favorites), !add);
-	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.remove_from_favorites), add);
+
+	gmameui_toolbar_set_favourites_sensitive (add);
 	
 	/* problems because the row values are completly changed, I redisplay the complete game list */
 	if (current_filter->type == FAVORITE)
@@ -252,48 +252,47 @@ on_exit_activate (GtkMenuItem     *menuitem,
 
 /* Main window menu: View */
 void
-on_toolbar_view_menu_activate (GtkCheckMenuItem *menuitem,
+on_toolbar_view_menu_activate (GtkAction *action,
 			       gpointer          user_data)
 {
-	if (menuitem->active) {
-		GMAMEUI_DEBUG ("Show toolbar");
+	gboolean visible;
+
+	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+
+	if (visible)
 		show_toolbar ();
-	} else {
-		GMAMEUI_DEBUG ("Hide toolbar");
+	else
 		hide_toolbar ();
-	}
 }
 
 
 void
-on_status_bar_view_menu_activate       (GtkCheckMenuItem     *menuitem,
+on_status_bar_view_menu_activate       (GtkAction *action,
                                         gpointer         user_data)
 {
-	if (menuitem->active) {
-		GMAMEUI_DEBUG ("Show status bar");
+	gboolean visible;
+
+	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+
+	if (visible)
 		show_status_bar ();
-	} else {
-		GMAMEUI_DEBUG ("Hide status bar");
+	else
 		hide_status_bar ();
-	}
 }
 
 
 void
-on_folder_list_activate (GtkCheckMenuItem *menuitem,
+on_folder_list_activate (GtkAction *action,
 			 gpointer         user_data)
 {
-	if (menuitem->active) {
-		GMAMEUI_DEBUG ("Show filters menu");
-		/* shouldn't I block the signal to toggle button
-		   otherwise, infinite loop?
-		   it seems it's working anyway ??
-		   maybe the gtk_toggle_button_set_active doesn't provoke a call
-		   to on_mode_button_clicked*/
+	gboolean visible;
+
+	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+
+	if (visible) {
 		gtk_toggle_tool_button_set_active (main_gui.filterShowButton, TRUE);
 		show_filters ();
 	} else {
-		GMAMEUI_DEBUG ("Hide filters menu");
 		gtk_toggle_tool_button_set_active (main_gui.filterShowButton, FALSE);
 		hide_filters ();
 	}
@@ -302,108 +301,63 @@ on_folder_list_activate (GtkCheckMenuItem *menuitem,
 
 
 void
-on_screen_shot_activate (GtkCheckMenuItem *menuitem,
+on_screen_shot_activate (GtkAction *action,
 			 gpointer         user_data)
 {
-	if (menuitem->active) {
-		GMAMEUI_DEBUG ("Show snaps menu");
+	gboolean visible;
+
+	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+
+	if (visible) {
 		gtk_toggle_tool_button_set_active (main_gui.snapShowButton, TRUE);
 		show_snaps ();
 	} else {
-		GMAMEUI_DEBUG ("Hide snaps menu");
 		gtk_toggle_tool_button_set_active (main_gui.snapShowButton, FALSE);
 		hide_snaps ();
 	}
 }
 
 void
-on_screen_shot_tab_activate (GtkCheckMenuItem *menuitem,
+on_screen_shot_tab_activate (GtkAction *action,
 			     gpointer         user_data)
 {
-	if (menuitem->active) {
-		GMAMEUI_DEBUG ("Show snaps tab menu");
+	gboolean visible;
+
+	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+
+	if (visible)
 		show_snaps_tab (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame));
-	} else {
-		GMAMEUI_DEBUG ("Hide snaps tab menu");
+	else
 		hide_snaps_tab (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame));
-	}
-}
-
-void
-on_list_view_menu_activate (GtkCheckMenuItem *menuitem,
-			    gpointer          user_data)
-{
-	if (!main_gui.list_view_button)
-		return;
-
-	gtk_toggle_tool_button_set_active (main_gui.list_view_button, menuitem->active);
-}
-
-void
-on_list_tree_view_menu_activate (GtkCheckMenuItem *menuitem,
-				 gpointer          user_data)
-{
-	if (!main_gui.list_tree_view_button)
-		return;
-
-	gtk_toggle_tool_button_set_active (main_gui.list_tree_view_button, menuitem->active);
-}
-
-
-void
-on_details_view_menu_activate (GtkCheckMenuItem *menuitem,
-			       gpointer          user_data)
-{
-	/* Avoids GTK Critical warning on startup
-	   before the toolbar is created.
-	*/
-	if (!main_gui.details_view_button)
-		return;
-
-	gtk_toggle_tool_button_set_active (main_gui.details_view_button, menuitem->active);
-}
-
-void
-on_details_tree_view_menu_activate (GtkCheckMenuItem *menuitem,
-				    gpointer          user_data)
-{
-	/* Avoids GTK Critical warning on startup
-	   before the toolbar is created.
-	*/
-	if (!main_gui.details_tree_view_button)
-		return;
-
-	gtk_toggle_tool_button_set_active (main_gui.details_tree_view_button, menuitem->active);
 }
 
 /* This function is called when the radio option defining the list mode is
-   changed */
+   changed. It changes the state of the corresponding toolbar button */
 void     on_view_type_changed                   (GtkRadioAction *action,
                                                  gpointer       user_data)
 {
 	gint val;
+	GtkWidget *widget;
+	
+	/* TODO Set all toolbar buttons to inactive */
 	
 	val = gtk_radio_action_get_current_value (action);
-/*	
-	switch (val)
+
+	switch (val) {
 		case 0:
-// TODO			gtk_toggle_tool_button_set_active (main_gui.list_view_button, menuitem->active);
+			gtk_toggle_tool_button_set_active (main_gui.list_view_button, TRUE);
 			break;
 		case 1:
-// TODO			gtk_toggle_tool_button_set_active (main_gui.list_tree_view_button, menuitem->active);
+			gtk_toggle_tool_button_set_active (main_gui.list_tree_view_button, TRUE);
 			break;
 		case 2:
-// TODO			gtk_toggle_tool_button_set_active (main_gui.details_view_button, menuitem->active);
+			gtk_toggle_tool_button_set_active (main_gui.details_view_button, TRUE);
 			break;
 		case 3:
-// TODO			gtk_toggle_tool_button_set_active (main_gui.details_tree_view_button, menuitem->active);
+			gtk_toggle_tool_button_set_active (main_gui.details_tree_view_button, TRUE);
 			break;
+	}
 
-	on_list_view_menu_activate
-	on_list_tree_view_menu_activate
-	on_details_view_menu_activate
-	on_details_tree_view_menu_activate
-*/
 }
 
 void
@@ -475,7 +429,7 @@ quick_refresh_list (void)
 	}
 
 	quick_check_running = 1;
-	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), FALSE);
+// FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), FALSE);
 	/* remove all information concerning the presence of roms */
 	for (list_pointer = g_list_first (game_list.roms); list_pointer; list_pointer = g_list_next (list_pointer)) {
 		rom = (RomEntry *)list_pointer->data;
@@ -493,7 +447,7 @@ quick_refresh_list (void)
 		GMAMEUI_DEBUG ("Final Refresh");
 	}
 	quick_check_running = 0;
-	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), TRUE);
+// FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), TRUE);
 }
 
 void
@@ -640,30 +594,22 @@ void
 on_filterShowButton_toggled (GtkToggleToolButton *togglebutton,
 			     gpointer             user_data)
 {
-	if (gtk_toggle_tool_button_get_active (togglebutton)) {
-		GMAMEUI_DEBUG ("Show filters");
-		/* the on_folder_list_activate callback will call show_filter ()*/
-		gtk_check_menu_item_set_active (main_gui.folder_list_menu, TRUE);
-	} else {
-		GMAMEUI_DEBUG ("Hide filters");
-		/* the on_folder_list_activate callback will call hide_filter ()*/
-		gtk_check_menu_item_set_active (main_gui.folder_list_menu, FALSE);
-	}
+	gtk_check_menu_item_set_active (gtk_ui_manager_get_widget (main_gui.manager,
+								   "/MenuBar/ViewMenu/ViewFolderListMenu"),
+					gtk_toggle_tool_button_get_active (togglebutton));
 }
 
 void
 on_snapShowButton_toggled (GtkToggleToolButton *togglebutton,
 			   gpointer             user_data)
 {
-	if (gtk_toggle_tool_button_get_active (togglebutton)) {
-		GMAMEUI_DEBUG ("Show snaps");
-		gtk_check_menu_item_set_active (main_gui.screen_shot_menu, TRUE);
-	} else {
-		GMAMEUI_DEBUG ("Hide snaps");
-		gtk_check_menu_item_set_active (main_gui.screen_shot_menu, FALSE);
-	}
+	gtk_check_menu_item_set_active (gtk_ui_manager_get_widget (main_gui.manager,
+								   "/MenuBar/ViewMenu/ViewSidebarPanelMenu"),
+					gtk_toggle_tool_button_get_active (togglebutton));
 }
 
+/* This function is called when the view mode buttons
+   on the toolbar are clicked */
 void
 on_mode_button_clicked (GtkToggleToolButton *button,
 			gpointer             user_data)
@@ -674,43 +620,15 @@ on_mode_button_clicked (GtkToggleToolButton *button,
 			gui_prefs.current_mode = GPOINTER_TO_INT (user_data);
 			GMAMEUI_DEBUG ("Current mode changed %d --> %d", gui_prefs.previous_mode, gui_prefs.current_mode);
 
-			switch (gui_prefs.current_mode) {
-			case (LIST):
-				gtk_check_menu_item_set_active (main_gui.list_view_menu, TRUE);
-				break;
-			case (LIST_TREE):
-				gtk_check_menu_item_set_active (main_gui.list_tree_view_menu, TRUE);
-				break;
-			case (DETAILS):
-				gtk_check_menu_item_set_active (main_gui.details_view_menu, TRUE);
-				break;
-			case (DETAILS_TREE):
-				gtk_check_menu_item_set_active (main_gui.details_tree_view_menu, TRUE);
-				break;
-			}
+			GtkWidget *widget;
 
-			switch (gui_prefs.previous_mode) {
-			case (LIST):
-				gtk_toggle_tool_button_set_active (main_gui.list_view_button, FALSE);
-				break;
-			case (LIST_TREE):
-				gtk_toggle_tool_button_set_active (main_gui.list_tree_view_button, FALSE);
-				break;
-			case (DETAILS):
-				gtk_toggle_tool_button_set_active (main_gui.details_view_button, FALSE);
-				break;
-			case (DETAILS_TREE):
-				gtk_toggle_tool_button_set_active (main_gui.details_tree_view_button, FALSE);
-				break;
-			}
+			gmameui_menu_set_view_mode_check (gui_prefs.current_mode, TRUE);
+			gmameui_menu_set_view_mode_check (gui_prefs.previous_mode, FALSE);
 
-			if ( (gui_prefs.current_mode==LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE)) {
-				gtk_widget_set_sensitive (GTK_WIDGET (main_gui.expand_all_menu), TRUE);
-				gtk_widget_set_sensitive (GTK_WIDGET (main_gui.collapse_all_menu), TRUE);
-			} else {
-				gtk_widget_set_sensitive (GTK_WIDGET (main_gui.expand_all_menu), FALSE);
-				gtk_widget_set_sensitive (GTK_WIDGET (main_gui.collapse_all_menu), FALSE);
-			}
+			if ( (gui_prefs.current_mode==LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))
+				gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, TRUE);
+			else
+				gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
 
 			/* Rebuild the UI */
 			create_gamelist (gui_prefs.current_mode);

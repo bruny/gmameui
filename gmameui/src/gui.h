@@ -58,10 +58,6 @@ static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
 	  N_("Quit GMAMEUI"), G_CALLBACK (on_exit_activate) },
 	
 	/* View menu */
-	{ "ViewExpandAll", NULL, N_("Expand All"), NULL,
-	  N_("Expand all rows"), G_CALLBACK (on_expand_all_activate) },
-	{ "ViewCollapseAll", NULL, N_("Collapse All"), NULL,
-	  N_("Collapse all rows"), G_CALLBACK (on_collapse_all_activate) },
 	{ "ViewColumnLayout", NULL, N_("_Column Layout..."), NULL,
 	  N_("Set column layout"), G_CALLBACK (on_column_layout_activate) },
 	{ "ViewRefresh", GTK_STOCK_REFRESH, N_("Refresh"), "F5",
@@ -103,6 +99,15 @@ static const GtkActionEntry gmameui_rom_menu_entries[] =
 	{ "FileProperties", GTK_STOCK_PROPERTIES, N_("Properties"), NULL,
 	  N_("Play currently selected game"), G_CALLBACK (on_properties_activate) },  
 
+};
+
+/* The following menu entries are enabled when the view is changed to a tree view */
+static const GtkActionEntry gmameui_view_expand_menu_entries[] =
+{
+	{ "ViewExpandAll", NULL, N_("Expand All"), NULL,
+	  N_("Expand all rows"), G_CALLBACK (on_expand_all_activate) },
+	{ "ViewCollapseAll", NULL, N_("Collapse All"), NULL,
+	  N_("Collapse all rows"), G_CALLBACK (on_collapse_all_activate) },
 };
 
 static const GtkToggleActionEntry gmameui_view_toggle_menu_entries[] = 
@@ -197,36 +202,22 @@ GtkWidget *MainWindow;
 
 struct main_gui_struct {
 
-	GtkMenuItem *play_menu;
-	GtkMenuItem *properties_menu;
 	GtkMenuItem *audit_all_games_menu;
-	GtkMenuItem *add_to_favorites;
-	GtkMenuItem *remove_from_favorites;
-	GtkCheckMenuItem *folder_list_menu;
-	GtkCheckMenuItem *screen_shot_menu;
-	GtkCheckMenuItem *screen_shot_tab_menu;
+
 	GtkCheckMenuItem *list_view_menu;
-	GtkCheckMenuItem *list_indented_view_menu;
 	GtkCheckMenuItem *list_tree_view_menu;
 	GtkCheckMenuItem *details_view_menu;
-	GtkCheckMenuItem *details_indented_view_menu;
 	GtkCheckMenuItem *details_tree_view_menu;
-	GtkCheckMenuItem *toolbar_view_menu;
-	GtkCheckMenuItem *status_bar_view_menu;
-	GtkMenuItem *expand_all_menu;
-	GtkMenuItem *collapse_all_menu;
-	GtkCheckMenuItem *modify_the_menu;
-	GtkMenuItem *refresh_menu;
 
 	GtkToolbar *toolbar;
 	GtkWidget *hseparator1;
 	GtkToggleToolButton *filterShowButton;
 	GtkToggleToolButton *snapShowButton;
 	GtkToggleToolButton *list_view_button;
-	GtkToggleToolButton *list_indented_view_button;
+//	GtkToggleToolButton *list_indented_view_button;
 	GtkToggleToolButton *list_tree_view_button;
 	GtkToggleToolButton *details_view_button;
-	GtkToggleToolButton *details_indented_view_button;
+//	GtkToggleToolButton *details_indented_view_button;
 	GtkToggleToolButton *details_tree_view_button;
 
 	GtkWidget *combo_progress_bar;
@@ -258,6 +249,7 @@ struct main_gui_struct {
 	
 	GtkUIManager *manager;
 	GtkActionGroup *gmameui_rom_action_group;
+	GtkActionGroup *gmameui_view_action_group;
 };
 
 struct main_gui_struct main_gui;
@@ -297,6 +289,8 @@ void create_gamelist_content (void);
 void create_gamelist (ListMode list_mode);
 RomEntry * gamelist_get_selected_game (void);
 void gamelist_popupmenu_show (RomEntry *rom, GdkEventButton *event);
+void gmameui_toolbar_set_favourites_sensitive (gboolean rom_is_favourite);
+void gmameui_menu_set_view_mode_check (gint view_mode, gboolean state);
 void show_progress_bar (void);
 void hide_progress_bar (void);
 void update_progress_bar (gfloat current_value);

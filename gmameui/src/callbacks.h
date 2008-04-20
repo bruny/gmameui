@@ -64,19 +64,19 @@ void     on_exit_activate                       (GtkMenuItem     *menuitem,
 
 
 /* Main window menu: View */
-void     on_toolbar_view_menu_activate          (GtkCheckMenuItem     *menuitem,
+void     on_toolbar_view_menu_activate          (GtkAction *action,
                                                  gpointer         user_data);
 
-void     on_status_bar_view_menu_activate       (GtkCheckMenuItem     *menuitem,
+void     on_status_bar_view_menu_activate       (GtkAction *action,
                                                  gpointer         user_data);
 
-void     on_folder_list_activate                (GtkCheckMenuItem *menuitem,
+void     on_folder_list_activate                (GtkAction *action,
                                                  gpointer         user_data);
 
-void     on_screen_shot_activate                (GtkCheckMenuItem *menuitem,
+void     on_screen_shot_activate                (GtkAction *action,
                                                  gpointer         user_data);
 
-void     on_screen_shot_tab_activate            (GtkCheckMenuItem *menuitem,
+void     on_screen_shot_tab_activate            (GtkAction *action,
                                                  gpointer         user_data);
 
 void     on_list_view_menu_activate             (GtkCheckMenuItem *menuitem,
