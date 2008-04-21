@@ -201,124 +201,6 @@ adjustment_scrolled (GtkAdjustment *adjustment,
 			       (GSourceFunc) adjustment_scrolled_delayed, NULL);
 }
 
-static void
-create_toolbar (void)
-{
-	GtkWidget *tmp_toolbar_icon;
-	GtkToolItem *item;
-
-	/* addition of toolbar buttons */
-	item = gtk_tool_button_new_from_stock (GTK_STOCK_NEW);
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-	gtk_tool_button_set_label (GTK_TOOL_BUTTON (item), _("Play Game"));
-	gtk_widget_show_all (GTK_WIDGET (item));
-	g_signal_connect (G_OBJECT (item), "clicked",
-			  G_CALLBACK (on_play_clicked), NULL);
-
-	item = gtk_tool_button_new_from_stock (GTK_STOCK_PROPERTIES);
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-	gtk_widget_show_all (GTK_WIDGET (item));
-	g_signal_connect (G_OBJECT (item), "clicked",
-			  G_CALLBACK (on_properties_clicked), NULL);
-
-	item = gtk_tool_button_new_from_stock (GTK_STOCK_REFRESH);
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-	gtk_widget_show_all (GTK_WIDGET (item));
-	g_signal_connect (G_OBJECT (item), "clicked",
-			  G_CALLBACK (on_refresh_clicked), NULL);
-
-	item = gtk_separator_tool_item_new ();
-	gtk_widget_show (GTK_WIDGET (item));
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-
-	/* filters and snapshots buttons */
-	tmp_toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-folders");
-	item = gtk_toggle_tool_button_new ();
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (item), tmp_toolbar_icon);
-	gtk_tool_button_set_label (GTK_TOOL_BUTTON (item), _("Show Folders"));
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-	gtk_widget_show_all (GTK_WIDGET (item));
-
-	main_gui.filterShowButton = GTK_TOGGLE_TOOL_BUTTON (item);
-
-	gtk_toggle_tool_button_set_active (main_gui.filterShowButton, gui_prefs.ShowFolderList);
-
-	tmp_toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-screenshot");
-	item = gtk_toggle_tool_button_new ();
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (item), tmp_toolbar_icon);
-	gtk_tool_button_set_label (GTK_TOOL_BUTTON (item), _("Show Sidebar"));
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-	gtk_widget_show_all (GTK_WIDGET (item));
-
-	main_gui.snapShowButton = GTK_TOGGLE_TOOL_BUTTON (item);
-
-	gtk_toggle_tool_button_set_active (main_gui.snapShowButton, gui_prefs.ShowScreenShot);
-
-	item = gtk_separator_tool_item_new ();
-	gtk_widget_show (GTK_WIDGET (item));
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-
-	/* listing mode buttons */
-	tmp_toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-list");
-	item = gtk_toggle_tool_button_new ();
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (item), tmp_toolbar_icon);
-	gtk_tool_button_set_label (GTK_TOOL_BUTTON (item), _("List"));
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-	gtk_widget_show_all (GTK_WIDGET (item));
-
-	main_gui.list_view_button = GTK_TOGGLE_TOOL_BUTTON (item);
-
-	tmp_toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-tree");
-	item = gtk_toggle_tool_button_new ();
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (item), tmp_toolbar_icon);
-	gtk_tool_button_set_label (GTK_TOOL_BUTTON (item), _("List Tree"));
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-	gtk_widget_show_all (GTK_WIDGET (item));
-
-	main_gui.list_tree_view_button = GTK_TOGGLE_TOOL_BUTTON (item);
-
-	tmp_toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-list");
-	item = gtk_toggle_tool_button_new ();
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (item), tmp_toolbar_icon);
-	gtk_tool_button_set_label (GTK_TOOL_BUTTON (item), _("Details"));
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-	gtk_widget_show_all (GTK_WIDGET (item));
-
-	main_gui.details_view_button = GTK_TOGGLE_TOOL_BUTTON (item);
-
-	tmp_toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-tree");
-	item = gtk_toggle_tool_button_new ();
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (item), tmp_toolbar_icon);
-	gtk_tool_button_set_label (GTK_TOOL_BUTTON (item), _("Details Tree"));
-	gtk_toolbar_insert (main_gui.toolbar, item, -1);
-	gtk_widget_show_all (GTK_WIDGET (item));
-
-	main_gui.details_tree_view_button = GTK_TOGGLE_TOOL_BUTTON (item);
-
-	/* init the mode button */
-	gmameui_menu_set_view_mode_check (gui_prefs.current_mode, TRUE);
-
-	/* Connection of toolbar buttons signals */
-	g_signal_connect (G_OBJECT (main_gui.filterShowButton), "toggled",
-			  G_CALLBACK (on_filterShowButton_toggled),
-			  NULL);
-	g_signal_connect (G_OBJECT (main_gui.snapShowButton), "toggled",
-			  G_CALLBACK (on_snapShowButton_toggled),
-			  NULL);
-	g_signal_connect (G_OBJECT (main_gui.list_view_button), "toggled",
-			  G_CALLBACK (on_mode_button_clicked),
-			  GINT_TO_POINTER (LIST));
-	g_signal_connect (G_OBJECT (main_gui.list_tree_view_button), "toggled",
-			  G_CALLBACK (on_mode_button_clicked),
-			  GINT_TO_POINTER (LIST_TREE));
-	g_signal_connect (G_OBJECT (main_gui.details_view_button), "toggled",
-			  G_CALLBACK (on_mode_button_clicked),
-			  GINT_TO_POINTER (DETAILS));
-	g_signal_connect (G_OBJECT (main_gui.details_tree_view_button), "toggled",
-			  G_CALLBACK (on_mode_button_clicked),
-			  GINT_TO_POINTER (DETAILS_TREE));
-}
-
 static gboolean
 set_history (const gchar   *entry_name,
 	     GtkTextBuffer *text_buffer)
@@ -808,8 +690,6 @@ init_gui (void)
 	gmameui_icons_init ();
 
 	/* Create the main window */
-	main_gui.details_view_button = NULL;
-	main_gui.details_tree_view_button = NULL;
 	MainWindow = create_MainWindow ();
 	
 	/* if the ListFont is empty or not loadable, use default font */
@@ -835,19 +715,20 @@ init_gui (void)
 
 	/* Show and hence realize mainwindow so that MainWindow->window is available */
 	gtk_widget_show (MainWindow);
-	/* Need to create the menu to have all button in the toolbar ??? not really needed */
-	create_toolbar ();
-	add_exec_menu ();
 
+	/* Set state of radio/check menu and toolbar widgets */
 	gmameui_menu_set_view_mode_check (gui_prefs.current_mode, TRUE);
+	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
+								 "/MenuBar/ViewMenu/ViewSidebarPanelMenu"),
+				      gui_prefs.ShowScreenShot);
+	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
+								 "/MenuBar/ViewMenu/ViewFolderListMenu"),
+				      gui_prefs.ShowFolderList);
+	
 
 	if (! ((gui_prefs.current_mode == LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))) {
 		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
 	}
-// FIXME TODO	gtk_check_menu_item_set_active (main_gui.toolbar_view_menu, gui_prefs.ShowToolBar);
-// FIXME TODO	gtk_check_menu_item_set_active (main_gui.status_bar_view_menu, gui_prefs.ShowStatusBar);
-// FIXME TODO	gtk_check_menu_item_set_active (main_gui.folder_list_menu, gui_prefs.ShowFolderList);
-// FIXME TODO	gtk_check_menu_item_set_active (main_gui.screen_shot_menu, gui_prefs.ShowScreenShot);
 
 	/* Create the UI of the Game List */
 	create_gamelist (gui_prefs.current_mode);
@@ -1582,7 +1463,6 @@ hide_toolbar (void)
 	gui_prefs.ShowToolBar = 0;
 	gtk_widget_hide (GTK_WIDGET (main_gui.toolbar));
 }
-
 
 void
 show_toolbar (void)

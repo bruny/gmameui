@@ -96,6 +96,7 @@ create_MainWindow (void)
   gtk_widget_show (vbox1);
   gtk_container_add (GTK_CONTAINER (MainWindow), vbox1);
 	
+	/* Prepare the UI manager to build the menu and toolbar */
 	main_gui.manager = gtk_ui_manager_new ();
 	
 	action_group = gtk_action_group_new ("GmameuiWindowAlwaysSensitiveActions");
@@ -166,7 +167,7 @@ create_MainWindow (void)
 		g_error_free (error);
 	}
 	
-
+	/* Set up the menu */
 	menubar = gtk_ui_manager_get_widget (main_gui.manager, "/MenuBar");
 	gtk_box_pack_start (GTK_BOX (vbox1), 
 			    menubar, 
@@ -174,13 +175,72 @@ create_MainWindow (void)
 			    FALSE, 
 			    0);
 	
-  toolbar1 = gtk_toolbar_new ();
-  gtk_toolbar_set_orientation (GTK_TOOLBAR (toolbar1), GTK_ORIENTATION_HORIZONTAL);
-  gtk_toolbar_set_style (GTK_TOOLBAR (toolbar1), GTK_TOOLBAR_BOTH);
-  gtk_widget_show (toolbar1);
-  main_gui.toolbar = GTK_TOOLBAR (toolbar1);
-  gtk_box_pack_start (GTK_BOX (vbox1), toolbar1, FALSE, FALSE, 0);
+	/* Dynamically add the list of known MAME executables to the toolbar */
+	add_exec_menu ();
 
+	/* Set up the toolbar */
+	main_gui.toolbar = gtk_ui_manager_get_widget (main_gui.manager, "/ToolBar");
+	gtk_box_pack_start (GTK_BOX (vbox1), 
+			    main_gui.toolbar, 
+			    FALSE, 
+			    FALSE, 
+			    0);
+	
+	GtkWidget *toolbar_widget;
+	GtkWidget *toolbar_icon;
+	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
+						    "/ToolBar/FilePlayGame");
+	gtk_tool_button_set_stock_id (toolbar_widget, GTK_STOCK_NEW);
+	gtk_tool_button_set_label (toolbar_widget, N_("Play Game"));
+	
+	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
+						    "/ToolBar/ViewFolderList");
+	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-folders");
+	gtk_tool_button_set_label (toolbar_widget, N_("Show Folders"));
+	gtk_widget_show (toolbar_icon);
+	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
+					 GTK_WIDGET (toolbar_icon));
+
+	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
+						    "/ToolBar/ViewSidebarPanel");
+	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-screenshot");
+	gtk_widget_show (toolbar_icon);
+	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
+					 toolbar_icon);
+	gtk_tool_button_set_label (toolbar_widget, N_("Show Sidebar"));
+	
+	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
+						    "/ToolBar/ViewListView");
+	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-list");
+	gtk_tool_button_set_label (toolbar_widget, N_("List"));
+	gtk_widget_show (toolbar_icon);
+	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
+					 GTK_WIDGET (toolbar_icon));
+
+	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
+						    "/ToolBar/ViewTreeView");
+	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-tree");
+	gtk_tool_button_set_label (toolbar_widget, N_("List Tree"));
+	gtk_widget_show (toolbar_icon);
+	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
+					 GTK_WIDGET (toolbar_icon));
+	
+	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
+						    "/ToolBar/ViewDetailsListView");
+	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-list");
+	gtk_tool_button_set_label (toolbar_widget, N_("Details"));
+	gtk_widget_show (toolbar_icon);
+	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
+					 GTK_WIDGET (toolbar_icon));
+	
+	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
+						    "/ToolBar/ViewDetailsTreeView");
+	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-tree");
+	gtk_tool_button_set_label (toolbar_widget, N_("Details Tree"));
+	gtk_widget_show (toolbar_icon);
+	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
+					 GTK_WIDGET (toolbar_icon));
+	
   hpanedLeft = gtk_hpaned_new ();
   gtk_widget_show (hpanedLeft);
   main_gui.hpanedLeft = GTK_PANED (hpanedLeft);

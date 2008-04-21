@@ -290,10 +290,8 @@ on_folder_list_activate (GtkAction *action,
 	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 
 	if (visible) {
-		gtk_toggle_tool_button_set_active (main_gui.filterShowButton, TRUE);
 		show_filters ();
 	} else {
-		gtk_toggle_tool_button_set_active (main_gui.filterShowButton, FALSE);
 		hide_filters ();
 	}
 
@@ -309,10 +307,8 @@ on_screen_shot_activate (GtkAction *action,
 	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 
 	if (visible) {
-		gtk_toggle_tool_button_set_active (main_gui.snapShowButton, TRUE);
 		show_snaps ();
 	} else {
-		gtk_toggle_tool_button_set_active (main_gui.snapShowButton, FALSE);
 		hide_snaps ();
 	}
 }
@@ -332,32 +328,40 @@ on_screen_shot_tab_activate (GtkAction *action,
 }
 
 /* This function is called when the radio option defining the list mode is
-   changed. It changes the state of the corresponding toolbar button */
+   changed. */
 void     on_view_type_changed                   (GtkRadioAction *action,
                                                  gpointer       user_data)
 {
 	gint val;
 	GtkWidget *widget;
 	
-	/* TODO Set all toolbar buttons to inactive */
-	
 	val = gtk_radio_action_get_current_value (action);
 
-	switch (val) {
-		case 0:
-			gtk_toggle_tool_button_set_active (main_gui.list_view_button, TRUE);
-			break;
-		case 1:
-			gtk_toggle_tool_button_set_active (main_gui.list_tree_view_button, TRUE);
-			break;
-		case 2:
-			gtk_toggle_tool_button_set_active (main_gui.details_view_button, TRUE);
-			break;
-		case 3:
-			gtk_toggle_tool_button_set_active (main_gui.details_tree_view_button, TRUE);
-			break;
+
+	if (gui_prefs.current_mode != val) {
+		gui_prefs.previous_mode = gui_prefs.current_mode;
+		gui_prefs.current_mode = val;
+		GMAMEUI_DEBUG ("Current mode changed %d --> %d", gui_prefs.previous_mode, gui_prefs.current_mode);
+			
+		if ( (gui_prefs.current_mode==LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))
+			gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, TRUE);
+		else
+			gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
+
+		/* Rebuild the UI */
+		create_gamelist (gui_prefs.current_mode);
+
+		/* Rebuild the List only if we change from/to tree mode */
+		if ((gui_prefs.current_mode == DETAILS_TREE) || (gui_prefs.current_mode == LIST_TREE)) {
+			if ( (gui_prefs.previous_mode != DETAILS_TREE) && (gui_prefs.previous_mode != LIST_TREE))
+				create_gamelist_content ();
+		} else {
+			if ((gui_prefs.previous_mode == DETAILS_TREE) || (gui_prefs.previous_mode == LIST_TREE))
+				create_gamelist_content ();
+		}
 	}
 
+	 
 }
 
 void
@@ -586,65 +590,6 @@ on_column_hide_activate (GtkMenuItem     *menuitem,
 		gtk_tree_view_column_set_visible (C->data, FALSE);
 		gui_prefs.ColumnShown [ColumnHide_selected] = FALSE;
 		GMAMEUI_DEBUG ("Column Hidden - %i", ColumnHide_selected);
-	}
-}
-
-/* Toolbar */
-void
-on_filterShowButton_toggled (GtkToggleToolButton *togglebutton,
-			     gpointer             user_data)
-{
-	gtk_check_menu_item_set_active (gtk_ui_manager_get_widget (main_gui.manager,
-								   "/MenuBar/ViewMenu/ViewFolderListMenu"),
-					gtk_toggle_tool_button_get_active (togglebutton));
-}
-
-void
-on_snapShowButton_toggled (GtkToggleToolButton *togglebutton,
-			   gpointer             user_data)
-{
-	gtk_check_menu_item_set_active (gtk_ui_manager_get_widget (main_gui.manager,
-								   "/MenuBar/ViewMenu/ViewSidebarPanelMenu"),
-					gtk_toggle_tool_button_get_active (togglebutton));
-}
-
-/* This function is called when the view mode buttons
-   on the toolbar are clicked */
-void
-on_mode_button_clicked (GtkToggleToolButton *button,
-			gpointer             user_data)
-{
-	if (gtk_toggle_tool_button_get_active (button)) {
-		if (gui_prefs.current_mode != (ListMode)GPOINTER_TO_INT (user_data)) {
-			gui_prefs.previous_mode = gui_prefs.current_mode;
-			gui_prefs.current_mode = GPOINTER_TO_INT (user_data);
-			GMAMEUI_DEBUG ("Current mode changed %d --> %d", gui_prefs.previous_mode, gui_prefs.current_mode);
-
-			GtkWidget *widget;
-
-			gmameui_menu_set_view_mode_check (gui_prefs.current_mode, TRUE);
-			gmameui_menu_set_view_mode_check (gui_prefs.previous_mode, FALSE);
-
-			if ( (gui_prefs.current_mode==LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))
-				gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, TRUE);
-			else
-				gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
-
-			/* Rebuild the UI */
-			create_gamelist (gui_prefs.current_mode);
-
-			/* Rebuild the List only if we change from/to tree mode */
-			if ((gui_prefs.current_mode == DETAILS_TREE) || (gui_prefs.current_mode == LIST_TREE)) {
-				if ( (gui_prefs.previous_mode != DETAILS_TREE) && (gui_prefs.previous_mode != LIST_TREE))
-					create_gamelist_content ();
-			} else {
-				if ((gui_prefs.previous_mode == DETAILS_TREE) || (gui_prefs.previous_mode == LIST_TREE))
-					create_gamelist_content ();
-			}
-		}
-	} else {
-		if (gui_prefs.current_mode == (ListMode)GPOINTER_TO_INT (user_data))
-			gtk_toggle_tool_button_set_active (button, TRUE);
 	}
 }
 

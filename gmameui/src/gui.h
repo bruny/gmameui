@@ -136,13 +136,13 @@ static const GtkToggleActionEntry gmameui_view_toggle_menu_entries[] =
 static const GtkRadioActionEntry gmameui_view_radio_menu_entries[] =
 {
 	{ "ViewListView", NULL, N_("_List"), NULL,
-	  N_("Displays items in a list"), 0 },
+	  N_("Displays items in a list"), LIST },
 	{ "ViewTreeView", NULL, N_("List _Tree"), NULL,
-	  N_("Displays items in a tree list with clones indented"), 1 },
+	  N_("Displays items in a tree list with clones indented"), LIST_TREE },
 	{ "ViewDetailsListView", NULL, N_("_Details"), NULL,
-	  N_("Displays detailed information about each item"), 2 },
+	  N_("Displays detailed information about each item"), DETAILS },
 	{ "ViewDetailsTreeView", NULL, N_("Detai_ls Tree"), NULL,
-	  N_("Displays detailed information about each item with clones indented"), 3 },
+	  N_("Displays detailed information about each item with clones indented"), DETAILS_TREE },
 };
 
 static const GtkActionEntry gmameui_column_entries[] =
@@ -204,21 +204,7 @@ struct main_gui_struct {
 
 	GtkMenuItem *audit_all_games_menu;
 
-	GtkCheckMenuItem *list_view_menu;
-	GtkCheckMenuItem *list_tree_view_menu;
-	GtkCheckMenuItem *details_view_menu;
-	GtkCheckMenuItem *details_tree_view_menu;
-
 	GtkToolbar *toolbar;
-	GtkWidget *hseparator1;
-	GtkToggleToolButton *filterShowButton;
-	GtkToggleToolButton *snapShowButton;
-	GtkToggleToolButton *list_view_button;
-//	GtkToggleToolButton *list_indented_view_button;
-	GtkToggleToolButton *list_tree_view_button;
-	GtkToggleToolButton *details_view_button;
-//	GtkToggleToolButton *details_indented_view_button;
-	GtkToggleToolButton *details_tree_view_button;
 
 	GtkWidget *combo_progress_bar;
 	GtkStatusbar *status_progress_bar;
