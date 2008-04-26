@@ -39,6 +39,7 @@
 #include "gmameui.h"
 #include "unzip.h"
 #include "callbacks.h"
+#include "mame_options.h"
 
 /* The following menu entries are always enabled */
 static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
@@ -89,16 +90,17 @@ static const GtkActionEntry gmameui_rom_menu_entries[] =
 	{ "FilePlayGame", NULL, N_("Play"), NULL,
 	  N_("Play currently selected game"), G_CALLBACK (on_play_activate) },
 	{ "FilePlayRecord", GTK_STOCK_SAVE, N_("Play and Record Input..."), NULL,
-	  N_("Play currently selected game"), G_CALLBACK (on_play_and_record_input_activate) },
+	  N_("Record a game for later playback"), G_CALLBACK (on_play_and_record_input_activate) },
 	{ "FilePlaybackRecord", GTK_STOCK_OPEN, N_("Playback Input..."), NULL,
-	  N_("Play currently selected game"), G_CALLBACK (on_playback_input_activate) },
+	  N_("Playback a recorded game"), G_CALLBACK (on_playback_input_activate) },
 	{ "FileFavesAdd", GTK_STOCK_ADD, N_("Add to 'Favorites'"), NULL,
-	  N_("Play currently selected game"), G_CALLBACK (on_add_to_favorites_activate) },
+	  N_("Add this game to your 'Favorites' game folder"), G_CALLBACK (on_add_to_favorites_activate) },
 	{ "FileFavesRemove", GTK_STOCK_REMOVE, N_("Remove from 'Favorites'"), NULL,
-	  N_("Play currently selected game"), G_CALLBACK (on_remove_from_favorites_activate) },
-	{ "FileProperties", GTK_STOCK_PROPERTIES, N_("Properties"), NULL,
-	  N_("Play currently selected game"), G_CALLBACK (on_properties_activate) },  
-
+	  N_("Remove this game from your 'Favorites' game folder"), G_CALLBACK (on_remove_from_favorites_activate) },
+	{ "FileProperties", GTK_STOCK_INFO, N_("Properties"), NULL,
+	  N_("Display the properties of the selected game"), G_CALLBACK (on_properties_activate) }, 
+	{ "FileOptions", GTK_STOCK_PROPERTIES, N_("Options"), NULL,
+	  N_("Change the options of the selected game"), G_CALLBACK (on_options_activate) }, 
 };
 
 /* The following menu entries are enabled when the view is changed to a tree view */
@@ -236,6 +238,8 @@ struct main_gui_struct {
 	GtkUIManager *manager;
 	GtkActionGroup *gmameui_rom_action_group;
 	GtkActionGroup *gmameui_view_action_group;
+	
+	MameOptions *options;
 };
 
 struct main_gui_struct main_gui;

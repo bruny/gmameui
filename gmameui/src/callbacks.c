@@ -208,19 +208,39 @@ show_properties_dialog (void)
 }
 
 void
-on_properties_activate (GtkMenuItem     *menuitem,
-			gpointer         user_data)
+on_properties_activate (GtkAction *action,
+			gpointer  user_data)
 {
-	show_properties_dialog ();
+	show_rom_properties ();
 }
 
-void
-on_properties_clicked (GtkToolButton *button,
-		       gpointer       user_data)
+void on_options_activate (GtkAction *action,
+			  gpointer  user_data)
 {
-	show_properties_dialog ();
-}
+	if (current_exec->type == XMAME_EXEC_WIN32) {
+		
+		GtkWidget *options_dialog = mame_options_get_dialog (main_gui.options);
 
+		GladeXML *xml = glade_xml_new (GLADEDIR "options.glade", NULL, NULL);
+		mame_options_add_page (main_gui.options, xml, "Display", "Display",
+		                       "gmameui-display-toolbar");
+		mame_options_add_page (main_gui.options, xml, "Sound", "Sound",
+		                       "gmameui-sound-toolbar");
+		mame_options_add_page (main_gui.options, xml, "performance_vbox", "Performance",
+		                       "gmameui-general-toolbar");
+		mame_options_add_page (main_gui.options, xml, "misc_vbox", "Miscellaneous",
+		                       "gmameui-general-toolbar");
+		mame_options_add_page (main_gui.options, xml, "debugging_vbox", "Debugging",
+		                       "gmameui-rom");
+
+		
+		gtk_dialog_run (GTK_WIDGET (options_dialog));
+		gtk_widget_destroy (GTK_WIDGET (options_dialog));
+
+	} else {
+		show_properties_dialog ();
+	}
+}
 
 void
 on_audit_all_games_activate (GtkMenuItem     *menuitem,

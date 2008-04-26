@@ -69,8 +69,10 @@ audit_game (RomEntry *rom)
 	gboolean    error_during_check = FALSE;
 	GtkTextIter text_iter;
 
-	if (game_checked)
+	if (game_checked) {		
+		GMAMEUI_DEBUG ("Game %s already audited", rom->romname);
 		return;
+	}	
 
 	while (gtk_events_pending ()) gtk_main_iteration ();
 
@@ -343,26 +345,29 @@ get_rom_sound_value (RomEntry *rom)
 	return value;
 }
 
-static void
-add_general_tab (GtkWidget    *properties_window,
-		 GtkNotebook  *target_notebook,
-		 RomEntry     *rom,
-		 GtkWidget    *apply_button,
-		 GtkWidget    *reset_button)
+void
+show_rom_properties ()
 {
-	GtkWidget *general_table;
-	GtkWidget    *general_label;
-	GtkWidget    *image;
-	GtkWidget    *scrolledwindow;
-	GtkWidget    *label;
-	gchar        *value;
-	gchar        *title;
+	GtkWidget *dialog;
+	GtkWidget *label;
+	GtkWidget *title;
+	GtkWidget *scrolledwindow;
+	gchar *value;
+	RomEntry *rom;
+	
+	rom = gui_prefs.current_game;
+	game_checked = FALSE;
+	
+	GladeXML *xml = glade_xml_new (GLADEDIR "rom_info.glade", "dialog1", NULL);
+	
+	dialog = glade_xml_get_widget (xml, "dialog1");
+	
+	gtk_window_set_title (GTK_WINDOW (dialog), rom_entry_get_list_name (rom));
 
-	GladeXML *xml = glade_xml_new (GLADEDIR "properties.glade", "general_table", NULL);
-	general_table = glade_xml_get_widget (xml, "general_table");
-
-	gtk_widget_show (general_table);
-
+	value = g_strdup_printf("<b>%s</b>", rom_entry_get_list_name (rom));
+	label = glade_xml_get_widget (xml, "rom_name_lbl");
+	gtk_label_set_markup (label, value);
+	
 	label = glade_xml_get_widget (xml, "year_result");
 	gtk_label_set_text (GTK_LABEL (label), rom->year);
 
@@ -433,14 +438,13 @@ add_general_tab (GtkWidget    *properties_window,
 	details_audit_result_buffer = gtk_text_buffer_new (NULL);
 	details_audit_result = glade_xml_get_widget (xml, "details_audit_result");
 	gtk_text_view_set_buffer (GTK_TEXT_VIEW (details_audit_result), details_audit_result_buffer);
-
-	image = gmameui_get_image_from_stock ("gmameui-general-toolbar");
-	general_label = gtk_hbox_new (FALSE, 5);
-	gtk_box_pack_start (GTK_BOX (general_label), image, FALSE, FALSE, 0);
-	gtk_box_pack_start (GTK_BOX (general_label), gtk_label_new (_("General")), FALSE, FALSE, 0);
-	gtk_widget_show_all (general_label);
-
-	gtk_notebook_append_page (GTK_NOTEBOOK (target_notebook), general_table, general_label);
+	
+	g_idle_add (audit_idle, rom);
+	
+	gtk_dialog_run (GTK_DIALOG (dialog));
+	
+	gtk_widget_destroy (dialog);
+	
 }
 
 static void
@@ -552,15 +556,6 @@ create_properties_windows (RomEntry *rom)
 	gtk_widget_show (notebook1);
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (properties_windows)->vbox), notebook1, TRUE, TRUE, 0);
 	gtk_container_set_border_width (GTK_CONTAINER (notebook1), 8);
-
-	if (rom) {
-		add_general_tab (properties_windows,
-				 GTK_NOTEBOOK (notebook1),
-				 rom,
-				 properties_apply_button,
-				 properties_reset_button);
-		g_idle_add (audit_idle, rom);
-	}
 
 	GMAMEUI_DEBUG ("Adding display options");
 	add_display_options_tab (properties_windows,
