@@ -175,7 +175,7 @@ static char *create_sound_options_string(XmameExecutable *exec, GameOptions *tar
 	
 	xmame_get_options(exec);
 	
-	if(!strcmp(target->dsp_plugin,"waveout"))
+	if(!g_ascii_strcasecmp(target->dsp_plugin,"waveout"))
 		audiodevice = xmame_get_option_string(exec, "audiodevice", target->soundfile);
 	else
 		audiodevice = xmame_get_option_string(exec, "audiodevice", target->audiodevice);
