@@ -1140,6 +1140,18 @@ mame_options_instance_init (MameOptions *pr)
 	
 	pr->priv->options_list = NULL;  /* Initialise options list */
 	
+	/* Register all the options in the Glade file to initialise
+	   properties hash table. This is a bit hacky, and only in
+	   place to stop segfault when playing game before opening
+	   the options screen */
+	GladeXML *xml;
+	xml = glade_xml_new (GLADEDIR "options.glade", NULL, NULL);
+	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "Display"));
+	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "Sound"));
+	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "performance_vbox"));
+	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "misc_vbox"));
+	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "debugging_vbox"));
+	
 }
 
 static void
