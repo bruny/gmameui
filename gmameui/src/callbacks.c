@@ -53,16 +53,8 @@ static guint timeoutfoldid;
 
 /* Main window menu: File */
 void
-on_play_activate (GtkMenuItem *menuitem,
-		  gpointer     user_data)
-{
-	if (!current_exec)
-		return;
-	play_game (gui_prefs.current_game);
-}
-void
-on_play_clicked (GtkToolButton *button,
-		 gpointer       user_data)
+on_play_activate (GtkAction *action,
+		  gpointer  user_data)
 {
 	if (!current_exec)
 		return;
@@ -70,8 +62,8 @@ on_play_clicked (GtkToolButton *button,
 }
 
 void
-on_play_and_record_input_activate (GtkMenuItem     *menuitem,
-				   gpointer         user_data)
+on_play_and_record_input_activate (GtkAction *action,
+				   gpointer  user_data)
 {
 	if (!current_exec)
 		return;
@@ -84,7 +76,7 @@ on_play_and_record_input_activate (GtkMenuItem     *menuitem,
 
 
 void
-on_playback_input_activate             (GtkMenuItem     *menuitem,
+on_playback_input_activate             (GtkAction *action/*GtkMenuItem     *menuitem*/,
                                         gpointer         user_data)
 {
 	if (!current_exec)
@@ -475,15 +467,8 @@ quick_refresh_list (void)
 }
 
 void
-on_refresh_activate (GtkMenuItem     *menuitem,
-		     gpointer         user_data)
-{
-	quick_refresh_list ();
-}
-
-void
-on_refresh_clicked (GtkToolButton *button,
-		    gpointer       user_data)
+on_refresh_activate (GtkAction *action,
+		     gpointer  user_data)
 {
 	quick_refresh_list ();
 }

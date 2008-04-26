@@ -31,15 +31,13 @@
 #include <gtk/gtktreeviewcolumn.h>
 
 /* Main window menu: File */
-void     on_play_activate                       (GtkMenuItem     *menuitem,
-                                                 gpointer         user_data);
-void     on_play_clicked                        (GtkToolButton   *button,
+void     on_play_activate                       (GtkAction *action,
                                                  gpointer         user_data);
 
-void     on_play_and_record_input_activate      (GtkMenuItem     *menuitem,
+void     on_play_and_record_input_activate      (GtkAction *action,
                                                  gpointer         user_data);
 
-void     on_playback_input_activate             (GtkMenuItem     *menuitem,
+void     on_playback_input_activate             (GtkAction *action,
                                                  gpointer         user_data);
 
 void     on_select_random_game_activate         (GtkMenuItem     *menuitem,
@@ -107,9 +105,7 @@ void     on_collapse_all_activate               (GtkMenuItem *menuitem,
 void     on_the_prefix_activate                 (GtkCheckMenuItem *menuitem,
                                                  gpointer         user_data);
 
-void     on_refresh_activate                    (GtkMenuItem      *menuitem,
-                                                 gpointer         user_data);
-void     on_refresh_clicked                     (GtkToolButton   *button,
+void     on_refresh_activate                    (GtkAction        *action,
                                                  gpointer         user_data);
 
 /* Main window menu: Option */
