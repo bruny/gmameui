@@ -37,6 +37,7 @@ struct _MameOptionValue
 {
 	gchar *key;
 	gchar *value;
+	GmameuiPropertyDataType    type;
 };
 
 struct _MameProperty
@@ -71,6 +72,74 @@ struct _MameOptionsPriv
 };
 
 #define PREFERENCE_PROPERTY_PREFIX "preferences_"
+
+/* Returns an options string for a particular category (e.g. Performance, Video, etc)
+   String needs to be free'd when finished
+ */
+gchar *
+mame_options_get_option_string (MameOptions *pr, gchar *category)
+{
+	gchar *options_string;
+	GList *listpointer;
+	gchar **stv;
+	MameOptionValue *option;
+	MameProperty *prop;
+	
+	options_string = g_strdup ("");
+
+	/* For each item in the pr->priv->options_list */
+	listpointer = g_list_first (pr->priv->options_list);
+	// FIXME TODO listpointer is only valid after the options
+	// pages have been loaded, i.e. only when properties screen
+	// has been loaded at least once. Need to load the options file
+	// on startup
+	while (listpointer)
+	{
+		option = (MameOptionValue *) listpointer->data;
+		stv = g_strsplit (option->key, ".", 0);
+		
+		/* If type of the option matches the category */
+		if (g_ascii_strcasecmp (stv[0], category) == 0) {
+			
+			prop = g_hash_table_lookup (pr->priv->properties, option->key);
+			
+			GMAMEUI_DEBUG ("Option %s has type %d and value %s", stv[1], prop->data_type, option->value);
+
+			/* FIXME TODO Only add option if supported by the executable */
+			
+			/* Depending on the type of the option, cat
+			   the string in a particular way */
+			switch (prop->data_type) {
+				case GMAMEUI_PROPERTY_DATA_TYPE_BOOL:
+					if (g_ascii_strcasecmp (option->value, "1") == 0) {
+						GMAMEUI_DEBUG("Adding option %s", option->key);
+						options_string = g_strconcat (options_string, " -", stv[1], NULL);
+					} else
+						GMAMEUI_DEBUG("Ignoring option %s", option->key);
+					break;
+				case GMAMEUI_PROPERTY_DATA_TYPE_INT:
+					options_string = g_strconcat (options_string, " -", stv[1], " ", option->value, NULL);
+					break;
+				case GMAMEUI_PROPERTY_DATA_TYPE_DOUBLE:
+					options_string = g_strconcat (options_string, " -", stv[1], " ", option->value, NULL);
+					break;
+				case GMAMEUI_PROPERTY_DATA_TYPE_TEXT:
+					/* Don't add empty strings */
+					if (g_ascii_strcasecmp (option->value, "") != 0)
+						options_string = g_strconcat (options_string, " -", stv[1], " ", option->value, NULL);
+					break;
+			}
+		}
+		
+		listpointer = g_list_next (listpointer);
+	}
+
+	if (stv)
+		g_strfreev (stv);
+
+	GMAMEUI_DEBUG ("Options string is %s", options_string);
+	return options_string;
+}
 
 gchar *
 mame_options_get (MameOptions *pr, const gchar *key)
@@ -111,6 +180,30 @@ mame_options_set (MameOptions *pr, const gchar *key,
 		add_option_to_option_list (pr, key, value);
 	}
 	g_strfreev (stv);
+}
+
+
+
+/* All the widgets that cannot be handled via the GladeXML naming scheme are
+   managed here, e.g. effect name, which is determined by .png files in artwork dir */
+mame_options_generate_custom_settings (MameOptions *pr)
+{
+	/*FIXME TODO
+	* Get the GladeXML file *
+	get the widget
+	add the entries*/
+	GtkComboBox *box = gtk_combo_box_new_text ();   // FIXME TODO Should be a widget attribute in priv
+	gtk_combo_box_append_text (box, "aperture1x2rb");
+	gtk_combo_box_append_text (box, "aperture1x3rb");
+	gtk_combo_box_append_text (box, "aperture2x4bg");
+	gtk_combo_box_append_text (box, "aperture2x4rb");
+	gtk_combo_box_append_text (box, "aperture4x6");
+	gtk_combo_box_append_text (box, "scanlines");
+	gtk_widget_show (GTK_WIDGET (box));
+
+	/* Set the signal - in the handler, get the value using
+	   gtk_combo_box_get_active_text (); */
+	
 }
 
 static void 
@@ -198,6 +291,7 @@ mame_options_get_int (MameOptions *pr, const gchar *key)
 
 	g_return_val_if_fail (MAME_IS_OPTIONS (pr), 0);
 	g_return_val_if_fail (key != NULL, 0);
+	g_return_val_if_fail (pr->priv->options_file != NULL, 0);
 
 	ret_val = 0;
 	stv = g_strsplit (key, ".", 0);
@@ -205,6 +299,12 @@ mame_options_get_int (MameOptions *pr, const gchar *key)
 
 	g_strfreev (stv);
 
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving int option %s: %s", key, error->message);
+		g_error_free (error);
+		error = NULL;
+	}
+	
 	return ret_val;
 }
 
@@ -302,7 +402,7 @@ unregister_preferences_key (GtkWidget *widget,
 							"MameOptions");
 	key = g_strdup (p->key);
 	
-	g_hash_table_remove (pr->priv->properties, key);
+// NEED TO ACCESS THE TYPE LATER	g_hash_table_remove (pr->priv->properties, key);
 	g_free (key);
 }
 
@@ -336,12 +436,12 @@ get_property_value_as_string (MameProperty *prop)
 		double_value = gtk_range_get_value (GTK_RANGE (prop->object));
 		text_value = g_strdup_printf ("%f", double_value);
 		break;
-/*	case GMAMEUI_PROPERTY_OBJECT_TYPE_SPIN:
+	case GMAMEUI_PROPERTY_OBJECT_TYPE_SPIN:
 		int_value =
 			gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prop->object));
 		text_value = g_strdup_printf ("%d", int_value);
 		break;
-	*/
+
 	case GMAMEUI_PROPERTY_OBJECT_TYPE_ENTRY:
 		text_value =
 			gtk_editable_get_chars (GTK_EDITABLE (prop->object), 0, -1);
@@ -528,6 +628,7 @@ set_property_value_as_string (MameProperty *prop, const gchar *value)
 			gtk_entry_set_text (GTK_ENTRY (prop->object), "");
 		break;
 	case GMAMEUI_PROPERTY_OBJECT_TYPE_COMBO:
+/* FIXME TODO This is where we add the strings to the combo */
 		values = g_object_get_data(G_OBJECT(prop->object), "untranslated");
 		if (value != NULL)
 		{
@@ -592,14 +693,14 @@ register_callbacks (MameOptions *pr, MameProperty *p)
 			g_signal_connect (G_OBJECT(p->object), "focus_in_event",
 							  G_CALLBACK (block_update_property_on_change_str), p);
 			break;
-/*		case GMAMEUI_PROPERTY_OBJECT_TYPE_SPIN:
+		case GMAMEUI_PROPERTY_OBJECT_TYPE_SPIN:
 			g_signal_connect (G_OBJECT(p->object), "value-changed",
 							  G_CALLBACK (update_property_on_change_int), p);
 			break;
 		case GMAMEUI_PROPERTY_OBJECT_TYPE_TEXT:
 			g_signal_connect (G_OBJECT(p->object), "focus_out_event",
 							  G_CALLBACK (update_property_on_event_str), p);
-			break;*/
+			break;
 		case GMAMEUI_PROPERTY_OBJECT_TYPE_COMBO:
 			g_signal_connect (G_OBJECT(p->object), "changed",
 							  G_CALLBACK (update_property_on_change_str), p);
@@ -641,55 +742,30 @@ void add_option_to_option_list (MameOptions *pr, gchar *key, gchar *value)
 	gboolean found = FALSE;
 	
 	/* Look for option in list of available options for this exec */
-/* TODO - need to get a reference to the executable
-	gchar **stv;
-	stv = g_strsplit (key, ".", 0);
-	MameOption *option = xmame_get_option (theexec, stv[1]);
-	if (option)
-		GMAMEUI_DEBUG ("Mame supports the option %s", stv[1]);
-	g_strfreev (stv);
-	*/
-	
-	
-	/*GMAMEUI_DEBUG ("The options list has %d elements", g_list_length (pr->priv->options_list));
-	listpointer = g_list_first (pr->priv->options_list);
-	while (listpointer)
-	{
-		GMAMEUI_DEBUG ("Option %s has value %s",
-					   ((MameOptionValue *) listpointer->data)->key,
-					   ((MameOptionValue *) listpointer->data)->value);
-		listpointer = g_list_next (listpointer);
-	}
-	
-	listpointer = g_list_first (pr->priv->options_list);*/
 
-	/* Check if this option already exists in the list */
-/*	listpointer = g_list_find_custom (pr->priv->options_list, key,
-									  (GCompareFunc) g_ascii_strcasecmp);
-
-	if (listpointer) {*/
 	for (listpointer = g_list_first (pr->priv->options_list);
 		 listpointer != NULL;
 		 listpointer = g_list_next (listpointer)) {
 		
 		if (g_ascii_strcasecmp (((MameOptionValue *) (listpointer->data))->key, key) == 0) {
-//			GMAMEUI_DEBUG ("Updating option %s", ((MameOptionValue *) (listpointer->data))->key);
+			GMAMEUI_DEBUG ("Updating option %s", ((MameOptionValue *) (listpointer->data))->key);
 			((MameOptionValue *) listpointer->data)->value = g_strdup (value);
 			found = TRUE;
 			break;
 		}
 	}
 	
+	/* If the option was not found, then create a new one */
 	if (!found) {
 		obj = g_new0 (MameOptionValue, 1);
 	
 		obj->key = g_strdup (key);
 		obj->value = g_strdup (value);
-//		GMAMEUI_DEBUG ("Adding new option %s with value %s", key, value);
+
+		GMAMEUI_DEBUG ("Adding new option %s with value %s", key, value);
 		/* Prepend to avoid inefficiencies with adding to end of list */
 		pr->priv->options_list = g_list_prepend (pr->priv->options_list, obj);
 	}
-//	GMAMEUI_DEBUG ("The options list now has %d elements", g_list_length (pr->priv->options_list));
 }
 
 static void
@@ -820,10 +896,12 @@ mame_options_register_property_raw (MameOptions *pr,
 	p->custom = FALSE;
 	p->set_property = NULL;
 	p->get_property = NULL;
-	
+
+	GMAMEUI_DEBUG ("Adding MameProperty in hash table under key %s", key);
 	g_hash_table_insert (pr->priv->properties, g_strdup (key), p);
 	connect_prop_to_object (pr, p);
 	register_callbacks (pr, p);
+
 	return TRUE;
 }
 
@@ -951,9 +1029,9 @@ mame_options_register_all_properties_from_glade_xml (MameOptions *pr,
 
 void
 mame_options_add_page (MameOptions *pr, GladeXML *gxml,
-					   const gchar* glade_widget_name,
-					   const gchar* title,
-					   const gchar *icon_filename)
+		       const gchar* glade_widget_name,
+		       const gchar* title,
+		       const gchar *icon_filename)
 {
 	GtkWidget *parent;
 	GtkWidget *page;
@@ -982,7 +1060,8 @@ mame_options_add_page (MameOptions *pr, GladeXML *gxml,
 		}
 	}
 //	image_path = icon_filename; /* TODO */
-	pixbuf = gdk_pixbuf_new_from_file (icon_filename, NULL);
+	pixbuf = gmameui_get_icon_from_stock (icon_filename);
+	
 	mame_options_dialog_add_page (MAME_OPTIONS_DIALOG (pr->priv->prefs_dialog),
 								  glade_widget_name, title, pixbuf, page);
 	mame_options_register_all_properties_from_glade_xml (pr, gxml, page);
@@ -1008,7 +1087,10 @@ mame_options_dispose (GObject *obj)
 	
 	if (pr->priv->properties)
 	{
+		GMAMEUI_DEBUG ("Destroying MameOptions hash table");
+		
 		/* This will release the refs on property objects */
+		/* FIXME - Need to remove all the elements first? */
 		g_hash_table_destroy (pr->priv->properties);
 		pr->priv->properties = NULL;
 	}
@@ -1019,25 +1101,27 @@ mame_options_instance_init (MameOptions *pr)
 {
 	pr->priv = g_new0 (MameOptionsPriv, 1);
 	
-	pr->priv->properties = g_hash_table_new_full (g_str_hash, g_str_equal,
-												  g_free, 
-												  (GDestroyNotify) property_destroy);
+	pr->priv->properties = g_hash_table_new_full (g_str_hash,
+						      g_str_equal,
+						      g_free,
+						      (GDestroyNotify) property_destroy);
 
 	/* This gets called from mame_options_new. From that function, also pass in a RomEntry
 	   If RomEntry is NULL, get default options, otherwise get the options
 	   for a specific ROM */
 	pr->priv->filename = g_build_filename (g_get_home_dir (),
-										   ".gmameui", "options", "default_new", NULL);
+					       ".gmameui", "options", "default_new", NULL);
 	pr->priv->options_file = g_key_file_new ();
 	GError *error = NULL;
 	g_key_file_load_from_file (pr->priv->options_file,
-							   pr->priv->filename,
-							   G_KEY_FILE_KEEP_COMMENTS,
-							   &error);
+				   pr->priv->filename,
+				   G_KEY_FILE_KEEP_COMMENTS,
+				   &error);
 
 	if (error) {
 		GMAMEUI_DEBUG ("options file could not be loaded: %s", error->message);
 		g_error_free (error);
+		error = NULL;
 	}
 	
 	pr->priv->options_list = NULL;  /* Initialise options list */

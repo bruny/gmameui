@@ -24,7 +24,9 @@
 #ifndef _MAME_OPTIONS_H
 #define _MAME_OPTIONS_H
 
+#include <glade/glade.h>
 #include "mame_options_dialog.h"
+
 
 G_BEGIN_DECLS
 
@@ -120,6 +122,8 @@ gchar * mame_options_get (MameOptions *pr,
 /* Gets the value (int) of a key. If not found, 0 is returned */
 gint mame_options_get_int (MameOptions *pr,
 						   const gchar *key);
+
+void add_option_to_option_list (MameOptions *pr, gchar *key, gchar *value);
 
 G_END_DECLS
 
