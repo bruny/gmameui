@@ -4,6 +4,7 @@ glade_DATA =    audit_window.glade \
 		properties.glade \
 		sidebar.glade \
 		column_layout.glade \
-		startup_prefs.glade
+		startup_prefs.glade \
+		rom_info.glade
 
 EXTRA_DIST = $(glade_DATA)
