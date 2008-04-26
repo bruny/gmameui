@@ -74,6 +74,9 @@ main (int argc, char *argv[])
 	gmameui_init ();
 	init_gui ();
 
+	/* Load the default options */
+	main_gui.options = mame_options_new ();
+	
 #ifdef ENABLE_SIGNAL_HANDLER
 	signal (SIGHUP, gmameui_signal_handler);
 	signal (SIGINT, gmameui_signal_handler);
@@ -476,32 +479,78 @@ play_game (RomEntry *rom)
 		return;
 	}
 
-	target = load_options (rom);
-	if (!target)
-		target = &default_options;
+	if (current_exec->type == XMAME_EXEC_WIN32) {
+		gchar *sdlmame_options_string_perf;
+		gchar *sdlmame_options_string_video;
+		gchar *sdlmame_options_string_sound;
+		gchar *sdlmame_options_string_display;
+		gchar *sdlmame_options_string_misc;
+		gchar *sdlmame_options_string_debug;
+		gchar *sdlmame_options_string_artwork;
+		gchar *sdlmame_options_string_vector;
+		
+		sdlmame_options_string_perf = mame_options_get_option_string (main_gui.options, "Performance");
+		sdlmame_options_string_video = mame_options_get_option_string (main_gui.options, "Video");
+		sdlmame_options_string_sound = mame_options_get_option_string (main_gui.options, "Sound");
+		sdlmame_options_string_display = mame_options_get_option_string (main_gui.options, "Display");
+		sdlmame_options_string_misc = mame_options_get_option_string (main_gui.options, "Miscellaneous");
+		sdlmame_options_string_debug = mame_options_get_option_string (main_gui.options, "Debugging");
+		sdlmame_options_string_artwork = mame_options_get_option_string (main_gui.options, "Artwork");
+		if (rom->vector)
+			sdlmame_options_string_vector = mame_options_get_option_string (main_gui.options, "Vector");
+		else
+			sdlmame_options_string_vector = g_strdup ("");
+		
+		opt = g_strdup_printf ("%s %s %s %s %s %s %s %s %s %s -%s %s 2>&1",
+				       current_exec->path,
+				       create_rompath_options_string (current_exec),
+				       sdlmame_options_string_perf,
+				       sdlmame_options_string_video,
+				       sdlmame_options_string_sound,
+				       sdlmame_options_string_display,
+				       sdlmame_options_string_vector,
+				       sdlmame_options_string_misc,
+				       sdlmame_options_string_debug,
+				       sdlmame_options_string_artwork,
+				       current_exec->noloadconfig_option,
+				       rom->romname);
+		
+		g_free (sdlmame_options_string_perf);
+		g_free (sdlmame_options_string_video);
+		g_free (sdlmame_options_string_sound);
+		g_free (sdlmame_options_string_display);
+		g_free (sdlmame_options_string_misc);
+		g_free (sdlmame_options_string_debug);
+		g_free (sdlmame_options_string_artwork);
+		g_free (sdlmame_options_string_vector);
+	} else {
 	
-	/* prepares options*/
-	general_options = create_options_string (current_exec, target);
+		target = load_options (rom);
+		if (!target)
+			target = &default_options;
 	
-	if (rom->vector)
-		Vector_Related_options = create_vector_options_string (current_exec, target);
-	else
-		Vector_Related_options = g_strdup ("");				
-	/* create the command */
-	opt = g_strdup_printf ("%s %s %s -%s %s 2>&1",
-			       current_exec->path,
-			       general_options,
-			       Vector_Related_options,
-			       current_exec->noloadconfig_option,
-			       rom->romname);
+		/* prepares options*/
+		general_options = create_options_string (current_exec, target);
+	
+		if (rom->vector)
+			Vector_Related_options = create_vector_options_string (current_exec, target);
+		else
+			Vector_Related_options = g_strdup ("");				
+		/* create the command */
+		opt = g_strdup_printf ("%s %s %s -%s %s 2>&1",
+				       current_exec->path,
+				       general_options,
+				       Vector_Related_options,
+				       current_exec->noloadconfig_option,
+				       rom->romname);
 
-	/*free options*/
-	g_free (general_options);
-	g_free (Vector_Related_options);
+		/*free options*/
+		g_free (general_options);
+		g_free (Vector_Related_options);
 	
-	if (target != &default_options)
-		game_options_free (target);
-
+		if (target != &default_options)
+			game_options_free (target);
+	}
 	launch_emulation (rom, opt);
 	g_free (opt);
 }
@@ -638,6 +687,9 @@ GMAMEUI_DEBUG ("Destroying window - done");
 	xmame_table_free ();
 	xmame_options_free ();
 
+	g_object_unref (main_gui.options);
+	main_gui.options == NULL;
+	
 	gtk_main_quit ();
 }
 
