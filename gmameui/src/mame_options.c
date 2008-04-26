@@ -80,62 +80,76 @@ gchar *
 mame_options_get_option_string (MameOptions *pr, gchar *category)
 {
 	gchar *options_string;
-	GList *listpointer;
-	gchar **stv;
-	MameOptionValue *option;
+	gchar **keylist;
+	gsize category_len;
+	GError *error = NULL;
 	MameProperty *prop;
+	int i;
+
+	g_return_if_fail (pr->priv->options_file != NULL);
+	g_return_if_fail (g_hash_table_size (pr->priv->properties) != 0);
 	
 	options_string = g_strdup ("");
 
-	/* For each item in the pr->priv->options_list */
-	listpointer = g_list_first (pr->priv->options_list);
-	// FIXME TODO listpointer is only valid after the options
-	// pages have been loaded, i.e. only when properties screen
-	// has been loaded at least once. Need to load the options file
-	// on startup
-	while (listpointer)
-	{
-		option = (MameOptionValue *) listpointer->data;
-		stv = g_strsplit (option->key, ".", 0);
+	keylist = g_key_file_get_keys (pr->priv->options_file, category, &category_len, &error);
+	
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving options keys for category %s: %s",
+			       category, error->message);
+		g_error_free (error);
+		return options_string;
+	}
+	
+	GMAMEUI_DEBUG ("Retrieving option keys for category %s - %d keys found", category, category_len);
+	
+	for (i = 0; i < category_len; i++) {
+		gchar *value;
+		gchar *key;
 		
-		/* If type of the option matches the category */
-		if (g_ascii_strcasecmp (stv[0], category) == 0) {
-			
-			prop = g_hash_table_lookup (pr->priv->properties, option->key);
-			
-			GMAMEUI_DEBUG ("Option %s has type %d and value %s", stv[1], prop->data_type, option->value);
-
-			/* FIXME TODO Only add option if supported by the executable */
-			
-			/* Depending on the type of the option, cat
-			   the string in a particular way */
-			switch (prop->data_type) {
-				case GMAMEUI_PROPERTY_DATA_TYPE_BOOL:
-					if (g_ascii_strcasecmp (option->value, "1") == 0) {
-						GMAMEUI_DEBUG("Adding option %s", option->key);
-						options_string = g_strconcat (options_string, " -", stv[1], NULL);
-					} else
-						GMAMEUI_DEBUG("Ignoring option %s", option->key);
-					break;
-				case GMAMEUI_PROPERTY_DATA_TYPE_INT:
-					options_string = g_strconcat (options_string, " -", stv[1], " ", option->value, NULL);
-					break;
-				case GMAMEUI_PROPERTY_DATA_TYPE_DOUBLE:
-					options_string = g_strconcat (options_string, " -", stv[1], " ", option->value, NULL);
-					break;
-				case GMAMEUI_PROPERTY_DATA_TYPE_TEXT:
-					/* Don't add empty strings */
-					if (g_ascii_strcasecmp (option->value, "") != 0)
-						options_string = g_strconcat (options_string, " -", stv[1], " ", option->value, NULL);
-					break;
-			}
+		key = g_strdup_printf("%s.%s", category, keylist[i]);
+		prop = g_hash_table_lookup (pr->priv->properties, key);
+		
+		if (!prop) {
+			GMAMEUI_DEBUG ("No property found for key %s", key);
+		} else {
+		
+		error = NULL;
+		
+		value = g_key_file_get_value (pr->priv->options_file, category, keylist[i], &error);
+		if (error) {
+			GMAMEUI_DEBUG ("Error retrieving options value for key %s in category %s: %s",
+				       keylist[i], category, error->message);
+			g_error_free (error);
+			break;
 		}
 		
-		listpointer = g_list_next (listpointer);
+		GMAMEUI_DEBUG ("Option %s has type %d and value %s", keylist[i], prop->data_type, value);
+		switch (prop->data_type) {
+			case GMAMEUI_PROPERTY_DATA_TYPE_BOOL:
+				if (g_ascii_strcasecmp (value, "1") == 0) {
+					GMAMEUI_DEBUG("Adding option %s", keylist[i]);
+					options_string = g_strconcat (options_string, " -", keylist[i], NULL);
+				} else
+					GMAMEUI_DEBUG("Ignoring option %s", keylist[i]);
+				break;
+			case GMAMEUI_PROPERTY_DATA_TYPE_INT:
+				options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
+				break;
+			case GMAMEUI_PROPERTY_DATA_TYPE_DOUBLE:
+				options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
+				break;
+			case GMAMEUI_PROPERTY_DATA_TYPE_TEXT:
+				/* Don't add empty strings */
+				if (g_ascii_strcasecmp (value, "") != 0)
+					options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
+				break;
+		}
+		g_free (value);}
+		g_free (key);
 	}
 
-	if (stv)
-		g_strfreev (stv);
+	if (keylist)
+		g_strfreev (keylist);
 
 	GMAMEUI_DEBUG ("Options string is %s", options_string);
 	return options_string;
@@ -1125,6 +1139,7 @@ mame_options_instance_init (MameOptions *pr)
 	}
 	
 	pr->priv->options_list = NULL;  /* Initialise options list */
+	
 }
 
 static void
