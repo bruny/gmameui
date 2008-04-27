@@ -473,47 +473,38 @@ on_refresh_activate (GtkAction *action,
 	quick_refresh_list ();
 }
 
-
-/* Main window menu: Option */
-static void
-color_selected  (GtkButton       *button,
-                 gpointer         user_data)
-{
-	GdkColor mycolor;
-	gtk_color_selection_get_current_color (GTK_COLOR_SELECTION (GTK_COLOR_SELECTION_DIALOG (user_data)->colorsel), &mycolor);
-	gui_prefs.clone_color.red = mycolor.red;
-	gui_prefs.clone_color.green = mycolor.green;
-	gui_prefs.clone_color.blue = mycolor.blue;
-	gtk_widget_destroy (user_data);
-	create_gamelist_content ();
-}
-
 void
 on_clone_color_menu_activate           (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+	GtkWidget *clone_selector_dlg = gtk_color_selection_dialog_new (_("Clone color selection"));
 	GdkColor mycolor;
-	main_gui.clone_selector = gtk_color_selection_dialog_new (_("Clone color selection"));
-	gtk_widget_hide (GTK_COLOR_SELECTION_DIALOG (main_gui.clone_selector)->help_button);
-	gtk_window_set_transient_for (GTK_WINDOW (main_gui.clone_selector),GTK_WINDOW (MainWindow));
-	gtk_window_set_modal (GTK_WINDOW (main_gui.clone_selector), TRUE);
+	gint response;
 
 	mycolor.pixel = 0;
 	mycolor.red = (guint16) gui_prefs.clone_color.red;
 	mycolor.green = (guint16) gui_prefs.clone_color.green;
 	mycolor.blue = (guint16) gui_prefs.clone_color.blue;
-	gtk_color_selection_set_current_color (GTK_COLOR_SELECTION (GTK_COLOR_SELECTION_DIALOG (main_gui.clone_selector)->colorsel), &mycolor);
 
-	g_signal_connect (G_OBJECT (GTK_COLOR_SELECTION_DIALOG (main_gui.clone_selector)->ok_button), "clicked",
-			  G_CALLBACK (color_selected),
-			  (gpointer) main_gui.clone_selector);
-	g_signal_connect_swapped (G_OBJECT (GTK_COLOR_SELECTION_DIALOG (main_gui.clone_selector)->cancel_button), "clicked",
-				  G_CALLBACK (gtk_widget_destroy),
-				  (gpointer) main_gui.clone_selector);
-	g_signal_connect (G_OBJECT (main_gui.clone_selector), "delete_event",
-			  G_CALLBACK (gtk_widget_destroy),
-			  NULL);
-	gtk_widget_show (main_gui.clone_selector);
+	gtk_color_selection_set_current_color (GTK_COLOR_SELECTION (GTK_COLOR_SELECTION_DIALOG (clone_selector_dlg)->colorsel), &mycolor);
+
+	response = gtk_dialog_run (GTK_DIALOG (clone_selector_dlg));
+	
+	switch (response) {
+		case GTK_RESPONSE_OK:
+			gtk_color_selection_get_current_color (GTK_COLOR_SELECTION (GTK_COLOR_SELECTION_DIALOG (clone_selector_dlg)->colorsel), &mycolor);
+			gui_prefs.clone_color.red = mycolor.red;
+			gui_prefs.clone_color.green = mycolor.green;
+			gui_prefs.clone_color.blue = mycolor.blue;
+			
+			gtk_widget_destroy (clone_selector_dlg);
+			
+			create_gamelist_content ();
+			break;
+		default:
+			gtk_widget_destroy (clone_selector_dlg);
+			break;
+	}
 }
 
 void

@@ -229,11 +229,7 @@ struct main_gui_struct {
 
 	GMAMEUISidebar *screenshot_hist_frame;
 
-	GtkWidget *xmame_executables_combo;
-	GtkMenuItem *executables_title;
 	GtkWidget *executable_menu;
-
-	GtkWidget *clone_selector;
 	
 	GtkUIManager *manager;
 	GtkActionGroup *gmameui_rom_action_group;
