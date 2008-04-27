@@ -483,6 +483,7 @@ GMAMEUI_DEBUG ("Loading directories ini file");
 			xmame_table_add (xmame_executables[i]);
 		if (mame_executable) {
 			current_exec = xmame_table_get (mame_executable);
+GMAMEUI_DEBUG("Current exec set to %s", current_exec->path);
 			g_free (mame_executable);
 		}
 	
@@ -567,7 +568,8 @@ save_dirs_ini (void)
 		g_key_file_set_string (dirsini_list, "Directories", "mame_executable", current_exec->path);
 
 	if (xmame_table_size () > 0)
-		g_key_file_set_string_list (dirsini_list, "Directories", "xmame_executables_array", xmame_table_get_all(), g_strv_length (gui_prefs.RomPath));
+		g_key_file_set_string_list (dirsini_list, "Directories", "xmame_executables_array",
+					    xmame_table_get_all(), xmame_table_size());
 
 	g_key_file_set_string_list (dirsini_list, "Directories", "RomPath", gui_prefs.RomPath, g_strv_length (gui_prefs.RomPath));
 	g_key_file_set_string_list (dirsini_list, "Directories", "SamplePath", gui_prefs.SamplePath, g_strv_length (gui_prefs.RomPath));
