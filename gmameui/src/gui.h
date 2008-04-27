@@ -204,8 +204,6 @@ GtkWidget *MainWindow;
 
 struct main_gui_struct {
 
-	GtkMenuItem *audit_all_games_menu;
-
 	GtkToolbar *toolbar;
 
 	GtkWidget *combo_progress_bar;
