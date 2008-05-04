@@ -1042,8 +1042,7 @@ xmame_get_option_string (const XmameExecutable *exec,
 	gchar *escaped_args;
 	gchar *opt_string;
 
-	if (!exec->options)
-		return NULL;
+	g_return_if_fail (exec->options != NULL);
 
 	opt = g_hash_table_lookup (exec->options, option_name);
 	if (!opt) {

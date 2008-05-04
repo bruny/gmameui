@@ -209,6 +209,8 @@ on_properties_activate (GtkAction *action,
 void on_options_activate (GtkAction *action,
 			  gpointer  user_data)
 {
+	/* SDLMAME uses a different set of options to XMAME. If we are running
+	   XMAME, then use the legacy GXMAME method of maintaining the options */
 	if (current_exec->type == XMAME_EXEC_WIN32) {
 		
 		GtkWidget *options_dialog = mame_options_get_dialog (main_gui.options);
@@ -218,6 +220,8 @@ void on_options_activate (GtkAction *action,
 		                       "gmameui-display-toolbar");
 		mame_options_add_page (main_gui.options, xml, "Sound", "Sound",
 		                       "gmameui-sound-toolbar");
+		mame_options_add_page (main_gui.options, xml, "Input", "Input",
+		                       "gmameui-joystick-toolbar");
 		mame_options_add_page (main_gui.options, xml, "performance_vbox", "Performance",
 		                       "gmameui-general-toolbar");
 		mame_options_add_page (main_gui.options, xml, "misc_vbox", "Miscellaneous",

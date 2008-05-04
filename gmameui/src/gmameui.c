@@ -487,6 +487,7 @@ play_game (RomEntry *rom)
 		gchar *sdlmame_options_string_misc;
 		gchar *sdlmame_options_string_debug;
 		gchar *sdlmame_options_string_artwork;
+		gchar *sdlmame_options_string_input;
 		gchar *sdlmame_options_string_vector;
 		
 		sdlmame_options_string_perf = mame_options_get_option_string (main_gui.options, "Performance");
@@ -496,14 +497,16 @@ play_game (RomEntry *rom)
 		sdlmame_options_string_misc = mame_options_get_option_string (main_gui.options, "Miscellaneous");
 		sdlmame_options_string_debug = mame_options_get_option_string (main_gui.options, "Debugging");
 		sdlmame_options_string_artwork = mame_options_get_option_string (main_gui.options, "Artwork");
+		sdlmame_options_string_input = mame_options_get_option_string (main_gui.options, "Input");
 		if (rom->vector)
 			sdlmame_options_string_vector = mame_options_get_option_string (main_gui.options, "Vector");
 		else
 			sdlmame_options_string_vector = g_strdup ("");
 		
-		opt = g_strdup_printf ("%s %s %s %s %s %s %s %s %s %s -%s %s 2>&1",
+		opt = g_strdup_printf ("%s %s %s %s %s %s %s %s %s %s %s %s -%s %s 2>&1",
 				       current_exec->path,
 				       create_rompath_options_string (current_exec),
+				       create_io_options_string (current_exec),
 				       sdlmame_options_string_perf,
 				       sdlmame_options_string_video,
 				       sdlmame_options_string_sound,
@@ -512,6 +515,7 @@ play_game (RomEntry *rom)
 				       sdlmame_options_string_misc,
 				       sdlmame_options_string_debug,
 				       sdlmame_options_string_artwork,
+				       sdlmame_options_string_input,
 				       current_exec->noloadconfig_option,
 				       rom->romname);
 		
@@ -522,6 +526,7 @@ play_game (RomEntry *rom)
 		g_free (sdlmame_options_string_misc);
 		g_free (sdlmame_options_string_debug);
 		g_free (sdlmame_options_string_artwork);
+		g_free (sdlmame_options_string_input);
 		g_free (sdlmame_options_string_vector);
 	} else {
 	

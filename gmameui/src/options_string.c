@@ -842,7 +842,7 @@ char *create_vector_options_string(XmameExecutable *exec, GameOptions *target)
 	return option_string;
 }
 
-static char *create_io_options_string(XmameExecutable *exec)
+gchar *create_io_options_string(XmameExecutable *exec)
 {
 	char *option_string;
 	gchar *artworkpath_option,
@@ -861,6 +861,8 @@ static char *create_io_options_string(XmameExecutable *exec)
 			*input_directory_option,
 			*state_directory_option;
 
+	xmame_get_options(exec);
+	
 	artworkpath_option = xmame_get_option_string(exec, "artwork_directory", gui_prefs.ArtworkDirectory);
 	screenshotdir_option = xmame_get_option_string(exec, "snapshot_directory", gui_prefs.SnapshotDirectory);
  	hiscoredir_option = xmame_get_option_string(exec, "hiscore_directory", gui_prefs.HiscoreDirectory);

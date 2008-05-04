@@ -100,8 +100,6 @@ mame_options_get_option_string (MameOptions *pr, gchar *category)
 		return options_string;
 	}
 	
-	GMAMEUI_DEBUG ("Retrieving option keys for category %s - %d keys found", category, category_len);
-	
 	for (i = 0; i < category_len; i++) {
 		gchar *value;
 		gchar *key;
@@ -123,14 +121,10 @@ mame_options_get_option_string (MameOptions *pr, gchar *category)
 			break;
 		}
 		
-		GMAMEUI_DEBUG ("Option %s has type %d and value %s", keylist[i], prop->data_type, value);
 		switch (prop->data_type) {
 			case GMAMEUI_PROPERTY_DATA_TYPE_BOOL:
-				if (g_ascii_strcasecmp (value, "1") == 0) {
-					GMAMEUI_DEBUG("Adding option %s", keylist[i]);
+				if (g_ascii_strcasecmp (value, "1") == 0)
 					options_string = g_strconcat (options_string, " -", keylist[i], NULL);
-				} else
-					GMAMEUI_DEBUG("Ignoring option %s", keylist[i]);
 				break;
 			case GMAMEUI_PROPERTY_DATA_TYPE_INT:
 				options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
@@ -151,7 +145,6 @@ mame_options_get_option_string (MameOptions *pr, gchar *category)
 	if (keylist)
 		g_strfreev (keylist);
 
-	GMAMEUI_DEBUG ("Options string is %s", options_string);
 	return options_string;
 }
 
@@ -762,7 +755,6 @@ void add_option_to_option_list (MameOptions *pr, gchar *key, gchar *value)
 		 listpointer = g_list_next (listpointer)) {
 		
 		if (g_ascii_strcasecmp (((MameOptionValue *) (listpointer->data))->key, key) == 0) {
-			GMAMEUI_DEBUG ("Updating option %s", ((MameOptionValue *) (listpointer->data))->key);
 			((MameOptionValue *) listpointer->data)->value = g_strdup (value);
 			found = TRUE;
 			break;
@@ -776,7 +768,6 @@ void add_option_to_option_list (MameOptions *pr, gchar *key, gchar *value)
 		obj->key = g_strdup (key);
 		obj->value = g_strdup (value);
 
-		GMAMEUI_DEBUG ("Adding new option %s with value %s", key, value);
 		/* Prepend to avoid inefficiencies with adding to end of list */
 		pr->priv->options_list = g_list_prepend (pr->priv->options_list, obj);
 	}
@@ -911,7 +902,6 @@ mame_options_register_property_raw (MameOptions *pr,
 	p->set_property = NULL;
 	p->get_property = NULL;
 
-	GMAMEUI_DEBUG ("Adding MameProperty in hash table under key %s", key);
 	g_hash_table_insert (pr->priv->properties, g_strdup (key), p);
 	connect_prop_to_object (pr, p);
 	register_callbacks (pr, p);
@@ -1030,7 +1020,7 @@ mame_options_register_all_properties_from_glade_xml (MameOptions *pr,
 		}
 		
 		name = glade_get_widget_name (widget);
-		GMAMEUI_DEBUG ("Processing widget %s", name);
+
 		if (strncmp (name, PREFERENCE_PROPERTY_PREFIX,
                      strlen (PREFERENCE_PROPERTY_PREFIX)) == 0)
 		{
@@ -1050,7 +1040,6 @@ mame_options_add_page (MameOptions *pr, GladeXML *gxml,
 	GtkWidget *parent;
 	GtkWidget *page;
 	GdkPixbuf *pixbuf;
-//	gchar *image_path;
 	
 	g_return_if_fail (MAME_IS_OPTIONS (pr));
 	g_return_if_fail (glade_widget_name != NULL);
@@ -1073,14 +1062,12 @@ mame_options_add_page (MameOptions *pr, GladeXML *gxml,
 			gtk_container_remove (GTK_CONTAINER (parent), page);
 		}
 	}
-//	image_path = icon_filename; /* TODO */
 	pixbuf = gmameui_get_icon_from_stock (icon_filename);
 	
 	mame_options_dialog_add_page (MAME_OPTIONS_DIALOG (pr->priv->prefs_dialog),
 								  glade_widget_name, title, pixbuf, page);
 	mame_options_register_all_properties_from_glade_xml (pr, gxml, page);
 	g_object_unref (page);
-//	g_free (image_path);
 	g_object_unref (pixbuf);						   
 }
 

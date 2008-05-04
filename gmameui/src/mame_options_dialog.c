@@ -89,6 +89,8 @@ add_category_columns (MameOptionsDialog *dlg)
 
 	gtk_tree_view_append_column (GTK_TREE_VIEW (dlg->priv->treeview),
 				     column);
+	
+
 }
 
 /* When an item in the sidebar is selected, we change the tab
@@ -111,6 +113,32 @@ selection_changed_cb (GtkTreeSelection *selection,
 						widget));
 		
 	}
+}
+
+/* This function fudges the order that items are added to the store. If we
+   didn't have this, then the sort order would be alphabetic */
+static gint
+compare_pref_page_func (GtkTreeModel *model,
+			GtkTreeIter *a, GtkTreeIter *b, gpointer user_data)
+{
+	gint val;
+	gchar *name1, *name2;
+	
+	gtk_tree_model_get (model, a, COL_TITLE, &name1, -1);
+	gtk_tree_model_get (model, b, COL_TITLE, &name2, -1);
+
+	/* FIXME: Make the debugging page last */
+	if (strcmp (name1, _("Debugging")) != 0)
+		return -1;
+		
+	if (strcmp (name2, _("Debugging")) == 0)
+		return 1;
+
+	val = strcmp (name1, name2);
+	g_free (name1);
+	g_free (name2);
+	
+	return val;
 }
 
 /* Creates a hbox containing a treeview (the sidebar) and a notebook */
@@ -140,7 +168,10 @@ mame_options_dialog_init (MameOptionsDialog *dlg)
 					       G_TYPE_INT);
 	sortable = GTK_TREE_SORTABLE (dlg->priv->store);
 	gtk_tree_sortable_set_sort_column_id (sortable, COL_TITLE,
-										  GTK_SORT_ASCENDING);
+					      GTK_SORT_ASCENDING);
+	gtk_tree_sortable_set_sort_func (sortable, COL_TITLE,
+					 compare_pref_page_func,
+					 NULL, NULL);
 	
 	gtk_tree_view_set_model (GTK_TREE_VIEW (dlg->priv->treeview),
 				 GTK_TREE_MODEL (dlg->priv->store));

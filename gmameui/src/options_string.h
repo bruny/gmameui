@@ -29,6 +29,8 @@
 
 gchar *
 create_rompath_options_string (XmameExecutable *exec);
+gchar *
+create_io_options_string (XmameExecutable *exec);
 
 char * create_options_string(XmameExecutable *exec, GameOptions *target);
 
