@@ -1,3 +1,156 @@
+2008-05-04 21:28  adburton
+
+	* data/Makefile.am: Add options.glade to Makefile.am
+	* data/options.glade, src/mame_options.c,
+	  src/mame_options_dialog.c, src/options_string.c,
+	  src/options_string.h, src/xmame_executable.c, src/callbacks.c,
+	  src/gmameui.c: Added support for more options, including input
+	  options
+
+2008-04-27 14:50  adburton
+
+	* src/gui.h: Remove redundant variable from MainGui object
+	* src/: callbacks.c, gui.h: Remove colour selection dlg variable
+	  from MainGui object and consolidate color handling code
+	* src/io.c: Fix a bug saving the executables
+
+2008-04-26 21:32  adburton
+
+	* src/mame_options.c: Initiate options hash table on startup
+	* src/options_string.c: Avoid segfault for invalid string
+
+2008-04-26 21:15  adburton
+
+	* src/: callbacks.c, callbacks.h: Remove redundant functions
+	* src/: properties.c, properties.h, callbacks.c, callbacks.h,
+	  gui.h: Split handling of ROM information and options into
+	  separate windows
+	* src/gmameui.c: Generate options string using mame_options
+	  structure for SDLMAME, free mame_options upon exit
+	* src/mame_options.c: Add function to load options from options key
+	  file for category
+	* data/: rom_info.glade, Makefile.am: Added new Glade window for
+	  ROM information
+	* src/gmameui-ui.xml: Split options and properties callbacks
+	* src/mame_options.c, src/mame_options.h, data/options.glade:
+	  Modifications to options dialog
+
+2008-04-22 00:56  adburton
+
+	* src/: callbacks.c, gui.c, gui.h, interface.c: Migrated toolbar to
+	  GtkUIManager functions and removed redundant code and functions
+
+2008-04-20 19:33  adburton
+
+	* src/: interface.c, callbacks.c, gui.c, gui.h, callbacks.h: Use
+	  GtkAction to generate menu, remove redundant functions
+	* src/: callbacks.c, gmameui-ui.xml, gui.c, gui.h, interface.c: Use
+	  GtkAction to generate popup column menu, remove redundant
+	  functions
+
+2008-04-20 00:40  adburton
+
+	* src/: gmameui-ui.xml, callbacks.c, interface.c, callbacks.h,
+	  gui.c, gui.h, Makefile.am: Use GtkAction to generate popup
+	  gamelist menu
+
+2008-04-19 16:46  adburton
+
+	* src/: callbacks.c, gui.c, gui.h, interface.c: Move screenshot and
+	  history frame to a separate class
+	* src/io.c: Only overwrite file paths with defaults if no value set
+
+2008-04-16 16:05  adburton
+
+	* src/xmame_options.c: Added new SDLMame options
+
+2008-04-15 19:54  adburton
+
+	* src/: cell-renderer-captioned-image.c,
+	  cell-renderer-captioned-image.h: Added initial cut at new options
+	  dialog code based on Anjuta preference plugin code
+	* data/options.glade, src/mame_options.c, src/mame_options.h,
+	  src/mame_options_dialog.c, src/mame_options_dialog.h,
+	  configure.ac, src/Makefile.am: Added initial cut at new options
+	  dialog code based on Anjuta preference plugin code
+
+2008-04-07 22:49  adburton
+
+	* src/io.c: When performing quick check, check for existence of
+	  clone ROMs rather than setting them to be automatically correct
+	  if parent set is present
+	* src/gui.c: Set status icon for ROMs in BEST AVAILABLE status, set
+	  status icon consistently where it is called
+
+2008-03-27 09:33  adburton
+
+	* src/gui.c: Add call to gtk_tree_view_set_rules_hint
+	* src/game_list.c: Moved gamelist_get_selected_game from gui.c
+	* src/gui.c: ifdef'd out references to network play, moved
+	  gamelist_get_selected_game to game_list.c
+	* src/callbacks.c: Removed redundant check when resizing columns
+	* src/gui_prefs.c, data/Makefile.am, data/startup_prefs.glade:
+	  Migrated startup options dialog to Glade
+
+2008-03-25 23:20  adburton
+
+	* src/: gmameui.c, directories.c: Save file and directory settings
+	  when directories window is closed with OK, rather than on GMAMEUI
+	  exit
+	* src/options.c: Fix GTK warnings, disable frameskip widgets when
+	  auto toggled, started work on setting signal handlers for child
+	  widgets rather than individually, use Glade instead of manually
+	  adding widgets
+	* src/properties.c: Removed redundant functions
+	* src/game_options.c: Set defaults for missing options after ini
+	  file has been loaded
+	* data/properties.glade: Updated Properties window to use Glade
+	* src/: gmameui.c, io.c, io.h: Removed read/write to gmameuirc and
+	  moved values within to other files
+
+2008-03-20 00:17  adburton
+
+	* src/gmameui.c, src/gmameui.h, src/gui.c, src/io.c,
+	  src/callbacks.c, src/column_layout.c, data/column_layout.glade:
+	  Removed column ordering functionality and used Glade to create
+	  columns shown window
+
+2008-03-18 23:23  adburton
+
+	* src/gui.c: Look for screenshot in parent subdirectory
+	* src/: callbacks.c, interface.c, gmameui.h, gui.c: Removed font
+	  configuration option
+	* src/: gui.c, rom_entry.h: Consolidate statusbar push code
+	* src/gui.c: Move if clause contents together
+	* data/: column_layout.glade, Makefile.am: Add new Glade file for
+	  column layout
+
+2008-03-12 23:08  adburton
+
+	* src/: game_list.c, Makefile.am, game_list.h, rom_entry.c,
+	  rom_entry.h: Move rom_entry functions to their own source file
+
+2008-03-07 21:38  adburton
+
+	* src/gui.c: Refactoring on status icon pixbuf choosing, sort order
+	  callback creation and moving to selected game on startup
+	* src/gui.c: Consolidate pixbuf loading code to remove redundant
+	  case clauses, consolidate filter subfolder creation code
+
+2008-03-05 21:06  adburton
+
+	* src/options.c: Add initial support for effects overlay combo box
+	* BUGS: Added audit-related bugs
+	* data/Makefile.am, data/audit_window.glade, src/audit.c: Updated
+	  audit window to use Glade
+	* data/audit_window.glade: Initial import
+	* data/properties.glade, src/options.c: Add additional Glade
+	  handling to options window
+
+2008-02-26 18:11  adburton
+
+	* ChangeLog: [no log message]
+
 2008-02-26 18:07  adburton
 
 	* Makefile.am: Update EXTRA_DIST section of Makefile.am
