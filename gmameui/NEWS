@@ -1,3 +1,15 @@
+Overview of changes in GMAMEUI 0.2
+==================================
+
+* Add new Options preference dialog for SDLMAME, which handles the
+  newer options available. XMAME is supported by the older-style
+  options window
+* New ROM Properties window, separated from the Options window
+* New column layout window
+* Use GtkAction to support popup and toolbar/menubar creation
+* Code cleanups and re-organisation, particularly around Sidebar
+
+
 Overview of changes in GMAMEUI 0.1
 ==================================
 
