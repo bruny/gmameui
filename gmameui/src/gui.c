@@ -933,7 +933,7 @@ hide_filters (void)
 	gui_prefs.Splitters[0] = main_gui.scrolled_window_filters->allocation.width;
 	gtk_paned_set_position (main_gui.hpanedLeft, 0);
 
-	gtk_widget_hide (GTK_WIDGET (main_gui.filters_list));
+	gtk_widget_hide (GTK_WIDGET (main_gui.scrolled_window_filters));
 }
 
 void
@@ -942,7 +942,7 @@ show_filters (void)
 	gui_prefs.ShowFolderList = 1;
 	gtk_paned_set_position (main_gui.hpanedLeft, gui_prefs.Splitters[0]);
 
-	gtk_widget_show (GTK_WIDGET (main_gui.filters_list));
+	gtk_widget_show (GTK_WIDGET (main_gui.scrolled_window_filters));
 }
 
 void
