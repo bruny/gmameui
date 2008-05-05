@@ -238,7 +238,7 @@ game_filtered (RomEntry * rom)
 				 (!is && !rom->is_bios));
 		} else
 			retval = FALSE;
-	}
+	} else {
 	
 	switch (type) {
 	case DRIVER:
@@ -338,7 +338,7 @@ game_filtered (RomEntry * rom)
 		GMAMEUI_DEBUG ("Trying to filter, but filter type %d is not handled", type);
 		retval = FALSE;
 	}
-	
+	}
 	g_free (value);
 	
 	return retval;

@@ -361,8 +361,8 @@ create_MainWindow (void)
 	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
 	g_object_unref (folder_filter);
 	
-		folder_filter = gmameui_filter_new ();
-		g_object_set (folder_filter,
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
 		      "name", "CPS2",
 		      "folderid", CPS2,
 		      "type", DRIVER,
@@ -374,6 +374,58 @@ create_MainWindow (void)
 	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
 	g_object_unref (folder_filter);
 
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "CPS3",
+		      "folderid", CPS3,
+		      "type", DRIVER,
+		      "is", TRUE,
+		      "value", "cps3",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	g_object_unref (folder_filter);
+
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Sega System 16",
+		      "folderid", SEGAS16,
+		      "type", DRIVER,
+		      "is", TRUE,
+		      "value", "segas16b",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	g_object_unref (folder_filter);
+
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Sega Model 2",
+		      "folderid", SEGAM2,
+		      "type", DRIVER,
+		      "is", TRUE,
+		      "value", "model2",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	g_object_unref (folder_filter);
+	
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Namco System 22",
+		      "folderid", NAMCOS22,
+		      "type", DRIVER,
+		      "is", TRUE,
+		      "value", "namcos22",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	g_object_unref (folder_filter);
+	
 	/* Custom filters */
 	folder_filter = gmameui_filter_new ();
 		g_object_set (folder_filter,
@@ -526,6 +578,33 @@ create_MainWindow (void)
 		      NULL);
 	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
 	g_object_unref (folder_filter);
+
+	/* FIXME TODO
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Vertical",
+		      "folderid", ORIENTATION,
+		      "type", ORIENTATION,
+		      "is", TRUE,
+		      "value", "vertical",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);
+
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Horizontal",
+		      "folderid", ORIENTATION,
+		      "type", ORIENTATION,
+		      "is", TRUE,
+		      "value", "horizontal",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);*/
 	
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
@@ -534,6 +613,20 @@ create_MainWindow (void)
 		      "type", CONTROL,
 		      "is", TRUE,
 		      "value", "trackball",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-joystick"),
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);	
+
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Lightgun",
+		      "folderid", LIGHTGUN,
+		      "type", CONTROL,
+		      "is", TRUE,
+		      "value", "lightgun",
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-joystick"),
