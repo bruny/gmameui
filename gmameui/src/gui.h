@@ -40,6 +40,7 @@
 #include "unzip.h"
 #include "callbacks.h"
 #include "mame_options.h"
+#include "filters_list.h"
 
 /* The following menu entries are always enabled */
 static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
@@ -218,8 +219,7 @@ struct main_gui_struct {
 	GtkPaned *hpanedRight;
 
 	GtkWidget *scrolled_window_filters;
-	GtkWidget *filters_displayed_list;   /* Tree View */
-	GtkTreeModel *filters_tree_model;
+	GMAMEUIFiltersList *filters_list;
 
 	GtkWidget *scrolled_window_games;
 	GtkWidget *displayed_list;   /* Tree View */
@@ -250,8 +250,6 @@ void init_gui(void);
 
 /* to add the dropbox from the directory.c whenn changing list*/
 void add_exec_menu (void);
-void create_filterslist (void);
-void create_filterslist_content (void);
 void hide_filters (void);
 void show_filters (void);
 void hide_snaps (void);
@@ -264,7 +262,6 @@ void hide_status_bar (void);
 void show_status_bar (void);
 
 GdkPixbuf * get_icon_for_rom (RomEntry *rom, guint size, ZIP *zip);
-GdkPixbuf * get_icon_for_filter (simple_filter *current_filter);
 GdkPixbuf * gmameui_get_icon_from_stock (const char *id);
 GtkWidget * gmameui_get_image_from_stock (const char *id);
 void        gmameui_icons_init (void);

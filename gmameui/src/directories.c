@@ -637,10 +637,10 @@ directories_selection_save_changes (GtkWidget *widget)
 		game_list.versions = NULL;
 		load_catver_ini ();
 
-		create_filterslist_content ();
-
 		/* Updating the UI if necessary */
-		if ( (current_filter->type == CATEGORY) || (current_filter->type == MAMEVER)
+		Columns_type type;
+		g_object_get (selected_filter, "type", &type, NULL);
+		if ( (type == CATEGORY) || (type == MAMEVER)
 		     || (gui_prefs.FolderID == CATEGORIES) || (gui_prefs.FolderID == VERSIONS) ) {
 			gui_prefs.FolderID = AVAILABLE;
 			gmameui_message (WARNING, GTK_WINDOW (directories_selection), _("Current Folder may not exist after loading the new catver file.\nMoving to the \"Available\" game folder"));

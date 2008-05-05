@@ -32,6 +32,7 @@
 #include "gtkjoy.h"
 #include "xmame_executable.h"
 #include "game_list.h"
+#include "filter.h"
 
 #define SELECT_TIMEOUT 110
 #define ICON_TIMEOUT 100
@@ -236,21 +237,13 @@ gint *ColumnShown;
 	gboolean use_xmame_options;
 };
 
-typedef struct {
-	folder_filters_list FolderID;
-	Columns_type type;
-	gboolean is;
-	const gchar *value;
-	gint int_value; /* should be a union with value */
-	gboolean update_list;
-} simple_filter;
-
 /* global variables */
 XmameExecutable *current_exec; /* pointer in the xmame_table */
 
 guint visible_games;
 
-simple_filter *current_filter;
+GMAMEUIFilter *selected_filter;
+
 gboolean displayedlist_keypressed;
 Joystick *joydata;
 GdkPixbuf *Status_Icons[NUMBER_STATUS];

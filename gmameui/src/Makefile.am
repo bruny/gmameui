@@ -30,7 +30,10 @@ gmameui_SOURCES = \
 	xmame_executable.h xmame_executable.c \
 	mame_options.c mame_options.h \
 	mame_options_dialog.c mame_options_dialog.h \
-	cell-renderer-captioned-image.c cell-renderer-captioned-image.h
+	cell-renderer-captioned-image.c cell-renderer-captioned-image.h \
+	filters_list.c filters_list.h \
+	filter.c filter.h \
+	gossip-cell-renderer-expander.c gossip-cell-renderer-expander.h 
 
 gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(GNOME_LIBS) $(INTLLIBS)
 

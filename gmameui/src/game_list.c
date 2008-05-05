@@ -692,7 +692,6 @@ gamelist_check (XmameExecutable *exec)
 					load_games_ini ();
 					load_catver_ini ();
 					quick_check ();
-					create_filterslist_content ();
 					create_gamelist_content ();
 					
 				}

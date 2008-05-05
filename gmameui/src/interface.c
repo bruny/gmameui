@@ -42,6 +42,8 @@
 #include "callbacks.h"
 #include "interface.h"
 #include "gui.h"
+#include "filters_list.h"
+#include "gmameui.h"    /* For gui_prefs */
 
 /* Callbacks for main window */
 
@@ -252,6 +254,363 @@ create_MainWindow (void)
   gtk_paned_pack1 (GTK_PANED (hpanedLeft), scrolledwindowFilters, FALSE, FALSE);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindowFilters), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
+	main_gui.filters_list = gmameui_filters_list_new ();
+	gtk_container_add (scrolledwindowFilters, main_gui.filters_list);
+	gtk_widget_show_all (main_gui.filters_list);
+
+	/* Populate the filters list - this should be done in filters_list.c */
+	
+	/* Recent versions of MAME use neodrvr */
+	static char *neogeo_value;
+	GList *listpointer;
+	if (xmame_compare_raw_version (current_exec, "0.116") >= 0)
+		neogeo_value = "neodrvr";
+	else
+		neogeo_value = "neogeo"; 
+	GMAMEUIFilter *folder_filter;
+	
+	/* Availability-related filters */
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "All ROMs",
+		      "folderid", ALL,
+		      "type", DRIVER,
+		      "is", FALSE,
+		      "value", " ",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+		      
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Available");
+	g_object_unref (folder_filter);
+	
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Available",
+		      "folderid", AVAILABLE,
+		      "type", HAS_ROMS,
+		      "is", FALSE,
+		      "value", NULL,
+		      "int_value", NOT_AVAIL,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-correct"),
+		      NULL);
+		      
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Available");
+	/* Select the Available filter as the default upon startup */
+	gmameui_filters_list_select (main_gui.filters_list, folder_filter);
+
+	g_object_unref (folder_filter);
+	
+	folder_filter = gmameui_filter_new ();
+		g_object_set (folder_filter,
+		      "name", "Unavailable",
+		      "folderid", UNAVAILABLE,
+		      "type", HAS_ROMS,
+		      "is", TRUE,
+		      "value", NULL,
+		      "int_value", NOT_AVAIL,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-unavailable"),
+		      NULL);
+		      
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Available");
+	g_object_unref (folder_filter);
+	
+	folder_filter = gmameui_filter_new ();
+			g_object_set (folder_filter,
+		      "name", "Incorrect",
+		      "folderid", FILTER_INCORRECT,
+		      "type", HAS_ROMS,
+		      "is", TRUE,
+		      "value", NULL,
+		      "int_value", INCORRECT,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-incorrect"),
+		      NULL);
+		      
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Available");
+	g_object_unref (folder_filter);
+
+	
+		
+	/* Architecture-related filters */
+	folder_filter = gmameui_filter_new ();
+		g_object_set (folder_filter,
+		      "name", "Neo-Geo",
+		      "folderid", NEOGEO,
+		      "type", DRIVER,
+		      "is", TRUE,
+		      "value", neogeo_value,
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	g_object_unref (folder_filter);
+
+		folder_filter = gmameui_filter_new ();
+		g_object_set (folder_filter,
+		      "name", "CPS1",
+		      "folderid", CPS1,
+		      "type", DRIVER,
+		      "is", TRUE,
+		      "value", "cps1",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	g_object_unref (folder_filter);
+	
+		folder_filter = gmameui_filter_new ();
+		g_object_set (folder_filter,
+		      "name", "CPS2",
+		      "folderid", CPS2,
+		      "type", DRIVER,
+		      "is", TRUE,
+		      "value", "cps2",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	g_object_unref (folder_filter);
+
+	/* Custom filters */
+	folder_filter = gmameui_filter_new ();
+		g_object_set (folder_filter,
+		      "name", "Favourites",
+		      "folderid", FAVORITES,
+		      "type", FAVORITE,
+		      "is", TRUE,
+		      "value", NULL,
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-favorite"),
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Custom");
+	g_object_unref (folder_filter);
+	
+		folder_filter = gmameui_filter_new ();
+		g_object_set (folder_filter,
+		      "name", "Played",
+		      "folderid", PLAYED,
+		      "type", TIMESPLAYED,
+		      "is", FALSE,
+		      "value", NULL,
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Custom");
+	g_object_unref (folder_filter);
+	
+	
+	/* Imperfect filters */
+		folder_filter = gmameui_filter_new ();
+		g_object_set (folder_filter,
+		      "name", "Colours",
+		      "folderid", IMPERFECT_COLORS,
+		      "type", COLOR_STATUS,
+		      "is", FALSE,
+		      "value", "good",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-not-working"),
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Imperfect");
+	g_object_unref (folder_filter);
+
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Sound",
+		      "folderid", IMPERFECT_SOUND,
+		      "type", SOUND_STATUS,
+		      "is", FALSE,
+		      "value", "good",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-not-working"),
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Imperfect");
+	g_object_unref (folder_filter);
+
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Graphics",
+		      "folderid", IMPERFECT_GRAPHIC,
+		      "type", GRAPHIC_STATUS,
+		      "is", FALSE,
+		      "value", "good",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-not-working"),
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Imperfect");
+	g_object_unref (folder_filter);
+
+	/* Game information filters */
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Originals",
+		      "folderid", ORIGINALS,
+		      "type", CLONE,
+		      "is", TRUE,
+		      "value", "-",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);
+
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Clones",
+		      "folderid", CLONES,
+		      "type", CLONE,
+		      "is", FALSE,
+		      "value", "-",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);
+	
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Samples",
+		      "folderid", SAMPLES,
+		      "type", HAS_SAMPLES,
+		      "is", FALSE,
+		      "value", " ",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-sound"),
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);
+	
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Stereo",
+		      "folderid", STEREO,
+		      "type", CHANNELS,
+		      "is", TRUE,
+		      "value", NULL,
+		      "int_value", 2,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-sound"),
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);
+	
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Raster",
+		      "folderid", RASTERS,
+		      "type", VECTOR,
+		      "is", FALSE,
+		      "value", NULL,
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);	
+	
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Vector",
+		      "folderid", VECTORS,
+		      "type", VECTOR,
+		      "is", TRUE,
+		      "value", NULL,
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);
+	
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "Trackball",
+		      "folderid", TRACKBALL,
+		      "type", CONTROL,
+		      "is", TRUE,
+		      "value", "trackball",
+		      "int_value", 0,
+		      "update_list", TRUE,
+		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-joystick"),
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	g_object_unref (folder_filter);	
+	
+	/* Driver filters */
+	for (listpointer = g_list_first (game_list.drivers);
+	     (listpointer);
+	     listpointer = g_list_next (listpointer)) {
+
+		gchar *text;
+		if (!strcmp (listpointer->data, "-"))
+			text = _("<unknown>");
+		else
+			text = (gchar* ) listpointer->data;
+
+		folder_filter = gmameui_filter_new ();
+		g_object_set (folder_filter,
+			      "name", text,
+			      "folderid", DRIVERS,
+			      "type", DRIVER,
+			      "is", TRUE,
+			      "value", (gchar *)listpointer->data,
+			      "int_value", 0,
+			      "update_list", TRUE,
+			      NULL);
+		gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Drivers");
+		g_object_unref (folder_filter);
+		g_free (text);     
+	}
+	
+	/* Catver.ini filters - Category and Version */
+	if (gui_prefs.catverDirectory) {		
+		/* Categories */
+		for (listpointer = g_list_first (game_list.categories);
+		     (listpointer);
+		     listpointer = g_list_next (listpointer)) {
+			     folder_filter = gmameui_filter_new ();
+			     g_object_set (folder_filter,
+					   "name", (gchar *)listpointer->data,
+					   "folderid", CATEGORIES,
+					   "type", CATEGORY,
+					   "is", TRUE,
+					   "value", (gchar *)listpointer->data,
+					   "int_value", 0,
+					   "update_list", TRUE,
+					   NULL);
+			     gmameui_filters_list_add_filter (main_gui.filters_list,
+							      folder_filter,
+							      "Category");
+			     g_object_unref (folder_filter);
+		}
+		/* Version */
+		for (listpointer = g_list_first (game_list.versions);
+		     (listpointer);
+		     listpointer = g_list_next (listpointer)) {
+			     folder_filter = gmameui_filter_new ();
+			     g_object_set (folder_filter,
+					   "name", (gchar *)listpointer->data,
+					   "folderid", VERSIONS,
+					   "type", MAMEVER,
+					   "is", TRUE,
+					   "value", (gchar *)listpointer->data,
+					   "int_value", 0,
+					   "update_list", TRUE,
+					   NULL);
+			     gmameui_filters_list_add_filter (main_gui.filters_list,
+							      folder_filter,
+							      "Version");
+			     g_object_unref (folder_filter);
+		}
+
+	}
+
+	
   hpanedRight = gtk_hpaned_new ();
   gtk_widget_show (hpanedRight);
   main_gui.hpanedRight = GTK_PANED (hpanedRight);
