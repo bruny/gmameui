@@ -572,7 +572,7 @@ save_dirs_ini (void)
 					    xmame_table_get_all(), xmame_table_size());
 
 	g_key_file_set_string_list (dirsini_list, "Directories", "RomPath", gui_prefs.RomPath, g_strv_length (gui_prefs.RomPath));
-	g_key_file_set_string_list (dirsini_list, "Directories", "SamplePath", gui_prefs.SamplePath, g_strv_length (gui_prefs.RomPath));
+	g_key_file_set_string_list (dirsini_list, "Directories", "SamplePath", gui_prefs.SamplePath, g_strv_length (gui_prefs.SamplePath));
 
 	g_key_file_set_string (dirsini_list, "Directories", "SnapshotDirectory", gui_prefs.SnapshotDirectory);
 	g_key_file_set_string (dirsini_list, "Directories", "ArtworkDirectory", gui_prefs.ArtworkDirectory);
