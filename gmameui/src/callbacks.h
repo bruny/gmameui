@@ -147,16 +147,6 @@ void     on_snapShowButton_toggled              (GtkToggleToolButton *togglebutt
 void     on_mode_button_clicked                 (GtkToggleToolButton *button,
                                                  gpointer             user_data);
 
-/* Filter List */
-void     on_filter_row_selected                 (GtkTreeSelection *selection,
-                                                 gpointer data);
-
-void     on_filter_row_collapsed                (GtkTreeView *treeview,
-                                                 GtkTreeIter *iter,
-                                                 GtkTreePath *path,
-                                                 gpointer user_data);
-
-
 /* Main list */
 void     on_row_selected                        (GtkTreeSelection *selection,
                                                  gpointer data);

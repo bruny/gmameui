@@ -212,99 +212,136 @@ game_filtered (RomEntry * rom)
 {
 	gchar **manufacturer;
 /* comparing taxt and text */
+	
+	gboolean is;
+	Columns_type type;
+	gchar *value;
+	gint int_value;
+	
+	gboolean retval;
 
-	if (!current_filter)
-		return FALSE;
+	g_return_if_fail (selected_filter != NULL);
+	
+	retval = FALSE;
+	
+	g_object_get (selected_filter,
+		      "is", &is,
+		      "type", &type,
+		      "value", &value,
+		      "int_value", &int_value,
+		      NULL);
 
 	/* Only display a BIOS rom if the BIOS filter is explicitly stated */
 	if (rom->is_bios) { 
-		if (current_filter->type == IS_BIOS) {
-			return ( (current_filter->is && rom->is_bios) ||
-				 (!current_filter->is && !rom->is_bios));
+		if (type == IS_BIOS) {
+			retval = ( (is && rom->is_bios) ||
+				 (!is && !rom->is_bios));
 		} else
-			return FALSE;
+			retval = FALSE;
 	}
 	
-	switch (current_filter->type) {
+	switch (type) {
 	case DRIVER:
-		return ( (current_filter->is && !g_strcasecmp (rom->driver, current_filter->value)) ||
-			 (!current_filter->is && g_strcasecmp (rom->driver, current_filter->value)));
+		retval = (g_ascii_strcasecmp (rom->driver, value) == 0);
+		break;
 	case CLONE:
-		return ( (current_filter->is && !g_strcasecmp (rom->cloneof,current_filter->value)) ||
-			 (!current_filter->is && g_strcasecmp (rom->cloneof,current_filter->value)));
+		retval = ( (is && !g_strcasecmp (rom->cloneof,value)) ||
+			 (!is && g_strcasecmp (rom->cloneof,value)));
+		break;
 	case CONTROL:
-		return ( (current_filter->is && !g_strcasecmp (rom->control,current_filter->value)) ||
-			 (!current_filter->is && g_strcasecmp (rom->control,current_filter->value)));
+		retval = ( (is && !g_strcasecmp (rom->control,value)) ||
+			 (!is && g_strcasecmp (rom->control,value)));
+		break;
 	case MAMEVER:
-		return ( (current_filter->is && (rom->mame_ver_added == current_filter->value)) ||
-			 (!current_filter->is && (rom->mame_ver_added != current_filter->value)));
+		if (rom->mame_ver_added)
+			retval = (g_ascii_strcasecmp (rom->mame_ver_added, value) == 0);
+		else
+			retval = 0;
+		break;
 	case CATEGORY:
-		return ( (current_filter->is && (rom->category == current_filter->value)) ||
-			 (!current_filter->is && (rom->category != current_filter->value)));
+		if (rom->category)
+			retval = (g_ascii_strcasecmp (rom->category, value) == 0);
+		else
+			retval = 0;
+		break;
 	case FAVORITE:
-		return ( (current_filter->is && rom->favourite) ||
-			 (!current_filter->is && !rom->favourite));
+		retval = ( (is && rom->favourite) ||
+			 (!is && !rom->favourite));
+		break;
 	case VECTOR:
-		return ( (current_filter->is && rom->vector) ||
-			 (!current_filter->is && !rom->vector));
+		retval = ( (is && rom->vector) ||
+			 (!is && !rom->vector));
+		break;
 	case STATUS:
-		return ( (current_filter->is && rom->status) ||
-			 (!current_filter->is && !rom->status));
+		retval = ( (is && rom->status) ||
+			 (!is && !rom->status));
+		break;
 	case COLOR_STATUS:
-		return ( (current_filter->is && !g_strcasecmp (rom->driver_status_color,current_filter->value)) ||
-			 (!current_filter->is && g_strcasecmp (rom->driver_status_color,current_filter->value)));
+		retval = ( (is && !g_strcasecmp (rom->driver_status_color,value)) ||
+			 (!is && g_strcasecmp (rom->driver_status_color,value)));
+		break;
 	case SOUND_STATUS:
-		return ( (current_filter->is && !g_strcasecmp (rom->driver_status_sound,current_filter->value)) ||
-			 (!current_filter->is && g_strcasecmp (rom->driver_status_sound,current_filter->value)));
+		retval = ( (is && !g_strcasecmp (rom->driver_status_sound,value)) ||
+			 (!is && g_strcasecmp (rom->driver_status_sound,value)));
+		break;
 	case GRAPHIC_STATUS:
-		return ( (current_filter->is && !g_strcasecmp (rom->driver_status_graphic,current_filter->value)) ||
-			 (!current_filter->is && g_strcasecmp (rom->driver_status_graphic,current_filter->value)));
+		retval = ( (is && !g_strcasecmp (rom->driver_status_graphic,value)) ||
+			 (!is && g_strcasecmp (rom->driver_status_graphic,value)));
+		break;
 		/* Comparing int and int */
 	case HAS_ROMS:
-		return ( (current_filter->is && (rom->has_roms == (RomStatus)current_filter->int_value))  ||
-			 (!current_filter->is && ! (rom->has_roms == (RomStatus)current_filter->int_value)));
-	/*case HAS_SAMPLES:
-		return ( (current_filter->is && (rom->has_samples == current_filter->value))  ||
-			 (!current_filter->is && ! (rom->has_samples == current_filter->value)));*/
+		retval = ( (is && (rom->has_roms == (RomStatus)int_value))  ||
+			 (!is && ! (rom->has_roms == (RomStatus)int_value)));
+		break;
+	case HAS_SAMPLES:
+		retval = ( (is && (rom->has_samples == value))  ||
+			 (!is && ! (rom->has_samples == value)));
+		break;
 	case TIMESPLAYED:
-		return ( (current_filter->is && (rom->timesplayed == current_filter->int_value)) ||
-			 (!current_filter->is && ! (rom->timesplayed == current_filter->int_value)));
+		retval = ( (is && (rom->timesplayed == int_value)) ||
+			 (!is && ! (rom->timesplayed == int_value)));
+		break;
 	case CHANNELS:
-		return ( (current_filter->is && (rom->channels == current_filter->int_value)) ||
-			 (!current_filter->is && (rom->channels != current_filter->int_value)));
+		retval = ( (is && (rom->channels == int_value)) ||
+			 (!is && (rom->channels != int_value)));
+		break;
 		/* Comparing text and int */
 	case YEAR:
-		return ( (current_filter->is && (rom->year == current_filter->value)) ||
-			 (!current_filter->is && (rom->year != current_filter->value)));
+		retval = ( (is && (rom->year == value)) ||
+			 (!is && (rom->year != value)));
+		break;
 		/* comparing parsed text and text */
 	case MANU:
 		manufacturer = rom_entry_get_manufacturers (rom);
 		/* we have now one or two clean manufacturer (s) we still need to differentiates sub companies*/
 		if (manufacturer[1] != NULL) {
-			if ( (current_filter->is && !g_strncasecmp (manufacturer[0], current_filter->value, 5)) ||
-			     (!current_filter->is && g_strncasecmp (manufacturer[0], current_filter->value, 5)) ||
-			     (current_filter->is && !g_strncasecmp (manufacturer[1], current_filter->value, 5)) ||
-			     (!current_filter->is && g_strncasecmp (manufacturer[1], current_filter->value, 5))
+			if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
+			     (!is && g_strncasecmp (manufacturer[0], value, 5)) ||
+			     (is && !g_strncasecmp (manufacturer[1], value, 5)) ||
+			     (!is && g_strncasecmp (manufacturer[1], value, 5))
 			     ) {
 				g_strfreev (manufacturer);
-				return TRUE;
+				retval = TRUE;
 
 			}
 		} else {
-			if ( (current_filter->is && !g_strncasecmp (manufacturer[0], current_filter->value, 5)) ||
-			     (!current_filter->is && g_strncasecmp (manufacturer[0], current_filter->value, 5))
+			if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
+			     (!is && g_strncasecmp (manufacturer[0], value, 5))
 			     ) {
 				g_strfreev (manufacturer);
-				return TRUE;
+				retval = TRUE;
 			}
 		}
 		g_strfreev (manufacturer);
 		break;
 	default:
-		GMAMEUI_DEBUG ("Trying to filter, but filter type %d is not handled", current_filter->type);
-		return FALSE;
+		GMAMEUI_DEBUG ("Trying to filter, but filter type %d is not handled", type);
+		retval = FALSE;
 	}
-	return FALSE;
+	
+	g_free (value);
+	
+	return retval;
 }
 
 

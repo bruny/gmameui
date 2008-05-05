@@ -159,12 +159,17 @@ on_select_random_game_activate         (GtkMenuItem     *menuitem,
 }
 
 void update_favourites_list (gboolean add) {
+	Columns_type type;
+	
 	gui_prefs.current_game->favourite = add;
 
 	gmameui_toolbar_set_favourites_sensitive (add);
 	
+	g_object_get (selected_filter,
+		      "type", &type,
+		      NULL);
 	/* problems because the row values are completly changed, I redisplay the complete game list */
-	if (current_filter->type == FAVORITE)
+	if (type == FAVORITE)
 		create_gamelist_content ();
 	else
 		update_game_in_list (gui_prefs.current_game);
@@ -524,7 +529,6 @@ on_rebuild_game_list_menu_activate     (GtkMenuItem     *menuitem,
 	gamelist_save ();
 	load_games_ini ();
 	load_catver_ini ();
-	create_filterslist_content ();
 	create_gamelist_content ();
 	gtk_widget_set_sensitive (main_gui.scrolled_window_games, TRUE);
 }
@@ -609,118 +613,6 @@ delayed_row_selected (GtkTreeSelection *selection)
 	}
 	return FALSE;
 }
-
-
-static gboolean
-delayed_filter_row_selected (GtkTreeSelection *selection)
-{
-	gchar *text;
-	simple_filter *current_folder_filter;
-	simple_filter *folder_filter;
-	GtkTreeIter iter;
-	GtkTreeIter sub_iter;
-	GtkTreeModel *model;
-	GdkPixbuf *icon_pixbuf;
-	gboolean valid;
-	gboolean is_root;
-	gint i;
-
-	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
-		gtk_tree_model_get (main_gui.filters_tree_model, &iter, 1, &current_folder_filter, 0, &text, -1);
-		if ( (current_folder_filter->update_list)
-		     && (current_filter != current_folder_filter)) {
-			/* Set open pixbuf */
-			icon_pixbuf = gmameui_get_icon_from_stock ("gmameui-folder-open");
-			gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &iter,
-					    2,		icon_pixbuf,
-					    -1);
-			/* Set normal pixbuf */
-			valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (main_gui.filters_tree_model), &iter);
-			gtk_tree_model_get (GTK_TREE_MODEL (main_gui.filters_tree_model), &iter, 1, &folder_filter, -1);
-			is_root = TRUE;
-			i = 0;
-			while ( (folder_filter!=current_filter) && (valid)) {
-				if (gtk_tree_model_iter_has_child (GTK_TREE_MODEL (main_gui.filters_tree_model),&iter)) {
-					if (gtk_tree_model_iter_children (GTK_TREE_MODEL (main_gui.filters_tree_model), &sub_iter, &iter)) {
-						gtk_tree_model_get (GTK_TREE_MODEL (main_gui.filters_tree_model), &sub_iter, 1, &folder_filter, -1);
-						is_root = FALSE;
-						i++;
-						while ((folder_filter != current_filter) && (gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.filters_tree_model), &sub_iter))) {
-							gtk_tree_model_get (GTK_TREE_MODEL (main_gui.filters_tree_model), &sub_iter, 1, &folder_filter, -1);
-							i++;
-						}
-					}
-				}
-				if (folder_filter != current_filter) {
-					valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.filters_tree_model), &iter);
-					if (valid) {
-						gtk_tree_model_get (GTK_TREE_MODEL (main_gui.filters_tree_model), &iter, 1, &folder_filter, -1);
-						is_root = TRUE;
-						i++;
-					}
-				}
-			}
-			icon_pixbuf = get_icon_for_filter (current_filter);
-			if (is_root)
-				gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &iter,
-						    2,		icon_pixbuf,
-						    -1);
-			else
-				gtk_tree_store_set (GTK_TREE_STORE (main_gui.filters_tree_model), &sub_iter,
-						    2,		icon_pixbuf,
-						    -1);
-			/* Update the list */
-			current_filter = current_folder_filter;
-			create_gamelist_content ();
-		}
-		gui_prefs.FolderID = current_folder_filter->FolderID;
-	}
-	return FALSE;
-}
-
-/* Filter List */
-void
-on_filter_row_selected (GtkTreeSelection *selection,
-			gpointer          data)
-{
-	if (timeoutfoldid)
-		g_source_remove (timeoutfoldid);
-	timeoutfoldid =
-	    g_timeout_add (SELECT_TIMEOUT,
-			 (GSourceFunc) delayed_filter_row_selected, selection);
-}
-
-void
-on_filter_row_collapsed (GtkTreeView *treeview,
-			 GtkTreeIter *iter,
-			 GtkTreePath *path,
-			 gpointer     user_data)
-{
-	GtkTreeIter iter_child;
-	simple_filter *folder_filter;
-	GtkTreeSelection *select;
-	GtkTreeModel* treemodel;
-
-
-	/* If one of the child iter is selected, we select the parent iter */
-	treemodel = gtk_tree_view_get_model (treeview);
-	gtk_tree_model_iter_children (treemodel, &iter_child, iter);
-	gtk_tree_model_get (treemodel, &iter_child, 1, &folder_filter, -1);
-	while ((current_filter != folder_filter) && (gtk_tree_model_iter_next (treemodel, &iter_child))) {
-		gtk_tree_model_get (treemodel, &iter_child, 1, &folder_filter, -1);
-	}
-
-	if (current_filter == folder_filter) {
-		GtkTreePath *tree_path;
-		select = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
-		tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (treemodel), iter);
-		gtk_tree_view_set_cursor (GTK_TREE_VIEW (treeview),
-					  tree_path,
-					  NULL, FALSE);
-		gtk_tree_path_free (tree_path);
-	}
-}
-
 
 /* Main list */
 void
