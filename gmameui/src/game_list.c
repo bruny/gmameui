@@ -71,14 +71,16 @@ void
 rom_entry_set_driver (RomEntry    *rom,
 		      const gchar *driver)
 {
-	rom->driver = glist_insert_unique (&game_list.drivers, driver);
+	rom->driver = g_strdup (driver);
+	glist_insert_unique (&game_list.drivers, driver);
 }
 
 void
 rom_entry_set_year (RomEntry    *rom,
 		    const gchar *year)
 {
-	rom->year = glist_insert_unique (&game_list.years, year);
+	rom->year = g_strdup (year);
+	glist_insert_unique (&game_list.years, year);
 }
 
 static gint
