@@ -60,41 +60,22 @@ void add_item_to_tree_view (GtkWidget *button, gpointer user_data);
 void remove_path_from_tree_view (GtkWidget *button, gpointer user_data);
 
 static void
-directories_selection_close_window       (GtkWidget *widget);
-
-static void
 directories_selection_save_changes       (GtkWidget *widget);
-
-static void
-directories_selection_save_and_close     (GtkWidget *widget);
-
-static void
-on_xmame_execs_tree_view_select          (GtkTreeSelection *selection, gpointer data);
-
-static void
-on_roms_path_tree_view_select            (GtkTreeSelection *selection, gpointer data);
-
-static void
-on_samples_path_tree_view_select         (GtkTreeSelection *selection, gpointer data);
-
 
 static GtkWidget *directories_selection;
 
-//static GtkWidget *xmame_execs_entry;
-static GtkTreeView *xmame_execs_tree_view;
-static GtkTreeModel *xmame_execs_tree_model;
+GtkTreeView *xmame_execs_tree_view;
+GtkTreeModel *xmame_execs_tree_model;
 static GtkWidget *xmame_execs_add_button;
 static GtkWidget *xmame_execs_remove_button;
 
-//static GtkWidget *roms_path_entry;
-static GtkTreeView *roms_path_tree_view;
-static GtkTreeModel *roms_path_tree_model;
+GtkTreeView *roms_path_tree_view;
+GtkTreeModel *roms_path_tree_model;
 static GtkWidget *roms_add_button;
 static GtkWidget *roms_remove_button;
 
-//static GtkWidget *samples_path_entry;
-static GtkTreeView *samples_path_tree_view;
-static GtkTreeModel *samples_path_tree_model;
+GtkTreeView *samples_path_tree_view;
+GtkTreeModel *samples_path_tree_model;
 static GtkWidget *samples_add_button;
 static GtkWidget *samples_remove_button;
 
@@ -115,52 +96,7 @@ static GtkWidget *ctrlr_directory_entry;
 static GtkWidget *catver_path_entry;
 static GtkWidget *icons_path_entry;
 
-static GtkWidget *directories_selection_apply_button;
-
-/* gboolean refresh_game_list; */
-
-
-/*static GtkWidget *
-options_frame_new (const char *text)
-{
-	PangoFontDescription *font_desc;
-	GtkWidget *label;
-	GtkWidget *frame = gtk_frame_new (text);
-
-	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_NONE);
-
-	label = gtk_frame_get_label_widget (GTK_FRAME (frame));
-
-	font_desc = pango_font_description_new ();
-	pango_font_description_set_weight (font_desc,
-					   PANGO_WEIGHT_BOLD);
-	gtk_widget_modify_font (label, font_desc);
-	pango_font_description_free (font_desc);
-
-	return frame;
-}
-
-static GtkWidget *
-options_frame_create_child (GtkWidget *widget)
-{
-	GtkWidget *vbox;
-	GtkWidget *hbox;
-	GtkWidget *label;
-
-	hbox = gtk_hbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (widget), hbox);
-	gtk_widget_show (hbox);
-
-	label = gtk_label_new ("    ");
-	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-	gtk_widget_show (label);
-
-	vbox = gtk_vbox_new (FALSE, 6);
-	gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 0);
-	gtk_widget_show (vbox);
-
-	return vbox;
-}*/
+gchar *delimited_str;   /* Used for processing list stores into gchar* arrays */
 
 void
 create_folderselection (gpointer current_entry,
@@ -188,9 +124,10 @@ create_folderselection (gpointer current_entry,
 	temp_text = gtk_editable_get_chars (GTK_EDITABLE (current_entry), 0, -1);      
 	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (filechooser), temp_text);    
 	g_free (temp_text);
+	
 	if (gtk_dialog_run (GTK_DIALOG (filechooser)) == GTK_RESPONSE_ACCEPT) {
-		GMAMEUI_DEBUG ("selected: {%s}", gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser)));
-		gtk_entry_set_text (GTK_ENTRY (current_entry), gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser)));
+		gtk_entry_set_text (GTK_ENTRY (current_entry),
+				    gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser)));
 	}
 	gtk_widget_destroy (filechooser);
 }
@@ -201,14 +138,16 @@ directories_selection_response (GtkWidget *dialog,
 				gpointer   user_data)
 {
 	switch (response_id) {
-	case GTK_RESPONSE_OK:
-		directories_selection_save_and_close (dialog);
-		break;
-	case GTK_RESPONSE_CANCEL:
-	default:
-		directories_selection_close_window (dialog);
-		break;
+		case GTK_RESPONSE_OK:
+			directories_selection_save_changes (dialog);
+			break;
 	}
+
+	gtk_list_store_clear (GTK_LIST_STORE (xmame_execs_tree_model));
+	gtk_list_store_clear (GTK_LIST_STORE (roms_path_tree_model));
+	gtk_list_store_clear (GTK_LIST_STORE (samples_path_tree_model));
+
+	gtk_widget_destroy (dialog);
 }
 
 GtkWidget *
@@ -231,8 +170,7 @@ create_directories_selection (void)
 	accel_group = gtk_accel_group_new ();
 
 	/* XMame Exe List */
-	store = (GtkTreeModel *) gtk_list_store_new (1,
-						     G_TYPE_STRING);
+	store = (GtkTreeModel *) gtk_list_store_new (1, G_TYPE_STRING);
 	xmame_executables_array = xmame_table_get_all ();
 
 	for (i = 0; xmame_executables_array[i] != NULL; i++) {
@@ -253,17 +191,15 @@ create_directories_selection (void)
 	gtk_tree_view_set_model (GTK_TREE_VIEW (xmame_execs_tree_view), GTK_TREE_MODEL (store));
 
     	/* Roms Path List */
-	store = (GtkTreeModel *) gtk_list_store_new (1,
-						     G_TYPE_STRING);
+	store = (GtkTreeModel *) gtk_list_store_new (1, G_TYPE_STRING);
 	if (gui_prefs.RomPath) {
 		for (i = 0; gui_prefs.RomPath[i] != NULL; i++) {
 			gtk_list_store_append (GTK_LIST_STORE (store), &iter);  /* Acquire an iterator */
 			gtk_list_store_set (GTK_LIST_STORE (store), &iter,
-						0,                   gui_prefs.RomPath[i],
-						-1);
+					    0, gui_prefs.RomPath[i],
+					    -1);
 		}
 	}
-
 	roms_path_tree_model = store;
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes (" ", renderer,
@@ -280,9 +216,9 @@ create_directories_selection (void)
 	if (gui_prefs.SamplePath) {
 		for (i = 0; gui_prefs.SamplePath[i] != NULL; i++) {
 			gtk_list_store_append (GTK_LIST_STORE (store), &iter);  /* Acquire an iterator */
-			gtk_list_store_set (GTK_LIST_STORE (store), &iter,
-						0,                   gui_prefs.SamplePath[i],
-						-1);
+			gtk_list_store_set (GTK_LIST_STORE (store), &iter, 
+					    0, gui_prefs.SamplePath[i],
+					    -1);
 		}
 	}
 	samples_path_tree_model = store;
@@ -327,7 +263,7 @@ create_directories_selection (void)
 	gtk_entry_set_text (GTK_ENTRY (icons_path_entry), gui_prefs.IconDirectory);
 
 	/* Button Cicked */
-	/* GMAMEUI */
+	/* Executables */
 	xmame_execs_add_button = glade_xml_get_widget (xml, "xmame_execs_add_button");
 	xmame_execs_remove_button = glade_xml_get_widget (xml, "xmame_execs_remove_button");
 	g_signal_connect (G_OBJECT (xmame_execs_add_button), "clicked",
@@ -336,7 +272,7 @@ create_directories_selection (void)
 			    G_CALLBACK (remove_path_from_tree_view),
 			    xmame_execs_tree_view);
 
-	/* XMame basic */
+	/* MAME basic */
 	samples_add_button = glade_xml_get_widget (xml, "samples_add_button");
 	samples_remove_button = glade_xml_get_widget (xml, "samples_remove_button");
 	g_signal_connect (G_OBJECT (samples_add_button), "clicked",
@@ -456,34 +392,33 @@ void add_path_to_tree_view (GtkWidget *button,
 	{
 		case GTK_RESPONSE_OK:
 			temp_text = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (chooser));
-	    		      gtk_widget_destroy (chooser);    
-	    if (strcmp (temp_text, "")) {
-		/* Check if what we are trying to add is not already in the list */
-		already_exist = FALSE;
-		size = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (model), NULL);
-		if (size) {
+			gtk_widget_destroy (chooser);    
+
+			/* Check if what we are trying to add is not already in the list */
+			already_exist = FALSE;
+			size = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (model), NULL);
+
 			for (i = 0; i < size; i++) {
 				gtk_tree_model_iter_nth_child (GTK_TREE_MODEL (model), &iter, NULL, i);
 				gtk_tree_model_get (model, &iter, 0, &text, -1);
-				if (!strcmp (text, temp_text))
+				if (g_ascii_strcasecmp (text, temp_text) == 0)
 					already_exist = TRUE;
 			}
-		}
 
-		if (!already_exist) {    
-			/* Acquire an iterator */
-			gtk_list_store_append (GTK_LIST_STORE (model), &iter);
-			gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-					    0,                   temp_text,
-					    -1);
-		}
-	}
-		g_free (temp_text);
-         break;
-      default:
-		      gtk_widget_destroy (chooser);
-         break;
-    }				    
+			if (!already_exist) {    
+				/* Acquire an iterator */
+				gtk_list_store_append (GTK_LIST_STORE (model), &iter);
+				gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+						    0, temp_text,
+						    -1);
+			}
+
+			g_free (temp_text);
+			break;
+		default:
+			gtk_widget_destroy (chooser);
+			break;
+	}				    
 }
 
 void add_item_to_tree_view (GtkWidget *button,
@@ -506,34 +441,32 @@ void add_item_to_tree_view (GtkWidget *button,
 	{
 		case GTK_RESPONSE_OK:
 			temp_text = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (chooser));
-	    		      gtk_widget_destroy (chooser);
-	    
-	    if (strcmp (temp_text, "")) {
-		/* Check if what we are trying to add is not already in the list */
-		already_exist = FALSE;
-		size = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (model), NULL);
-		if (size) {
+			gtk_widget_destroy (chooser);
+			
+			/* Check if what we are trying to add is not already in the list */
+			already_exist = FALSE;
+			size = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (model), NULL);
+
 			for (i = 0; i < size; i++) {
 				gtk_tree_model_iter_nth_child (GTK_TREE_MODEL (model), &iter, NULL, i);
 				gtk_tree_model_get (model, &iter, 0, &text, -1);
 				if (!strcmp (text, temp_text))
 					already_exist = TRUE;
 			}
-		}
 
-		if (!already_exist) {
-			gtk_list_store_append (GTK_LIST_STORE (model), &iter);  /* Acquire an iterator */
-			gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-					    0,                   temp_text,
-					    -1);
-		}
-	}
-		g_free (temp_text);
-         break;
-      default:
-		      gtk_widget_destroy (chooser);
-         break;
-    }				    
+			if (!already_exist) {
+				gtk_list_store_append (GTK_LIST_STORE (model), &iter);  /* Acquire an iterator */
+				gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+						    0, temp_text,
+						    -1);
+			}
+
+			g_free (temp_text);
+			break;
+		default:
+			gtk_widget_destroy (chooser);
+			break;
+	}				    
 }
 
 void
@@ -568,13 +501,6 @@ on_file_browse_button_clicked         (GtkButton       *button,
 	create_folderselection (user_data, FALSE);
 }
 
-void
-directories_selection_close_window (GtkWidget *widget)
-{
-	if (GTK_IS_WIDGET (widget))
-		gtk_widget_destroy (widget);
-}
-
 #if 0
 static gboolean
 remove_hash_value (gpointer key,
@@ -586,51 +512,83 @@ remove_hash_value (gpointer key,
 }
 #endif
 
+
+  gboolean path_tree_model_foreach (GtkTreeModel  *model,
+                              GtkTreePath   *path,
+                              GtkTreeIter   *iter,
+                              gpointer       userdata)
+  {
+    gchar *name;
+	gchar *tmp;  
+
+    gtk_tree_model_get (model, iter, 0, &name, -1);
+
+	if (!delimited_str) {
+		delimited_str = g_strdup (name);	
+	} else {
+		tmp = g_strjoin (":", delimited_str, name, NULL);
+		delimited_str = g_strdup (tmp);
+		g_free (tmp);
+	}
+	  
+	 /* Return FALSE to retrieve next row */
+	  return FALSE;
+  }
+
 void
 directories_selection_save_changes (GtkWidget *widget)
 {
 	GtkTreeIter iter;
-	int size;
+	gint size;
 	gint i;
 	gchar *text = NULL;
 	gboolean changed_flag;
 
-	gtk_widget_set_sensitive (directories_selection_apply_button, FALSE);
-
+	g_return_if_fail (xmame_execs_tree_model != NULL);
+	g_return_if_fail (roms_path_tree_model != NULL);
+	g_return_if_fail (samples_path_tree_model != NULL);
+	
+	changed_flag = FALSE;
+	
 	/* free the main config paths*/
 	/* GMAMEUI */
-	g_free (gui_prefs.FlyerDirectory);
-	g_free (gui_prefs.CabinetDirectory);
-	g_free (gui_prefs.MarqueeDirectory);
-	g_free (gui_prefs.TitleDirectory);
-	g_free (gui_prefs.CPanelDirectory);
-	g_free (gui_prefs.IconDirectory);
+	if (gui_prefs.FlyerDirectory) g_free (gui_prefs.FlyerDirectory);
+	if (gui_prefs.CabinetDirectory) g_free (gui_prefs.CabinetDirectory);
+	if (gui_prefs.MarqueeDirectory) g_free (gui_prefs.MarqueeDirectory);
+	if (gui_prefs.TitleDirectory) g_free (gui_prefs.TitleDirectory);
+	if (gui_prefs.CPanelDirectory) g_free (gui_prefs.CPanelDirectory);
+	if (gui_prefs.IconDirectory) g_free (gui_prefs.IconDirectory);
 	/* XMame basic */
-	g_strfreev (gui_prefs.SamplePath);
-	g_free (gui_prefs.DiffDirectory);
-	g_free (gui_prefs.ArtworkDirectory);
+	if (gui_prefs.SamplePath) g_strfreev (gui_prefs.SamplePath);
+	if (gui_prefs.ArtworkDirectory) g_free (gui_prefs.ArtworkDirectory);
 	/* XMame additional */
-	g_free (gui_prefs.SnapshotDirectory);
-	g_free (gui_prefs.HistoryFile);
-	g_free (gui_prefs.MameInfoFile);
-	g_free (gui_prefs.CheatFile);
-	g_free (gui_prefs.HiscoreFile);
-	/* User Resources */
-	g_free (gui_prefs.HiscoreDirectory);
-	g_free (gui_prefs.InputDirectory);
-	g_free (gui_prefs.ConfigDirectory);
-	g_free (gui_prefs.NVRamDirectory);
-	g_free (gui_prefs.MemCardDirectory);
-	g_free (gui_prefs.StateDirectory);
-	g_free (gui_prefs.inipath);
+	if (gui_prefs.SnapshotDirectory) g_free (gui_prefs.SnapshotDirectory);
+	if (gui_prefs.HistoryFile) g_free (gui_prefs.HistoryFile);
+	if (gui_prefs.MameInfoFile) g_free (gui_prefs.MameInfoFile);
+	if (gui_prefs.CheatFile) g_free (gui_prefs.CheatFile);
+	if (gui_prefs.HiscoreFile) g_free (gui_prefs.HiscoreFile);
+	/* User Resources *
+	 User Resources are not yet implemented in the directories window
+	if (gui_prefs.HiscoreDirectory) g_free (gui_prefs.HiscoreDirectory);
+	if (gui_prefs.DiffDirectory) g_free (gui_prefs.DiffDirectory);
+	if (gui_prefs.InputDirectory) g_free (gui_prefs.InputDirectory);
+	if (gui_prefs.ConfigDirectory) g_free (gui_prefs.ConfigDirectory);
+	if (gui_prefs.NVRamDirectory) g_free (gui_prefs.NVRamDirectory);
+	if (gui_prefs.MemCardDirectory) g_free (gui_prefs.MemCardDirectory);
+	if (gui_prefs.StateDirectory) g_free (gui_prefs.StateDirectory);
+	if (gui_prefs.inipath) g_free (gui_prefs.inipath);*/
 
 
 	/* and replace them by the new ones*/
 	/* GMAMEUI */
-	if (strcmp (gui_prefs.catverDirectory, gtk_editable_get_chars (GTK_EDITABLE (catver_path_entry), 0, -1))) {
-		GMAMEUI_DEBUG ("catver changed %s - %s",gui_prefs.catverDirectory, gtk_editable_get_chars (GTK_EDITABLE (catver_path_entry), 0, -1));
+	gchar *catver_path;
+	catver_path = gtk_editable_get_chars (GTK_EDITABLE (catver_path_entry), 0, -1);
+	if (g_ascii_strcasecmp (gui_prefs.catverDirectory, catver_path)) {
+		GMAMEUI_DEBUG ("catver path changed from %s to %s",
+			       gui_prefs.catverDirectory,
+			       catver_path);
 		g_free (gui_prefs.catverDirectory);
-		gui_prefs.catverDirectory = gtk_editable_get_chars (GTK_EDITABLE (catver_path_entry), 0, -1);
+		gui_prefs.catverDirectory = g_strdup (catver_path);
 		/* Updating with the new catver file */
 		g_list_foreach (game_list.versions, (GFunc)g_free, NULL);
 		g_list_free (game_list.versions);
@@ -650,7 +608,10 @@ directories_selection_save_changes (GtkWidget *widget)
 			create_gamelist_content ();
 		}
 	}
+	g_free (catver_path);
 
+	/* XMame basic */
+	gui_prefs.ArtworkDirectory = gtk_editable_get_chars (GTK_EDITABLE (artwork_path_entry), 0, -1);
 	gui_prefs.FlyerDirectory = gtk_editable_get_chars (GTK_EDITABLE (flyer_path_entry), 0, -1);
 	gui_prefs.CabinetDirectory = gtk_editable_get_chars (GTK_EDITABLE (cabinet_path_entry), 0, -1);
 	gui_prefs.MarqueeDirectory = gtk_editable_get_chars (GTK_EDITABLE (marquee_path_entry), 0, -1);
@@ -673,59 +634,29 @@ directories_selection_save_changes (GtkWidget *widget)
 		load_options (NULL);
 	}
 
-	/* XMame basic */
-	gui_prefs.ArtworkDirectory = gtk_editable_get_chars (GTK_EDITABLE (artwork_path_entry), 0, -1);
+	/* Get sample paths from tree model */
+	gtk_tree_model_foreach (GTK_TREE_MODEL (samples_path_tree_model), path_tree_model_foreach, NULL);
+	gui_prefs.SamplePath = g_strsplit (delimited_str, ":", -1);
+	g_free (delimited_str);
+	delimited_str = NULL;
 
-	/* Transform the list content into a array of char terminated by a NULL element */
-	/* Samples Path */
-	size = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (samples_path_tree_model),NULL);
-	if (size) {
-		gui_prefs.SamplePath = g_new (gchar *, (size+1));
-		for (i = 0; i < size; i++) {
-			gtk_tree_model_iter_nth_child (GTK_TREE_MODEL (samples_path_tree_model), &iter, NULL, i);
-			gtk_tree_model_get (samples_path_tree_model, &iter, 0, &text, -1);
-			gui_prefs.SamplePath[i] = g_strdup (text);
-		}
-		gui_prefs.SamplePath[size] = NULL;
-	} else {
-		gui_prefs.SamplePath = g_new (gchar *, 1);
-		gui_prefs.SamplePath[0] = NULL;
-	}
-
-	/* Roms Path */
-	size = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (roms_path_tree_model), NULL);
-	changed_flag = FALSE;
-	i = 0;
-	while (gui_prefs.RomPath[i])
-		i++;
-	if (i == size) {
-		for (i = 0; i < size; i++) {
-			gtk_tree_model_iter_nth_child (GTK_TREE_MODEL (roms_path_tree_model), &iter, NULL, i);
-			gtk_tree_model_get (roms_path_tree_model, &iter, 0, &text, -1);
-			if (strcmp (gui_prefs.RomPath[i], text))
-				changed_flag = TRUE;
-		}
-	} else {
+	/* Get ROM paths from tree model and determine whether the list is different from that
+	   in the preferences; if so, we have changed and should prompt the user to
+	   update the game list */
+	gchar *roms_paths_as_str;
+	gtk_tree_model_foreach (GTK_TREE_MODEL (roms_path_tree_model), path_tree_model_foreach, NULL);
+	roms_paths_as_str = g_strjoinv (":",gui_prefs.RomPath);
+	if (g_ascii_strcasecmp (delimited_str, roms_paths_as_str) != 0)
 		changed_flag = TRUE;
-	}
+	gui_prefs.RomPath = g_strsplit (delimited_str, ":", -1);
+	g_free (roms_paths_as_str);
+	g_free (delimited_str);
+	delimited_str = NULL;
 
 	if (changed_flag) {
-		GMAMEUI_DEBUG ("rom path changed");
-		if (size) {
-			g_strfreev (gui_prefs.RomPath);
-			gui_prefs.RomPath = g_new (gchar *, (size + 1));
-			for (i = 0; i < size; i++) {
-				gtk_tree_model_iter_nth_child (GTK_TREE_MODEL (roms_path_tree_model), &iter, NULL, i);
-				gtk_tree_model_get (roms_path_tree_model, &iter, 0, &text, -1);
-				gui_prefs.RomPath[i] = g_strdup (text);
-			}
-			gui_prefs.RomPath[size] = NULL;
-		} else {
-			gui_prefs.RomPath = g_new (gchar *, 1);
-			gui_prefs.RomPath[0] = NULL;
-		}
 		/* Do we perform the quickcheck? */
-		/*
+		/* FIXME TODO Do this automatically as a background thread, updating the
+		   progress bar
 		GtkWidget *dialog;
 		gint result;
 		dialog = gtk_message_dialog_new (GTK_WINDOW (directories_selection),
@@ -746,7 +677,6 @@ directories_selection_save_changes (GtkWidget *widget)
 		*/
 	}
 
-
 	/* XMame Executables */
 	current_exec = NULL;
 	xmame_table_free ();
@@ -760,8 +690,6 @@ directories_selection_save_changes (GtkWidget *widget)
 
 	/* Save the directories file */
 	save_dirs_ini();
-	
-	GMAMEUI_DEBUG ("Setting current executable to the 1st one");
 
 	/* remove and destroy the submenu */
 	add_exec_menu ();
@@ -770,50 +698,6 @@ directories_selection_save_changes (GtkWidget *widget)
 	if (!current_exec) {
 		gmameui_message (ERROR, GTK_WINDOW (directories_selection), _("No valid xmame executables found"));
 	}
-}
-
-
-
-
-void
-directories_selection_save_and_close (GtkWidget *widget)
-{
-	directories_selection_save_changes (widget);
-	directories_selection_close_window (widget);
-}
-
-void
-on_xmame_execs_tree_view_select         (GtkTreeSelection *selection, gpointer user_data)
-{
-	GtkTreeIter iter;
-	gchar *text;
-
-	if (gtk_tree_selection_get_selected (selection, &xmame_execs_tree_model, &iter)) {
-		gtk_tree_model_get (xmame_execs_tree_model, &iter, 0, &text, -1);
-		gtk_entry_set_text (GTK_ENTRY (user_data), text);
-	}
-}
-
-void
-on_roms_path_tree_view_select         (GtkTreeSelection *selection, gpointer user_data)
-{
-	GtkTreeIter iter;
-	gchar *text;
-
-	if (gtk_tree_selection_get_selected (selection, &roms_path_tree_model, &iter)) {
-		gtk_tree_model_get (roms_path_tree_model, &iter, 0, &text, -1);
-		gtk_entry_set_text (GTK_ENTRY (user_data), text);
-	}
-}
-
-void
-on_samples_path_tree_view_select         (GtkTreeSelection *selection, gpointer user_data)
-{
-	GtkTreeIter iter;
-	gchar *text;
-
-	if (gtk_tree_selection_get_selected (selection, &samples_path_tree_model, &iter)) {
-		gtk_tree_model_get (samples_path_tree_model, &iter, 0, &text, -1);
-		gtk_entry_set_text (GTK_ENTRY (user_data), text);
-	}
+	
+	g_free (text);
 }
