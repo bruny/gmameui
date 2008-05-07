@@ -558,9 +558,7 @@ save_dirs_ini (void)
 {
 	gchar *filename;
 
-	GMAMEUI_DEBUG ("Saving dirs.ini");
-
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "dirs.ini", NULL);	
+GMAMEUI_DEBUG ("Saving dirs.ini");
 
 	GKeyFile *dirsini_list = g_key_file_new ();
 
@@ -570,7 +568,6 @@ save_dirs_ini (void)
 	if (xmame_table_size () > 0)
 		g_key_file_set_string_list (dirsini_list, "Directories", "xmame_executables_array",
 					    xmame_table_get_all(), xmame_table_size());
-
 	g_key_file_set_string_list (dirsini_list, "Directories", "RomPath", gui_prefs.RomPath, g_strv_length (gui_prefs.RomPath));
 	g_key_file_set_string_list (dirsini_list, "Directories", "SamplePath", gui_prefs.SamplePath, g_strv_length (gui_prefs.SamplePath));
 
@@ -593,10 +590,13 @@ save_dirs_ini (void)
 	g_key_file_set_string (dirsini_list, "Directories", "HistoryFile", gui_prefs.HistoryFile);
 	g_key_file_set_string (dirsini_list, "Directories", "MameInfoFile", gui_prefs.MameInfoFile);
 	
+	filename = g_build_filename (g_get_home_dir (), ".gmameui", "dirs.ini", NULL);	
 	g_key_file_save_to_file (dirsini_list, filename, NULL);
+	g_free (filename);
 	
 	g_key_file_free (dirsini_list);
-	g_free (filename);
+
+GMAMEUI_DEBUG ("Saving dirs.ini... done");
 	
 	return TRUE;
 }
@@ -604,23 +604,31 @@ save_dirs_ini (void)
 gboolean
 check_rom_exists_as_file (gchar *romname) {
 	gchar *filename;
+	gchar *zipname;
+	gboolean retval;
 	int i;
 	
-	filename = g_malloc (200);
+	retval = FALSE;
+
+	zipname = g_strdup_printf("%s.zip", romname);
+	
 	for (i=0;gui_prefs.RomPath[i]!=NULL;i++) {
-		g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s.zip", gui_prefs.RomPath[i], romname);
-		if (g_file_test (filename, g_file_test (filename, G_FILE_TEST_EXISTS)))
-			return TRUE;
-
-		g_snprintf (filename, 200, "%s" G_DIR_SEPARATOR_S "%s", gui_prefs.RomPath[i], romname);
-		if (g_file_test (filename, G_FILE_TEST_IS_DIR))
-			return TRUE;
-
+		filename = g_build_filename (gui_prefs.RomPath[i], g_strdup_printf("%s.zip", romname), NULL);	
+		if (g_file_test (zipname, G_FILE_TEST_EXISTS) ||
+		    g_file_test (g_path_get_dirname (zipname), G_FILE_TEST_IS_DIR)) {
+			retval = TRUE;
+		}
+		continue;
 	}
+	if (filename)
+		g_free (filename);
+	g_free (zipname);
 
-	return FALSE;
+	return retval;
 }
 
+/* TODO FIXME This function never gets called, but should use similar code
+   to check_rom_exists_as_file; or combine the two */
 gboolean
 check_samples_exists_as_file (gchar *samplename) {
 	gchar *filename;
@@ -646,7 +654,6 @@ quick_check (void)
 {
 	static gboolean quick_check_running = FALSE;
 	GList *list_pointer;
-	gchar *filename;
 	gint nb_rom_not_checked;
 	gfloat done;
 	int i;
@@ -666,7 +673,7 @@ quick_check (void)
 	quick_check_running = TRUE;
 		
 	show_progress_bar ();
-	filename = g_malloc (200);
+
 	nb_rom_not_checked = g_list_length (game_list.not_checked_list);
 	g_message (_("Performing quick check, please wait:"));
 	/* Disable the callback */
@@ -724,7 +731,6 @@ quick_check (void)
 	g_list_free(game_list.not_checked_list);
 	game_list.not_checked_list = NULL;
 
-	g_free (filename);
 	hide_progress_bar ();
 	quick_check_running= FALSE;
 	
