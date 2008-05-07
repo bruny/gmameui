@@ -833,6 +833,8 @@ const gchar *
 rom_entry_get_list_name (RomEntry *rom)
 {
 	
+	g_return_if_fail (rom != NULL);
+	
 	if (!rom->the_trailer) {
 		if (!rom->name_in_list) {
 			rom->name_in_list = g_strdup_printf ("%s %s", rom->gamename, rom->gamenameext);
