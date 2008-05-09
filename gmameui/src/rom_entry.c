@@ -33,8 +33,10 @@ rom_entry_new (void)
 	rom = (RomEntry*) g_malloc0 (sizeof (RomEntry));
 
 	for (i = 0; i < NB_CPU; i++) {
-		strcpy (rom->cpu_info[i].name, "-");
-		strcpy (rom->sound_info[i].name, "-");
+		/*strcpy (rom->cpu_info[i].name, "-");
+		strcpy (rom->sound_info[i].name, "-");*/
+		rom->cpu_info[i].name = g_strdup ("-");
+		rom->sound_info[i].name = g_strdup ("-");
 	}
 	
 	/* fill the some fields with default value if we have problems */
@@ -49,24 +51,39 @@ rom_entry_new (void)
 void
 rom_entry_free (RomEntry *rom)
 {
+	int i;
+	
 	if (!rom)
 		return;
 
+	g_free (rom->romname);
+	
 	/* optimization: clonesort points to romname
 	* if original. See: gamelist_add ()
 	*/
 	if (rom->clonesort != rom->romname)
 		g_free (rom->clonesort);
 
-	g_free (rom->name_in_list);
-	g_free (rom->gamename);
-	g_free (rom->gamenameext);
-	g_free (rom->manu);
-	g_free (rom->cloneof);
-	g_free (rom->romof);
-	g_free (rom->sampleof);
+	for (i = 0; i < NB_CPU; i++) {
+		if (rom->cpu_info[i].name) g_free (rom->cpu_info[i].name);
+		if (rom->sound_info[i].name) g_free (rom->sound_info[i].name);
+	}
+	
+	if (rom->gamename) g_free (rom->gamename);
+	if (rom->gamenameext) g_free (rom->gamenameext);
 
-	g_free (rom);
+	if (rom->manu) g_free (rom->manu);
+	if (rom->cloneof) g_free (rom->cloneof);
+	if (rom->romof) g_free (rom->romof);
+	if (rom->sampleof) g_free (rom->sampleof);
+	
+	/* if (rom->clonesort) g_free (rom->clonesort); points to romname, which has been free'd */
+	
+	if (rom->icon_pixbuf) g_object_unref (rom->icon_pixbuf);
+	
+	if (rom->name_in_list) g_free (rom->name_in_list);
+
+	rom = NULL;
 }
 
 void
@@ -112,6 +129,43 @@ rom_entry_set_name (RomEntry *rom,
 
 	rom->gamename = g_strdup (value);
 }
+
+ControlType get_control_type (gchar *control_type)
+{
+	ControlType type;
+	
+	g_return_if_fail (control_type != NULL);
+
+	/* FIXME TODO There are additional types to add */
+	if (g_ascii_strcasecmp (control_type, "trackball") == 0)
+		type = TRACKBALL;
+	else if (g_ascii_strcasecmp (control_type, "lightgun") == 0)
+		type = LIGHTGUN;
+	else
+		type = JOYSTICK;
+	
+	return type;
+}
+
+DriverStatus get_driver_status (gchar *driver_status)
+{
+	DriverStatus status;
+	
+	g_return_if_fail (driver_status != NULL);
+
+	/* FIXME TODO There are additional types to add */
+	if (g_ascii_strcasecmp (driver_status, "good") == 0)
+		status = DRIVER_STATUS_GOOD;
+	else if (g_ascii_strcasecmp (driver_status, "imperfect") == 0)
+		status = DRIVER_STATUS_IMPERFECT;
+	else if (g_ascii_strcasecmp (driver_status, "preliminary") == 0)
+		status = DRIVER_STATUS_PRELIMINARY;
+	else
+		status = DRIVER_STATUS_UNKNOWN;
+	
+	return status;
+}
+
 
 gchar **
 rom_entry_get_manufacturers (RomEntry * rom)

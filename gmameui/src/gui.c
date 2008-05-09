@@ -528,8 +528,7 @@ get_pixbuf (RomEntry       *rom,
 		struct zipent* zipent;
 		gchar *tmp_buffer;
 		gchar *parent_tmp_buffer = NULL;
-		gsize parent_buf_size = 0
-;
+		gsize parent_buf_size = 0;
 		gchar *parent_filename;
 
 		zip = openzip (zipfile);
@@ -908,7 +907,7 @@ gamelist_popupmenu_show (RomEntry       *rom,
 	GtkWidget *popup_menu;
 
 	popup_menu = gtk_ui_manager_get_widget (main_gui.manager, "/GameListPopup");
-	g_return_val_if_fail (popup_menu != NULL, FALSE);
+	g_return_if_fail (popup_menu != NULL);
 
 	if (!current_exec) {
 		gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
@@ -1491,17 +1490,17 @@ g_timer_start (timer);
 							     G_TYPE_STRING,
 							     G_TYPE_STRING,
 							     G_TYPE_STRING,
+							     G_TYPE_INT,	/* Times played */
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
 							     G_TYPE_INT,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
+							     G_TYPE_INT,
+							     G_TYPE_INT,
+							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_STRING,
@@ -1528,17 +1527,17 @@ g_timer_start (timer);
 							     G_TYPE_STRING,
 							     G_TYPE_STRING,
 							     G_TYPE_STRING,
+							     G_TYPE_INT,	/* Times played */
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
+							     G_TYPE_STRING,
 							     G_TYPE_INT,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
+							     G_TYPE_INT,
+							     G_TYPE_INT,
+							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_STRING,
@@ -1575,7 +1574,7 @@ g_timer_start (timer);
 				my_hassamples = tmprom->has_samples ? _("Yes") : _("No");
 
 			/* Control */
-			if (!strcmp (tmprom->control, "trackball"))
+			if (tmprom->control == TRACKBALL)
 				my_control = _("Yes");
 			else
 				my_control = _("No");
@@ -1625,7 +1624,7 @@ g_timer_start (timer);
 						    DRIVER,       tmprom->driver,
 						    STATUS,       tmprom->has_roms ? _("Available") : _("Not Available"),
 						    ROMOF,        tmprom->romof,
-						    DRIVERSTATUS, tmprom->status ? _("Working") : _("Not Working"),
+						    DRIVERSTATUS, tmprom->status,
 						    COLOR_STATUS, tmprom->driver_status_color,
 						    SOUND_STATUS, tmprom->driver_status_sound,
 						    GRAPHIC_STATUS, tmprom->driver_status_graphic,
@@ -1666,7 +1665,7 @@ g_timer_start (timer);
 						    DRIVER,       tmprom->driver,
 						    STATUS,       tmprom->has_roms ? _("Available") : _("Not Available"),
 						    ROMOF,        tmprom->romof,
-						    DRIVERSTATUS, tmprom->status ? _("Working") : _("Not Working"),
+						    DRIVERSTATUS, tmprom->status,
 						    COLOR_STATUS, tmprom->driver_status_color,
 						    SOUND_STATUS, tmprom->driver_status_sound,
 						    GRAPHIC_STATUS, tmprom->driver_status_graphic,
@@ -1983,23 +1982,17 @@ select_game (RomEntry *rom)
 		set_status_bar (rom_entry_get_list_name (rom),
 				rom_status_string_value [rom->has_roms]);
 
-GMAMEUI_DEBUG ("ROM Selected: %s", rom->romname);
-GMAMEUI_DEBUG ("   Emulation status: %s", rom->driver_status_emulation);
-GMAMEUI_DEBUG ("   Color status: %s", rom->driver_status_color);
-GMAMEUI_DEBUG ("   Sound status: %s", rom->driver_status_sound);
-GMAMEUI_DEBUG ("   Graphic status: %s", rom->driver_status_graphic);
 		/* update screenshot panel */
-
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
 					      gui_prefs.current_game);
 	} else {
 		/* no roms selected display the default picture */
 
 		GMAMEUI_DEBUG ("no games selected");
+		
 		/* update menus */
 		gmameui_menubar_set_favourites_sensitive (FALSE);
 		gmameui_toolbar_set_play_sensitive (FALSE);
-
 
 		/* update statusbar */
 		set_status_bar (_("No game selected"), "");
@@ -2085,7 +2078,7 @@ update_game_in_list (RomEntry *tmprom)
 	}
 	
 	/* Control */
-	if (!strcmp (tmprom->control, "trackball"))
+	if (tmprom->control == TRACKBALL)
 		my_control = _("Yes");
 	else
 		my_control = _("No");
@@ -2303,7 +2296,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	sidebar->priv->screenshot_event_box = gtk_event_box_new ();
 	gtk_box_pack_start (sidebar->priv->screenshot_hist_vbox,
 			    sidebar->priv->screenshot_event_box,
-			    TRUE, TRUE, 5);
+			    TRUE, TRUE, 6);
 	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
 			   GTK_WIDGET (sidebar->priv->main_screenshot));
 	gtk_widget_show (sidebar->priv->screenshot_event_box);
@@ -2311,7 +2304,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	
 	xml = glade_xml_new (GLADEDIR "sidebar.glade", "screenshot_notebook", NULL);
 	
-	sidebar->priv->screenshot_hist_vbox = gtk_vbox_new (FALSE, 5);
+	sidebar->priv->screenshot_hist_vbox = gtk_vbox_new (FALSE, 6);
 	gtk_container_set_border_width (GTK_CONTAINER (sidebar->priv->screenshot_hist_vbox), 6);
 	gtk_container_add (GTK_CONTAINER (sidebar),
 			   GTK_WIDGET (sidebar->priv->screenshot_hist_vbox));

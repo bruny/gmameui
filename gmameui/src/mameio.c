@@ -35,6 +35,7 @@
 
 #include "gui.h"
 #include "progression_window.h"
+#include "rom_entry.h"
 
 #define BUFFER_SIZE 1000
 #define MAX_ELEMENT_NAME 32
@@ -265,7 +266,7 @@ static void XMLStartHandler(TCreateGameList *_this,
 
 					for (i =0; atts[i]; i += 2) {
 						if (!strcmp(atts[i], "name")) {
-							g_strlcpy(cpu->name, atts[i+1], MAX_CPU);
+							cpu->name = g_strdup (atts[i+1]);
 						} else if (!strcmp(atts[i], "clock")) {
 							cpu->clock = atoi(atts[i+1]);
 						} else if (!strcmp(atts[i], "soundonly")) {
@@ -286,7 +287,7 @@ _this->cpu_count++;
 
 					for (i =0; atts[i]; i += 2) {
 						if (!strcmp(atts[i], "name")) {
-							g_strlcpy(cpu->name, atts[i+1], MAX_CPU);
+							cpu->name = g_strdup (atts[i+1]);
 						} else if (!strcmp(atts[i], "clock")) {
 							cpu->clock = atoi(atts[i+1]);
 						}
@@ -303,7 +304,7 @@ _this->sound_count++;
 				if (!strcmp(atts[i], "players")) {
 					rom->num_players = atoi(atts[i+1]);
 				} else if (!strcmp(atts[i], "control")) {
-					g_strlcpy(rom->control, atts[i+1], MAX_CONTROL);
+					rom->control = get_control_type (atts[i+1]);
 				} else if (!strcmp(atts[i], "buttons")) {
 					rom->num_buttons = atoi(atts[i+1]);	
 				}
@@ -315,7 +316,7 @@ _this->sound_count++;
 			   XML output */
 			for (i =0; atts[i]; i += 2) {
 				if (!strcmp(atts[i], "type")) {
-					g_strlcpy(rom->control, atts[i+1], MAX_CONTROL);
+					rom->control = get_control_type (atts[i+1]);
 				}
 			}
 		}
@@ -327,13 +328,13 @@ _this->sound_count++;
 				if (!strcmp(atts[i], "status")) {
 					rom->status = !strcmp(atts[i+1], "good");
 				} else if (!strcmp(atts[i], "emulation")) {
-					rom->driver_status_emulation = g_strdup (atts[i+1]);
+					rom->driver_status_emulation = get_driver_status (atts[i+1]);
 				} else if (!strcmp(atts[i], "color")) {
-					rom->driver_status_color = g_strdup (atts[i+1]);
+					rom->driver_status_color = get_driver_status (atts[i+1]);
 				} else if (!strcmp(atts[i], "sound")) {
-					rom->driver_status_sound = g_strdup (atts[i+1]);
+					rom->driver_status_sound = get_driver_status (atts[i+1]);
 				} else if (!strcmp(atts[i], "graphic")) {
-					rom->driver_status_graphic = g_strdup (atts[i+1]);
+					rom->driver_status_graphic = get_driver_status (atts[i+1]);
 				} else if (!strcmp(atts[i], "palettesize")) {
 					rom->colors = atoi(atts[i+1]);
 				}
@@ -812,9 +813,9 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 
 						if (!strcmp(tmp_array[tmp_counter], "name")) {
 							if (is_sound)
-								g_strlcpy(rom->sound_info[sound_count].name, tmp_array[tmp_counter+1], MAX_CPU);
+								rom->sound_info[sound_count].name = g_strdup (tmp_array[tmp_counter+1]);
 							else
-								g_strlcpy(rom->cpu_info[cpu_count].name, tmp_array[tmp_counter+1], MAX_CPU);
+								rom->cpu_info[cpu_count].name = g_strdup (tmp_array[tmp_counter+1]);
 
 							tmp_counter++;
 
@@ -882,11 +883,8 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 						}
 						else if (!strcmp
 						    (tmp_array[tmp_counter], "control")) {
-
-							g_strlcpy(rom->control,tmp_array[tmp_counter + 1],  MAX_CONTROL);
+							rom->control = get_control_type (tmp_array[tmp_counter + 1]);
 							tmp_counter++;		
-
-
 						}else if (!strcmp
 						    (tmp_array[tmp_counter], "buttons")) {
 

@@ -120,12 +120,13 @@ gamelist_free (void)
 		g_free (game_list.name);
 	if (game_list.version)
 		g_free (game_list.version);
-
+GMAMEUI_DEBUG ("Freeing roms");
 	if (game_list.roms)
 	{
 		g_list_foreach (game_list.roms, (GFunc) rom_entry_free, NULL);
 		g_list_free (game_list.roms);
 	}
+GMAMEUI_DEBUG ("Freeing roms... done");
 	if (game_list.years)
 	{
 		g_list_foreach (game_list.years, (GFunc) g_free, NULL);
@@ -201,8 +202,8 @@ gamelist_add (RomEntry *rom)
 	if (!rom->year)
 		rom_entry_set_year (rom, _("Unknown"));
 
-	if (!rom->control)
-		strcpy (rom->control, "-");
+/*DELETE	if (!rom->control)
+		strcpy (rom->control, "-");*/
 
 	game_list.roms = g_list_insert_sorted (game_list.roms, (gpointer) rom, (GCompareFunc )compare_game_name);
 
@@ -300,13 +301,10 @@ gamelist_load (void)
 			rom->romof = g_strdup (tmp_array[8]);
 			rom_entry_set_driver (rom, tmp_array[9]);
 			
-			if (!strcmp (tmp_array[10], "true"))
-				rom->status = TRUE;
-			else
-				rom->status = FALSE;
-			rom->driver_status_color = g_strdup (tmp_array[11]);
-			rom->driver_status_sound = g_strdup (tmp_array[12]);
-			rom->driver_status_graphic = g_strdup (tmp_array[13]);
+			rom->status = atoi (tmp_array[10]);
+			rom->driver_status_color = atoi (tmp_array[11]);
+			rom->driver_status_sound = atoi (tmp_array[12]);
+			rom->driver_status_graphic = atoi (tmp_array[13]);
 			rom->colors = atoi (tmp_array[14]);
 
 			/* offset of cpu infos in the array */
@@ -316,13 +314,12 @@ gamelist_load (void)
 				if (!strncmp (tmp_array[ (j * 2) + offset], "(sound)", 7)) {
 					p = tmp_array[ (j * 2) + offset];
 					p += 7;
-					g_snprintf (rom->cpu_info[j].name, MAX_CPU, "%s", p);
+					rom->cpu_info[j].name = g_strdup (p);
 					rom->cpu_info[j].sound_flag = TRUE;
 				}
 				else
 				{
-					g_snprintf (rom->cpu_info[j].name, MAX_CPU,
-						    "%s", tmp_array[ (j * 2) + offset]);
+					rom->cpu_info[j].name = g_strdup (tmp_array[ (j * 2) + offset]);
 					rom->cpu_info[j].sound_flag = FALSE;
 				}
 				rom->cpu_info[j].clock = atoi (tmp_array[ (j * 2) + offset + 1]);
@@ -334,8 +331,7 @@ gamelist_load (void)
 			for (j = 0; j < NB_CPU; j++)
 			{
 				if (strcmp (tmp_array[offset + (j * 2)], "")) {
-					g_snprintf (rom->sound_info[j].name, MAX_CPU,
-						    "%s", tmp_array[offset + (j * 2)]);
+					rom->sound_info[j].name = g_strdup (tmp_array[offset + (j * 2)]);
 				}
 				rom->sound_info[j].clock = atoi (tmp_array[offset + (j * 2) + 1]);
 			}
@@ -344,12 +340,7 @@ gamelist_load (void)
 
 			rom->num_players = atoi (tmp_array[offset + 0]);
 			rom->num_buttons = atoi (tmp_array[offset + 1]);
-
-			if (strcmp (tmp_array[offset + 2], "")) {
-				g_snprintf (rom->control,
-					   MAX_CONTROL, "%s",
-					   tmp_array[offset + 2]);
-			}
+			rom->control = atoi (tmp_array[offset + 2]);
 
 			rom->vector = !strcmp (tmp_array[offset + 3], "true");
 		
@@ -385,14 +376,14 @@ gamelist_load (void)
 				fclose (gamelist);
 				return FALSE;
 			}
-			if (g_ascii_strtod (tmp_array[2], NULL) < 0.9)
+			if (g_ascii_strtod (tmp_array[2], NULL) < 0.91)
 			{
 				game_list.version = g_strdup ("too old");
 				g_strfreev (tmp_array);
 				fclose (gamelist);
 				return FALSE;
 			}
-			if (g_ascii_strtod (tmp_array[2], NULL) > 0.9)
+			if (g_ascii_strtod (tmp_array[2], NULL) > 0.91)
 			{
 				game_list.version = g_strdup ("unknown");
 				g_strfreev (tmp_array);
@@ -439,7 +430,7 @@ static void
 gamelist_prefix_print (FILE *handle)
 {
 	fprintf (handle,
-		"# GMAMEUI 0.9\n"
+		"# GMAMEUI 0.91\n"
 		"# Name %s\n"
 		"# Version %s\n"
 		"# list of xmame games for GMAMEUI front-end\n"
@@ -517,10 +508,10 @@ gamelist_print (FILE     *handle,
 		"%s" SEP	/* clone of */
 		"%s" SEP	/* rom of */
 		"%s" SEP	/* driver */
-		"%s" SEP	/* status */
-		"%s" SEP	/* driver color status */
-		"%s" SEP	/* driver sound status */
-		"%s" SEP	/* driver sound graphic */
+		"%d" SEP	/* status */
+		"%d" SEP	/* driver color status */
+		"%d" SEP	/* driver sound status */
+		"%d" SEP	/* driver sound graphic */
 		"%i" SEP	/* colors */
 		,
 		rom->romname,
@@ -533,7 +524,7 @@ gamelist_print (FILE     *handle,
 		rom->cloneof,
 		rom->romof,
 		rom->driver,
-		rom->status ? "true" : "false",
+		rom->status,
 		rom->driver_status_color,
 		rom->driver_status_sound,
 		rom->driver_status_graphic,
@@ -552,7 +543,7 @@ gamelist_print (FILE     *handle,
 	fprintf (handle,
 		"%i" SEP	/* players */
 		"%i" SEP	/* buttons */
-		"%s" SEP	/* control */
+		"%d" SEP	/* control */
 		"%s" SEP	/* vector */
 		"%i" SEP	/* screen X */
 		"%i" SEP	/* screen Y */

@@ -249,8 +249,8 @@ game_filtered (RomEntry * rom)
 			 (!is && g_strcasecmp (rom->cloneof,value)));
 		break;
 	case CONTROL:
-		retval = ( (is && !g_strcasecmp (rom->control,value)) ||
-			 (!is && g_strcasecmp (rom->control,value)));
+		retval = ( (is && (rom->control == (ControlType)int_value))  ||
+			 (!is && ! (rom->control == (ControlType)int_value)));
 		break;
 	case MAMEVER:
 		if (rom->mame_ver_added)
@@ -273,22 +273,21 @@ game_filtered (RomEntry * rom)
 			 (!is && !rom->vector));
 		break;
 	case STATUS:
-		retval = ( (is && rom->status) ||
-			 (!is && !rom->status));
+		retval = ( (is && rom->status == (DriverStatus)int_value) ||
+			 (!is && !rom->status == (DriverStatus)int_value));
 		break;
 	case COLOR_STATUS:
-		retval = ( (is && !g_strcasecmp (rom->driver_status_color,value)) ||
-			 (!is && g_strcasecmp (rom->driver_status_color,value)));
+		retval = ( (is && (rom->driver_status_color == (DriverStatus)int_value))  ||
+			 (!is && ! (rom->driver_status_color == (DriverStatus)int_value)));
 		break;
 	case SOUND_STATUS:
-		retval = ( (is && !g_strcasecmp (rom->driver_status_sound,value)) ||
-			 (!is && g_strcasecmp (rom->driver_status_sound,value)));
+		retval = ( (is && (rom->driver_status_sound == (DriverStatus)int_value))  ||
+			 (!is && ! (rom->driver_status_sound == (DriverStatus)int_value)));
 		break;
 	case GRAPHIC_STATUS:
-		retval = ( (is && !g_strcasecmp (rom->driver_status_graphic,value)) ||
-			 (!is && g_strcasecmp (rom->driver_status_graphic,value)));
+		retval = ( (is && (rom->driver_status_graphic == (DriverStatus)int_value))  ||
+			 (!is && ! (rom->driver_status_graphic == (DriverStatus)int_value)));
 		break;
-		/* Comparing int and int */
 	case HAS_ROMS:
 		retval = ( (is && (rom->has_roms == (RomStatus)int_value))  ||
 			 (!is && ! (rom->has_roms == (RomStatus)int_value)));

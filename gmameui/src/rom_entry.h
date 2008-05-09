@@ -36,13 +36,13 @@ changing this will break the gamelist compatibility
 #define NB_CPU 4
 
 typedef struct {
-	gchar name[MAX_CPU];
+	gchar *name;
 	guint clock;
 	gboolean sound_flag;
 } CPUInfo;
 
 typedef struct {
-	gchar name[MAX_CPU];
+	gchar *name;
 	guint clock;
 } SoundCPUInfo;
 
@@ -56,6 +56,28 @@ typedef enum {
 	NOTROMSET,
 	NUMBER_STATUS
 } RomStatus;
+
+typedef enum {
+	JOYSTICK,
+	TRACKBALL,
+	LIGHTGUN
+} ControlType;
+
+typedef enum {
+	DRIVER_STATUS_GOOD,
+	DRIVER_STATUS_IMPERFECT,
+	DRIVER_STATUS_PRELIMINARY,
+	DRIVER_STATUS_UNKNOWN,
+	NUM_DRIVER_STATUS
+} DriverStatus;
+
+/*
+gchar *driver_status_str[NUM_DRIVER_STATUS] = {
+	"Good",
+	"Imperfect",
+	"Preliminary",
+	"Unknown"
+};*/
 
 static gchar* rom_status_string_value[NUMBER_STATUS] = {
 	N_("Incorrect"),
@@ -84,7 +106,7 @@ typedef struct {
 	const gchar *year;
 	gchar *manu;
 	gchar *cloneof;
-	gchar *romof;
+	gchar *romof;   /* This appears to be the same as cloneof in the XML output */
 	gchar *sampleof;
 	
 	gboolean is_bios;
@@ -95,7 +117,7 @@ typedef struct {
 	const gchar *driver;
 	CPUInfo cpu_info[NB_CPU];
 	SoundCPUInfo sound_info[NB_CPU];
-	gchar control[MAX_CONTROL];
+	ControlType control;
 
 	/** The category for the game.
 	This is a pointer to a string in the game_list.categories g_list
@@ -106,15 +128,15 @@ typedef struct {
 	gint num_buttons;
 	gint channels;
 	gboolean vector;
-	gboolean status;
+	DriverStatus status;
 
 	/** Driver status
 	Recent versions of MAME have good | imperfect or | preliminary
 	*/
-	gchar *driver_status_emulation;
-	gchar *driver_status_color;
-	gchar *driver_status_sound;
-	gchar *driver_status_graphic;
+	DriverStatus driver_status_emulation;
+	DriverStatus driver_status_color;
+	DriverStatus driver_status_sound;
+	DriverStatus driver_status_graphic;
 	
 	gboolean horizontal;
 	guint screen_x;
@@ -162,5 +184,7 @@ RomEntry * rom_entry_new (void);
 
 void rom_entry_set_name   (RomEntry *rom, gchar *value);
 gchar **rom_entry_get_manufacturers (RomEntry * rom);
+ControlType get_control_type (gchar *control_type);
+DriverStatus get_driver_status (gchar *driver_status);
 
 #endif

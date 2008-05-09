@@ -456,14 +456,14 @@ create_MainWindow (void)
 	
 	
 	/* Imperfect filters */
-		folder_filter = gmameui_filter_new ();
-		g_object_set (folder_filter,
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
 		      "name", "Colours",
 		      "folderid", IMPERFECT_COLORS,
 		      "type", COLOR_STATUS,
 		      "is", FALSE,
-		      "value", "good",
-		      "int_value", 0,
+		      "value", NULL,
+		      "int_value", DRIVER_STATUS_GOOD,
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-not-working"),
 		      NULL);
@@ -476,8 +476,8 @@ create_MainWindow (void)
 		      "folderid", IMPERFECT_SOUND,
 		      "type", SOUND_STATUS,
 		      "is", FALSE,
-		      "value", "good",
-		      "int_value", 0,
+		      "value", NULL,
+		      "int_value", DRIVER_STATUS_GOOD,
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-not-working"),
 		      NULL);
@@ -490,8 +490,8 @@ create_MainWindow (void)
 		      "folderid", IMPERFECT_GRAPHIC,
 		      "type", GRAPHIC_STATUS,
 		      "is", FALSE,
-		      "value", "good",
-		      "int_value", 0,
+		      "value", NULL,
+		      "int_value", DRIVER_STATUS_GOOD,
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-not-working"),
 		      NULL);
@@ -609,11 +609,11 @@ create_MainWindow (void)
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
 		      "name", "Trackball",
-		      "folderid", TRACKBALL,
+		      "folderid", FILTER_CONTROL_TRACKBALL,
 		      "type", CONTROL,
 		      "is", TRUE,
-		      "value", "trackball",
-		      "int_value", 0,
+		      "value", NULL,
+		      "int_value", TRACKBALL,
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-joystick"),
 		      NULL);
@@ -623,11 +623,11 @@ create_MainWindow (void)
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
 		      "name", "Lightgun",
-		      "folderid", LIGHTGUN,
+		      "folderid", FILTER_CONTROL_LIGHTGUN,
 		      "type", CONTROL,
 		      "is", TRUE,
-		      "value", "lightgun",
-		      "int_value", 0,
+		      "value", NULL,
+		      "int_value", LIGHTGUN,
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-joystick"),
 		      NULL);

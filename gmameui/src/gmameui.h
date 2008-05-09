@@ -55,12 +55,12 @@ typedef enum {
 	YEAR,
 	CLONE,
 	DRIVER,
-	STATUS,       /*  Available / Not Available */
+	STATUS,			/*  Available / Not Available */
 	ROMOF,
-	DRIVERSTATUS, /*  Working / Not Working */
-COLOR_STATUS,	/* Good | Imperfect | Preliminary */
-SOUND_STATUS,	/* Good | Imperfect | Preliminary */
-GRAPHIC_STATUS,	/* Good | Imperfect | Preliminary */
+	DRIVERSTATUS,   /* Good | Imperfect | Preliminary */
+	COLOR_STATUS,	/* Good | Imperfect | Preliminary */
+	SOUND_STATUS,	/* Good | Imperfect | Preliminary */
+	GRAPHIC_STATUS,	/* Good | Imperfect | Preliminary */
 	NUMPLAYERS,
 	NUMBUTTONS,
 	CPU1,
@@ -102,17 +102,18 @@ typedef enum  {
 	AVAILABLE,	/* 2 */
 	UNAVAILABLE,	/* 3 */
 	FILTER_INCORRECT,
-	NEOGEO,		/* 4 */
-	CPS1,		/* 18 */
-	CPS2,		/* 19 */
+	/* Architecture type filters */
+	NEOGEO,
+	CPS1,
+	CPS2,
 	CPS3,
 	NAMCOS22,
 	SEGAS16,
 	SEGAM2,
-IMPERFECT,
-IMPERFECT_COLORS,
-IMPERFECT_SOUND,
-IMPERFECT_GRAPHIC,
+	IMPERFECT,
+	IMPERFECT_COLORS,
+	IMPERFECT_SOUND,
+	IMPERFECT_GRAPHIC,
 	MANUFACTURERS, 	/* 5 just for the folderID compliance*/
 	YEARS, 		/* 6 just for the folderID compliance*/
 	WORKING,	/* 7 */
@@ -125,8 +126,8 @@ IMPERFECT_GRAPHIC,
 	RASTERS,	/* 14 */
 	VECTORS,	/* 15 */
 SAMPLES,
-	TRACKBALL,	/* 16 */
-	LIGHTGUN,
+	FILTER_CONTROL_TRACKBALL,	/* 16 */
+	FILTER_CONTROL_LIGHTGUN,
 	ORIENTATION,
 	STEREO,
 	FILTER_BIOS,
