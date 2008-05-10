@@ -35,9 +35,9 @@ gmameui_SOURCES = \
 	filter.c filter.h \
 	gossip-cell-renderer-expander.c gossip-cell-renderer-expander.h 
 
-gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(GNOME_LIBS) $(INTLLIBS)
+gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(INTLLIBS)
 
-AM_CPPFLAGS = $(GTK_CFLAGS) $(GLADE2_CFLAGS) $(GNOME_CFLAGS) \
+AM_CPPFLAGS = $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
 		-DDATADIR=\""$(datadir)"\" \
 		-DGLADEDIR=\"${datadir}/gmameui/glade/\" \
 		-DGMAMEUI_UI_DIR=\"${datadir}/gmameui/ui/\" \

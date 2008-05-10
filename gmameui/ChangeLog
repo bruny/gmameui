@@ -1,3 +1,54 @@
+2008-05-09 23:33  adburton
+
+        * src/: game_list.c, gmameui.c, gmameui.h, gui.c, interface.c,
+          mameio.c, rom_entry.c, rom_entry.h: Use integer enums rather than
+          strings in RomEntry fields, and amend gamelist load/save and
+          filtering accordingly. Free gchar strings when freeing a RomEntry
+          object
+
+2008-05-07 21:15  adburton
+
+        * src/io.c: Remove reference to malloc when generating a string
+          representing filenames, use glib functions
+
+        * src/directories.c: Fix invalid free's on subsequent saves, code
+          cleanup when retrieving paths from tree model using
+          gtk_tree_model_foreach, remove redundant functions
+
+        * src/gmameui.c: Avoid segfault when data passed in to
+          rom_entry_get_list_name is null
+
+2008-05-06 00:15  adburton
+
+        * src/io.c: Fixed bug when saving directories with different number
+          of rom and sample paths
+
+2008-05-05 16:21  adburton
+
+        * src/: gmameui.c, gmameui.h, interface.c: Add additional filters,
+          fix handling of some filter types
+
+        * src/: callbacks.c, callbacks.h, gmameui.c: Use GMAMEUIFiltersList
+          and GMAMEUIFilter to support ROM filtering
+
+        * src/game_list.c: Fix problem setting driver and year in gamelist
+
+        * src/gui.c: Show/hide the filter scrolled window, not just the
+          filter tree
+
+        * src/: Makefile.am, directories.c, game_list.c, gmameui.h, gui.c,
+          gui.h, interface.c: Use GMAMEUIFiltersList and GMAMEUIFilter to
+          support ROM filtering
+
+        * src/: filter.c, filter.h, filters_list.c, filters_list.h,
+          gossip-cell-renderer-expander.c, gossip-cell-renderer-expander.h:
+          Add functionality for filter classes to replace existing
+          filtering functionality
+
+2008-05-05 08:43  adburton
+
+        * po/Makefile.in.in: Tagged for version 0.2 release
+
 2008-05-04 21:28  adburton
 
 	* data/Makefile.am: Add options.glade to Makefile.am

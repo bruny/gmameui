@@ -1,3 +1,13 @@
+Overview of changes in GMAMEUI 0.2.1
+====================================
+
+* Change the filter sidebar layout to be similar to that of Rhythmbox, rather than the previous ugly treeview with folder icons
+* Add new classes GMAMEUIFiltersList and GMAMEUIFilters for filtering game list
+* Use integer enums in RomEntry rather than strings
+* Reduce some of the memory leaks in RomEntry
+* Fix hang on subsequent OK in Directory Selection window caused by invalid free's
+* Fix bug when saving directories with different number of ROM paths and sample paths caused by bad copy-and-paste
+
 Overview of changes in GMAMEUI 0.2
 ==================================
 
