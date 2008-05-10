@@ -31,13 +31,11 @@
 #include <stdlib.h>
 #include <glib/gi18n.h>
 
-#include <libgnome/gnome-macros.h>
-
 #include "cell-renderer-captioned-image.h"
 
 
-static void gmameui_cell_renderer_captioned_image_instance_init (GmameuiCellRendererCaptionedImage      *cell);
-static void gmameui_cell_renderer_captioned_image_class_init    (GmameuiCellRendererCaptionedImageClass *class);
+static void gmameui_cell_renderer_captioned_image_init (GmameuiCellRendererCaptionedImage *cell);
+static void gmameui_cell_renderer_captioned_image_class_init (GmameuiCellRendererCaptionedImageClass *class);
 
 enum {
 	PROP_0,
@@ -49,9 +47,9 @@ enum {
 #define PAD 3
 #define SPACE 5
 
-GNOME_CLASS_BOILERPLATE (GmameuiCellRendererCaptionedImage,
-			 gmameui_cell_renderer_captioned_image,
-			 GtkCellRenderer, GTK_TYPE_CELL_RENDERER);
+G_DEFINE_TYPE (GmameuiCellRendererCaptionedImage,
+	       gmameui_cell_renderer_captioned_image,
+	       GTK_TYPE_CELL_RENDERER);
 
 static void
 gmameui_cell_renderer_captioned_image_get_property (GObject *object,
@@ -192,7 +190,7 @@ gmameui_cell_renderer_captioned_image_dispose (GObject *obj)
 }
 
 static void
-gmameui_cell_renderer_captioned_image_instance_init (GmameuiCellRendererCaptionedImage *cell)
+gmameui_cell_renderer_captioned_image_init (GmameuiCellRendererCaptionedImage *cell)
 {
 	cell->image = gtk_cell_renderer_pixbuf_new ();
 	cell->caption = gtk_cell_renderer_text_new ();
@@ -203,8 +201,6 @@ gmameui_cell_renderer_captioned_image_class_init (GmameuiCellRendererCaptionedIm
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (class);
 	GtkCellRendererClass *cell_class = GTK_CELL_RENDERER_CLASS (class);
-	
-	parent_class = g_type_class_peek_parent (class);
 	
 	object_class->dispose = gmameui_cell_renderer_captioned_image_dispose;
 	
