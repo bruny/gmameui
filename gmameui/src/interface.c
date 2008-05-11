@@ -531,7 +531,7 @@ create_MainWindow (void)
 		      "folderid", SAMPLES,
 		      "type", HAS_SAMPLES,
 		      "is", FALSE,
-		      "value", " ",
+		      "value", NULL,
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-sound"),

@@ -95,7 +95,7 @@ gmameui_filter_class_init (GMAMEUIFilterClass *class)
 									 g_param_spec_int ("type",
 													   "Filter Type",
 													   "Type of the filter",
-													   0, NUMBER_COLUMN,
+													   0, NUMBER_COLUMN_TOTAL,
 													   0,
 													   G_PARAM_READWRITE));
 	

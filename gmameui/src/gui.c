@@ -1456,7 +1456,6 @@ create_gamelist_content (void)
 	RomEntry *tmprom;
 	gchar *my_romname_root = NULL;
 	gchar *my_hassamples;
-	gchar *my_control;
 	GdkColor *my_txtcolor;
 	GtkTreeSelection *select;
 	GtkTreeIter iter;
@@ -1498,76 +1497,46 @@ g_timer_start (timer);
 
 	/* Create a model. */
 	if (tree_store)
-		store = (GtkTreeModel *) gtk_tree_store_new (NUMBER_COLUMN_TOTAL,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
+		store = (GtkTreeModel *) gtk_tree_store_new (NUMBER_COLUMN_TOTAL - 15,
+							     G_TYPE_STRING,     /* Name */
+							     G_TYPE_STRING,     /* Has samples */
+							     G_TYPE_STRING,     /* ROM name */
 							     G_TYPE_INT,	/* Times played */
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
+							     G_TYPE_STRING,     /* Manu */
+							     G_TYPE_STRING,     /* Year */
+							     G_TYPE_STRING,     /* Clone of */
+							     G_TYPE_STRING,     /* Driver */
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_INT,
-							     G_TYPE_STRING,
+							     G_TYPE_STRING,     /* Ver added */
+							     G_TYPE_STRING,     /* Category */
+							     G_TYPE_INT,	/* Channels */
 							     G_TYPE_POINTER,     /* Rom Entry */
 							     GDK_TYPE_COLOR,     /* Text Color */
 							     GDK_TYPE_PIXBUF);   /* Pixbuf */
 	else
-		store = (GtkTreeModel *) gtk_list_store_new (NUMBER_COLUMN_TOTAL,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
+		store = (GtkTreeModel *) gtk_list_store_new (NUMBER_COLUMN_TOTAL - 15,
+							     G_TYPE_STRING,     /* Name */
+							     G_TYPE_STRING,     /* Has samples */
+							     G_TYPE_STRING,     /* ROM name */
 							     G_TYPE_INT,	/* Times played */
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
+							     G_TYPE_STRING,     /* Manu */
+							     G_TYPE_STRING,     /* Year */
+							     G_TYPE_STRING,     /* Clone of */
+							     G_TYPE_STRING,     /* Driver */
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
 							     G_TYPE_INT,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_STRING,
-							     G_TYPE_INT,
-							     G_TYPE_STRING,
+							     G_TYPE_STRING,     /* Ver added */
+							     G_TYPE_STRING,     /* Category */
+							     G_TYPE_INT,	/* Channels */
 							     G_TYPE_POINTER,     /* Rom Entry */
 							     GDK_TYPE_COLOR,     /* Text Color */
 							     GDK_TYPE_PIXBUF);   /* Pixbuf */
@@ -1586,14 +1555,8 @@ g_timer_start (timer);
 			if (tmprom->nb_samples == 0)
 				my_hassamples = NULL;
 			else
-				my_hassamples = tmprom->has_samples ? _("Yes") : _("No");
-
-			/* Control */
-			if (tmprom->control == TRACKBALL)
-				my_control = _("Yes");
-			else
-				my_control = _("No");
-			
+				my_hassamples = (tmprom->has_samples == CORRECT) ? _("Yes") : _("No");
+		
 			/* Clone Color + Pixbuf width */
 			if (strcmp (tmprom->cloneof, "-")) {  /* Clone */
 				my_txtcolor = &gui_prefs.clone_color;
@@ -1627,37 +1590,22 @@ g_timer_start (timer);
 
 				gtk_tree_store_set (GTK_TREE_STORE (store), &iter,
 						    GAMENAME,     tmprom->name_in_list,
-						    HAS_ROMS,     tmprom->has_roms ? _("Yes") : _("No"),
 						    HAS_SAMPLES,  my_hassamples,
 						    ROMNAME,      tmprom->romname,
-						    VECTOR,       tmprom->vector ? _("Vector") : _("Raster"),
-						    CONTROL,      my_control,
 						    TIMESPLAYED,  tmprom->timesplayed,
 						    MANU,         tmprom->manu,
 						    YEAR,         tmprom->year,
 						    CLONE,        tmprom->cloneof,
 						    DRIVER,       tmprom->driver,
-						    STATUS,       tmprom->has_roms ? _("Available") : _("Not Available"),
-						    ROMOF,        tmprom->romof,
 						    DRIVERSTATUS, tmprom->status,
 						    COLOR_STATUS, tmprom->driver_status_color,
 						    SOUND_STATUS, tmprom->driver_status_sound,
 						    GRAPHIC_STATUS, tmprom->driver_status_graphic,
 						    NUMPLAYERS,   tmprom->num_players,
 						    NUMBUTTONS,   tmprom->num_buttons,
-						    CPU1,         tmprom->cpu_info[0].name,
-						    CPU2,         tmprom->cpu_info[1].name,
-						    CPU3,         tmprom->cpu_info[2].name,
-						    CPU4,         tmprom->cpu_info[3].name,
-						    SOUND1,       tmprom->sound_info[0].name,
-						    SOUND2,       tmprom->sound_info[1].name,
-						    SOUND3,       tmprom->sound_info[2].name,
-						    SOUND4,       tmprom->sound_info[3].name,
 						    MAMEVER,      tmprom->mame_ver_added,
 						    CATEGORY,     tmprom->category,
-						    FAVORITE,     tmprom->favourite ? _("Yes") : _("No"),
 						    CHANNELS,     tmprom->channels,
-						    IS_BIOS,      tmprom->is_bios ? _("Yes") : _("No"),
 						    ROMENTRY,     tmprom,                 /* rom entry */
 						    TEXTCOLOR,    my_txtcolor,            /* text color */
 						    PIXBUF,       pixbuf,                 /* pixbuf */
@@ -1668,37 +1616,22 @@ g_timer_start (timer);
 				gtk_list_store_append (GTK_LIST_STORE (store), &iter);  /* Acquire an iterator */
 				gtk_list_store_set (GTK_LIST_STORE (store), &iter,
 						    GAMENAME,     tmprom->name_in_list,
-						    HAS_ROMS,     tmprom->has_roms ? _("Yes") : _("No"),
 						    HAS_SAMPLES,  my_hassamples,
 						    ROMNAME,      tmprom->romname,
-						    VECTOR,       tmprom->vector ? _("Vector") : _("Raster"),
-						    CONTROL,      my_control,
 						    TIMESPLAYED,  tmprom->timesplayed,
 						    MANU,         tmprom->manu,
 						    YEAR,         tmprom->year,
 						    CLONE,        tmprom->cloneof,
 						    DRIVER,       tmprom->driver,
-						    STATUS,       tmprom->has_roms ? _("Available") : _("Not Available"),
-						    ROMOF,        tmprom->romof,
 						    DRIVERSTATUS, tmprom->status,
 						    COLOR_STATUS, tmprom->driver_status_color,
 						    SOUND_STATUS, tmprom->driver_status_sound,
 						    GRAPHIC_STATUS, tmprom->driver_status_graphic,
 						    NUMPLAYERS,   tmprom->num_players,
 						    NUMBUTTONS,   tmprom->num_buttons,
-						    CPU1,         tmprom->cpu_info[0].name,
-						    CPU2,         tmprom->cpu_info[1].name,
-						    CPU3,         tmprom->cpu_info[2].name,
-						    CPU4,         tmprom->cpu_info[3].name,
-						    SOUND1,       tmprom->sound_info[0].name,
-						    SOUND2,       tmprom->sound_info[1].name,
-						    SOUND3,       tmprom->sound_info[2].name,
-						    SOUND4,       tmprom->sound_info[3].name,
 						    MAMEVER,      tmprom->mame_ver_added,
 						    CATEGORY,     tmprom->category,
-						    FAVORITE,     tmprom->favourite ? _("Yes") : _("No"),
 						    CHANNELS,     tmprom->channels,
-						    IS_BIOS,      tmprom->is_bios ? _("Yes") : _("No"),
 						    ROMENTRY,     tmprom,                 /* rom entry */
 						    TEXTCOLOR,    my_txtcolor,            /* text color */
 						    PIXBUF,       pixbuf,                 /* pixbuf */
@@ -1840,6 +1773,7 @@ create_gamelist (ListMode list_mode)
 		main_gui.displayed_list = gtk_tree_view_new ();
 		for (i = 0; i < NUMBER_COLUMN; i++) {
 			if (i == GAMENAME) {
+				/* Game name column contains both the status icon and the name */
 				column = gtk_tree_view_column_new ();
 				gtk_tree_view_column_set_title  (GTK_TREE_VIEW_COLUMN (column), column_title (i));
 				gtk_tree_view_column_set_sort_column_id (column, i);
@@ -2068,11 +2002,9 @@ void
 update_game_in_list (RomEntry *tmprom)
 {
 	const gchar *my_hassamples;
-	const gchar *my_control;
 	GdkColor *my_txtcolor;
 	GdkPixbuf *pixbuf;
 	gboolean is_tree_store;
-	gint pixbuf_width = 0;
 
 	if (!tmprom)
 		return;
@@ -2089,21 +2021,13 @@ update_game_in_list (RomEntry *tmprom)
 	if (tmprom->nb_samples == 0)
 		my_hassamples = "";
 	else {
-		my_hassamples = tmprom->has_samples ? _("Yes") : _("No");
+		my_hassamples = (tmprom->has_samples == CORRECT) ? _("Yes") : _("No");
 	}
-	
-	/* Control */
-	if (tmprom->control == TRACKBALL)
-		my_control = _("Yes");
-	else
-		my_control = _("No");
 	
 	/* Clone Color + Pixbuf width */
 	if (strcmp (tmprom->cloneof, "-")) {  /* Clone */
-		pixbuf_width = 50;
 		my_txtcolor = &gui_prefs.clone_color;
 	} else { /* Original */
-		pixbuf_width = 20;
 		my_txtcolor = NULL; /* Black */
 	}
 
@@ -2113,74 +2037,44 @@ update_game_in_list (RomEntry *tmprom)
 	if (is_tree_store) {
 		gtk_tree_store_set (GTK_TREE_STORE (main_gui.tree_model), &tmprom->position,
 				    GAMENAME,                   tmprom->name_in_list,
-				    HAS_ROMS,                   tmprom->has_roms ? _("Yes") : _("No"),	/* FIXME */
 				    HAS_SAMPLES,                my_hassamples,
 				    ROMNAME,                    tmprom->romname,
-				    VECTOR,                     tmprom->vector ? _("Vector") : _("Raster"),
-				    CONTROL,                    my_control,
 				    TIMESPLAYED,                tmprom->timesplayed,
 				    MANU,                       tmprom->manu,
 				    YEAR,                       tmprom->year,
 				    CLONE,                      tmprom->cloneof,
 				    DRIVER,                     tmprom->driver,
-				    STATUS,                     tmprom->has_roms ? _("Available") : _("Not Available"),	/* FIXME */
-				    ROMOF,                      tmprom->romof,
 				    DRIVERSTATUS,               tmprom->status ? _("Working") : _("Not Working"),
 				    COLOR_STATUS,		tmprom->driver_status_color,
 				    SOUND_STATUS, 		tmprom->driver_status_sound,
 				    GRAPHIC_STATUS,		tmprom->driver_status_graphic,
 				    NUMPLAYERS,                 tmprom->num_players,
 				    NUMBUTTONS,                 tmprom->num_buttons,
-				    CPU1,                       tmprom->cpu_info[0].name,
-				    CPU2,                       tmprom->cpu_info[1].name,
-				    CPU3,                       tmprom->cpu_info[2].name,
-				    CPU4,                       tmprom->cpu_info[3].name,
-				    SOUND1,                     tmprom->sound_info[0].name,
-				    SOUND2,                     tmprom->sound_info[1].name,
-				    SOUND3,                     tmprom->sound_info[2].name,
-				    SOUND4,                     tmprom->sound_info[3].name,
 				    MAMEVER,                    tmprom->mame_ver_added,
 				    CATEGORY,                   tmprom->category,
-				    FAVORITE,                   tmprom->favourite ? _("Yes") : _("No"),
 				    CHANNELS,                   tmprom->channels,
-				    IS_BIOS,      tmprom->is_bios ? _("Yes") : _("No"),
 				    TEXTCOLOR,                  my_txtcolor,            /* text color */
 				    PIXBUF,                     pixbuf,                 /* pixbuf */
 				    -1);
 	} else {
 		gtk_list_store_set (GTK_LIST_STORE (main_gui.tree_model), &tmprom->position,
 				    GAMENAME,                   tmprom->name_in_list,
-				    HAS_ROMS,                   tmprom->has_roms ? _("Yes") : _("No"),	/* FIXME */
 				    HAS_SAMPLES,                my_hassamples,
 				    ROMNAME,                    tmprom->romname,
-				    VECTOR,                     tmprom->vector ? _("Vector") : _("Raster"),
-				    CONTROL,                    my_control,
 				    TIMESPLAYED,                tmprom->timesplayed,
 				    MANU,                       tmprom->manu,
 				    YEAR,                       tmprom->year,
 				    CLONE,                      tmprom->cloneof,
 				    DRIVER,                     tmprom->driver,
-				    STATUS,                     tmprom->has_roms ? _("Available") : _("Not Available"),	/* FIXME */
-				    ROMOF,                      tmprom->romof,
 				    DRIVERSTATUS,               tmprom->status ? _("Working") : _("Not Working"),
 				    COLOR_STATUS,		tmprom->driver_status_color,
 				    SOUND_STATUS, 		tmprom->driver_status_sound,
 				    GRAPHIC_STATUS,		tmprom->driver_status_graphic,
 				    NUMPLAYERS,                 tmprom->num_players,
 				    NUMBUTTONS,                 tmprom->num_buttons,
-				    CPU1,                       tmprom->cpu_info[0].name,
-				    CPU2,                       tmprom->cpu_info[1].name,
-				    CPU3,                       tmprom->cpu_info[2].name,
-				    CPU4,                       tmprom->cpu_info[3].name,
-				    SOUND1,                     tmprom->sound_info[0].name,
-				    SOUND2,                     tmprom->sound_info[1].name,
-				    SOUND3,                     tmprom->sound_info[2].name,
-				    SOUND4,                     tmprom->sound_info[3].name,
 				    MAMEVER,                    tmprom->mame_ver_added,
 				    CATEGORY,                   tmprom->category,
-				    FAVORITE,                   tmprom->favourite ? _("Yes") : _("No"),
 				    CHANNELS,                   tmprom->channels,
-				    IS_BIOS,      tmprom->is_bios ? _("Yes") : _("No"),
 				    TEXTCOLOR,                  my_txtcolor,            /* text color */
 				    PIXBUF,                     pixbuf,                 /* pixbuf */
 				    -1);

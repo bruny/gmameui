@@ -273,7 +273,6 @@ load_gmameui_ini (void)
 	gchar *filename;
 	gchar *default_game = NULL;
 	gint i;
-//	gsize sizes[2], columnsize[NUMBER_COLUMN];
 	gsize sizes, columnsize;
 	
 	GMAMEUI_DEBUG ("Loading gmameui.ini");
@@ -315,18 +314,6 @@ load_gmameui_ini (void)
 		gui_prefs.ColumnWidth[i] = 0;  /* 0 --> Auto Size */
 		gui_prefs.ColumnShown[i] = 0;
 	}
-	gui_prefs.ColumnShown[GAMENAME] = 1;
-	gui_prefs.ColumnShown[HAS_SAMPLES] = 1;
-	gui_prefs.ColumnShown[ROMNAME] = 1;
-	gui_prefs.ColumnShown[VECTOR] = 1;
-	gui_prefs.ColumnShown[CONTROL] = 1;
-	gui_prefs.ColumnShown[TIMESPLAYED] = 1;
-	gui_prefs.ColumnShown[MANU] = 1;
-	gui_prefs.ColumnShown[YEAR] = 1;
-	gui_prefs.ColumnShown[CLONE] = 1;
-	gui_prefs.ColumnShown[DRIVER] = 1;
-	gui_prefs.ColumnShown[MAMEVER] = 1;
-	gui_prefs.ColumnShown[CATEGORY] = 1;
 
 	filename = g_build_filename (g_get_home_dir (), ".gmameui", "gmameui.ini", NULL);
 
@@ -374,6 +361,17 @@ load_gmameui_ini (void)
 	g_key_file_free (gmameui_ini_file);
 	g_free (filename);
 
+	gui_prefs.ColumnShown[GAMENAME] = 1;
+	gui_prefs.ColumnShown[HAS_SAMPLES] = 1;
+	gui_prefs.ColumnShown[ROMNAME] = 1;
+	gui_prefs.ColumnShown[TIMESPLAYED] = 1;
+	gui_prefs.ColumnShown[MANU] = 1;
+	gui_prefs.ColumnShown[YEAR] = 1;
+	gui_prefs.ColumnShown[CLONE] = 1;
+	gui_prefs.ColumnShown[DRIVER] = 1;
+	gui_prefs.ColumnShown[MAMEVER] = 1;
+	gui_prefs.ColumnShown[CATEGORY] = 1;
+	
 	if (game_list.roms && default_game) {
 		GList *listpointer;
 		/* Try and find the default game in the ROM list */

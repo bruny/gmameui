@@ -202,9 +202,6 @@ gamelist_add (RomEntry *rom)
 	if (!rom->year)
 		rom_entry_set_year (rom, _("Unknown"));
 
-/*DELETE	if (!rom->control)
-		strcpy (rom->control, "-");*/
-
 	game_list.roms = g_list_insert_sorted (game_list.roms, (gpointer) rom, (GCompareFunc )compare_game_name);
 
 	game_list.num_games++;

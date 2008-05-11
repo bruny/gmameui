@@ -111,26 +111,6 @@ main (int argc, char *argv[])
 	return 0;
 }
 
-/* ONLY USED FOR DEBUG */
-void
-column_debug	 (void)
-{
-#ifdef ENABLE_DEBUG
-	gint i;
-	printf ("i    : ");
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		printf ("%2d|", i);
-	}
-	printf ("\n");
-	printf ("Shown: ");
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		printf ("%2d|", gui_prefs.ColumnShown[i]);
-	}
-	printf ("\n");
-
-#endif
-}
-
 void
 gmameui_init (void)
 {
@@ -293,8 +273,8 @@ game_filtered (RomEntry * rom)
 			 (!is && ! (rom->has_roms == (RomStatus)int_value)));
 		break;
 	case HAS_SAMPLES:
-		retval = ( (is && (rom->has_samples == value))  ||
-			 (!is && ! (rom->has_samples == value)));
+		retval = ( (is && (rom->has_samples == int_value))  ||
+			 (!is && ! (rom->has_samples == int_value)));
 		break;
 	case TIMESPLAYED:
 		retval = ( (is && (rom->timesplayed == int_value)) ||
@@ -766,10 +746,6 @@ column_title (int column_num)
 		return _("Samples");
 	case ROMNAME:
 		return _("Directory");
-	case VECTOR:
-		return _("Type");
-	case CONTROL:
-		return _("Trackball");
 	case TIMESPLAYED:
 		return _("Played");
 	case MANU:
@@ -796,22 +772,6 @@ column_title (int column_num)
 		return _("Players");
 	case NUMBUTTONS:
 		return _("Buttons");
-	case CPU1:
-		return _("CPU 1");
-	case CPU2:
-		return _("CPU 2");
-	case CPU3:
-		return _("CPU 3");
-	case CPU4:
-		return _("CPU 4");
-	case SOUND1:
-		return _("Sound 1");
-	case SOUND2:
-		return _("Sound 2");
-	case SOUND3:
-		return _("Sound 3");
-	case SOUND4:
-		return _("Sound 4");
 	case MAMEVER:
 		return _("Version");
 	case CATEGORY:

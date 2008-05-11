@@ -45,24 +45,35 @@
 
 typedef enum {
 	GAMENAME,
-	HAS_ROMS,
 	HAS_SAMPLES,
 	ROMNAME,
-	VECTOR,
-	CONTROL,
 	TIMESPLAYED,
 	MANU,
 	YEAR,
 	CLONE,
 	DRIVER,
-	STATUS,			/*  Available / Not Available */
-	ROMOF,
 	DRIVERSTATUS,   /* Good | Imperfect | Preliminary */
 	COLOR_STATUS,	/* Good | Imperfect | Preliminary */
 	SOUND_STATUS,	/* Good | Imperfect | Preliminary */
 	GRAPHIC_STATUS,	/* Good | Imperfect | Preliminary */
 	NUMPLAYERS,
 	NUMBUTTONS,
+	MAMEVER,
+	CATEGORY,
+	CHANNELS,
+	NUMBER_COLUMN   /* 17 */
+} Columns_type;
+
+/* Those are also columns. The only difference is that they are hidden */
+typedef enum {
+	ROMENTRY = NUMBER_COLUMN,
+	TEXTCOLOR,
+	PIXBUF,
+	HAS_ROMS,
+	ROMOF,
+	STATUS,
+	CONTROL,
+	VECTOR,
 	CPU1,
 	CPU2,
 	CPU3,
@@ -71,20 +82,9 @@ typedef enum {
 	SOUND2,
 	SOUND3,
 	SOUND4,
-	MAMEVER,
-	CATEGORY,
 	FAVORITE,
-	CHANNELS,
 	IS_BIOS,
-	NUMBER_COLUMN
-} Columns_type;
-
-/* Those are also columns. The only difference is that they are hidden */
-typedef enum {
-	ROMENTRY = NUMBER_COLUMN,
-	TEXTCOLOR,
-	PIXBUF,
-	NUMBER_COLUMN_TOTAL
+	NUMBER_COLUMN_TOTAL /* 35 */
 } Columns_type_hidden;
 
 typedef enum  {
