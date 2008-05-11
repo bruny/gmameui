@@ -802,6 +802,16 @@ add_exec_menu (void)
 	/* This is really hard to understand from the API. Why do they make it so hard?
 	   Ref: http://log.emmanuelebassi.net/archives/2006/08/boogie-woogie-bugle-boy/ */
 
+	/* Remove any existing group if it exists */
+	if (main_gui.gmameui_exec_radio_action_group) {
+		gtk_ui_manager_remove_ui (main_gui.manager,
+					  main_gui.gmameui_exec_merge_id);
+		gtk_ui_manager_remove_action_group (main_gui.manager,
+						    main_gui.gmameui_exec_radio_action_group);
+		g_object_unref (main_gui.gmameui_exec_radio_action_group);
+		main_gui.gmameui_exec_radio_action_group = NULL;
+	}
+
 	/* Create a new radio action group for the executables */
 	GtkActionGroup *exec_radio_action_group;
 	GSList *radio_group = NULL;
@@ -810,9 +820,12 @@ add_exec_menu (void)
 	
 	num_execs = xmame_table_size ();
 
+	main_gui.gmameui_exec_merge_id = gtk_ui_manager_new_merge_id (main_gui.manager);
+	 
 	/* No items - attach an insensitive place holder */
 	if (num_execs == 0) {
 		GtkAction *action;
+			
 		action = g_object_new (GTK_TYPE_ACTION,
 				       "name", "execs-empty",
 				       "label", "No executables",
@@ -820,52 +833,54 @@ add_exec_menu (void)
 				       NULL);
 		gtk_action_group_add_action (exec_radio_action_group, action);
 		g_object_unref (action);
+		
 		gtk_ui_manager_add_ui (main_gui.manager,
-				       gtk_ui_manager_new_merge_id (main_gui.manager),
+				       main_gui.gmameui_exec_merge_id,
 				       "/MenuBar/OptionsMenu/OptionMameExecutables",
 				       "execs-empty",
 				       "execs-empty",
 				       GTK_UI_MANAGER_MENUITEM,
 				       FALSE);
-		return;
-	};
-	
-	for (i = 0; i < num_execs; i++) {
+	} else {
+		for (i = 0; i < num_execs; i++) {
 		
-		exec = xmame_table_get_by_index (i);
-		gchar *exec_name = g_strdup_printf ("%s (%s) %s", exec->name, exec->target, exec->version);
+			exec = xmame_table_get_by_index (i);
+			gchar *exec_name = g_strdup_printf ("%s (%s) %s", exec->name, exec->target, exec->version);
 		
-		/* Create a new radio action for the executable */
-		gchar *name = g_strdup_printf ("exec-%d", i);
-		gchar *action_name = g_strdup (name);
-		GtkRadioAction *action;
-		action = g_object_new (GTK_TYPE_RADIO_ACTION,
-				       "name", action_name,
-				       "label", exec_name,
-				       "stock_id", NULL,
-				       NULL);
-		g_signal_connect (action, "activate",
-				  G_CALLBACK (on_executable_selected),
-				  GINT_TO_POINTER (i));
-		gtk_action_group_add_action (exec_radio_action_group, action);
-		gtk_radio_action_set_group (action, radio_group);
-		radio_group = gtk_radio_action_get_group (action);
-		g_object_unref (action);
+			/* Create a new radio action for the executable */
+			gchar *name = g_strdup_printf ("exec-%d", i);
+			gchar *action_name = g_strdup (name);
+			GtkRadioAction *action;
+			action = g_object_new (GTK_TYPE_RADIO_ACTION,
+					       "name", action_name,
+					       "label", exec_name,
+					       "stock_id", NULL,
+					       NULL);
+			g_signal_connect (action, "activate",
+					  G_CALLBACK (on_executable_selected),
+					  GINT_TO_POINTER (i));
+			gtk_action_group_add_action (exec_radio_action_group, GTK_ACTION (action));
+			gtk_radio_action_set_group (action, radio_group);
+			radio_group = gtk_radio_action_get_group (action);
+			g_object_unref (action);
 		
-		gtk_ui_manager_add_ui (main_gui.manager,
-				       gtk_ui_manager_new_merge_id (main_gui.manager),
-				       "/MenuBar/OptionsMenu/OptionMameExecutables",
-				       name, action_name,
-				       GTK_UI_MANAGER_MENUITEM,
-				       FALSE);
-		GMAMEUI_DEBUG ("Adding action '%s'", action_name);
+			gtk_ui_manager_add_ui (main_gui.manager,
+					       main_gui.gmameui_exec_merge_id,
+					       "/MenuBar/OptionsMenu/OptionMameExecutables",
+					       name, action_name,
+					       GTK_UI_MANAGER_MENUITEM,
+					       FALSE);
+			GMAMEUI_DEBUG ("Adding action '%s'", action_name);
 		
-		/* TODO Free the executable */
+			/* TODO Free the executable */
 		
-		g_free (action_name);
-		g_free (exec_name);
-		g_free (name);
+			g_free (action_name);
+			g_free (exec_name);
+			g_free (name);
+		}
 	}
+	main_gui.gmameui_exec_radio_action_group = exec_radio_action_group;
+	 
 }
 
 void gmameui_toolbar_set_favourites_sensitive (gboolean rom_is_favourite)

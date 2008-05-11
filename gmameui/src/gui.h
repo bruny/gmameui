@@ -232,6 +232,8 @@ struct main_gui_struct {
 	GtkUIManager *manager;
 	GtkActionGroup *gmameui_rom_action_group;
 	GtkActionGroup *gmameui_view_action_group;
+	GtkActionGroup *gmameui_exec_radio_action_group;	/* Executable radio buttons */
+	gint gmameui_exec_merge_id;
 	
 	MameOptions *options;
 };
