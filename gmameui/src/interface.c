@@ -425,6 +425,19 @@ create_MainWindow (void)
 		      NULL);
 	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
 	g_object_unref (folder_filter);
+
+	folder_filter = gmameui_filter_new ();
+	g_object_set (folder_filter,
+		      "name", "BIOS",
+		      "folderid", FILTER_BIOS,
+		      "type", IS_BIOS,
+		      "is", TRUE,
+		      "value", NULL,
+		      "int_value", TRUE,
+		      "update_list", TRUE,
+		      NULL);
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	g_object_unref (folder_filter);
 	
 	/* Custom filters */
 	folder_filter = gmameui_filter_new ();
