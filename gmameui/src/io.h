@@ -63,4 +63,10 @@ save_dirs_ini(void);
 GList *
 get_ctrlr_list (void);
 
+gboolean
+check_rom_exists_as_file (gchar *romname);
+
+gboolean
+check_samples_exists_as_file (gchar *samplename);
+
 #endif /* __IO_H__ */

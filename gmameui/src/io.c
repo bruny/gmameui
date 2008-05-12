@@ -125,13 +125,14 @@ load_games_ini (void)
 			tmprom->favourite = g_key_file_get_integer (gameini_list, gamelist[i], "Favorite", &error);
 			if (!tmprom->favourite) tmprom->favourite = 0;	/* Set default */
 			/* TODO AutofireDelay */
-
-			if ((tmprom->has_roms == UNKNOWN) ||
-			    (tmprom->has_roms == NOT_AVAIL) ||
-			    ((tmprom->has_roms == INCORRECT) && gui_prefs.GameCheck))
+#ifdef QUICK_CHECK_ENABLED
+			if (((tmprom->has_roms == UNKNOWN) ||
+			     (tmprom->has_roms == NOT_AVAIL) ||
+			     (tmprom->has_roms == INCORRECT)) && gui_prefs.GameCheck)
 			{
 				game_list.not_checked_list = g_list_append (game_list.not_checked_list, tmprom);
 			}
+#endif
 		}
 	}
 
@@ -599,9 +600,10 @@ GMAMEUI_DEBUG ("Saving dirs.ini... done");
 	return TRUE;
 }
 
+#ifdef QUICK_CHECK_ENABLED
 gboolean
 check_rom_exists_as_file (gchar *romname) {
-	gchar *filename;
+	gchar *filename, *dirname;
 	gchar *zipname;
 	gboolean retval;
 	int i;
@@ -610,16 +612,20 @@ check_rom_exists_as_file (gchar *romname) {
 
 	zipname = g_strdup_printf("%s.zip", romname);
 	
-	for (i=0;gui_prefs.RomPath[i]!=NULL;i++) {
-		filename = g_build_filename (gui_prefs.RomPath[i], g_strdup_printf("%s.zip", romname), NULL);	
-		if (g_file_test (zipname, G_FILE_TEST_EXISTS) ||
-		    g_file_test (g_path_get_dirname (zipname), G_FILE_TEST_IS_DIR)) {
+	for (i = 0; gui_prefs.RomPath[i] != NULL; i++) {
+		filename = g_build_filename (gui_prefs.RomPath[i], zipname, NULL);
+		dirname = g_build_filename (gui_prefs.RomPath[i], romname, NULL);
+		
+		if (g_file_test (filename, G_FILE_TEST_EXISTS) ||
+		    g_file_test (dirname, G_FILE_TEST_IS_DIR)) {
 			retval = TRUE;
+	    		break;
 		}
-		continue;
 	}
 	if (filename)
 		g_free (filename);
+	if (dirname)
+		g_free (dirname);
 	g_free (zipname);
 
 	return retval;
@@ -646,6 +652,7 @@ check_samples_exists_as_file (gchar *samplename) {
 
 	return FALSE;
 }
+#endif
 
 void
 quick_check (void)
@@ -654,10 +661,8 @@ quick_check (void)
 	GList *list_pointer;
 	gint nb_rom_not_checked;
 	gfloat done;
-	int i;
 	RomEntry *rom;
-
-
+#ifdef QUICK_CHECK_ENABLED
 	GMAMEUI_DEBUG ("Running quick check.");
 	if (game_list.num_games == 0)
 		return;
@@ -688,11 +693,11 @@ quick_check (void)
 		if (strcmp (rom->cloneof, "-"))
 			if ((check_rom_exists_as_file (rom->romname)) &&
 			    (check_rom_exists_as_file (rom->cloneof)))
-				rom->has_roms = CORRECT;
+				rom->has_roms = UNKNOWN;
 			else
 				rom->has_roms = NOT_AVAIL;
 		else if (check_rom_exists_as_file (rom->romname))
-			rom->has_roms = CORRECT;
+			rom->has_roms = UNKNOWN;
 		else
 			rom->has_roms = NOT_AVAIL;
 
@@ -704,11 +709,11 @@ quick_check (void)
 		{
 			/* Check for the existence of the samples; if the samples is a clone, the
 			   parent set must exist as well */
-			if (strcmp (rom->sampleof, "-"))
+			if (strcmp (rom->sampleof, "-")) {
 				if ((check_rom_exists_as_file (rom->romname)) &&
 				    (check_rom_exists_as_file (rom->sampleof)))
 					rom->has_samples = CORRECT;
-			else if (check_rom_exists_as_file (rom->romname))
+			} else if (check_rom_exists_as_file (rom->romname))
 				rom->has_samples = CORRECT;
 		}
 		
@@ -734,7 +739,8 @@ quick_check (void)
 	
 	/* Re-Enable the callback */
 	g_signal_handlers_unblock_by_func (G_OBJECT (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games))),
-					   (gpointer)adjustment_scrolled, NULL);		
+					   (gpointer)adjustment_scrolled, NULL);
+#endif QUICK_CHECK_ENABLED
 }
 
 GList *

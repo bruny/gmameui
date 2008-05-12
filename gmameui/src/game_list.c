@@ -142,10 +142,12 @@ GMAMEUI_DEBUG ("Freeing roms... done");
 		g_list_foreach (game_list.drivers, (GFunc) g_free, NULL);
 		g_list_free (game_list.drivers);
 	}
-
-	if (game_list.not_checked_list);
+#ifdef QUICK_CHECK_ENABLED
+	if (game_list.not_checked_list) {
+		g_list_foreach (game_list.not_checked_list, (GFunc) rom_entry_free, NULL);
 		g_list_free (game_list.not_checked_list);
-
+	}
+#endif
 	gamelist_init ();
 }
 

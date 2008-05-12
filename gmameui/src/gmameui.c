@@ -102,6 +102,7 @@ main (int argc, char *argv[])
 
 	/* only need to do a quick check and redisplay games if the not_checked_list is not empty */
 	if (game_list.not_checked_list) {
+GMAMEUI_DEBUG ("Processing not checked list");
 		quick_check ();
 		create_gamelist_content ();
 	}
@@ -146,6 +147,9 @@ gmameui_init (void)
 	if (!current_exec)
 		GMAMEUI_DEBUG ("No executable!");
 
+	if (!load_gmameui_ini ())
+		g_message (_("unable to load gmameui.ini, using default values"));
+	
 	if (!load_dirs_ini ())
 		g_message (_("dirs.ini not loaded, using default values"));
 	
@@ -158,9 +162,6 @@ gmameui_init (void)
 		if (!load_catver_ini ())
 			g_message (_("catver not loaded, using default values"));
 	}
-
-	if (!load_gmameui_ini ())
-		g_message (_("unable to load gmameui.ini, using default values"));
 
 	if (!load_options (NULL))
 		g_message (_("default options not loaded, using default values"));
@@ -705,6 +706,7 @@ GMAMEUI_DEBUG ("Destroying window");
 	//gtk_widget_destroy (MainWindow); ADB COMMENTING THIS OUT REMOVES COLUMN REORDERING AT END
 GMAMEUI_DEBUG ("Destroying window - done");
 	gamelist_free ();
+	
 	xmame_table_free ();
 	xmame_options_free ();
 
@@ -787,7 +789,7 @@ column_title (int column_num)
 	}
 }
 
-
+/* FIXME This function should either set or return. Do we need to do both? */
 const gchar *
 rom_entry_get_list_name (RomEntry *rom)
 {
