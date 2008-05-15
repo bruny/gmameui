@@ -4,3 +4,5 @@
 * In process_audit_romset, a ROM is reported as 'bad' even if the error is just an incorrect length on one of the ROMs
 
 * With the new Options dialog, per-game options are not yet implemented
+
+* Filters list is not finalised, hence a small memory leak

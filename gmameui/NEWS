@@ -1,3 +1,13 @@
+Overview of changes in GMAMEUI 0.2.2
+====================================
+
+* Fixed bug which caused ROMs not to be filtered in Availability filter categories (bug 1962183)
+* Remove a number of non-visible columns from the TreeView store, resulting in a speed up when populating the ROM list
+* Code cleanup, remove redundant code, fixed some compile/run-time GTK warnings
+* Removed Drivers as a filters category for 2 second improvement when starting
+* Replaced g_list_insert_sorted with g_list_append when adding a ROM to the gamelist, which was unnecessary and cost 2 seconds on startup
+* Fixed setting ROM- and executable-specific menu and toolbar items sensitive when no ROM and/or executable is selected
+
 Overview of changes in GMAMEUI 0.2.1
 ====================================
 

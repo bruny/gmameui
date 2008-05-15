@@ -1,57 +1,156 @@
+2008-05-15 20:55  adburton
+
+	* src/: gmameui.c, gmameui.h: Code cleanup, fix filters not working
+	  when filtering on Availability
+
+2008-05-15 20:45  adburton
+
+	* src/: gui.c, gui.h: Code cleanup, set sensitivity properly when
+	  no rom selected or no executable configured
+
+2008-05-15 20:42  adburton
+
+	* src/: callbacks.c, callbacks.h: Code cleanup
+
+2008-05-15 20:32  adburton
+
+	* src/interface.c: Remove Drivers filters since it takes too long
+	  to add so many filters, amend GtkActionGroups
+
+2008-05-15 20:29  adburton
+
+	* src/gui_prefs.c: Remove redundant code
+
+2008-05-15 20:29  adburton
+
+	* src/game_list.c: When adding a rom to game_list, just append
+	  rather than insert sorted, which is unnecessary and adds time to
+	  startup
+
+2008-05-15 20:27  adburton
+
+	* src/filters_list.c: Remove Drivers filter group, fix some compile
+	  warnings
+
+2008-05-15 20:24  adburton
+
+	* src/: io.c, directories.c: Check if error is not null before
+	  free'ing
+
+2008-05-12 21:17  adburton
+
+	* src/: game_list.c, gmameui.c, io.c, io.h: Load gmameui ini file
+	  before gamelist to ensure preference to check gamelist on startup
+	  is effective, fix if-else checks for determining whether games
+	  are checked on startup, fix check for existance of ROM file,
+	  disable game checking while a better approach is investigated
+
+2008-05-11 21:59  adburton
+
+	* src/interface.c: Add BIOS filter
+
+2008-05-11 21:04  adburton
+
+	* src/: filter.c, game_list.c, gmameui.c, gmameui.h, gui.c,
+	  interface.c, io.c: Remove unused columns from tree or liststore
+
+2008-05-11 14:05  adburton
+
+	* src/: gui.c, gui.h: Fix re-population of exec menu when MAME
+	  executables added and removed
+
+2008-05-10 16:26  adburton
+
+	* gmameui.spec: Added RPM spec file (thanks Ugo Viti)
+
+2008-05-10 15:52  adburton
+
+	* src/cell-renderer-captioned-image.c: Remove libgnome macros
+
+2008-05-10 15:33  adburton
+
+	* ChangeLog, NEWS, configure.ac, src/Makefile.am: Remove dependency
+	  on libgnome, bumped version for release
+
 2008-05-09 23:33  adburton
 
-        * src/: game_list.c, gmameui.c, gmameui.h, gui.c, interface.c,
-          mameio.c, rom_entry.c, rom_entry.h: Use integer enums rather than
-          strings in RomEntry fields, and amend gamelist load/save and
-          filtering accordingly. Free gchar strings when freeing a RomEntry
-          object
+	* src/: game_list.c, gmameui.c, gmameui.h, gui.c, interface.c,
+	  mameio.c, rom_entry.c, rom_entry.h: Use integer enums rather than
+	  strings in RomEntry fields, and amend gamelist load/save and
+	  filtering accordingly. Free gchar strings when freeing a RomEntry
+	  object
 
 2008-05-07 21:15  adburton
 
-        * src/io.c: Remove reference to malloc when generating a string
-          representing filenames, use glib functions
+	* src/io.c: Remove reference to malloc when generating a string
+	  representing filenames, use glib functions
 
-        * src/directories.c: Fix invalid free's on subsequent saves, code
-          cleanup when retrieving paths from tree model using
-          gtk_tree_model_foreach, remove redundant functions
+2008-05-07 20:13  adburton
 
-        * src/gmameui.c: Avoid segfault when data passed in to
-          rom_entry_get_list_name is null
+	* src/directories.c: Fix invalid free's on subsequent saves, code
+	  cleanup when retrieving paths from tree model using
+	  gtk_tree_model_foreach, remove redundant functions
+
+2008-05-07 19:00  adburton
+
+	* src/gmameui.c: Avoid segfault when data passed in to
+	  rom_entry_get_list_name is null
 
 2008-05-06 00:15  adburton
 
-        * src/io.c: Fixed bug when saving directories with different number
-          of rom and sample paths
+	* src/io.c: Fixed bug when saving directories with different number
+	  of rom and sample paths
 
 2008-05-05 16:21  adburton
 
-        * src/: gmameui.c, gmameui.h, interface.c: Add additional filters,
-          fix handling of some filter types
+	* src/: gmameui.c, gmameui.h, interface.c: Add additional filters,
+	  fix handling of some filter types
 
-        * src/: callbacks.c, callbacks.h, gmameui.c: Use GMAMEUIFiltersList
-          and GMAMEUIFilter to support ROM filtering
+2008-05-05 15:51  adburton
 
-        * src/game_list.c: Fix problem setting driver and year in gamelist
+	* src/: callbacks.c, callbacks.h, gmameui.c: Use GMAMEUIFiltersList
+	  and GMAMEUIFilter to support ROM filtering
 
-        * src/gui.c: Show/hide the filter scrolled window, not just the
-          filter tree
+2008-05-05 15:49  adburton
 
-        * src/: Makefile.am, directories.c, game_list.c, gmameui.h, gui.c,
-          gui.h, interface.c: Use GMAMEUIFiltersList and GMAMEUIFilter to
-          support ROM filtering
+	* src/game_list.c: Fix problem setting driver and year in gamelist
 
-        * src/: filter.c, filter.h, filters_list.c, filters_list.h,
-          gossip-cell-renderer-expander.c, gossip-cell-renderer-expander.h:
-          Add functionality for filter classes to replace existing
-          filtering functionality
+2008-05-05 15:16  adburton
+
+	* src/gui.c: Show/hide the filter scrolled window, not just the
+	  filter tree
+
+2008-05-05 14:31  adburton
+
+	* src/: Makefile.am, directories.c, game_list.c, gmameui.h, gui.c,
+	  gui.h, interface.c: Use GMAMEUIFiltersList and GMAMEUIFilter to
+	  support ROM filtering
+
+2008-05-05 12:21  adburton
+
+	* src/: filter.c, filter.h, filters_list.c, filters_list.h,
+	  gossip-cell-renderer-expander.c, gossip-cell-renderer-expander.h:
+	  Add functionality for filter classes to replace existing
+	  filtering functionality
 
 2008-05-05 08:43  adburton
 
-        * po/Makefile.in.in: Tagged for version 0.2 release
+	* po/Makefile.in.in: Tagged for version 0.2 release
+
+2008-05-04 21:56  adburton
+
+	* NEWS: Update files for release
+
+2008-05-04 21:49  adburton
+
+	* BUGS, ChangeLog, configure.ac: Update files for release
 
 2008-05-04 21:28  adburton
 
 	* data/Makefile.am: Add options.glade to Makefile.am
+
+2008-05-04 20:32  adburton
+
 	* data/options.glade, src/mame_options.c,
 	  src/mame_options_dialog.c, src/options_string.c,
 	  src/options_string.h, src/xmame_executable.c, src/callbacks.c,
@@ -61,28 +160,55 @@
 2008-04-27 14:50  adburton
 
 	* src/gui.h: Remove redundant variable from MainGui object
+
+2008-04-27 14:49  adburton
+
 	* src/: callbacks.c, gui.h: Remove colour selection dlg variable
 	  from MainGui object and consolidate color handling code
+
+2008-04-27 10:04  adburton
+
 	* src/io.c: Fix a bug saving the executables
 
 2008-04-26 21:32  adburton
 
 	* src/mame_options.c: Initiate options hash table on startup
+
+2008-04-26 21:31  adburton
+
 	* src/options_string.c: Avoid segfault for invalid string
 
 2008-04-26 21:15  adburton
 
 	* src/: callbacks.c, callbacks.h: Remove redundant functions
+
+2008-04-26 21:04  adburton
+
 	* src/: properties.c, properties.h, callbacks.c, callbacks.h,
 	  gui.h: Split handling of ROM information and options into
 	  separate windows
+
+2008-04-26 21:04  adburton
+
 	* src/gmameui.c: Generate options string using mame_options
 	  structure for SDLMAME, free mame_options upon exit
+
+2008-04-26 21:02  adburton
+
 	* src/mame_options.c: Add function to load options from options key
 	  file for category
+
+2008-04-26 20:58  adburton
+
 	* data/: rom_info.glade, Makefile.am: Added new Glade window for
 	  ROM information
+
+2008-04-26 17:17  adburton
+
 	* src/gmameui-ui.xml: Split options and properties callbacks
+
+2008-04-26 17:16  adburton
+
 	* src/mame_options.c, src/mame_options.h, data/options.glade:
 	  Modifications to options dialog
 
@@ -95,6 +221,9 @@
 
 	* src/: interface.c, callbacks.c, gui.c, gui.h, callbacks.h: Use
 	  GtkAction to generate menu, remove redundant functions
+
+2008-04-20 12:41  adburton
+
 	* src/: callbacks.c, gmameui-ui.xml, gui.c, gui.h, interface.c: Use
 	  GtkAction to generate popup column menu, remove redundant
 	  functions
@@ -109,6 +238,9 @@
 
 	* src/: callbacks.c, gui.c, gui.h, interface.c: Move screenshot and
 	  history frame to a separate class
+
+2008-04-19 15:19  adburton
+
 	* src/io.c: Only overwrite file paths with defaults if no value set
 
 2008-04-16 16:05  adburton
@@ -120,6 +252,9 @@
 	* src/: cell-renderer-captioned-image.c,
 	  cell-renderer-captioned-image.h: Added initial cut at new options
 	  dialog code based on Anjuta preference plugin code
+
+2008-04-15 18:30  adburton
+
 	* data/options.glade, src/mame_options.c, src/mame_options.h,
 	  src/mame_options_dialog.c, src/mame_options_dialog.h,
 	  configure.ac, src/Makefile.am: Added initial cut at new options
@@ -130,16 +265,31 @@
 	* src/io.c: When performing quick check, check for existence of
 	  clone ROMs rather than setting them to be automatically correct
 	  if parent set is present
+
+2008-04-07 22:14  adburton
+
 	* src/gui.c: Set status icon for ROMs in BEST AVAILABLE status, set
 	  status icon consistently where it is called
 
 2008-03-27 09:33  adburton
 
 	* src/gui.c: Add call to gtk_tree_view_set_rules_hint
+
+2008-03-27 09:28  adburton
+
 	* src/game_list.c: Moved gamelist_get_selected_game from gui.c
+
+2008-03-27 09:27  adburton
+
 	* src/gui.c: ifdef'd out references to network play, moved
 	  gamelist_get_selected_game to game_list.c
+
+2008-03-27 09:26  adburton
+
 	* src/callbacks.c: Removed redundant check when resizing columns
+
+2008-03-27 09:00  adburton
+
 	* src/gui_prefs.c, data/Makefile.am, data/startup_prefs.glade:
 	  Migrated startup options dialog to Glade
 
@@ -148,14 +298,29 @@
 	* src/: gmameui.c, directories.c: Save file and directory settings
 	  when directories window is closed with OK, rather than on GMAMEUI
 	  exit
+
+2008-03-25 22:59  adburton
+
 	* src/options.c: Fix GTK warnings, disable frameskip widgets when
 	  auto toggled, started work on setting signal handlers for child
 	  widgets rather than individually, use Glade instead of manually
 	  adding widgets
+
+2008-03-25 22:57  adburton
+
 	* src/properties.c: Removed redundant functions
+
+2008-03-25 22:57  adburton
+
 	* src/game_options.c: Set defaults for missing options after ini
 	  file has been loaded
+
+2008-03-25 22:56  adburton
+
 	* data/properties.glade: Updated Properties window to use Glade
+
+2008-03-25 22:51  adburton
+
 	* src/: gmameui.c, io.c, io.h: Removed read/write to gmameuirc and
 	  moved values within to other files
 
@@ -169,10 +334,22 @@
 2008-03-18 23:23  adburton
 
 	* src/gui.c: Look for screenshot in parent subdirectory
+
+2008-03-18 22:38  adburton
+
 	* src/: callbacks.c, interface.c, gmameui.h, gui.c: Removed font
 	  configuration option
+
+2008-03-18 21:16  adburton
+
 	* src/: gui.c, rom_entry.h: Consolidate statusbar push code
+
+2008-03-18 20:33  adburton
+
 	* src/gui.c: Move if clause contents together
+
+2008-03-18 19:52  adburton
+
 	* data/: column_layout.glade, Makefile.am: Add new Glade file for
 	  column layout
 
@@ -185,16 +362,31 @@
 
 	* src/gui.c: Refactoring on status icon pixbuf choosing, sort order
 	  callback creation and moving to selected game on startup
+
+2008-03-07 20:04  adburton
+
 	* src/gui.c: Consolidate pixbuf loading code to remove redundant
 	  case clauses, consolidate filter subfolder creation code
 
 2008-03-05 21:06  adburton
 
 	* src/options.c: Add initial support for effects overlay combo box
+
+2008-03-05 20:31  adburton
+
 	* BUGS: Added audit-related bugs
+
+2008-03-05 20:21  adburton
+
 	* data/Makefile.am, data/audit_window.glade, src/audit.c: Updated
 	  audit window to use Glade
+
+2008-03-05 19:25  adburton
+
 	* data/audit_window.glade: Initial import
+
+2008-03-05 19:23  adburton
+
 	* data/properties.glade, src/options.c: Add additional Glade
 	  handling to options window
 
