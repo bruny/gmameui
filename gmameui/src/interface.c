@@ -110,6 +110,16 @@ create_MainWindow (void)
 	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
 	g_object_unref (action_group);
 	/* TODO window->priv->always_sensitive_action_group = action_group;*/
+
+	action_group = gtk_action_group_new ("GmameuiWindowExecROMActions");
+	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_add_actions (action_group,
+				      gmameui_rom_and_exec_menu_entries,
+				      G_N_ELEMENTS (gmameui_rom_and_exec_menu_entries),
+				      MainWindow);
+	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
+	g_object_unref (action_group);
+	main_gui.gmameui_rom_exec_action_group = action_group;	
 	
 	action_group = gtk_action_group_new ("GmameuiWindowROMActions");
 	gtk_action_group_set_translation_domain (action_group, NULL);
@@ -121,6 +131,16 @@ create_MainWindow (void)
 	g_object_unref (action_group);
 	main_gui.gmameui_rom_action_group = action_group;
 
+	action_group = gtk_action_group_new ("GmameuiWindowFavouriteActions");
+	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_add_actions (action_group,
+				      gmameui_favourite_menu_entries,
+				      G_N_ELEMENTS (gmameui_favourite_menu_entries),
+				      MainWindow);
+	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
+	g_object_unref (action_group);
+	main_gui.gmameui_favourite_action_group = action_group;
+	
 	action_group = gtk_action_group_new ("GmameuiWindowViewActions");
 	gtk_action_group_set_translation_domain (action_group, NULL);
 	gtk_action_group_add_actions (action_group,
@@ -646,32 +666,6 @@ create_MainWindow (void)
 		      NULL);
 	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
 	g_object_unref (folder_filter);	
-	
-	/* Driver filters */
-	for (listpointer = g_list_first (game_list.drivers);
-	     (listpointer);
-	     listpointer = g_list_next (listpointer)) {
-
-		gchar *text;
-		if (!strcmp (listpointer->data, "-"))
-			text = _("<unknown>");
-		else
-			text = (gchar* ) listpointer->data;
-
-		folder_filter = gmameui_filter_new ();
-		g_object_set (folder_filter,
-			      "name", text,
-			      "folderid", DRIVERS,
-			      "type", DRIVER,
-			      "is", TRUE,
-			      "value", (gchar *)listpointer->data,
-			      "int_value", 0,
-			      "update_list", TRUE,
-			      NULL);
-		gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Drivers");
-		g_object_unref (folder_filter);
-		g_free (text);     
-	}
 	
 	/* Catver.ini filters - Category and Version */
 	if (gui_prefs.catverDirectory) {		
