@@ -699,5 +699,8 @@ directories_selection_save_changes (GtkWidget *widget)
 		gmameui_message (ERROR, GTK_WINDOW (directories_selection), _("No valid xmame executables found"));
 	}
 	
+	/* Update the state of the menus and toolbars */
+	gmameui_ui_set_items_sensitive ();
+	
 	g_free (text);
 }

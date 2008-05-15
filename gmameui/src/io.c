@@ -385,7 +385,8 @@ load_gmameui_ini (void)
 		}
 	}
 
-	g_error_free(error);
+	if (error)
+		g_error_free (error);
 	g_free (default_game);
 
 	return TRUE;
