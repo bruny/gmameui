@@ -63,6 +63,9 @@ static void
 filters_list_selection_changed_cb (GtkTreeSelection *selection,
 				    GMAMEUIFiltersList     *fl);
 
+void
+gmameui_filters_list_select (GMAMEUIFiltersList *fl,
+							 GMAMEUIFilter *filter);
 
 G_DEFINE_TYPE (GMAMEUIFiltersList, gmameui_filters_list,
 			   GTK_TYPE_TREE_VIEW);
@@ -92,7 +95,7 @@ gmameui_filters_list_class_init (GMAMEUIFiltersListClass *class)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (class);
 
-	object_class->finalize = gmameui_filters_list_finalize;
+	object_class->finalize = (GObjectFinalizeFunc) gmameui_filters_list_finalize;
 }
 
 /* Creates the UI for the filters list */
@@ -132,8 +135,6 @@ GMAMEUI_DEBUG ("Creating filters list");
 		      "search-column", -1,
 		      NULL);
 	
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (fl), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-
 	col = gtk_tree_view_column_new ();
 
 	/* State */
@@ -179,7 +180,6 @@ GMAMEUI_DEBUG ("Creating filters list");
 	fl->priv->groups = g_list_append (fl->priv->groups, "Imperfect");
 	fl->priv->groups = g_list_append (fl->priv->groups, "Game Details");
 	fl->priv->groups = g_list_append (fl->priv->groups, "Custom");
-	fl->priv->groups = g_list_append (fl->priv->groups, "Drivers");
 	fl->priv->groups = g_list_append (fl->priv->groups, "Category");
 	fl->priv->groups = g_list_append (fl->priv->groups, "Version");
 
@@ -216,7 +216,6 @@ gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
 	GList *l;
 	
 	for (l = fl->priv->groups; l; l = l->next) {
-		GtkTreeIter  model_iter_group;
 		const gchar *name;
 		gboolean     created;
 		GtkTreePath   *path;
@@ -242,7 +241,7 @@ gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
 		      NULL);
 
 		/* Expand if there are child nodes (i.e. filters) in the group */
-		path = gtk_tree_model_get_path (fl->priv->store, &iter_group);
+		path = gtk_tree_model_get_path (GTK_TREE_MODEL (fl->priv->store), &iter_group);
 		gtk_tree_view_expand_row (GTK_TREE_VIEW (fl), path, TRUE);
 		gtk_tree_path_free (path);
 		
@@ -285,7 +284,7 @@ filters_list_get_group_foreach (GtkTreeModel *model,
 						GMAMEUI_FILTER_LIST_MODEL_IS_GROUP, &is_group,
 						-1);
 
-	if (is_group && strcmp (str, fg->name) == 0) {
+	if (is_group && g_ascii_strcasecmp (str, fg->name) == 0) {
 		fg->found = TRUE;
 		fg->iter = *iter;
 	}
