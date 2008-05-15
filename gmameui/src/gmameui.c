@@ -45,7 +45,6 @@
 #include "progression_window.h"
 #include "gtkjoy.h"
 
-
 #define BUFFER_SIZE 1000
 
 static void
@@ -101,12 +100,13 @@ main (int argc, char *argv[])
 	} 
 
 	/* only need to do a quick check and redisplay games if the not_checked_list is not empty */
+#ifdef QUICK_CHECK_ENABLED
 	if (game_list.not_checked_list) {
 GMAMEUI_DEBUG ("Processing not checked list");
 		quick_check ();
 		create_gamelist_content ();
 	}
-
+#endif
 	GMAMEUI_DEBUG ("init done, starting main loop");
 	gtk_main ();
 	return 0;
@@ -147,22 +147,33 @@ gmameui_init (void)
 	if (!current_exec)
 		GMAMEUI_DEBUG ("No executable!");
 
-	if (!load_gmameui_ini ())
-		g_message (_("unable to load gmameui.ini, using default values"));
-	
 	if (!load_dirs_ini ())
 		g_message (_("dirs.ini not loaded, using default values"));
 	
 	gamelist_init ();
+#ifdef ENABLE_DEBUG
+g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+#endif
 	if (!gamelist_load ()) {
 		g_message (_("gamelist not found, need to rebuild one"));
 	} else {
+#ifdef ENABLE_DEBUG
+g_message (_("Time to load gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+#endif
 		if (!load_games_ini ())
 			g_message (_("games.ini not loaded, using default values"));
+#ifdef ENABLE_DEBUG
+g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+#endif
 		if (!load_catver_ini ())
 			g_message (_("catver not loaded, using default values"));
 	}
 
+	/* gmameui.ini file needs to be loaded after the gamelist while setting
+	   gui_prefs.current_game is done in load_gmameui_ini () */
+	if (!load_gmameui_ini ())
+		g_message (_("unable to load gmameui.ini, using default values"));
+	
 	if (!load_options (NULL))
 		g_message (_("default options not loaded, using default values"));
 
@@ -223,7 +234,8 @@ game_filtered (RomEntry * rom)
 	
 	switch (type) {
 	case DRIVER:
-		retval = (g_ascii_strcasecmp (rom->driver, value) == 0);
+		retval = ( (is && !g_strcasecmp (rom->driver,value)) ||
+			 (!is && g_strcasecmp (rom->driver,value)));
 		break;
 	case CLONE:
 		retval = ( (is && !g_strcasecmp (rom->cloneof,value)) ||
@@ -481,13 +493,8 @@ play_game (RomEntry *rom)
 	gchar *Vector_Related_options;
 	GameOptions *target;
 
-	if (!rom)
-		return;
-
-	if (!current_exec) {
-		gmameui_message (ERROR, NULL, _("No xmame executables defined"));
-		return;
-	}
+	g_return_if_fail (rom != NULL);
+	g_return_if_fail (current_exec != NULL);
 
 	if (gui_prefs.use_xmame_options) {
 		opt = g_strdup_printf ("%s %s 2>&1", current_exec->path, rom->romname);
@@ -711,7 +718,12 @@ GMAMEUI_DEBUG ("Destroying window - done");
 	xmame_options_free ();
 
 	g_object_unref (main_gui.options);
-	main_gui.options == NULL;
+	main_gui.options = NULL;
+	
+	g_object_unref (main_gui.filters_list);
+	main_gui.filters_list = NULL;
+	
+	g_message (_("Finished cleaning up GMAMEUI"));
 	
 	gtk_main_quit ();
 }

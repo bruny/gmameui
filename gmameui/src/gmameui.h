@@ -146,65 +146,33 @@ typedef enum {
 
 struct gui_prefs_struct {
 	RomEntry *current_game;
-	/* 1:All, 2:available, 3=unavailable, 4=NeoGeo, 5:Manufacturers
-	   6=Years, 7=Working, 8=NonWorking, 9=Custom, 10=Played, 11=Favorites
-	   12=originals, 13=clones 14=Raster, 15=Vector, 16=Trackball, 17=Stereo
-	   18=CPS1, 19=CPS2
-	   Mame32K			| GMAMEUI
-	   20=Namco 21=hack...		| 22=3D Games
-	   got the year in good order, just need to find the good ofsset given by the number of manufacturer
-	   240=year>1980 		| 293=year>1980
-	   ...				| ...
-	   248=<U>			| 301=<U>
-	   249=1986			| 302=1986
-	   ...				| ...
-	   266=2000			| 319=2000
-	  will be able to stick with mame32k only with first folders or
-	  I have to assign a folder ID to all manufacturer and year at
-	  the condition that I got the same manufacturers list.*/
 	folder_filters_list FolderID;
 	/*Show screenshot panel*/
 	gboolean ShowScreenShot;
-	/* 0:Snaps, 1:Flyers, 2:Cabinets, 3:Marquees, 4:Titles?*/
 	gboolean ShowScreenShotTab;
 	screenshot_type ShowFlyer;
-	gint ShowToolBar;
-	gboolean ShowStatusBar;
-	gboolean ShowFolderList;
-	gboolean GameCheck;
-	gboolean VersionCheck;
-/*	gint MMXCheck;*/
-	gboolean ModifyThe;
-/*	gint UseFavoriteNetPlay;*/
-/*	gint UseIMEInChat;*/
-/*	gint ChatDrawMode;*/
-	gint SortColumn;
-	gboolean SortReverse;
+	gint       ShowToolBar;
+	gboolean   ShowStatusBar;
+	gboolean   ShowFolderList;
+	gboolean   ModifyThe;
+	gint       SortColumn;
+	gboolean   SortReverse;
 
-	gint GUIPosX;
-	gint GUIPosY;
-	gint GUIWidth;
-	gint GUIHeight;
-/*set by local
-	gchar *Language;*/
-	ListMode current_mode;
-	ListMode previous_mode;
+	gint       GUIPosX;
+	gint       GUIPosY;
+	gint       GUIWidth;
+	gint       GUIHeight;
 
-	//gint Splitters[2];
-	gint *Splitters;
+	ListMode   current_mode;
+	ListMode   previous_mode;
 
-	guint ListFontHeight;
-	/* Width of each column ex: width of "game name" column is ColumnWidth[0] */
-	//gint ColumnWidth[NUMBER_COLUMN];
-gint *ColumnWidth;
+	gint       *Splitters;
 
-	/* ColumnShown[0]==true -> "game name" column is shown */
-	//gboolean ColumnShown[NUMBER_COLUMN];
-gint *ColumnShown;
-	gchar *SaveVersion;
-	GdkColor clone_color;
-	gint ResetGUI;
-	gint ResetGameDefaults;
+	guint      ListFontHeight;
+	gint       *ColumnWidth;
+	gint       *ColumnShown;
+//	gchar *SaveVersion;
+	GdkColor   clone_color;
 	
 	/* directories specification */
 	gchar **RomPath;
@@ -237,12 +205,16 @@ gint *ColumnShown;
  	gchar *HistoryFile;
  	gchar *MameInfoFile;
 	
+	/* Startup options */
+	gboolean   GameCheck;
+	gboolean   VersionCheck;
 	/* GUI Joystick options */
-	gboolean gui_joy;
-	gchar *Joystick_in_GUI;
-	/* Don't pass any options to xmame */
-	gboolean use_xmame_options;
+	gboolean   gui_joy;
+	gchar      *Joystick_in_GUI;
+	gboolean   use_xmame_options;   /* Don't pass any options to xmame */
 };
+
+struct gui_prefs_struct gui_prefs;
 
 /* global variables */
 XmameExecutable *current_exec; /* pointer in the xmame_table */
@@ -251,11 +223,8 @@ guint visible_games;
 
 GMAMEUIFilter *selected_filter;
 
-gboolean displayedlist_keypressed;
 Joystick *joydata;
 GdkPixbuf *Status_Icons[NUMBER_STATUS];
-
-struct gui_prefs_struct gui_prefs;
 
 gboolean dirty_icon_cache;
 
