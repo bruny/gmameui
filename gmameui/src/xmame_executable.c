@@ -1345,8 +1345,7 @@ xmame_get_options (XmameExecutable *exec)
 	gchar line[BUFFER_SIZE];
 	GHashTable *option_hash;
 
-	if (!exec)
-		return NULL;
+	g_return_if_fail (exec != NULL);
 
 	if (exec->options)
 		return exec->options;
@@ -1354,8 +1353,7 @@ xmame_get_options (XmameExecutable *exec)
 	GMAMEUI_DEBUG ("Getting options using parameter %s\n", exec->showusage_option);
 	
 	xmame_pipe = xmame_open_pipe (exec, "-%s", exec->showusage_option);
-	if (!xmame_pipe)
-		return NULL;
+	g_return_if_fail (xmame_pipe != NULL);
 
 	GMAMEUI_DEBUG ("checking xmame options");
 	if (fgets (line, BUFFER_SIZE, xmame_pipe))

@@ -37,7 +37,7 @@ gmameui_SOURCES = \
 
 gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(INTLLIBS)
 
-AM_CPPFLAGS = $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
+AM_CPPFLAGS = -g $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
 		-DDATADIR=\""$(datadir)"\" \
 		-DGLADEDIR=\"${datadir}/gmameui/glade/\" \
 		-DGMAMEUI_UI_DIR=\"${datadir}/gmameui/ui/\" \
