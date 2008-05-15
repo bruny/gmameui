@@ -62,6 +62,11 @@
 
 static guint timeout_icon;
 
+gboolean foreach_find_rom_in_store (GtkTreeModel *model,
+				    GtkTreePath  *path,
+				    GtkTreeIter  *iter,
+				    gpointer      user_data);
+
 /**** Sidebar functionality ****/
 struct _GMAMEUISidebarPrivate {
 
@@ -678,7 +683,12 @@ init_gui (void)
 {
 	GtkTooltips *tooltips;
 	gchar *filename;
+#ifdef ENABLE_DEBUG
+	GTimer *mytimer;
 
+	mytimer = g_timer_new ();
+	g_timer_start (mytimer);
+#endif
 	tooltips = gtk_tooltips_new ();
 
 	/* Default Pixbuf once for all windows */
@@ -687,12 +697,15 @@ init_gui (void)
 	g_free (filename);
 
 	gmameui_icons_init ();
-
+#ifdef ENABLE_DEBUG
+g_message (_("Time to initialise icons: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+#endif
 	/* Create the main window */
 	MainWindow = create_MainWindow ();
-	
+#ifdef ENABLE_DEBUG
+g_message (_("Time to create main window and filters: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+#endif
 	/* if the ListFont is empty or not loadable, use default font */
-/*	gui_prefs.ListFontStruct = NULL;*/
 	gui_prefs.ListFontHeight = 16;
 
 	gtk_paned_set_position (main_gui.hpanedLeft, gui_prefs.Splitters[0]);
@@ -701,12 +714,12 @@ init_gui (void)
 	gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));
 
 	gtk_window_set_default_size (GTK_WINDOW (MainWindow),
-				    gui_prefs.GUIWidth,
-				    gui_prefs.GUIHeight);
+				     gui_prefs.GUIWidth,
+				     gui_prefs.GUIHeight);
 
 	gtk_window_move (GTK_WINDOW (MainWindow),
-				    gui_prefs.GUIPosX,
-				    gui_prefs.GUIPosY);
+			 gui_prefs.GUIPosX,
+			 gui_prefs.GUIPosY);
 
 	/* Show and hence realize mainwindow so that MainWindow->window is available */
 	gtk_widget_show (MainWindow);
@@ -727,10 +740,14 @@ init_gui (void)
 
 	/* Create the UI of the Game List */
 	create_gamelist (gui_prefs.current_mode);
-
+#ifdef ENABLE_DEBUG
+g_message (_("Time to create gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+#endif
 	/* Feed the Game List */
 	create_gamelist_content ();
-
+#ifdef ENABLE_DEBUG
+g_message (_("Time to create gamelist content: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+#endif
 	/* Need to set the size here otherwise it move when we create the gamelist */
 	if (gui_prefs.ShowScreenShot)
 		gtk_paned_set_position (main_gui.hpanedRight, gui_prefs.Splitters[1]);
@@ -747,33 +764,35 @@ init_gui (void)
 
 	/* Need to set the notebook page here otherwise it segfault */
 	gmameui_sidebar_set_current_page (main_gui.screenshot_hist_frame, gui_prefs.ShowFlyer);
+#ifdef ENABLE_DEBUG
+	g_timer_stop (mytimer);
+	g_message (_("Time to complete start of UI: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+	g_timer_destroy (mytimer);
+#endif
 }
 
 static void
 set_current_executable (XmameExecutable *new_exec)
 {
+	gboolean valid;
 	
 	if (new_exec) {
 		GMAMEUI_DEBUG ("Executable changed to %s", new_exec->path);
 	}
 
 	current_exec = new_exec;
+	
+	valid = xmame_executable_is_valid (new_exec);
 
 	/* check if the executable is still valid */
-	if (!xmame_executable_is_valid (new_exec)) {
+	if (!valid) {
 		if (new_exec) {
 			gmameui_message (ERROR, NULL, _("%s is not a valid executable"), new_exec->path);
 		}
-
-/* TODO FIXME
-		 gtk_widget_set_sensitive (GTK_WIDGET (main_gui.audit_all_games_menu), FALSE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.properties_menu), FALSE);*/
-	} else {
-		gamelist_check (new_exec);
-/* TODO FIXME
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.audit_all_games_menu), TRUE);
-		gtk_widget_set_sensitive (GTK_WIDGET (main_gui.properties_menu), TRUE);*/
 	}
+
+	gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
+					valid);
 }
 
 /* executable selected from the menu */
@@ -883,7 +902,7 @@ add_exec_menu (void)
 	 
 }
 
-void gmameui_toolbar_set_favourites_sensitive (gboolean rom_is_favourite)
+void gmameui_ui_set_favourites_sensitive (gboolean rom_is_favourite)
 {
 	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
 							     "/MenuBar/FileMenu/FileFavesAddMenu"),
@@ -899,20 +918,22 @@ void gmameui_toolbar_set_favourites_sensitive (gboolean rom_is_favourite)
 				  rom_is_favourite);
 }
 
-void gmameui_menubar_set_favourites_sensitive (gboolean state)
-{
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/MenuBar/FileMenu/FileFavesAddMenu"),
-				  state);
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/MenuBar/FileMenu/FileFavesRemoveMenu"),
-				  state);
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/GameListPopup/FileFavesAdd"),
-				  state);
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/GameListPopup/FileFavesRemove"),
-				  state);
+void gmameui_ui_set_items_sensitive () {
+
+	gboolean rom_and_exec;  /* TRUE if both an executable exists and a ROM is selected */
+	rom_and_exec = (gui_prefs.current_game) && (xmame_table_size () > 0);
+
+	gtk_action_group_set_sensitive (main_gui.gmameui_rom_exec_action_group,
+					rom_and_exec);
+
+	gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
+					gui_prefs.current_game);
+
+	/* Disable favourites if no current game */
+	gtk_action_group_set_sensitive (main_gui.gmameui_favourite_action_group,
+					(gui_prefs.current_game != NULL));
+	if (gui_prefs.current_game != NULL)
+		gmameui_ui_set_favourites_sensitive (gui_prefs.current_game->favourite);
 }
 
 void
@@ -924,16 +945,8 @@ gamelist_popupmenu_show (RomEntry       *rom,
 	popup_menu = gtk_ui_manager_get_widget (main_gui.manager, "/GameListPopup");
 	g_return_if_fail (popup_menu != NULL);
 
-	if (!current_exec) {
-		gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
-						FALSE);
-	} else {
+	if (current_exec)
 		xmame_get_options (current_exec);
-		gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
-						TRUE);
-	}
-	
-	gmameui_toolbar_set_favourites_sensitive (rom->favourite);
 
 	gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,
 			NULL, NULL,
@@ -1449,6 +1462,52 @@ void set_list_sortable_column ()
 	}	/* Select the correct row */
 }
 
+/* This function walks the tree store containing the ROM data until
+   it finds the row that has the ROM from the preferences. It then
+   scrolls to that row, and opens the parent row if the found
+   row is a child */
+gboolean foreach_find_rom_in_store (GtkTreeModel *model,
+				    GtkTreePath  *path,
+				    GtkTreeIter  *iter,
+				    gpointer      user_data)
+{
+	RomEntry *rom;
+/*	gchar *tree_path_str;*/
+	
+	/* Don't even bother trying to walk the store if the current game
+	   is not set. We are just wasting our time */
+	g_return_val_if_fail ((gui_prefs.current_game != NULL), TRUE);
+	
+	gtk_tree_model_get (model, iter,
+			    ROMENTRY, &rom,
+			    -1);
+/*	
+	tree_path_str = gtk_tree_path_to_string (path);
+	GMAMEUI_DEBUG ("Row %s: name is %s", tree_path_str, rom->romname);
+	g_free (tree_path_str);
+*/	
+	if (g_ascii_strcasecmp (rom->romname, gui_prefs.current_game->romname) == 0) {
+		GMAMEUI_DEBUG ("Found row in tree view - %s", rom->romname);
+				
+		/* Scroll to selection */
+		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list),
+					      path, NULL, TRUE, 0.5, 0);
+
+		/* Need to expand the parent row (if a child) */
+		gtk_tree_view_expand_to_path (GTK_TREE_VIEW (main_gui.displayed_list),
+					      path);
+
+		/* And highlight the row */
+		gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list),
+					  path,
+					  NULL, FALSE);
+		
+		return TRUE;    /* Found the row we are after, no need to keep walking */
+	}
+	
+	return FALSE;   /* Do not stop walking the store, call us with next row */
+}
+
 void
 create_gamelist_content (void)
 {
@@ -1457,16 +1516,12 @@ create_gamelist_content (void)
 	gchar *my_romname_root = NULL;
 	gchar *my_hassamples;
 	GdkColor *my_txtcolor;
-	GtkTreeSelection *select;
 	GtkTreeIter iter;
 	GtkTreeIter iter_root;
-	GtkTreeIter iter_child;
 	GtkTreeModel *store;
 	gboolean tree_store;   /* If the model is a tree or a list */
 	gboolean is_root;
-	guint i = 0;
 	gint j = 0;
-	gboolean valid;
 	gchar *message;
 	RomEntry *selected_game;
 
@@ -1658,83 +1713,20 @@ g_timer_start (timer);
 	if (main_gui.displayed_list) {
 		/* Link the view with the model */
 		gtk_tree_view_set_model (GTK_TREE_VIEW (main_gui.displayed_list), GTK_TREE_MODEL (main_gui.tree_model));
-		/* Get the selection */
-		select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_gui.displayed_list));
 
 		/* Sort the list */
 		set_list_sortable_column ();
 
 		/* Find the selected game in the gamelist, and scroll to it, opening any expanders */
 		if (visible_games > 0) {
-			RomEntry *curr_rom;
-
-			valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-			gtk_tree_model_get (GTK_TREE_MODEL (main_gui.tree_model), &iter, ROMENTRY, &curr_rom, -1);
-			is_root = TRUE;
-			i = 0;
-			while ( (i < visible_games) && (curr_rom != selected_game) && (valid)) {
-
-				if (gtk_tree_model_iter_has_child (GTK_TREE_MODEL (main_gui.tree_model), &iter)) {
-
-					if (gtk_tree_model_iter_children (GTK_TREE_MODEL (main_gui.tree_model), &iter_child, &iter)) {
-						gtk_tree_model_get (GTK_TREE_MODEL (main_gui.tree_model), &iter_child, ROMENTRY, &curr_rom, -1);
-						is_root = FALSE;
-						i++;
-
-						while ((i < visible_games)
-						       && (curr_rom != selected_game)
-						       && (gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter_child))) {
-							gtk_tree_model_get (GTK_TREE_MODEL (main_gui.tree_model), &iter_child, ROMENTRY, &curr_rom, -1);
-							i++;
-						}
-					}
-				}
-
-				if ((i < visible_games) && (curr_rom != selected_game)) {
-					valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-					if (valid) {
-						gtk_tree_model_get (GTK_TREE_MODEL (main_gui.tree_model), &iter, ROMENTRY, &curr_rom, -1);
-						is_root = TRUE;
-						i++;
-					}
-				}
-			}
-
-			select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_gui.displayed_list));
-			if (curr_rom != selected_game) {
-				valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-				is_root = TRUE;
-			}
-	
-			GtkTreePath *tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-			if (is_root) {
-				gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list),
-							  tree_path,
-							  NULL, FALSE);
-			} else {
-				valid=gtk_tree_view_expand_row (GTK_TREE_VIEW (main_gui.displayed_list),
-								tree_path,
-								TRUE);
-				gtk_tree_path_free (tree_path);
-				tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter_child);
-				gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list),
-							  tree_path,
-							  NULL, FALSE);
-			}
-			/* Scroll to selection */
-			gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list), tree_path, NULL, TRUE, 0.5, 0);
-			gtk_tree_path_free (tree_path);
-			
-			
-			
+			/* Scroll to the game specified from the preferences */
+			gtk_tree_model_foreach (GTK_TREE_MODEL (main_gui.tree_model), foreach_find_rom_in_store, NULL);
 		}
 		/* Header clickable. */
-		if ( (gui_prefs.current_mode == DETAILS) || (gui_prefs.current_mode == DETAILS_TREE))
-			gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
-							     TRUE);
-		else
-			gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
-							     FALSE);
+		gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
+						     (gui_prefs.current_mode == DETAILS) ||
+						     (gui_prefs.current_mode == DETAILS_TREE));
+		
 	}
 
 	/* Status Bar Message */
@@ -1838,19 +1830,9 @@ create_gamelist (ListMode list_mode)
 		/* We sort the list */
 		set_list_sortable_column();
 		
-		if ( (list_mode == DETAILS) || (list_mode == DETAILS_TREE))
-			gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
-							     TRUE);
-		else
-			gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
-							     FALSE);
+		gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
+						     (list_mode == DETAILS) || (list_mode == DETAILS_TREE));
 	}
-
-	/* Show or hide Header */
-	if ( (list_mode == DETAILS) || (list_mode == DETAILS_TREE))
-		gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (main_gui.displayed_list), TRUE);
-	else
-		gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (main_gui.displayed_list), FALSE);
 
 	/* Update the columns */
 	/* FIXME When switching from LIST mode to DETAILS, it puts a mess in the size of the
@@ -1906,27 +1888,12 @@ set_status_bar (gchar *game_name, gchar *game_status)
 	gtk_statusbar_push (main_gui.statusbar2, 1, game_status);
 }
 
-static void
-gmameui_toolbar_set_play_sensitive (gboolean state)
-{
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/MenuBar/FileMenu/FilePlayGameMenu"),
-				  state);
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/MenuBar/FileMenu/FilePropertiesMenu"),
-				  state);
-}
-
 void
 select_game (RomEntry *rom)
 {
 	gui_prefs.current_game = rom;
 
 	if (rom) {
-		/* update menus */
-		gmameui_toolbar_set_favourites_sensitive (rom->favourite);
-		gmameui_toolbar_set_play_sensitive (TRUE);
-
 		/* update statusbar */
 		set_status_bar (rom_entry_get_list_name (rom),
 				rom_status_string_value [rom->has_roms]);
@@ -1939,19 +1906,15 @@ select_game (RomEntry *rom)
 
 		GMAMEUI_DEBUG ("no games selected");
 		
-		/* update menus */
-		gmameui_menubar_set_favourites_sensitive (FALSE);
-		gmameui_toolbar_set_play_sensitive (FALSE);
-
 		/* update statusbar */
 		set_status_bar (_("No game selected"), "");
 
 		/* update screenshot panel */
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
 					      NULL);
-
 	}
 
+	gmameui_ui_set_items_sensitive ();
 }
 
 void
@@ -2354,85 +2317,60 @@ gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom)
 					  G_CALLBACK (change_screenshot),
 					  NULL);
 		} else {
-			/* Remove the elements from the container */
+			pict = get_pixbuf (rom, gui_prefs.ShowFlyer, wwidth, wheight);
+			/* Remove the elements from the container and then re-add.
+			   This is necessary to refresh the image */
 			switch (gui_prefs.ShowFlyer) {
 			case (SNAPSHOTS):
 				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box1),
 						      sidebar->priv->screenshot1);
-				pict = get_pixbuf (rom, 0, wwidth, wheight);
 				sidebar->priv->screenshot1 = pict;
+					
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box1),
+						   GTK_WIDGET (sidebar->priv->screenshot1));
+				gtk_widget_show_all (sidebar->priv->screenshot_box1);
 				break;
 			case (FLYERS):
 				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box2),
 						      sidebar->priv->screenshot2);
-				pict = get_pixbuf (rom, 1, wwidth, wheight);
 				sidebar->priv->screenshot2 = pict;
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box2),
+						   GTK_WIDGET (sidebar->priv->screenshot2));
+				gtk_widget_show_all (sidebar->priv->screenshot_box2);
 				break;
 			case (CABINETS):
 				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box3),
 						      sidebar->priv->screenshot3);
-				pict = get_pixbuf (rom, 2, wwidth, wheight);
 				sidebar->priv->screenshot3 = pict;
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box3),
+						   GTK_WIDGET (sidebar->priv->screenshot3));
+				gtk_widget_show_all (sidebar->priv->screenshot_box3);
 				break;
 			case (MARQUEES):
 				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box4),
 						      sidebar->priv->screenshot4);
-				pict = get_pixbuf (rom, 3, wwidth, wheight);
 				sidebar->priv->screenshot4 = pict;
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box4),
+						   GTK_WIDGET (sidebar->priv->screenshot4));
+				gtk_widget_show_all (sidebar->priv->screenshot_box4);
 				break;
 			case (TITLES):
 				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box5),
 						      sidebar->priv->screenshot5);
-				pict = get_pixbuf (rom, 4, wwidth, wheight);
 				sidebar->priv->screenshot5 = pict;
+				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box5),
+						   GTK_WIDGET (sidebar->priv->screenshot5));
+				gtk_widget_show_all (sidebar->priv->screenshot_box5);
 				break;
 			case (CONTROL_PANELS):
 				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box6),
 						      sidebar->priv->screenshot6);
-				pict = get_pixbuf (rom, 5, wwidth, wheight);
 				sidebar->priv->screenshot6 = pict;
-				break;	
-			}
-			
-			/* And add them again */
-			switch (gui_prefs.ShowFlyer) {
-			case (SNAPSHOTS):
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box1),
-						   GTK_WIDGET (sidebar->priv->screenshot1));
-				gtk_widget_show (sidebar->priv->screenshot_box1);
-				gtk_widget_show (sidebar->priv->screenshot1);
-				break;
-			case (FLYERS):
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box2),
-						   GTK_WIDGET (sidebar->priv->screenshot2));
-				gtk_widget_show (sidebar->priv->screenshot_box2);
-				gtk_widget_show (sidebar->priv->screenshot2);
-				break;
-			case (CABINETS):
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box3),
-						   GTK_WIDGET (sidebar->priv->screenshot3));
-				gtk_widget_show (sidebar->priv->screenshot_box3);
-				gtk_widget_show (sidebar->priv->screenshot3);
-				break;
-			case (MARQUEES):
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box4),
-						   GTK_WIDGET (sidebar->priv->screenshot4));
-				gtk_widget_show (sidebar->priv->screenshot_box4);
-				gtk_widget_show (sidebar->priv->screenshot4);
-				break;
-			case (TITLES):
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box5),
-						   GTK_WIDGET (sidebar->priv->screenshot5));
-				gtk_widget_show (sidebar->priv->screenshot_box5);
-				gtk_widget_show (sidebar->priv->screenshot5);
-				break;
-			case (CONTROL_PANELS):
 				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box6),
 						   GTK_WIDGET (sidebar->priv->screenshot6));
-				gtk_widget_show (sidebar->priv->screenshot_box6);
-				gtk_widget_show (sidebar->priv->screenshot6);
-				break;
-			}					
+				gtk_widget_show_all (sidebar->priv->screenshot_box6);
+				break;	
+			}
 		}
 		
 		if (had_history) {

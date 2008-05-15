@@ -84,8 +84,9 @@ static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
 	 N_("About this application"), G_CALLBACK (on_about_activate) }
 };
 
-/* The following menu entries are enabled when a ROM is selected */
-static const GtkActionEntry gmameui_rom_menu_entries[] =
+/* The following menu entries are enabled when a ROM is selected and a MAME
+   executable exists */
+static const GtkActionEntry gmameui_rom_and_exec_menu_entries[] =
 {
 	/* File menu */
 	{ "FilePlayGame", NULL, N_("Play"), NULL,
@@ -94,14 +95,23 @@ static const GtkActionEntry gmameui_rom_menu_entries[] =
 	  N_("Record a game for later playback"), G_CALLBACK (on_play_and_record_input_activate) },
 	{ "FilePlaybackRecord", GTK_STOCK_OPEN, N_("Playback Input..."), NULL,
 	  N_("Playback a recorded game"), G_CALLBACK (on_playback_input_activate) },
+	{ "FileOptions", GTK_STOCK_PROPERTIES, N_("Options"), NULL,
+	  N_("Change the options of the selected game"), G_CALLBACK (on_options_activate) }, 
+};
+
+/* The following menu entries are enabled when a ROM is selected */
+static const GtkActionEntry gmameui_rom_menu_entries[] =
+{
+	{ "FileProperties", GTK_STOCK_INFO, N_("Properties"), NULL,
+	  N_("Display the properties of the selected game"), G_CALLBACK (on_properties_activate) }, 
+};
+
+static const GtkActionEntry gmameui_favourite_menu_entries[] =
+{
 	{ "FileFavesAdd", GTK_STOCK_ADD, N_("Add to 'Favorites'"), NULL,
 	  N_("Add this game to your 'Favorites' game folder"), G_CALLBACK (on_add_to_favorites_activate) },
 	{ "FileFavesRemove", GTK_STOCK_REMOVE, N_("Remove from 'Favorites'"), NULL,
 	  N_("Remove this game from your 'Favorites' game folder"), G_CALLBACK (on_remove_from_favorites_activate) },
-	{ "FileProperties", GTK_STOCK_INFO, N_("Properties"), NULL,
-	  N_("Display the properties of the selected game"), G_CALLBACK (on_properties_activate) }, 
-	{ "FileOptions", GTK_STOCK_PROPERTIES, N_("Options"), NULL,
-	  N_("Change the options of the selected game"), G_CALLBACK (on_options_activate) }, 
 };
 
 /* The following menu entries are enabled when the view is changed to a tree view */
@@ -231,6 +241,8 @@ struct main_gui_struct {
 	
 	GtkUIManager *manager;
 	GtkActionGroup *gmameui_rom_action_group;
+	GtkActionGroup *gmameui_rom_exec_action_group;
+	GtkActionGroup *gmameui_favourite_action_group;
 	GtkActionGroup *gmameui_view_action_group;
 	GtkActionGroup *gmameui_exec_radio_action_group;	/* Executable radio buttons */
 	gint gmameui_exec_merge_id;
