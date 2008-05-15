@@ -155,14 +155,6 @@ gboolean on_list_clicked                        (GtkWidget *widget,
                                                  GdkEventButton *event,
                                                  gpointer user_data);
 
-gboolean on_displayed_list_key_press_event      (GtkWidget	*widget,
-                                                 GdkEventKey	*event,
-                                                 gpointer	 user_data);
-
-gboolean on_displayed_list_key_release_event    (GtkWidget	*widget,
-                                                 GdkEventKey	*event,
-                                                 gpointer	 user_data);
-
 void     on_columns_changed                     (GtkTreeView *treeview,
                                                  gpointer user_data);
 

@@ -48,16 +48,20 @@
 #include "column_layout.h"
 
 static guint timeoutid;
-static guint timeoutfoldid;
 
+void update_favourites_list (gboolean add);
+gboolean foreach_find_random_rom_in_store (GtkTreeModel *model,
+					   GtkTreePath  *path,
+					   GtkTreeIter  *iter,
+					   gpointer      user_data);
 
 /* Main window menu: File */
 void
 on_play_activate (GtkAction *action,
 		  gpointer  user_data)
 {
-	if (!current_exec)
-		return;
+	g_return_if_fail (current_exec != NULL);
+
 	play_game (gui_prefs.current_game);
 }
 
@@ -65,8 +69,8 @@ void
 on_play_and_record_input_activate (GtkAction *action,
 				   gpointer  user_data)
 {
-	if (!current_exec)
-		return;
+	g_return_if_fail (current_exec != NULL);
+	
 	/* joystick focus turned off, will be turned on again in:
 	   gui.c (select_inp) when cancelling the file selection
 	   gmameui.c (record_game) */
@@ -76,11 +80,11 @@ on_play_and_record_input_activate (GtkAction *action,
 
 
 void
-on_playback_input_activate             (GtkAction *action/*GtkMenuItem     *menuitem*/,
-                                        gpointer         user_data)
+on_playback_input_activate (GtkAction *action,
+			    gpointer  user_data)
 {
-	if (!current_exec)
-		return;
+	g_return_if_fail (current_exec != NULL);
+	
 	/* joystick focus turned off, will be turned on again in:
 	   gui.c (select_inp)
 	   gmameui.c (playback_game)*/
@@ -88,74 +92,55 @@ on_playback_input_activate             (GtkAction *action/*GtkMenuItem     *menu
 	select_inp (gui_prefs.current_game, TRUE);
 }
 
+gboolean foreach_find_random_rom_in_store (GtkTreeModel *model,
+					   GtkTreePath  *path,
+					   GtkTreeIter  *iter,
+					   gpointer      user_data)
+{
+	static gint current_row;
+	gint target_row;
+	gboolean return_val;
+	
+	return_val = FALSE;		/* Do not stop walking the store, call us with next row */
+	
+	target_row = (gint *) user_data;
+	
+	if (current_row == target_row) {
+		/* Found the random row we are after */
+		/* Scroll to selection */
+		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list),
+					      path, NULL, TRUE, 0.5, 0);
+
+		/* Need to expand the parent row (if a child) */
+		gtk_tree_view_expand_to_path (GTK_TREE_VIEW (main_gui.displayed_list),
+					      path);
+
+		/* And highlight the row */
+		gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list),
+					  path,
+					  NULL, FALSE);
+		
+		return_val = TRUE;      /* Stop walking the store */
+		current_row = 0;	/* Reset for next time we want to find a random row */
+	}
+	
+	current_row++;
+	
+	return return_val;   
+}
 
 void
 on_select_random_game_activate         (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 	gint random_game;
-	gint i;
-	gboolean is_root;
-	gboolean valid;
-	GtkTreeIter iter, iter_child;
-	GtkTreeSelection *select;
 
 	random_game = (gint) g_random_int_range (0, visible_games);
 	GMAMEUI_DEBUG ("random game#%i", random_game);
 
-	valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-	i=0;
-	is_root=TRUE;
-	while ((i < random_game) && valid)
-	{
-		if (gtk_tree_model_iter_has_child (GTK_TREE_MODEL (main_gui.tree_model),&iter))
-		{
-			if (gtk_tree_model_iter_children (GTK_TREE_MODEL (main_gui.tree_model), &iter_child, &iter))
-			{
-				is_root = FALSE;
-				i++;
-				while (gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter_child) && (i < random_game))
-				{
-					i++;
-				}
-			}
-		}
-		if (i < random_game)
-		{
-			valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-			if (valid)
-			{
-				is_root = TRUE;
-				i++;
-			}
-		}
-	}
-	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_gui.displayed_list));
-	if (is_root)
-	{
-		GtkTreePath *path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-		gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list),
-					  path,
-					  NULL, FALSE);
-		/* Scroll to selection */
-		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list), path, NULL, TRUE, 0.5, 0);
-		gtk_tree_path_free (path);
-	}else
-	{
-		GtkTreePath *path, *child_path;
-		path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-		valid = gtk_tree_view_expand_row (GTK_TREE_VIEW (main_gui.displayed_list),
-						  path,
-						  TRUE);
-		gtk_tree_path_free (path);
-		child_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter_child);
-		gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list),
-					  child_path,
-					  NULL, FALSE);
-		/* Scroll to selection */
-		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list), child_path, NULL, TRUE, 0.5, 0);
-		gtk_tree_path_free (child_path);
-	}
+	gtk_tree_model_foreach (GTK_TREE_MODEL (main_gui.tree_model),
+				foreach_find_random_rom_in_store,
+				(gpointer *) random_game);
 }
 
 void update_favourites_list (gboolean add) {
@@ -163,7 +148,7 @@ void update_favourites_list (gboolean add) {
 	
 	gui_prefs.current_game->favourite = add;
 
-	gmameui_toolbar_set_favourites_sensitive (add);
+	gmameui_ui_set_favourites_sensitive (add);
 	
 	g_object_get (selected_filter,
 		      "type", &type,
@@ -348,26 +333,22 @@ on_screen_shot_tab_activate (GtkAction *action,
 		hide_snaps_tab (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame));
 }
 
-/* This function is called when the radio option defining the list mode is
-   changed. */
+/* This function is called when the radio option defining the list mode is changed. */
 void     on_view_type_changed                   (GtkRadioAction *action,
                                                  gpointer       user_data)
 {
 	gint val;
-	GtkWidget *widget;
 	
 	val = gtk_radio_action_get_current_value (action);
-
 
 	if (gui_prefs.current_mode != val) {
 		gui_prefs.previous_mode = gui_prefs.current_mode;
 		gui_prefs.current_mode = val;
 		GMAMEUI_DEBUG ("Current mode changed %d --> %d", gui_prefs.previous_mode, gui_prefs.current_mode);
-			
-		if ( (gui_prefs.current_mode==LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))
-			gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, TRUE);
-		else
-			gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
+		
+		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group,
+						(gui_prefs.current_mode == LIST_TREE) ||
+						(gui_prefs.current_mode == DETAILS_TREE));
 
 		/* Rebuild the UI */
 		create_gamelist (gui_prefs.current_mode);
@@ -675,19 +656,6 @@ on_list_clicked (GtkWidget      *widget,
 	if (event && event->type == GDK_BUTTON_PRESS && event->button == 3) {
 		 gamelist_popupmenu_show (gui_prefs.current_game, event);
 	}
-	return FALSE;
-}
-
-
-/* Used to detect if key was pressed in the main list
-   that prevent key release detection from another window, dialog box or popup*/
-gboolean
-on_displayed_list_key_press_event (GtkWidget	*widget,
-				   GdkEventKey	*event,
-				   gpointer	 user_data)
-{
-	displayedlist_keypressed = TRUE;
-
 	return FALSE;
 }
 
