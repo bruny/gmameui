@@ -60,6 +60,8 @@
 #include "unzip.h"
 #include "io.h"
 
+const int ROM_ICON_SIZE = 16;
+
 static guint timeout_icon;
 
 gboolean foreach_find_rom_in_store (GtkTreeModel *model,
@@ -105,6 +107,7 @@ set_game_pixbuff_from_iter (GtkTreeIter *iter,
 	RomEntry *tmprom;
 	GdkRectangle rect;
 	GtkTreePath *tree_path;
+	ListMode current_mode;
 
 	gtk_tree_model_get (GTK_TREE_MODEL (main_gui.tree_model), iter, ROMENTRY, &tmprom, -1);
 	tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), iter);
@@ -119,11 +122,15 @@ set_game_pixbuff_from_iter (GtkTreeIter *iter,
 	    && (rect.y < page_size)
 	    && !tmprom->icon_pixbuf) {
 
-		tmprom->icon_pixbuf = get_icon_for_rom (tmprom, gui_prefs.ListFontHeight, zip);
+		    g_object_get (main_gui.gui_prefs,
+				  "current-mode", &current_mode,
+				  NULL);
+		    
+		tmprom->icon_pixbuf = get_icon_for_rom (tmprom, ROM_ICON_SIZE, zip);
 
 		if (tmprom->icon_pixbuf) {
 
-			if ((gui_prefs.current_mode == LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))
+			if ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))
 				gtk_tree_store_set (GTK_TREE_STORE (main_gui.tree_model), iter,
 						    PIXBUF, tmprom->icon_pixbuf,
 						    -1);
@@ -146,9 +153,14 @@ adjustment_scrolled_delayed (void)
 	gchar *zipfile;
 	gboolean valid;
 	GtkAdjustment *vadj;
+	gchar *icon_dir;
+	
+	g_object_get (main_gui.gui_prefs,
+		      "dir-icons", &icon_dir,
+		      NULL);
 
 	/* open the zip file only at the begining */
-	zipfile = g_build_filename (gui_prefs.IconDirectory, "icons.zip", NULL);
+	zipfile = g_build_filename (icon_dir, "icons.zip", NULL);
 	zip = openzip (zipfile);
 
 	/* Getting the vertical window area */
@@ -157,7 +169,7 @@ adjustment_scrolled_delayed (void)
 	/* Disable the callback */
 	g_signal_handlers_block_by_func (G_OBJECT (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games))),
 					 (gpointer)adjustment_scrolled, NULL);
-
+/* FIXME TODO Use gtk_tree_model_foreach similar to callback for selecting random row */
 	if (visible_games > 0) {
 		valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (main_gui.tree_model), &iter);
 		set_game_pixbuff_from_iter (&iter,zip, (gint) (vadj->page_size));
@@ -192,6 +204,8 @@ adjustment_scrolled_delayed (void)
 	if (zip)
 		closezip (zip);
 	g_free (zipfile);
+	g_free (icon_dir);
+	
 	return FALSE;
 }
 
@@ -211,6 +225,7 @@ set_history (const gchar   *entry_name,
 	     GtkTextBuffer *text_buffer)
 {
 	FILE *history_file;
+	gchar *history_filename;
 	GtkTextIter text_iter;
 	gchar line[2000];
 	gint i, n;
@@ -220,10 +235,14 @@ set_history (const gchar   *entry_name,
 	gboolean pointer_in_info = FALSE;
 	gboolean extra_newline = FALSE;
 
-	history_file = fopen (gui_prefs.HistoryFile, "r");
+	g_object_get (main_gui.gui_prefs,
+		      "file-history", &history_filename,
+		      NULL);
+	history_file = fopen (history_filename, "r");
 
 	if (!history_file) {
-		GMAMEUI_DEBUG ("History.dat file %s not found", gui_prefs.HistoryFile);
+		GMAMEUI_DEBUG ("History.dat file %s not found", history_filename);
+		g_free (history_filename);
 		return (FALSE);
 	}
 
@@ -311,6 +330,8 @@ set_history (const gchar   *entry_name,
 	}
 
 	fclose (history_file);
+	if (history_filename)
+		g_free (history_filename);
 
 	return (found_game);
 }
@@ -339,6 +360,7 @@ set_info (const gchar   *entry_name,
 {
 	
 	FILE *mameinfo_dat;
+	gchar *mameinfo_filename;
 	GtkTextIter text_iter;
 	gchar line[2000];
 	gint i;
@@ -347,10 +369,14 @@ set_info (const gchar   *entry_name,
 	gboolean pointer_in_info = FALSE;
 	gboolean extra_newline = FALSE;
 
-	mameinfo_dat = fopen (gui_prefs.MameInfoFile, "r");
+	g_object_get (main_gui.gui_prefs,
+		      "file-mameinfo", &mameinfo_filename,
+		      NULL);
+	mameinfo_dat = fopen (mameinfo_filename, "r");
 
 	if (!mameinfo_dat) {
-		GMAMEUI_DEBUG ("mameinfo.dat file %s not found", gui_prefs.MameInfoFile);
+		GMAMEUI_DEBUG ("mameinfo.dat file %s not found", mameinfo_filename);
+		g_free (mameinfo_filename);
 		return (FALSE);
 	}
 
@@ -408,6 +434,7 @@ set_info (const gchar   *entry_name,
 	}
 
 	fclose (mameinfo_dat);
+	g_free (mameinfo_filename);
 
 	return TRUE;
 }
@@ -450,50 +477,47 @@ get_pixbuf (RomEntry       *rom,
 
 	if (!rom)
 		return NULL;
-
+	
 	/* Prevent a strange bug where wwidth=wheight=1 */
 	if (wwidth < 20)
 		wwidth = 20;
 
 	if (wheight < 20)
 		wheight = 20;
-
+	
+	gint dir_num;
 	switch (sctype) {
-	case (SNAPSHOTS):
-		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->romname);
-		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->cloneof);
-		zipfile = g_build_filename (gui_prefs.SnapshotDirectory, "snap.zip", NULL);
-		break;
-	case (FLYERS):
-		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.FlyerDirectory, rom->romname);
-		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.FlyerDirectory, rom->cloneof);
-		zipfile = g_build_filename (gui_prefs.FlyerDirectory, "flyers.zip", NULL);
-		break;
-	case (CABINETS):
-		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CabinetDirectory, rom->romname);
-		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CabinetDirectory, rom->cloneof);
-		zipfile = g_build_filename (gui_prefs.CabinetDirectory, "cabinets.zip", NULL);
-		break;
-	case (MARQUEES):
-		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.MarqueeDirectory, rom->romname);
-		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.MarqueeDirectory, rom->cloneof);
-		zipfile = g_build_filename (gui_prefs.MarqueeDirectory, "marquees.zip", NULL);
-		break;
-	case (TITLES):
-		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.TitleDirectory, rom->romname);
-		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.TitleDirectory, rom->cloneof);
-		zipfile = g_build_filename (gui_prefs.TitleDirectory, "titles.zip", NULL);
-		break;
-	case (CONTROL_PANELS):
-		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CPanelDirectory, rom->romname);
-		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.CPanelDirectory, rom->cloneof);
-		zipfile = g_build_filename (gui_prefs.TitleDirectory, "cpanels.zip", NULL);
-		break;
-	default:
-		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->romname);
-		filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", gui_prefs.SnapshotDirectory, rom->cloneof);
-		zipfile = g_build_filename (gui_prefs.SnapshotDirectory, "snap.zip", NULL);
+		case (FLYERS):
+			dir_num = DIR_FLYER;
+			break;
+		case (CABINETS):
+			dir_num = DIR_CABINET;
+			break;
+		case (MARQUEES):
+			dir_num = DIR_MARQUEE;
+			break;
+		case (TITLES):
+			dir_num = DIR_TITLE;
+			break;
+		case (CONTROL_PANELS):
+			dir_num = DIR_CPANEL;
+			break;
+		case (SNAPSHOTS):
+		default:
+			dir_num = DIR_SNAPSHOT;
+			break;
 	}
+	
+	gchar *directory_name;
+	g_object_get (main_gui.gui_prefs,
+		      directory_prefs[dir_num].name, &directory_name,
+		      NULL);
+	
+	filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", directory_name, rom->romname);
+	filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", directory_name, rom->cloneof);
+// FIXME TODO	zipfile = g_build_filename (gui_prefs.SnapshotDirectory, "snap.zip", NULL);
+
+	GMAMEUI_DEBUG ("directory is %s, filename is %s, parent is %s", directory_name, filename, filename_parent);
 
 	GMAMEUI_DEBUG ("Looking for image %s", filename);
 	pixbuf = gdk_pixbuf_new_from_file (filename, error);
@@ -510,24 +534,32 @@ get_pixbuf (RomEntry       *rom,
 	
 	if (!pixbuf) {
 		if (sctype == SNAPSHOTS) {
+			gchar *snapshot_dir;
+			g_object_get (main_gui.gui_prefs,
+				      "dir-snapshot", &snapshot_dir,
+				      NULL);
+			
 			/* Since MAME 0.111, snapshots are now in a subdirectory per game
 			   with numeric names 0000.png, 0001.png, etc. */
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", gui_prefs.SnapshotDirectory, rom->romname);
+			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", snapshot_dir, rom->romname);
 			GMAMEUI_DEBUG ("Looking for image %s", filename);
 			pixbuf = gdk_pixbuf_new_from_file (filename,error);
 			g_free (filename);
 
 			/* If not found, look in parent folder */
 			if ((!pixbuf) && strcmp (rom->cloneof,"-")) {
-				filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", gui_prefs.SnapshotDirectory, rom->cloneof);
+				filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", snapshot_dir, rom->cloneof);
 				GMAMEUI_DEBUG ("Looking for parent image %s", filename);
 				pixbuf = gdk_pixbuf_new_from_file (filename,error);
 				g_free (filename);
 			}
+			
+			g_free (snapshot_dir);
 		}
 	}
 	
-	/* we havent found the picture in the directory, maybe we could try in a zipfile */
+	/* FIXME TODO
+	* we havent found the picture in the directory, maybe we could try in a zipfile *
 	if (!pixbuf) {
 		ZIP *zip;
 		struct zipent* zipent;
@@ -546,14 +578,14 @@ get_pixbuf (RomEntry       *rom,
 			parent_filename = g_strdup_printf ("%s.", rom->cloneof);
 
 			while ( (zipent = readzip (zip)) != 0) {
-				/* this should allows to find any format of picture in the zip, not only bmp */
+				* this should allows to find any format of picture in the zip, not only bmp *
 				if (!strncmp (filename,zipent->name, strlen (rom->romname) + 1)) {
 					GMAMEUI_DEBUG ("found file name %s\twith CRC:%i\tsize%i",
 							zipent->name,
 							zipent->crc32,
 							zipent->uncompressed_size);
 					tmp_buffer = read_zipentry (zip, zipent);
-					if (tmp_buffer) {	/* if the file successfully uncompress, try to load it in a pixbuf loader */
+					if (tmp_buffer) {	* if the file successfully uncompress, try to load it in a pixbuf loader *
 						loader = gdk_pixbuf_loader_new ();
 						if (!gdk_pixbuf_loader_write (loader, (guchar *)tmp_buffer, zipent->uncompressed_size, error)) {
 							GMAMEUI_DEBUG ("Error while uncompressing %s from %s", zipent->name, zipfile);
@@ -563,7 +595,7 @@ get_pixbuf (RomEntry       *rom,
 						}
 						g_free (tmp_buffer);
 					}
-					/* prevent to read all zip file if we have found the picture's game (uncompressed successfuly or not) */
+					* prevent to read all zip file if we have found the picture's game (uncompressed successfuly or not) *
 					break;
 
 				} else if (!strncmp (parent_filename, zipent->name, strlen (rom->cloneof) + 1)) {
@@ -574,7 +606,7 @@ get_pixbuf (RomEntry       *rom,
 			g_free (filename);
 			g_free (parent_filename);
 
-			/* no picture found try parent game if any*/
+			* no picture found try parent game if any*
 			if (!pixbuf && parent_tmp_buffer) {
 				loader = gdk_pixbuf_loader_new ();
 				if (!gdk_pixbuf_loader_write (loader, (guchar *)parent_tmp_buffer, parent_buf_size, error)) {
@@ -595,14 +627,19 @@ get_pixbuf (RomEntry       *rom,
 
 		g_free (zipfile);
 		
-	}
+	}*/
 
 	if (pixbuf) {
 		GdkPixbuf *scaled_pixbuf;
+		gboolean show_screenshot;
+		
+		g_object_get (main_gui.gui_prefs,
+			      "show-screenshot", &show_screenshot,
+			      NULL);
 
 		width = gdk_pixbuf_get_width (pixbuf);
 		height = gdk_pixbuf_get_height (pixbuf);
-		if (gui_prefs.ShowScreenShot == 1) {
+		if (show_screenshot == 1) {
 			/* the picture is wider than the window, resize it to the window size */
 			if (width > wwidth) {
 				height = wwidth * ((gdouble)height / (gdouble)width);
@@ -634,11 +671,12 @@ change_screenshot (GtkWidget       *widget,
 		   GdkEventButton  *event,
 		   gpointer         user_data)
 {	/* prevent the mouse wheel (button 4 & 5) to change the screenshot*/
+/* FIXME TODO
 	if (event && event->button <= 3) {
 		gui_prefs.ShowFlyer = (++gui_prefs.ShowFlyer) % 5;
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
 					      gui_prefs.current_game);
-	}
+	}*/
 }
 
 static void
@@ -647,7 +685,10 @@ on_screenshot_notebook_switch_page (GtkNotebook *notebook,
 				    guint page_num,
 				    gpointer user_data)
 {
-	gui_prefs.ShowFlyer = page_num;
+	g_object_set (main_gui.gui_prefs,
+		      "show-flyer", page_num,
+		      NULL);
+
 	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
 				  gui_prefs.current_game);
 }
@@ -678,11 +719,34 @@ gmameui_menu_set_view_mode_check (gint view_mode, gboolean state)
 	gtk_check_menu_item_set_active (widget, state);
 }
 
+static gboolean on_main_window_moved_cb (GtkWidget *widget, GdkEventConfigure *event, gpointer data)
+{
+	gint x, y, w, h;
+	gdk_drawable_get_size (GDK_DRAWABLE (widget->window), &x, &y);
+	gdk_window_get_position (GTK_WINDOW (widget), &w, &h);  /* FIXME TODO */
+
+	g_object_set (main_gui.gui_prefs,
+		      "ui-width", widget->allocation.width,
+		      "ui-height", widget->allocation.height,
+		      NULL);
+	return FALSE;
+}
+
 void
 init_gui (void)
 {
 	GtkTooltips *tooltips;
 	gchar *filename;
+	
+	gint ui_width;
+	gint ui_height;
+	gboolean show_filters;
+	gboolean show_screenshot;
+	gboolean show_statusbar;
+	gboolean show_toolbar;
+	screenshot_type show_flyer;
+	ListMode current_mode;
+	
 #ifdef ENABLE_DEBUG
 	GTimer *mytimer;
 
@@ -705,41 +769,59 @@ g_message (_("Time to initialise icons: %.02f seconds"), g_timer_elapsed (mytime
 #ifdef ENABLE_DEBUG
 g_message (_("Time to create main window and filters: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
-	/* if the ListFont is empty or not loadable, use default font */
-	gui_prefs.ListFontHeight = 16;
 
+	/* FIXME TODO
 	gtk_paned_set_position (main_gui.hpanedLeft, gui_prefs.Splitters[0]);
-	gtk_paned_set_position (main_gui.hpanedRight, gui_prefs.Splitters[1]);
+	gtk_paned_set_position (main_gui.hpanedRight, gui_prefs.Splitters[1]);*/
 
 	gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));
 
+	g_object_get (main_gui.gui_prefs,
+		      "ui-width", &ui_width,
+		      "ui-height", &ui_height,
+		      "show-filterlist", &show_filters,
+		      "show-screenshot", &show_screenshot,
+		      "show-flyer", &show_flyer,
+		      "current-mode", &current_mode,
+		      "show-statusbar", &show_statusbar,
+		      "show-toolbar", &show_toolbar,
+		      NULL);
+ GMAMEUI_DEBUG ("Size is %dx%d", ui_width, ui_height);
 	gtk_window_set_default_size (GTK_WINDOW (MainWindow),
-				     gui_prefs.GUIWidth,
-				     gui_prefs.GUIHeight);
+				     ui_width,
+				     ui_height);
 
+	/* FIXME TODO
 	gtk_window_move (GTK_WINDOW (MainWindow),
 			 gui_prefs.GUIPosX,
-			 gui_prefs.GUIPosY);
+			 gui_prefs.GUIPosY);*/
 
 	/* Show and hence realize mainwindow so that MainWindow->window is available */
 	gtk_widget_show (MainWindow);
 
 	/* Set state of radio/check menu and toolbar widgets */
-	gmameui_menu_set_view_mode_check (gui_prefs.current_mode, TRUE);
+	gmameui_menu_set_view_mode_check (current_mode, TRUE);
 	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
 								 "/MenuBar/ViewMenu/ViewSidebarPanelMenu"),
-				      gui_prefs.ShowScreenShot);
+				      show_screenshot);
+
 	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
 								 "/MenuBar/ViewMenu/ViewFolderListMenu"),
-				      gui_prefs.ShowFolderList);
+				      show_filters);
 	
+	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
+								 "/MenuBar/ViewMenu/ViewStatusBarMenu"),
+				      show_statusbar);
+	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
+								 "/MenuBar/ViewMenu/ViewToolbar"),
+				      show_toolbar);
 
-	if (! ((gui_prefs.current_mode == LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))) {
+	if (! ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))) {
 		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
 	}
 
 	/* Create the UI of the Game List */
-	create_gamelist (gui_prefs.current_mode);
+	create_gamelist (current_mode);
 #ifdef ENABLE_DEBUG
 g_message (_("Time to create gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
@@ -749,7 +831,7 @@ g_message (_("Time to create gamelist: %.02f seconds"), g_timer_elapsed (mytimer
 g_message (_("Time to create gamelist content: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
 	/* Need to set the size here otherwise it move when we create the gamelist */
-	if (gui_prefs.ShowScreenShot)
+	if (show_screenshot)
 		gtk_paned_set_position (main_gui.hpanedRight, gui_prefs.Splitters[1]);
 
 	/* Grab focus on the game list */
@@ -763,7 +845,13 @@ g_message (_("Time to create gamelist content: %.02f seconds"), g_timer_elapsed 
 	                  NULL);
 
 	/* Need to set the notebook page here otherwise it segfault */
-	gmameui_sidebar_set_current_page (main_gui.screenshot_hist_frame, gui_prefs.ShowFlyer);
+	gmameui_sidebar_set_current_page (main_gui.screenshot_hist_frame, show_flyer);
+	
+	/* Once we have created and populated the window, link to the configure-event */
+	g_signal_connect (G_OBJECT (MainWindow), "configure_event",
+			  G_CALLBACK (on_main_window_moved_cb),
+			  NULL);
+	
 #ifdef ENABLE_DEBUG
 	g_timer_stop (mytimer);
 	g_message (_("Time to complete start of UI: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
@@ -937,8 +1025,7 @@ void gmameui_ui_set_items_sensitive () {
 }
 
 void
-gamelist_popupmenu_show (RomEntry       *rom,
-			 GdkEventButton *event)
+gamelist_popupmenu_show (GdkEventButton *event)
 {
 	GtkWidget *popup_menu;
 
@@ -956,7 +1043,6 @@ gamelist_popupmenu_show (RomEntry       *rom,
 void
 hide_filters (void)
 {
-	gui_prefs.ShowFolderList = 0;
 	gui_prefs.Splitters[0] = main_gui.scrolled_window_filters->allocation.width;
 	gtk_paned_set_position (main_gui.hpanedLeft, 0);
 
@@ -966,7 +1052,6 @@ hide_filters (void)
 void
 show_filters (void)
 {
-	gui_prefs.ShowFolderList = 1;
 	gtk_paned_set_position (main_gui.hpanedLeft, gui_prefs.Splitters[0]);
 
 	gtk_widget_show (GTK_WIDGET (main_gui.scrolled_window_filters));
@@ -975,7 +1060,6 @@ show_filters (void)
 void
 hide_snaps (void)
 {
-	gui_prefs.ShowScreenShot = 0;
 	gui_prefs.Splitters[1] = main_gui.scrolled_window_games->allocation.width;
 	gtk_paned_set_position (main_gui.hpanedRight, -1);
 
@@ -985,65 +1069,9 @@ hide_snaps (void)
 void
 show_snaps (void)
 {
-	gui_prefs.ShowScreenShot = 1;
 	gtk_paned_set_position (main_gui.hpanedRight, gui_prefs.Splitters[1]);
 
 	gtk_widget_show (GTK_WIDGET (main_gui.screenshot_hist_frame));
-}
-
-
-void
-hide_snaps_tab (GMAMEUISidebar *sidebar)
-{
-	gui_prefs.ShowScreenShotTab = 0;
-	gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_notebook));
-	gtk_widget_show (GTK_WIDGET (sidebar->priv->screenshot_event_box));
-	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
-				      gui_prefs.current_game);
-}
-
-
-void
-show_snaps_tab (GMAMEUISidebar *sidebar)
-{
-	gui_prefs.ShowScreenShotTab = 1;
-	gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));
-	gtk_widget_show (GTK_WIDGET (sidebar->priv->screenshot_notebook));
-	gtk_notebook_set_current_page (GTK_NOTEBOOK (sidebar->priv->screenshot_notebook),
-				       gui_prefs.ShowFlyer);
-	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
-				      gui_prefs.current_game);
-}
-
-
-void
-hide_toolbar (void)
-{
-	gui_prefs.ShowToolBar = 0;
-	gtk_widget_hide (GTK_WIDGET (main_gui.toolbar));
-}
-
-void
-show_toolbar (void)
-{
-	gui_prefs.ShowToolBar = 1;
-	gtk_widget_show (GTK_WIDGET (main_gui.toolbar));
-}
-
-
-void
-hide_status_bar (void)
-{
-	gui_prefs.ShowStatusBar = 0;
-	gtk_widget_hide (GTK_WIDGET (main_gui.tri_status_bar));
-}
-
-
-void
-show_status_bar (void)
-{
-	gui_prefs.ShowStatusBar = 1;
-	gtk_widget_show (GTK_WIDGET (main_gui.tri_status_bar));
 }
 
 /* get an icon for a rom, if not found, try the original game if the game is a clone */
@@ -1055,18 +1083,23 @@ get_icon_for_rom (RomEntry *rom,
 	GdkPixbuf *pixbuf, *scaled_pixbuf = NULL;
 	gchar filename [MAX_ROMNAME + 1], *filename2;
 	gchar parent_filename [MAX_ROMNAME + 1];
+	gchar *icon_dir;
 	GError **error = NULL;
 
 	if (!rom)
 		return NULL;
 
-	filename2 = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.ico", gui_prefs.IconDirectory, rom->romname);
+	g_object_get (main_gui.gui_prefs,
+		      "dir-icons", &icon_dir,
+		      NULL);
+	
+	filename2 = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.ico", icon_dir, rom->romname);
 	pixbuf = gdk_pixbuf_new_from_file (filename2, error);
 	g_free (filename2);
 
 		/* no picture found try parent game if any*/
 	if ((pixbuf == NULL) && strcmp (rom->cloneof, "-")) {
-		filename2 = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.ico", gui_prefs.IconDirectory, rom->cloneof);
+		filename2 = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.ico", icon_dir, rom->cloneof);
 		pixbuf = gdk_pixbuf_new_from_file (filename, error);
 		g_free (filename2);
 	}
@@ -1132,6 +1165,8 @@ get_icon_for_rom (RomEntry *rom,
 							size, size, GDK_INTERP_BILINEAR);
 		g_object_unref (pixbuf);
 	}
+	
+	g_free (icon_dir);
 	
 	return scaled_pixbuf;
 }
@@ -1448,16 +1483,25 @@ get_status_icons (void)
 
 void set_list_sortable_column ()
 {
-	if ((gui_prefs.current_mode == DETAILS) || (gui_prefs.current_mode == DETAILS_TREE)) {
-		GMAMEUI_DEBUG("Sorting - using sort order %d", gui_prefs.SortColumn);
-		if (gui_prefs.SortReverse)
-			gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), gui_prefs.SortColumn, GTK_SORT_DESCENDING);
-		else
-			gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), gui_prefs.SortColumn, GTK_SORT_ASCENDING);
+	ListMode current_mode;
+	gint sort_col;
+	gint sort_col_dir;
+	
+	g_object_get (main_gui.gui_prefs,
+		      "current-mode", &current_mode,
+		      "sort-col", &sort_col,
+		      "sort-col-direction", &sort_col_dir,
+		      NULL);
+	
+	if ((current_mode == DETAILS) || (current_mode == DETAILS_TREE)) {
+		GMAMEUI_DEBUG("Sorting - using sort order %d", sort_col);
+		gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model),
+						      sort_col, sort_col_dir);
+
 	} else {
 		g_signal_handlers_block_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
-		/* FIXME we sometimes have here a gtk warning why????? */
-		gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model), GAMENAME, GTK_SORT_ASCENDING);
+		gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model),
+						      GAMENAME, GTK_SORT_ASCENDING);
 		g_signal_handlers_unblock_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
 	}	/* Select the correct row */
 }
@@ -1472,11 +1516,12 @@ gboolean foreach_find_rom_in_store (GtkTreeModel *model,
 				    gpointer      user_data)
 {
 	RomEntry *rom;
+	gchar *current_rom_name = (gchar *) user_data;
 /*	gchar *tree_path_str;*/
 	
 	/* Don't even bother trying to walk the store if the current game
 	   is not set. We are just wasting our time */
-	g_return_val_if_fail ((gui_prefs.current_game != NULL), TRUE);
+	g_return_val_if_fail ((current_rom_name != NULL), TRUE);
 	
 	gtk_tree_model_get (model, iter,
 			    ROMENTRY, &rom,
@@ -1486,7 +1531,7 @@ gboolean foreach_find_rom_in_store (GtkTreeModel *model,
 	GMAMEUI_DEBUG ("Row %s: name is %s", tree_path_str, rom->romname);
 	g_free (tree_path_str);
 */	
-	if (g_ascii_strcasecmp (rom->romname, gui_prefs.current_game->romname) == 0) {
+	if (g_ascii_strcasecmp (rom->romname, current_rom_name) == 0) {
 		GMAMEUI_DEBUG ("Found row in tree view - %s", rom->romname);
 				
 		/* Scroll to selection */
@@ -1515,7 +1560,7 @@ create_gamelist_content (void)
 	RomEntry *tmprom;
 	gchar *my_romname_root = NULL;
 	gchar *my_hassamples;
-	GdkColor *my_txtcolor;
+	GdkColor my_txtcolor;
 	GtkTreeIter iter;
 	GtkTreeIter iter_root;
 	GtkTreeModel *store;
@@ -1524,10 +1569,18 @@ create_gamelist_content (void)
 	gint j = 0;
 	gchar *message;
 	RomEntry *selected_game;
+	ListMode current_mode;
+	gchar *current_rom_name;
 
 	GMAMEUI_DEBUG ("POPULATE GAME LIST");
 GTimer *timer = g_timer_new ();
 g_timer_start (timer);
+	
+	g_object_get (main_gui.gui_prefs,
+		      "current-mode", &current_mode,
+		      "current-rom", &current_rom_name,
+		      NULL);
+	
 	selected_game = gui_prefs.current_game;
 
 	/* Status Bar Message */
@@ -1542,10 +1595,7 @@ g_timer_start (timer);
 	}
 
 	/* Whether the Tree Model will a tree or a list */
-	if ( (gui_prefs.current_mode == LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))
-		tree_store = TRUE;
-	else
-		tree_store = FALSE;
+	tree_store = ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE));
 
 	/* Get the status icon */
 	get_status_icons ();
@@ -1613,10 +1663,17 @@ g_timer_start (timer);
 				my_hassamples = (tmprom->has_samples == CORRECT) ? _("Yes") : _("No");
 		
 			/* Clone Color + Pixbuf width */
-			if (strcmp (tmprom->cloneof, "-")) {  /* Clone */
-				my_txtcolor = &gui_prefs.clone_color;
-			} else { /* Original */
-				my_txtcolor = NULL; /* Black */
+			if (strcmp (tmprom->cloneof, "-")) {
+				/* Clone */
+				gchar *clone_color;
+				g_object_get (main_gui.gui_prefs,
+					      "clone-color", &clone_color,
+					      NULL);
+				gdk_color_parse (clone_color, &my_txtcolor);
+				g_free (clone_color);
+			} else {
+				/* Original */
+				gdk_color_parse ("black", &my_txtcolor);
 			}
 
 			/* Set the pixbuf for the status icon */
@@ -1662,7 +1719,7 @@ g_timer_start (timer);
 						    CATEGORY,     tmprom->category,
 						    CHANNELS,     tmprom->channels,
 						    ROMENTRY,     tmprom,                 /* rom entry */
-						    TEXTCOLOR,    my_txtcolor,            /* text color */
+						    TEXTCOLOR,    &my_txtcolor,            /* text color */
 						    PIXBUF,       pixbuf,                 /* pixbuf */
 						    -1);
 				if (is_root)
@@ -1688,7 +1745,7 @@ g_timer_start (timer);
 						    CATEGORY,     tmprom->category,
 						    CHANNELS,     tmprom->channels,
 						    ROMENTRY,     tmprom,                 /* rom entry */
-						    TEXTCOLOR,    my_txtcolor,            /* text color */
+						    TEXTCOLOR,    &my_txtcolor,            /* text color */
 						    PIXBUF,       pixbuf,                 /* pixbuf */
 						    -1);
 			}
@@ -1703,7 +1760,7 @@ g_timer_start (timer);
 
 	/* Callbacks - Sorting order has changed */
 	main_gui.tree_model = GTK_TREE_MODEL (store);
-	if (main_gui.tree_model == NULL) {
+	if (main_gui.tree_model != NULL) {
 		g_signal_connect (G_OBJECT (main_gui.tree_model), "sort-column-changed",
 				  G_CALLBACK (on_displayed_list_sort_column_changed),
 				  NULL);
@@ -1720,12 +1777,12 @@ g_timer_start (timer);
 		/* Find the selected game in the gamelist, and scroll to it, opening any expanders */
 		if (visible_games > 0) {
 			/* Scroll to the game specified from the preferences */
-			gtk_tree_model_foreach (GTK_TREE_MODEL (main_gui.tree_model), foreach_find_rom_in_store, NULL);
+			gtk_tree_model_foreach (GTK_TREE_MODEL (main_gui.tree_model), foreach_find_rom_in_store, current_rom_name);
 		}
 		/* Header clickable. */
 		gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
-						     (gui_prefs.current_mode == DETAILS) ||
-						     (gui_prefs.current_mode == DETAILS_TREE));
+						     (current_mode == DETAILS) ||
+						     (current_mode == DETAILS_TREE));
 		
 	}
 
@@ -1818,11 +1875,12 @@ create_gamelist (ListMode list_mode)
 		/* Callback - Column size modified */
 		g_signal_connect (G_OBJECT (main_gui.displayed_list), "size-request",
 				G_CALLBACK (on_displayed_list_resize_column),
-				NULL);
+				  NULL);
 		/* Callback - Row has been collapsed */
 		g_signal_connect (G_OBJECT (main_gui.displayed_list), "row-collapsed",
 				G_CALLBACK (on_displayed_list_row_collapsed),
 				NULL);
+
 	}
 
 	/* Header clickable Tree Model must exist. */
@@ -1834,6 +1892,14 @@ create_gamelist (ListMode list_mode)
 						     (list_mode == DETAILS) || (list_mode == DETAILS_TREE));
 	}
 
+	GValueArray *va_shown = NULL;
+	GValueArray *va_width = NULL;
+
+	g_object_get (main_gui.gui_prefs,
+		      "cols-shown", &va_shown,
+		      "cols-width", &va_width,
+		      NULL);
+	
 	/* Update the columns */
 	/* FIXME When switching from LIST mode to DETAILS, it puts a mess in the size of the
 	GAMENAME column even if I block the callback?????? */
@@ -1844,17 +1910,24 @@ create_gamelist (ListMode list_mode)
 
 		/* Columns visible, Column size,... */
 		if ( (list_mode == DETAILS) || (list_mode == DETAILS_TREE)) {	/* COLUMNS */
-			if (gui_prefs.ColumnShown[i]==FALSE) {
+
+			//if (gui_prefs.ColumnShown[i]==FALSE) {
+			if (g_value_get_int (g_value_array_get_nth (va_shown, i)) == FALSE) {
 				gtk_tree_view_column_set_visible (column, FALSE);
 			} else {
+				gint col_width;
+				
+				col_width = g_value_get_int (g_value_array_get_nth (va_width, i));
 				gtk_tree_view_column_set_visible (column, TRUE);
-				if (gui_prefs.ColumnWidth[i] == 0) {
+				if (col_width == 0) {
 					gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
 				} else {
 					gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_FIXED);
-					gtk_tree_view_column_set_fixed_width (column, gui_prefs.ColumnWidth[i]);
+					gtk_tree_view_column_set_fixed_width (column, col_width);
 				}
 				gtk_tree_view_column_set_resizable (column, TRUE);
+				
+				
 			}
 		} else {	/* NO COLUMNS */
 			if (i == GAMENAME) {
@@ -1895,12 +1968,12 @@ select_game (RomEntry *rom)
 
 	if (rom) {
 		/* update statusbar */
-		set_status_bar (rom_entry_get_list_name (rom),
-				rom_status_string_value [rom->has_roms]);
+/* FIXME TODO		set_status_bar (rom_entry_get_list_name (rom),
+				rom_status_string_value [rom->has_roms]);*/
 
 		/* update screenshot panel */
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
-					      gui_prefs.current_game);
+					      rom);
 	} else {
 		/* no roms selected display the default picture */
 
@@ -1920,6 +1993,7 @@ select_game (RomEntry *rom)
 void
 show_progress_bar (void)
 {
+/* FIXME TODO Not currently implemented 
 	if (gui_prefs.ShowStatusBar) {
 		gchar *displayed_message;
 		displayed_message = g_strdup_printf (_("Game search %i%% complete"), 0);
@@ -1928,22 +2002,24 @@ show_progress_bar (void)
 		gtk_statusbar_push (main_gui.status_progress_bar, 1, displayed_message);
 		gtk_widget_show (GTK_WIDGET (main_gui.combo_progress_bar));
 		g_free (displayed_message);
-	}	
+	}	*/
 }
 
 void
 hide_progress_bar (void)
 {
+/* FIXME TODO Not currently implemented 
 	if (gui_prefs.ShowStatusBar) {
 		gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));
 		gtk_statusbar_pop (main_gui.status_progress_bar, 1);
 		gtk_widget_show (GTK_WIDGET (main_gui.tri_status_bar));
-	}
+	}*/
 }
 
 void
 update_progress_bar (gfloat current_value)
 {
+/* FIXME TODO Not currently implemented 
 	static gint current_displayed_value;
 	gchar *displayed_message;
 
@@ -1959,6 +2035,7 @@ update_progress_bar (gfloat current_value)
 	}
 
 	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (main_gui.progress_progress_bar), current_value);
+*/
 }
 
 void
@@ -1968,15 +2045,17 @@ update_game_in_list (RomEntry *tmprom)
 	GdkColor *my_txtcolor;
 	GdkPixbuf *pixbuf;
 	gboolean is_tree_store;
+	ListMode current_mode;
 
 	if (!tmprom)
 		return;
 
+	g_object_get (main_gui.gui_prefs,
+		      "current-mode", &current_mode,
+		      NULL);
+	
 	/* Whether the Tree Model will a tree or a list */
-	if ( (gui_prefs.current_mode == LIST_TREE) || (gui_prefs.current_mode == DETAILS_TREE))
-		is_tree_store = TRUE;
-	else
-		is_tree_store = FALSE;
+	is_tree_store = (current_mode == LIST_TREE) || (current_mode == DETAILS_TREE);
 
 	rom_entry_get_list_name (tmprom);
 	
@@ -1989,7 +2068,13 @@ update_game_in_list (RomEntry *tmprom)
 	
 	/* Clone Color + Pixbuf width */
 	if (strcmp (tmprom->cloneof, "-")) {  /* Clone */
-		my_txtcolor = &gui_prefs.clone_color;
+		/* Clone */
+/* FIXME TODO		gchar *clone_color;
+		g_object_get (main_gui.gui_prefs,
+			      "clone-color", &clone_color,
+			      NULL);
+		gdk_color_parse (clone_color, &my_txtcolor);
+		g_free (clone_color);*/
 	} else { /* Original */
 		my_txtcolor = NULL; /* Black */
 	}
@@ -2087,6 +2172,7 @@ select_inp (RomEntry *rom,
 {
 	GtkWidget *inp_selection;
 	gchar *temp_text;
+	gchar *inp_dir;
 
 	if (play_record) {
 		inp_selection = gtk_file_chooser_dialog_new (_("Choose inp file to play"),
@@ -2103,8 +2189,13 @@ select_inp (RomEntry *rom,
 							     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
 							     NULL);
 	}
-
-	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (inp_selection), gui_prefs.InputDirectory);
+	
+	g_object_get (main_gui.gui_prefs,
+		      "dir-inp", &inp_dir,
+		      NULL);
+	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (inp_selection), inp_dir);
+	g_free (inp_dir);
+	
 	if (!play_record) {
 		temp_text = g_strdup_printf ("%s.inp", rom->romname);
 		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (inp_selection), temp_text);
@@ -2244,11 +2335,12 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	gtk_widget_show (sidebar->priv->history_box);
 
 	gtk_widget_show_all (GTK_WIDGET (sidebar));
-	
+/* DELETE - Not using ScreenShotTab	
 	if (gui_prefs.ShowScreenShotTab == FALSE)
 		gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_notebook));
 	else
-		gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));
+		gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));*/
+gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));
 GMAMEUI_DEBUG ("Finished creating sidebar");
 }
 
@@ -2274,58 +2366,38 @@ gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom)
 		
 	GMAMEUI_DEBUG ("Setting page");
 	
+	screenshot_type show_flyer;
 	int wwidth, wheight;
 	GtkWidget *pict = NULL;
 	
 	gboolean had_history;
 
 	wwidth = 0; wheight = 0;
+	
+	g_object_get (main_gui.gui_prefs,
+		      "show-flyer", &show_flyer,
+		      NULL);
 
 	if (rom) {
 		UPDATE_GUI;
-		if (gui_prefs.ShowScreenShotTab == 0) {
-			gdk_drawable_get_size ((sidebar->priv->screenshot_event_box)->window,
-					       &wwidth, &wheight);
-		} else {
-			GtkRequisition requisition;
-			gtk_widget_size_request (sidebar->priv->screenshot_box1,
-						 &requisition);
-			wwidth = requisition.width;
-			wheight = requisition.height;
-		}
+
+		GtkRequisition requisition;
+		gtk_widget_size_request (sidebar->priv->screenshot_box1,
+					 &requisition);
+		wwidth = requisition.width;
+		wheight = requisition.height;
 
 		had_history = FALSE;
 		had_history = gmameui_sidebar_set_history (sidebar, rom);
-		
-		if (gui_prefs.ShowScreenShotTab == 0) {
-			/* Remove the elements from the container */
-			gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
-					      sidebar->priv->main_screenshot);
-			gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_hist_vbox),
-					      sidebar->priv->screenshot_event_box);
-			pict = get_pixbuf (rom, gui_prefs.ShowFlyer, wwidth, wheight);
-			sidebar->priv->main_screenshot = pict;
-			sidebar->priv->screenshot_event_box = gtk_event_box_new ();
-			
-			/* And add them again */
-			gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
-					   GTK_WIDGET (sidebar->priv->main_screenshot));
-			gtk_widget_show (sidebar->priv->screenshot_event_box);
-			gtk_widget_show (sidebar->priv->main_screenshot);
-			g_signal_connect (G_OBJECT (sidebar->priv->screenshot_event_box),
-					  "button-release-event",
-					  G_CALLBACK (change_screenshot),
-					  NULL);
-		} else {
-			pict = get_pixbuf (rom, gui_prefs.ShowFlyer, wwidth, wheight);
+
+			pict = get_pixbuf (rom, show_flyer, wwidth, wheight);
 			/* Remove the elements from the container and then re-add.
 			   This is necessary to refresh the image */
-			switch (gui_prefs.ShowFlyer) {
+			switch (show_flyer) {
 			case (SNAPSHOTS):
 				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box1),
 						      sidebar->priv->screenshot1);
-				sidebar->priv->screenshot1 = pict;
-					
+				sidebar->priv->screenshot1 = pict;					
 				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box1),
 						   GTK_WIDGET (sidebar->priv->screenshot1));
 				gtk_widget_show_all (sidebar->priv->screenshot_box1);
@@ -2371,39 +2443,14 @@ gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom)
 				gtk_widget_show_all (sidebar->priv->screenshot_box6);
 				break;	
 			}
-		}
 		
 		if (had_history) {
 			gtk_widget_show (GTK_WIDGET (sidebar->priv->history_scrollwin));
-			if (gui_prefs.ShowScreenShotTab == 0)
-				gtk_box_pack_end (sidebar->priv->screenshot_hist_vbox,
-						  sidebar->priv->screenshot_event_box, FALSE, TRUE, 5);
 		} else {
 			gtk_widget_hide (GTK_WIDGET (sidebar->priv->history_scrollwin));
-			if (gui_prefs.ShowScreenShotTab == 0)
-				gtk_box_pack_end (sidebar->priv->screenshot_hist_vbox,
-						  sidebar->priv->screenshot_event_box, TRUE, TRUE, 5);
 		}
 		
 	} else {
-		/* no roms selected display the default picture */ 
-		if (gui_prefs.ShowScreenShotTab == 0) {
-			gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
-					      sidebar->priv->main_screenshot);
-			gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_hist_vbox),
-					      sidebar->priv->screenshot_event_box);
-
-			sidebar->priv->main_screenshot = gmameui_get_image_from_stock ("gmameui-screen");
-			sidebar->priv->screenshot_event_box = gtk_event_box_new ();
-			gtk_box_pack_end (sidebar->priv->screenshot_hist_vbox,
-					  sidebar->priv->screenshot_event_box,
-					  TRUE, TRUE, 5);
-			gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_event_box),
-					   GTK_WIDGET (sidebar->priv->main_screenshot));
-			gtk_widget_show (sidebar->priv->screenshot_event_box);
-			gtk_widget_show (sidebar->priv->main_screenshot);
-		}
-
 		/* erase and hide the history box */
 		gtk_text_buffer_set_text (GTK_TEXT_BUFFER (sidebar->priv->history_buffer), "", -1);
 		gtk_widget_hide (GTK_WIDGET (sidebar->priv->history_scrollwin));

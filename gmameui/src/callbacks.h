@@ -75,9 +75,6 @@ void     on_folder_list_activate                (GtkAction *action,
 void     on_screen_shot_activate                (GtkAction *action,
                                                  gpointer         user_data);
 
-void     on_screen_shot_tab_activate            (GtkAction *action,
-                                                 gpointer         user_data);
-
 void     on_list_view_menu_activate             (GtkCheckMenuItem *menuitem,
                                                  gpointer         user_data);
 
@@ -90,9 +87,6 @@ void     on_details_view_menu_activate          (GtkCheckMenuItem *menuitem,
 void     on_details_tree_view_menu_activate     (GtkCheckMenuItem *menuitem,
                                                  gpointer         user_data);
 
-void     on_column_layout_activate              (GtkCheckMenuItem *menuitem,
-                                                 gpointer         user_data);
-
 void     on_view_type_changed                   (GtkRadioAction *action,
                                                  gpointer       user_data);
 
@@ -102,19 +96,10 @@ void     on_expand_all_activate                 (GtkMenuItem *menuitem,
 void     on_collapse_all_activate               (GtkMenuItem *menuitem,
                                                  gpointer         user_data);
 
-void     on_the_prefix_activate                 (GtkCheckMenuItem *menuitem,
-                                                 gpointer         user_data);
-
 void     on_refresh_activate                    (GtkAction        *action,
                                                  gpointer         user_data);
 
 /* Main window menu: Option */
-void     on_clone_color_menu_activate           (GtkMenuItem     *menuitem,
-                                                 gpointer         user_data);
-
-void     on_game_list_font_activate             (GtkMenuItem     *menuitem,
-                                                 gpointer         user_data);
-
 void     on_rebuild_game_list_menu_activate     (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
 
@@ -124,7 +109,7 @@ void     on_directories_menu_activate           (GtkMenuItem     *menuitem,
 void     on_default_option_menu_activate        (GtkMenuItem	*menuitem,
                                                  gpointer	 user_data);
 
-void     on_startup_option_activate             (GtkMenuItem     *menuitem,
+void     on_preferences_activate             (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
 
 

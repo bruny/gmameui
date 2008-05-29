@@ -146,72 +146,21 @@ typedef enum {
 
 struct gui_prefs_struct {
 	RomEntry *current_game;
-	folder_filters_list FolderID;
-	/*Show screenshot panel*/
-	gboolean ShowScreenShot;
-	gboolean ShowScreenShotTab;
-	screenshot_type ShowFlyer;
-	gint       ShowToolBar;
-	gboolean   ShowStatusBar;
-	gboolean   ShowFolderList;
-	gboolean   ModifyThe;
-	gint       SortColumn;
-	gboolean   SortReverse;
-
-	gint       GUIPosX;
-	gint       GUIPosY;
-	gint       GUIWidth;
-	gint       GUIHeight;
-
-	ListMode   current_mode;
-	ListMode   previous_mode;
+//	folder_filters_list FolderID;   /* FIXME TODO Not used with current filters */
 
 	gint       *Splitters;
-
-	guint      ListFontHeight;
-	gint       *ColumnWidth;
-	gint       *ColumnShown;
-//	gchar *SaveVersion;
-	GdkColor   clone_color;
 	
 	/* directories specification */
-	gchar **RomPath;
-	gchar **SamplePath;
-	gchar *ArtworkDirectory;
-	gchar *SnapshotDirectory;
-	gchar *HiscoreDirectory;
-	gchar *FlyerDirectory;
-	gchar *CabinetDirectory;
-	gchar *MarqueeDirectory;
-	gchar *TitleDirectory;
-	gchar *CPanelDirectory;
-	gchar *DiffDirectory;
-
-	gchar *IconDirectory;
-
-	gchar *InputDirectory;
-	gchar *NVRamDirectory;
-	gchar *MemCardDirectory;
-	gchar *ConfigDirectory;
-	gchar *StateDirectory;
 	gchar *CtrlrDirectory;
 	gchar *inipath;
 	
 	/* specifics option to GMAMEUI (path to catver, common path...)
 	   not in dir.ini */
 	gchar *catverDirectory;
-	gchar *CheatFile;
- 	gchar *HiscoreFile;
- 	gchar *HistoryFile;
- 	gchar *MameInfoFile;
 	
-	/* Startup options */
-	gboolean   GameCheck;
-	gboolean   VersionCheck;
 	/* GUI Joystick options */
-	gboolean   gui_joy;
+//	gboolean   gui_joy;
 	gchar      *Joystick_in_GUI;
-	gboolean   use_xmame_options;   /* Don't pass any options to xmame */
 };
 
 struct gui_prefs_struct gui_prefs;

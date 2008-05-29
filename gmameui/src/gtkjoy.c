@@ -390,7 +390,7 @@ on_joystick_event (gint eventtype, gint button)
 		if (joydata->buttons[button] == 0)
 			switch (button) {
 			case 0:
-				play_game (gui_prefs.current_game);
+// FIXME TODO				play_game (gui_prefs.current_game);
 				break;
 			case 1:
 				toggle_expand ();

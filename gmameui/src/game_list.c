@@ -108,8 +108,6 @@ void
 gamelist_init (void)
 {
 	memset (&game_list, 0, sizeof (GameList));
-
-	gui_prefs.current_game = NULL;
 }
 
 void
@@ -616,6 +614,11 @@ gamelist_check (XmameExecutable *exec)
 	GtkWidget *dialog = NULL;
 
 	gint result;
+	gboolean versioncheck;  /* Check the gamelist against the current executable */
+	
+	g_object_get (main_gui.gui_prefs,
+		      "versioncheck", &versioncheck,
+		      NULL);
 
 	if (!exec)
 		return;
@@ -647,8 +650,7 @@ gamelist_check (XmameExecutable *exec)
 							  "The gamelist is not supported.\n"
 							  "Do you want to rebuild the gamelist?"));
 
-	} else if (gui_prefs.VersionCheck) {
-		
+	} else if (versioncheck) {	
 		if (strcmp (exec->name, game_list.name) ||
 			strcmp (exec->version, game_list.version))
 		{

@@ -28,6 +28,7 @@
 #include <stdlib.h>
 
 #include "gmameui.h"
+#include "gui.h"	/* For main_gui, so we can reach the preferences */
 #include "options_string.h"
 #include "io.h"
 #include "keyboard.h"
@@ -682,6 +683,7 @@ static char *create_misc_options_string(XmameExecutable *exec, GameOptions *targ
 
 	gchar *debug_size;
 	gchar *cheat;
+	gchar *cfg_dir;
 
 	xmame_get_options(exec);
 
@@ -733,17 +735,22 @@ static char *create_misc_options_string(XmameExecutable *exec, GameOptions *targ
 	}
 
 	/* for the cfg_directory option, if available, see in io options */
+	g_object_get (main_gui.gui_prefs,
+		      "dir-cfg", &cfg_dir,
+		      NULL);
 	if (target->cfgname_flag)
 	{
 		cfgname = xmame_get_option_string(exec, "cfgname", target->cfgname);
 		if (!cfgname && strcmp(g_strstrip(target->cfgname),"")) {
-			gchar *full_path =  g_strdup_printf("%s" G_DIR_SEPARATOR_S "%s",gui_prefs.ConfigDirectory, target->cfgname);
+			gchar *full_path = g_build_filename (cfg_dir,
+							     target->cfgname,
+							     NULL);
 			cfgname = xmame_get_option_string(exec, "cfg_directory", full_path);
 
 			g_free(full_path);
 		}
 	} else {
-		cfgname = xmame_get_option_string(exec, "cfg_directory", gui_prefs.ConfigDirectory);
+		cfgname = xmame_get_option_string(exec, "cfg_directory", cfg_dir);
 	}
 
 	
@@ -780,7 +787,9 @@ static char *create_misc_options_string(XmameExecutable *exec, GameOptions *targ
 	g_free(cfgname);
 	g_free(skip_gameinfo);
 	g_free(skip_disclaimer);
-	g_free(bios);	
+	g_free(bios);
+	
+	g_free (cfg_dir);
 
 	return option_string;
 }
@@ -845,6 +854,10 @@ char *create_vector_options_string(XmameExecutable *exec, GameOptions *target)
 gchar *create_io_options_string(XmameExecutable *exec)
 {
 	char *option_string;
+	
+	gchar *artwork_dir, *snapshot_dir, *hiscore_dir, *cheat_file, *hiscore_file, *history_file, *mameinfo_file;
+	gchar *nvram_dir, *cfg_dir, *state_dir, *inp_dir, *memcard_dir, *diff_dir;
+	
 	gchar *artworkpath_option,
 			*screenshotdir_option,
 			*hiscoredir_option,
@@ -863,14 +876,30 @@ gchar *create_io_options_string(XmameExecutable *exec)
 
 	xmame_get_options(exec);
 	
-	artworkpath_option = xmame_get_option_string(exec, "artwork_directory", gui_prefs.ArtworkDirectory);
-	screenshotdir_option = xmame_get_option_string(exec, "snapshot_directory", gui_prefs.SnapshotDirectory);
- 	hiscoredir_option = xmame_get_option_string(exec, "hiscore_directory", gui_prefs.HiscoreDirectory);
-	cheatfile_option = xmame_get_option_string(exec, "cheat_file", gui_prefs.CheatFile);
-	hiscorefile_option = xmame_get_option_string(exec, "hiscore_file", gui_prefs.HiscoreFile);	
-	historyfile_option = xmame_get_option_string(exec, "history_file", gui_prefs.HistoryFile);
-	mameinfofile_option = xmame_get_option_string(exec, "mameinfo_file", gui_prefs.MameInfoFile);
-	diffdir_option = xmame_get_option_string(exec, "diff_directory", gui_prefs.DiffDirectory);
+	/* FIXME TODO Free the strings */
+	g_object_get (main_gui.gui_prefs,
+		      "dir-artwork", &artwork_dir,
+		      "dir-snapshot", &snapshot_dir,
+		      "dir-hiscore", &hiscore_dir,
+		      "file-cheat", &cheat_file,
+		      "file-hiscore", &hiscore_file,
+		      "file-history", &history_file,
+		      "file-mameinfo", &mameinfo_file,
+		      "dir-nvram", &nvram_dir,
+		      "dir-state", &state_dir,
+		      "dir-inp", &inp_dir,
+		      "dir-memcard", &memcard_dir,
+		      "dir-diff", &diff_dir,
+		      NULL);
+	
+	artworkpath_option = xmame_get_option_string(exec, "artwork_directory", artwork_dir);
+	screenshotdir_option = xmame_get_option_string(exec, "snapshot_directory", snapshot_dir);
+ 	hiscoredir_option = xmame_get_option_string(exec, "hiscore_directory", hiscore_dir);
+	cheatfile_option = xmame_get_option_string(exec, "cheat_file", cheat_file);
+	hiscorefile_option = xmame_get_option_string(exec, "hiscore_file", hiscore_file);	
+	historyfile_option = xmame_get_option_string(exec, "history_file", history_file);
+	mameinfofile_option = xmame_get_option_string(exec, "mameinfo_file", mameinfo_file);
+	diffdir_option = xmame_get_option_string(exec, "diff_directory", diff_dir);
 	
 	/* for this option, see in the input option as this option can change if cfname has bee set or not */
 /*	if (available_options.ConfigDirectory  && (strlen(gui_prefs.ConfigDirectory)>0))
@@ -883,11 +912,11 @@ gchar *create_io_options_string(XmameExecutable *exec)
 */		cfg_directory_option = g_strdup("");
 
 	inipath_option = xmame_get_option_string(exec, "inipath", gui_prefs.inipath);
-	nvram_directory_option = xmame_get_option_string(exec, "nvram_directory", gui_prefs.NVRamDirectory);
+	nvram_directory_option = xmame_get_option_string(exec, "nvram_directory", nvram_dir);
 	ctrlr_directory_option = xmame_get_option_string(exec, "ctrlr_directory", gui_prefs.CtrlrDirectory);
-	state_directory_option = xmame_get_option_string(exec, "state_directory", gui_prefs.StateDirectory);
-	input_directory_option = xmame_get_option_string(exec, "input_directory", gui_prefs.InputDirectory);
-	memcard_directory_option = xmame_get_option_string(exec, "memcard_directory", gui_prefs.MemCardDirectory);
+	state_directory_option = xmame_get_option_string(exec, "state_directory", state_dir);
+	input_directory_option = xmame_get_option_string(exec, "input_directory", inp_dir);
+	memcard_directory_option = xmame_get_option_string(exec, "memcard_directory", memcard_dir);
 
 	option_string = g_strdup_printf("%s "	/* artworkpath_option*/
 			"%s "			/* screenshotdir_option */
@@ -937,29 +966,70 @@ gchar *create_io_options_string(XmameExecutable *exec)
 	g_free(input_directory_option);
 	g_free(state_directory_option);
 	
+	g_free (artwork_dir);
+	g_free (snapshot_dir);
+	g_free (hiscore_dir);
+	g_free (cheat_file);
+	g_free (hiscore_file);
+	g_free (history_file);
+	g_free (mameinfo_file);
+	g_free (nvram_dir);
+	g_free (state_dir);
+	g_free (inp_dir);
+	g_free (memcard_dir);
+	g_free (diff_dir);
+	
 	return option_string;
 }
 
 gchar *create_rompath_options_string(XmameExecutable *exec)
 {
+	GValueArray *va_rom_paths;
+	GValueArray *va_sample_paths;
 	gchar *rompath_option_string;
 	gchar *rompath;
 	gchar *samplepath_option_string;
 	gchar *samplepath;
 	gchar *option_string;
+	guint i;
+	
+	g_object_get (main_gui.gui_prefs,
+		      "sample-paths", &va_sample_paths,
+		      "rom-paths", &va_rom_paths,
+		      NULL);
 	
 	xmame_get_options(exec);
 
 	/* G_SEARCHPATH_SEPARATOR_S returns ":" on Unix, but newer versions,
 	   particularly for sdlmame, require ";" */
-	if (!g_strcasecmp (exec->name, "xmame")) {
-		rompath = g_strjoinv(G_SEARCHPATH_SEPARATOR_S, gui_prefs.RomPath);
-		samplepath = g_strjoinv(G_SEARCHPATH_SEPARATOR_S, gui_prefs.SamplePath);
-	} else {
-		rompath = g_strjoinv(";", gui_prefs.RomPath);
-		samplepath = g_strjoinv(";", gui_prefs.SamplePath);
+	
+	rompath = g_new0 (gchar*, 0);
+	for (i = 0; i < va_rom_paths->n_values; i++) {
+		if (!rompath)
+			rompath = g_strdup (g_value_get_string (g_value_array_get_nth (va_rom_paths, i)));
+		else
+			rompath = g_strjoin ((g_strcasecmp (exec->name, "xmame") == 0) ? G_SEARCHPATH_SEPARATOR_S : ";",
+						rompath,
+						g_value_get_string (g_value_array_get_nth (va_rom_paths, i)),
+						NULL);
+		GMAMEUI_DEBUG ("In loop rompath is %s", rompath);
 	}
-GMAMEUI_DEBUG ("Rompath is %s", rompath);
+	
+	samplepath = g_new0 (gchar*, 0);
+	for (i = 0; i < va_sample_paths->n_values; i++) {
+		if (!samplepath)
+			samplepath = g_strdup (g_value_get_string (g_value_array_get_nth (va_sample_paths, i)));
+		else
+			samplepath = g_strjoin ((g_strcasecmp (exec->name, "xmame") == 0) ? ";" : G_SEARCHPATH_SEPARATOR_S,
+						samplepath,
+						g_value_get_string (g_value_array_get_nth (va_sample_paths, i)),
+						NULL);
+		GMAMEUI_DEBUG ("In loop samplepath is %s", samplepath);
+	}
+
+	GMAMEUI_DEBUG ("Rompath is %s", rompath);
+	GMAMEUI_DEBUG ("Samplepath is %s", samplepath);
+
 	rompath_option_string = xmame_get_option_string(exec, "rompath", rompath);
 	samplepath_option_string = xmame_get_option_string(exec, "samplepath", samplepath);
 
@@ -973,6 +1043,9 @@ GMAMEUI_DEBUG ("Rompath is %s", rompath);
 
 	g_free(rompath_option_string);
 	g_free(samplepath_option_string);
+	
+	g_value_array_free (va_sample_paths);
+	g_value_array_free (va_rom_paths);
 
 	if (!option_string)
 		option_string = g_strdup("");

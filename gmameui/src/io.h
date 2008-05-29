@@ -55,9 +55,6 @@ gboolean
 save_games_ini(void);
 
 gboolean
-save_gmameui_ini(void);
-
-gboolean
 save_dirs_ini(void);
 
 GList *

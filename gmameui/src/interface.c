@@ -84,7 +84,7 @@ create_MainWindow (void)
 	GError *error = NULL;
 	
 	GtkWidget *menubar;
-
+	
   tooltips = gtk_tooltips_new ();
 
   accel_group = gtk_accel_group_new ();
@@ -93,6 +93,7 @@ create_MainWindow (void)
   g_object_set_data (G_OBJECT (MainWindow), "MainWindow", MainWindow);
   gtk_window_set_title (GTK_WINDOW (MainWindow), _("GMAMEUI Arcade Machine Emulator"));
   gtk_window_set_default_size (GTK_WINDOW (MainWindow), 640, 400);
+	gtk_widget_set_events (GTK_WIDGET (MainWindow), GDK_STRUCTURE_MASK);    /* Required to catch configure-event */
 
   vbox1 = gtk_vbox_new (FALSE, 1);
   gtk_widget_show (vbox1);

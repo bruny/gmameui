@@ -267,10 +267,17 @@ get_rom_clone_name (RomEntry *rom)
 
 			tmprom = (RomEntry *)l->data;
 			if (!strcmp (tmprom->romname, rom->cloneof)) {
-				if (tmprom->the_trailer && gui_prefs.ModifyThe)
+				/* TODO FIXME Move name generation to a common rom_entry function */
+				gboolean the_prefix;
+				
+				g_object_get (main_gui.gui_prefs,
+					      "theprefix", &the_prefix,
+					      NULL);
+				
+				if (tmprom->the_trailer && the_prefix)
 					value = g_strdup_printf ("%s, The %s - \"%s\"",
 								 tmprom->gamename, tmprom->gamenameext, rom->cloneof);
-				else if (tmprom->the_trailer && !gui_prefs.ModifyThe)
+				else if (tmprom->the_trailer && !the_prefix)
 					value = g_strdup_printf ("The %s %s - \"%s\"",
 								 tmprom->gamename, tmprom->gamenameext, rom->cloneof);
 				else

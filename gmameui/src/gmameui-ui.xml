@@ -25,7 +25,6 @@
       <menuitem name="ViewStatusBarMenu" action="ViewStatusBar"/>
       <menuitem name="ViewFolderListMenu" action="ViewFolderList"/>
       <menuitem name="ViewSidebarPanelMenu" action="ViewSidebarPanel"/>
-      <menuitem name="ViewSidebarPanelTabMenu" action="ViewSidebarPanelTab"/>
       <separator/>
       <menuitem name="ViewListViewMenu" action="ViewListView"/>
       <menuitem name="ViewTreeViewMenu" action="ViewTreeView"/>
@@ -35,19 +34,14 @@
       <menuitem name="ViewExpandAllMenu" action="ViewExpandAll"/>
       <menuitem name="ViewCollapseAllMenu" action="ViewCollapseAll"/>
       <separator/>
-      <menuitem name="ViewColumnLayoutMenu" action="ViewColumnLayout"/>
-      <separator/>
-      <menuitem name="ViewThePrefixMenu" action="ViewThePrefix"/>
-      <separator/>
       <menuitem name="ViewRefreshMenu" action="ViewRefresh"/>
     </menu>
 
     <menu name="OptionsMenu" action="Options">
-      <menuitem name="OptionCloneColorMenu" action="OptionCloneColor"/>
       <menuitem name="OptionRebuildGameListMenu" action="OptionRebuildGameList"/>
       <menuitem name="OptionDirsMenu" action="OptionDirs"/>
       <menuitem name="OptionDefaultOptsMenu" action="OptionDefaultOpts"/>
-      <menuitem name="OptionStartupOptsMenu" action="OptionStartupOpts"/>
+      <menuitem name="OptionPreferencesMenu" action="OptionPreferences"/>
       <separator/>
       <placeholder name="OptionMameExecutables" />
     </menu>
@@ -90,9 +84,7 @@
 
   <popup name="ColumnPopup" action="ColumnPopupAction">
     <menuitem action="ColumnHide"/>
-    <menuitem action="ColumnLayout"/>
     <separator/>
-<!--    <menuitem action="ColumnCancel"/>-->
   </popup>      
      
 </ui>

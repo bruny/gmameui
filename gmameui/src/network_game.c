@@ -136,6 +136,8 @@ static gchar *create_network_options_string(XmameExecutable *exec, const struct 
 
 static void play_network_game(RomEntry *rom, const struct network_game_options *net_options)
 {
+/* This code is commented out since networking is not supported by
+   recent versions of MAME
 	gchar *opt;
 	gchar *general_options;
 	gchar *vector_options;
@@ -164,7 +166,7 @@ static void play_network_game(RomEntry *rom, const struct network_game_options *
 	if (!target)
 		target = &default_options;
 	
-	/* prepares options*/
+	* prepares options*
 	general_options = create_options_string(current_exec, target);
 	network_options = create_network_options_string(current_exec, net_options);
 	
@@ -176,7 +178,7 @@ static void play_network_game(RomEntry *rom, const struct network_game_options *
 
 	game_options_free(target);
 	
-	/* create the command */
+	* create the command *
 	opt=g_strdup_printf("%s %s %s %s -noloadconfig %s 2>&1",
 			current_exec->path,
 			general_options,
@@ -184,13 +186,13 @@ static void play_network_game(RomEntry *rom, const struct network_game_options *
 			vector_options,
 			rom->romname);
 
-	/*free options*/
+	*free options*
 	g_free(general_options);
 	g_free(vector_options);
 	g_free(network_options);	
 
 	launch_emulation(rom, opt);
-	g_free(opt);
+	g_free(opt);*/
 }
 
 static void on_ok_click (GtkObject *checkbutton,
@@ -508,7 +510,7 @@ void on_network_play_activate  (GtkMenuItem     *menuitem,
 {
 	GtkWidget *network_window;
 	RomEntry *rom;
-
+/* FIXME TODO
 	rom = gui_prefs.current_game;
 
 	xmame_get_options(current_exec);
@@ -518,5 +520,5 @@ void on_network_play_activate  (GtkMenuItem     *menuitem,
 		gtk_widget_show(network_window);
 	} else {
 		gmameui_message(ERROR, NULL, "Your xmame does not support network games.");
-	}
+	}*/
 }

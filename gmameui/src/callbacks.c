@@ -44,7 +44,7 @@
 #include "properties.h"
 #include "progression_window.h"
 #include "io.h"
-#include "gui_prefs.h"
+#include "gui_prefs_dialog.h"
 #include "column_layout.h"
 
 static guint timeoutid;
@@ -65,6 +65,8 @@ on_play_activate (GtkAction *action,
 	play_game (gui_prefs.current_game);
 }
 
+/* FIXME TODO Consolidate the next two functions by passing
+   in TRUE or FALSE in the user_data */
 void
 on_play_and_record_input_activate (GtkAction *action,
 				   gpointer  user_data)
@@ -75,7 +77,7 @@ on_play_and_record_input_activate (GtkAction *action,
 	   gui.c (select_inp) when cancelling the file selection
 	   gmameui.c (record_game) */
 	joy_focus_off ();
-	select_inp (gui_prefs.current_game, FALSE);
+/* FIXME TODO	select_inp (gui_prefs.current_game, FALSE);*/
 }
 
 
@@ -89,7 +91,7 @@ on_playback_input_activate (GtkAction *action,
 	   gui.c (select_inp)
 	   gmameui.c (playback_game)*/
 	joy_focus_off ();
-	select_inp (gui_prefs.current_game, TRUE);
+/* FIXME TODO	select_inp (gui_prefs.current_game, TRUE);*/
 }
 
 gboolean foreach_find_random_rom_in_store (GtkTreeModel *model,
@@ -145,7 +147,7 @@ on_select_random_game_activate         (GtkMenuItem     *menuitem,
 
 void update_favourites_list (gboolean add) {
 	Columns_type type;
-	
+
 	gui_prefs.current_game->favourite = add;
 
 	gmameui_ui_set_favourites_sensitive (add);
@@ -266,9 +268,13 @@ on_toolbar_view_menu_activate (GtkAction *action,
 	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 
 	if (visible)
-		show_toolbar ();
+		gtk_widget_show (GTK_WIDGET (main_gui.toolbar));
 	else
-		hide_toolbar ();
+		gtk_widget_hide (GTK_WIDGET (main_gui.toolbar));
+
+	g_object_set (main_gui.gui_prefs,
+		      "show-toolbar", visible,
+		      NULL);
 }
 
 
@@ -281,9 +287,13 @@ on_status_bar_view_menu_activate       (GtkAction *action,
 	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 
 	if (visible)
-		show_status_bar ();
+		gtk_widget_show (GTK_WIDGET (main_gui.tri_status_bar));
 	else
-		hide_status_bar ();
+		gtk_widget_hide (GTK_WIDGET (main_gui.tri_status_bar));
+
+	g_object_set (main_gui.gui_prefs,
+		      "show-statusbar", visible,
+		      NULL);
 }
 
 
@@ -295,6 +305,10 @@ on_folder_list_activate (GtkAction *action,
 
 	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 
+	g_object_set (main_gui.gui_prefs,
+		      "show-filterlist", visible,
+		      NULL);
+	
 	if (visible) {
 		show_filters ();
 	} else {
@@ -311,6 +325,10 @@ on_screen_shot_activate (GtkAction *action,
 	gboolean visible;
 
 	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+	
+	g_object_set (main_gui.gui_prefs,
+		      "show-screenshot", visible,
+		      NULL);
 
 	if (visible) {
 		show_snaps ();
@@ -319,48 +337,46 @@ on_screen_shot_activate (GtkAction *action,
 	}
 }
 
-void
-on_screen_shot_tab_activate (GtkAction *action,
-			     gpointer         user_data)
-{
-	gboolean visible;
-
-	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
-
-	if (visible)
-		show_snaps_tab (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame));
-	else
-		hide_snaps_tab (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame));
-}
-
 /* This function is called when the radio option defining the list mode is changed. */
 void     on_view_type_changed                   (GtkRadioAction *action,
                                                  gpointer       user_data)
 {
 	gint val;
+	ListMode current_mode;
+	ListMode previous_mode;
+	
+	g_object_get (main_gui.gui_prefs,
+		      "current-mode", &current_mode,
+		      "previous-mode", &previous_mode,
+		      NULL);
 	
 	val = gtk_radio_action_get_current_value (action);
 
-	if (gui_prefs.current_mode != val) {
-		gui_prefs.previous_mode = gui_prefs.current_mode;
-		gui_prefs.current_mode = val;
-		GMAMEUI_DEBUG ("Current mode changed %d --> %d", gui_prefs.previous_mode, gui_prefs.current_mode);
+	if (current_mode != val) {
+		previous_mode = current_mode;
+		current_mode = val;
+		GMAMEUI_DEBUG ("Current mode changed %d --> %d", previous_mode, current_mode);
 		
 		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group,
-						(gui_prefs.current_mode == LIST_TREE) ||
-						(gui_prefs.current_mode == DETAILS_TREE));
+						(current_mode == LIST_TREE) ||
+						(current_mode == DETAILS_TREE));
 
 		/* Rebuild the UI */
-		create_gamelist (gui_prefs.current_mode);
+		create_gamelist (current_mode);
 
 		/* Rebuild the List only if we change from/to tree mode */
-		if ((gui_prefs.current_mode == DETAILS_TREE) || (gui_prefs.current_mode == LIST_TREE)) {
-			if ( (gui_prefs.previous_mode != DETAILS_TREE) && (gui_prefs.previous_mode != LIST_TREE))
+		if ((current_mode == DETAILS_TREE) || (current_mode == LIST_TREE)) {
+			if ( (previous_mode != DETAILS_TREE) && (previous_mode != LIST_TREE))
 				create_gamelist_content ();
 		} else {
-			if ((gui_prefs.previous_mode == DETAILS_TREE) || (gui_prefs.previous_mode == LIST_TREE))
+			if ((previous_mode == DETAILS_TREE) || (previous_mode == LIST_TREE))
 				create_gamelist_content ();
 		}
+		
+		g_object_set (main_gui.gui_prefs,
+			      "current-mode", current_mode,
+			      "previous-mode", previous_mode,
+			      NULL);
 	}
 
 	 
@@ -402,26 +418,6 @@ on_collapse_all_activate (GtkMenuItem     *menuitem,
 	}
 }
 
-void
-on_column_layout_activate (GtkCheckMenuItem *menuitem,
-			   gpointer          user_data)
-{
-	GtkWidget *column_layout;
-	column_layout = create_column_layout_window ();
-	gtk_widget_show (column_layout);
-}
-
-void
-on_the_prefix_activate                 (GtkCheckMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-	gboolean is_active;
-
-	is_active = gtk_check_menu_item_get_active (menuitem);
-	gui_prefs.ModifyThe = is_active;
-	create_gamelist_content ();
-}
-
 static void
 quick_refresh_list (void)
 {
@@ -448,10 +444,11 @@ quick_refresh_list (void)
 
 	quick_check ();
 	/* final refresh only if we are in AVAILABLE or UNAVAILABLE Folder*/
+/* DELETE Not using FolderID in new prefs
 	if ((gui_prefs.FolderID == AVAILABLE) || (gui_prefs.FolderID == UNAVAILABLE)) {
 		create_gamelist_content ();
 		GMAMEUI_DEBUG ("Final Refresh");
-	}
+	}*/
 	quick_check_running = 0;
 // FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), TRUE);
 }
@@ -461,40 +458,6 @@ on_refresh_activate (GtkAction *action,
 		     gpointer  user_data)
 {
 	quick_refresh_list ();
-}
-
-void
-on_clone_color_menu_activate           (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-	GtkWidget *clone_selector_dlg = gtk_color_selection_dialog_new (_("Clone color selection"));
-	GdkColor mycolor;
-	gint response;
-
-	mycolor.pixel = 0;
-	mycolor.red = (guint16) gui_prefs.clone_color.red;
-	mycolor.green = (guint16) gui_prefs.clone_color.green;
-	mycolor.blue = (guint16) gui_prefs.clone_color.blue;
-
-	gtk_color_selection_set_current_color (GTK_COLOR_SELECTION (GTK_COLOR_SELECTION_DIALOG (clone_selector_dlg)->colorsel), &mycolor);
-
-	response = gtk_dialog_run (GTK_DIALOG (clone_selector_dlg));
-	
-	switch (response) {
-		case GTK_RESPONSE_OK:
-			gtk_color_selection_get_current_color (GTK_COLOR_SELECTION (GTK_COLOR_SELECTION_DIALOG (clone_selector_dlg)->colorsel), &mycolor);
-			gui_prefs.clone_color.red = mycolor.red;
-			gui_prefs.clone_color.green = mycolor.green;
-			gui_prefs.clone_color.blue = mycolor.blue;
-			
-			gtk_widget_destroy (clone_selector_dlg);
-			
-			create_gamelist_content ();
-			break;
-		default:
-			gtk_widget_destroy (clone_selector_dlg);
-			break;
-	}
 }
 
 void
@@ -538,12 +501,21 @@ on_default_option_menu_activate        (GtkMenuItem     *menuitem,
 
 
 void
-on_startup_option_activate             (GtkMenuItem     *menuitem,
+on_preferences_activate             (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+	/*
 	GtkWidget *gui_prefs_window;
 	gui_prefs_window = create_gui_prefs_window ();
 	gtk_widget_show (gui_prefs_window);
+	*/
+	
+	MameGuiPrefsDialog *prefs_dialog;
+	prefs_dialog = mame_gui_prefs_dialog_new ();
+GMAMEUI_DEBUG("Running dialog");
+//	gtk_dialog_run (prefs_dialog);
+GMAMEUI_DEBUG("Done running dialog");
+//	gtk_widget_destroy (prefs_dialog);
 }
 
 
@@ -562,6 +534,11 @@ on_column_hide_activate (GtkMenuItem     *menuitem,
 {
 	GList *column_list=NULL;
 	GList *C=NULL;
+	GValueArray *va;
+	
+	g_object_get (main_gui.gui_prefs,
+		      "cols-shown", &va,
+		      NULL);
 
 	GMAMEUI_DEBUG ("Column Hide - %i",ColumnHide_selected);
 
@@ -573,7 +550,10 @@ on_column_hide_activate (GtkMenuItem     *menuitem,
 
 	if (C->data) {
 		gtk_tree_view_column_set_visible (C->data, FALSE);
-		gui_prefs.ColumnShown [ColumnHide_selected] = FALSE;
+		g_value_set_int (g_value_array_get_nth (va, ColumnHide_selected), 0);
+		g_object_set (main_gui.gui_prefs,
+			      "cols-shown", va,
+			      NULL);
 		GMAMEUI_DEBUG ("Column Hidden - %i", ColumnHide_selected);
 	}
 }
@@ -584,14 +564,26 @@ delayed_row_selected (GtkTreeSelection *selection)
 	RomEntry *game_data;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
-
+	gchar *current_rom_name;
+	
+	g_object_get (main_gui.gui_prefs, "current-rom", &current_rom_name, NULL);
+	
 	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
 		gtk_tree_model_get (model, &iter, ROMENTRY, &game_data, -1);
+
+		if (!current_rom_name) {
+			g_object_set (main_gui.gui_prefs, "current-rom", game_data->romname, NULL);
+			select_game (game_data);
+			return FALSE;
+		}
+
 		/* select the game only if it wasn't the previously selected one
 		 (prevent screenshot flickers)*/
-		if (game_data != gui_prefs.current_game)
+		if (g_ascii_strcasecmp (current_rom_name, game_data->romname) != 0)
 			select_game (game_data);
 	}
+	g_free (current_rom_name);
+	
 	return FALSE;
 }
 
@@ -653,9 +645,9 @@ on_list_clicked (GtkWidget      *widget,
 		}
 	}
 
-	if (event && event->type == GDK_BUTTON_PRESS && event->button == 3) {
-		 gamelist_popupmenu_show (gui_prefs.current_game, event);
-	}
+	if (event && event->type == GDK_BUTTON_PRESS && event->button == 3)
+		gamelist_popupmenu_show (event);
+
 	return FALSE;
 }
 
@@ -664,26 +656,48 @@ on_displayed_list_resize_column (GtkWidget      *widget,
 				 GtkRequisition *requisition,
 				 gpointer        user_data)
 {
+	GtkTreeViewColumn *col;
+	gint col_id;
+	GValueArray *va;
 	GList *column_list;
 	GList *pointer_list;
 	gint i;
 
-	if ((gui_prefs.current_mode == DETAILS) || (gui_prefs.current_mode == DETAILS_TREE)) {
+	ListMode current_mode;
+GMAMEUI_DEBUG("Resizing columns");
+	g_object_get (main_gui.gui_prefs,
+		      "current-mode", &current_mode,
+		      "cols-width", &va,
+		      NULL);
+	
+	if ((current_mode == DETAILS) || (current_mode == DETAILS_TREE)) {
 		column_list = gtk_tree_view_get_columns (GTK_TREE_VIEW (widget));
 
 		for (pointer_list = g_list_first (column_list), i = 0;
 		     pointer_list != NULL;
-		     pointer_list = g_list_next (pointer_list), i++)
-			if (gtk_tree_view_column_get_visible (GTK_TREE_VIEW_COLUMN (pointer_list->data)))
-				gui_prefs.ColumnWidth[gtk_tree_view_column_get_sort_column_id (GTK_TREE_VIEW_COLUMN (pointer_list->data))] = gtk_tree_view_column_get_width (GTK_TREE_VIEW_COLUMN (pointer_list->data));
-  /* This is to debug the fact that this callback is called when switching fron LIST to DETAIL mode
-	even if I block it??? (See the create_gamelist in gui.c)
-	if (gtk_tree_view_column_get_sort_column_id (GTK_TREE_VIEW_COLUMN (pointer_list->data))==GAMENAME)
-	GMAMEUI_DEBUG ("Gamename column: %i",gtk_tree_view_column_get_width (GTK_TREE_VIEW_COLUMN (pointer_list->data))); */
-
+		     pointer_list = g_list_next (pointer_list), i++) {
+			col = GTK_TREE_VIEW_COLUMN (pointer_list->data);
+			if (gtk_tree_view_column_get_visible (col)) {
+				col_id = gtk_tree_view_column_get_sort_column_id (col);
+				/*GMAMEUI_DEBUG ("Setting width of column %d %s to %d",
+					       col_id, gtk_tree_view_column_get_title (col),
+					       gtk_tree_view_column_get_width (col));*/
+				g_value_set_int (g_value_array_get_nth (va, col_id), gtk_tree_view_column_get_width (col));
+				g_object_set (main_gui.gui_prefs,
+					      "cols-width", va,
+					      NULL);
+			} else
+				GMAMEUI_DEBUG ("Column %s is not visible", gtk_tree_view_column_get_title (col));
+		}
+		
 		g_list_free (column_list);
 		g_list_free (pointer_list);
-	}
+	} else
+		GMAMEUI_DEBUG ("Not in details mode - column sizing not allowed");
+/* FIXME TODO	
+	if (va)
+		g_value_array_free (va);*/
+GMAMEUI_DEBUG("Resizing columns... done");
 }
 
 void
@@ -692,13 +706,12 @@ on_displayed_list_sort_column_changed (GtkTreeSortable *treesortable,
 {
 	gint sort_column_id;
 	GtkSortType order;
-
-	if (gtk_tree_sortable_get_sort_column_id (treesortable, &sort_column_id, &order)) {
-		if (order == GTK_SORT_DESCENDING)
-			gui_prefs.SortReverse = TRUE;
-		else
-			gui_prefs.SortReverse = FALSE;
-		gui_prefs.SortColumn = sort_column_id;
+GMAMEUI_DEBUG("Changing list sorting");
+	if (gtk_tree_sortable_get_sort_column_id (treesortable, &sort_column_id, &order)) {	
+		g_object_set (main_gui.gui_prefs,
+			      "sort-col", sort_column_id,
+			      "sort-col-direction", order,
+			      NULL);
 	}
 }
 
@@ -712,16 +725,21 @@ on_displayed_list_row_collapsed (GtkTreeView *treeview,
 	RomEntry *tmprom;
 	GtkTreeSelection *select;
 	GtkTreeModel* treemodel;
+	gchar *current_rom_name;
 
 	/* If one of the child iter is selected, we select the parent iter */
 	treemodel = gtk_tree_view_get_model (treeview);
 	gtk_tree_model_iter_children (treemodel, &iter_child, iter);
 	gtk_tree_model_get (treemodel, &iter_child, ROMENTRY, &tmprom, -1);
-	while ((gui_prefs.current_game != tmprom) && (gtk_tree_model_iter_next (treemodel, &iter_child))) {
+
+	while ((g_ascii_strcasecmp (current_rom_name, tmprom->romname) != 0) &&
+	       (gtk_tree_model_iter_next (treemodel, &iter_child))) {
 		gtk_tree_model_get (treemodel, &iter_child, ROMENTRY, &tmprom, -1);
 	}
 
-	if (gui_prefs.current_game == tmprom) {
+	g_object_get (main_gui.gui_prefs, "current-rom", &current_rom_name, NULL);
+	
+	if (g_ascii_strcasecmp (current_rom_name, tmprom->romname) == 0) {
 		GtkTreePath *tree_path;
 		select = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
 		tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (treemodel), iter);
@@ -730,6 +748,8 @@ on_displayed_list_row_collapsed (GtkTreeView *treeview,
 					  NULL, FALSE);
 		gtk_tree_path_free (tree_path);
 	}
+	
+	g_free (current_rom_name);
 }
 
 

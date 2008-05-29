@@ -22,7 +22,7 @@ gmameui_SOURCES = \
 	options_string.c options_string.h \
 	gtkjoy.c gtkjoy.h \
 	gui_prefs.c gui_prefs.h \
-	column_layout.c column_layout.h \
+	gui_prefs_dialog.c gui_prefs_dialog.h \
 	unzip.c unzip.h \
 	keyboard.c keyboard.h \
 	network_game.h network_game.c \
@@ -35,9 +35,9 @@ gmameui_SOURCES = \
 	filter.c filter.h \
 	gossip-cell-renderer-expander.c gossip-cell-renderer-expander.h 
 
-gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(INTLLIBS)
+gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(INTLLIBS) 
 
-AM_CPPFLAGS = -g $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
+AM_CPPFLAGS = -g -Wall $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
 		-DDATADIR=\""$(datadir)"\" \
 		-DGLADEDIR=\"${datadir}/gmameui/glade/\" \
 		-DGMAMEUI_UI_DIR=\"${datadir}/gmameui/ui/\" \

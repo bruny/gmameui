@@ -69,7 +69,7 @@ main (int argc, char *argv[])
 	bind_textdomain_codeset (PACKAGE, "UTF-8");
 #endif
 	gtk_init (&argc, &argv);
-
+	
 	gmameui_init ();
 	init_gui ();
 
@@ -116,7 +116,10 @@ void
 gmameui_init (void)
 {
 	gchar *filename;
-
+#ifdef ENABLE_JOYSTICK
+	gboolean usejoyingui;
+#endif
+	
 #ifdef ENABLE_DEBUG
 	GTimer *mytimer;
 
@@ -148,8 +151,11 @@ gmameui_init (void)
 		GMAMEUI_DEBUG ("No executable!");
 
 	if (!load_dirs_ini ())
-		g_message (_("dirs.ini not loaded, using default values"));
-	
+		g_message (_("dirs.ini not loaded, using default values"));	
+
+	/* Load GUI preferences */
+	main_gui.gui_prefs = mame_gui_prefs_new ();
+
 	gamelist_init ();
 #ifdef ENABLE_DEBUG
 g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
@@ -184,7 +190,10 @@ g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer,
 #endif
 
 #ifdef ENABLE_JOYSTICK
-	if (gui_prefs.gui_joy) {
+	g_object_get (main_gui.gui_prefs,
+		      "usejoyingui", &usejoyingui,
+		      NULL);
+	if (usejoyingui) {
 		joydata = joystick_new (gui_prefs.Joystick_in_GUI);
 
 		if (joydata)
@@ -351,16 +360,17 @@ launch_emulation (RomEntry    *rom,
 	GList *extra_output = NULL, *extra_output2 = NULL;
 	gboolean error_during_load,other_error;
 	ProgressWindow *progress_window;
-
+#ifdef ENABLE_JOYSTICK
+	gboolean usejoyingui;
+	
 	joystick_close (joydata);
 	joydata = NULL;
-	
+#endif
 	progress_window = progress_window_new (TRUE);
 
 	progress_window_set_title (progress_window, _("Loading %s:"), rom_entry_get_list_name (rom));
 	progress_window_show (progress_window);
 
-	gtk_window_get_position (GTK_WINDOW (MainWindow), &gui_prefs.GUIPosX, &gui_prefs.GUIPosY);
 	gtk_widget_hide (MainWindow);
 
 	/* need to use printf otherwise, with GMAMEUI_DEBUG, we dont see the complete command line */
@@ -469,17 +479,16 @@ launch_emulation (RomEntry    *rom,
 		rom->has_roms = CORRECT;
 	}
 
-	gtk_window_move (GTK_WINDOW (MainWindow),
-			 gui_prefs.GUIPosX,
-			 gui_prefs.GUIPosY);
-
 	gtk_widget_show (MainWindow);
 	/* update the gui for the times played and romstatus if there was any error */
 	update_game_in_list (rom);
 	select_game (rom);
 
 #ifdef ENABLE_JOYSTICK
-	if (gui_prefs.gui_joy)
+	g_object_get (main_gui.gui_prefs,
+		      "usejoyingui", &usejoyingui,
+		      NULL);
+	if (usejoyingui)
 		joydata = joystick_new (gui_prefs.Joystick_in_GUI);
 #endif	
 }
@@ -492,11 +501,16 @@ play_game (RomEntry *rom)
 	gchar *general_options;
 	gchar *Vector_Related_options;
 	GameOptions *target;
+	gboolean use_xmame_options;
 
 	g_return_if_fail (rom != NULL);
 	g_return_if_fail (current_exec != NULL);
 
-	if (gui_prefs.use_xmame_options) {
+	g_object_get (main_gui.gui_prefs,
+		      "usexmameoptions", &use_xmame_options,
+		      NULL);
+	
+	if (use_xmame_options) {
 		opt = g_strdup_printf ("%s %s 2>&1", current_exec->path, rom->romname);
 		launch_emulation (rom, opt);
 		g_free (opt);
@@ -699,7 +713,6 @@ exit_gmameui (void)
 	  (gamelist file corruption or rebuild of a list with a bogus executable)*/
 	if (game_list.roms)
 		save_games_ini ();
-	save_gmameui_ini ();
 
 	save_options (NULL, NULL);
 
@@ -722,6 +735,9 @@ GMAMEUI_DEBUG ("Destroying window - done");
 	
 	g_object_unref (main_gui.filters_list);
 	main_gui.filters_list = NULL;
+	
+	g_object_unref (main_gui.gui_prefs);
+	main_gui.gui_prefs = NULL;
 	
 	g_message (_("Finished cleaning up GMAMEUI"));
 	
@@ -805,27 +821,28 @@ column_title (int column_num)
 const gchar *
 rom_entry_get_list_name (RomEntry *rom)
 {
+	gboolean the_prefix;
 	
 	g_return_if_fail (rom != NULL);
+
+	g_object_get (main_gui.gui_prefs,
+		      "theprefix", &the_prefix,
+		      NULL);
 	
 	if (!rom->the_trailer) {
 		if (!rom->name_in_list) {
 			rom->name_in_list = g_strdup_printf ("%s %s", rom->gamename, rom->gamenameext);
 		}
 	} else  {
-
-		if (gui_prefs.ModifyThe) {
-
-			if (!rom->name_in_list || !strncmp (rom->name_in_list, "The", 3)) {
-				g_free (rom->name_in_list);
-				rom->name_in_list = g_strdup_printf ("%s, The %s", rom->gamename, rom->gamenameext);
-			}
-
-		} else {
-
+		if (the_prefix) {
 			if (!rom->name_in_list || strncmp (rom->name_in_list, "The", 3)) {
 				g_free (rom->name_in_list);
 				rom->name_in_list = g_strdup_printf ("The %s %s", rom->gamename, rom->gamenameext);
+			}
+		} else {
+			if (!rom->name_in_list || !strncmp (rom->name_in_list, "The", 3)) {
+				g_free (rom->name_in_list);
+				rom->name_in_list = g_strdup_printf ("%s, The %s", rom->gamename, rom->gamenameext);
 			}
 		}
 

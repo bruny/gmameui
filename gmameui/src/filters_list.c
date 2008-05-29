@@ -659,7 +659,7 @@ filters_list_selection_changed_cb (GtkTreeSelection *selection,
 				  "folderid", &folderid,
 				  NULL);
 
-	gui_prefs.FolderID = folderid;
+/*	gui_prefs.FolderID = folderid;*/
 	selected_filter = filter;   /* Set global variable for use when re-creating the gamelist content */
 
 	GMAMEUI_DEBUG ("About to recreate gamelist after filter selected");
