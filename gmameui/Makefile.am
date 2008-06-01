@@ -33,6 +33,9 @@ icon_DATA = 	gmameui.png \
 docdir = $(datadir)/doc/$(PACKAGE)
 doc_DATA = BUGS NEWS COPYING AUTHORS README TODO ChangeLog
 
+rpmdir = /usr/src/rpm/SPECS
+rpm_DATA = gmameui.spec
+
 man_MANS = gmameui.6
 
 distclean-local:
@@ -59,4 +62,24 @@ dist-hook:
 	    fi \
 	  done \
 	fi
+
+release: dist rpm
+	mkdir -p release
+	rm -f release/*
+	mv -f rpmbuild/RPMS/*/*		release/
+	mv -f rpmbuild/SRPMS/*		release/
+	mv -f rpmbuild/SOURCES/*	release/
+	rm -rf rpmbuild
+
+pot:
+	make -C po update-po
+
+rpm: build-rpm
+
+build-rpm:
+	$(MAKE) $(PACKAGE).spec $(PACKAGE).spec.in
+	$(MAKE) dist
+	mkdir -p rpmbuild/{BUILD,RPMS/{noarch,athlon,i386,i486,i588,i686,x86_64},SOURCES,SPECS,SRPMS}
+	mv @PACKAGE@-@VERSION@.tar.gz rpmbuild/SOURCES/
+	unset MAKEFLAGS ; test ! -f $$HOME/.bashrc || . $$HOME/.bashrc; rpmbuild --define "_topdir $(PWD)/rpmbuild" --define "debug_package %{nil}" -ba @PACKAGE@.spec
 

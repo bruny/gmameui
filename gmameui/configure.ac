@@ -95,6 +95,7 @@ src/Makefile
 data/Makefile
 intl/Makefile
 po/Makefile.in
+gmameui.spec
 ])
 
 AC_OUTPUT

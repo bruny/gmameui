@@ -1,4 +1,3 @@
-gmameui.desktop.in
 src/about.c
 src/audit.c
 src/callbacks.c
@@ -10,7 +9,7 @@ src/game_options.c
 src/gtkjoy.c
 src/gui.c
 src/gui_prefs.c
-src/gxmame.c
+src/gmameui.c
 src/interface.c
 src/io.c
 src/keyboard.c
@@ -23,3 +22,12 @@ src/properties.c
 src/unzip.c
 src/xmame_executable.c
 src/xmame_options.c
+data/audit_window.glade
+data/column_layout.glade
+data/directories.glade
+data/options.glade
+data/properties.glade
+data/rom_info.glade
+data/sidebar.glade
+data/startup_prefs.glade
+gmameui.desktop.in
