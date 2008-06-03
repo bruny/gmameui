@@ -3,8 +3,6 @@
  * GMAMEUI
  *
  * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
- * based on GXMame code
- * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,6 +89,7 @@ struct _MameGuiPrefsPrivate {
 	gboolean VersionCheck;		/* Check for new version of MAME on startup */
 	gboolean use_xmame_options;     /* Use MAME options, or options set within GMAMEUI */
 	gboolean gui_joy;
+	gchar *joystick_name;
 	
 	/* Column layout preferences */
 	
@@ -163,6 +162,9 @@ mame_gui_prefs_set_property (GObject *object,
 			break;
 		case PROP_USEJOYINGUI:
 			prefs->priv->gui_joy = g_value_get_boolean (value);
+			break;
+		case PROP_JOYSTICKNAME:
+			prefs->priv->joystick_name = g_strdup (g_value_get_string (value));
 			break;
 		case PROP_THEPREFIX:
 			prefs->priv->theprefix = g_value_get_boolean (value);
@@ -288,6 +290,9 @@ mame_gui_prefs_get_property (GObject *object,
 		case PROP_USEJOYINGUI:
 			g_value_set_boolean (value, prefs->priv->gui_joy);
 			break;
+		case PROP_JOYSTICKNAME:
+			g_value_set_string (value, prefs->priv->joystick_name);
+			break;
 		case PROP_THEPREFIX:
 			g_value_set_boolean (value, prefs->priv->theprefix);
 			break;
@@ -341,6 +346,9 @@ mame_gui_prefs_finalize (GObject *obj)
 	g_free (pr->priv->filename);
 	
 	/* Free the properties that are strings or GValueArrays */
+	if (pr->priv->joystick_name)
+		g_free (pr->priv->joystick_name);
+	
 	if (pr->priv->clone_color)
 		g_free (pr->priv->clone_color);
 
@@ -432,6 +440,9 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 	g_object_class_install_property (object_class,
 					 PROP_USEJOYINGUI,
 					 g_param_spec_boolean ("usejoyingui", "Use Joystick in GUI", "Use the joystick to navigate in GMAMEUI", 0, G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
+					 PROP_JOYSTICKNAME,
+					 g_param_spec_string ("joystick-name", "Joystick Name", "Device name of the joystick", "/dev/js0", G_PARAM_READWRITE));
 	
 	/* Miscellaneous preferences */
 	g_object_class_install_property (object_class,
@@ -511,6 +522,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 		
 		g_value_init (&val, G_TYPE_INT);
 		g_value_set_int (&val, int_array != NULL ? int_array[i] : 1);	/* If not available, default to shown */
+
 		GMAMEUI_DEBUG ("Value for cols-shown at %d is %d", i, g_value_get_int (&val));
 		g_value_array_append (pr->priv->cols_shown, &val);
 	}
@@ -532,6 +544,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	pr->priv->VersionCheck = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "versioncheck", &error);
 	pr->priv->use_xmame_options = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "usexmameoptions", &error);
 	pr->priv->gui_joy = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "usejoyingui", &error);
+	pr->priv->joystick_name = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "joystick-name", &error);
 	
 	/* Miscellaneous preferences */
 	pr->priv->theprefix = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "theprefix", &error);
@@ -594,6 +607,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	g_signal_connect (pr, "notify::versioncheck", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::usexmameoptions", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::usejoyingui", (GCallback) mame_gui_prefs_save_bool, NULL);
+	g_signal_connect (pr, "notify::joystick-name", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::theprefix", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::clone-color", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::rom-paths", (GCallback) mame_gui_prefs_save_string_arr, NULL);

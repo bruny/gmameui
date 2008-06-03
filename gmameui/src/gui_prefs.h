@@ -2,8 +2,6 @@
  * GMAMEUI
  *
  * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
- * based on GXMame code
- * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,6 +81,7 @@ enum
 	PROP_VERSIONCHECK,
 	PROP_USEXMAMEOPTIONS,
 	PROP_USEJOYINGUI,
+	PROP_JOYSTICKNAME,
 	/* Miscellaneous preferences */
 	PROP_THEPREFIX,
 	PROP_CLONECOLOR,
@@ -100,6 +99,7 @@ enum
 	PROP_DIR_TITLE,
 	PROP_DIR_CPANEL,
 	PROP_DIR_ICONS,
+	PROP_DIR_CTRLR,
 	PROP_DIR_HISCORE,   /* FIXME TODO Move this below */
 	PROP_FILE_CHEAT,
 	PROP_FILE_HISCORE,
@@ -111,6 +111,7 @@ enum
 	PROP_DIR_INP,
 	PROP_DIR_MEMCARD,
 	PROP_DIR_DIFF,
+	PROP_DIR_INI,
 	NUM_PROPERTIES
 };
 
@@ -123,6 +124,7 @@ enum {
 	DIR_TITLE,
 	DIR_CPANEL,
 	DIR_ICONS,
+	DIR_CTRLR,
 	DIR_HISCORE,	/* FIXME TODO Move this below */
 	FILE_CHEAT,
 	FILE_HISCORE,
@@ -134,6 +136,7 @@ enum {
 	DIR_INP,
 	DIR_MEMCARD,
 	DIR_DIFF,
+	DIR_INI,
 	NUM_DIRS
 };
 
@@ -147,11 +150,11 @@ static const directory_config directory_prefs [] = {
 	{ PROP_DIR_TITLE, "dir-title", "/usr/lib/games/xmame/" },
 	{ PROP_DIR_CPANEL, "dir-cpanel", "/usr/lib/games/xmame/" },
 	{ PROP_DIR_ICONS, "dir-icons", "/usr/lib/games/xmame/" },
+	{ PROP_DIR_CTRLR, "dir-ctrlr", "/usr/lib/games/xmame/" },
 	{ PROP_DIR_HISCORE, "dir-hiscore", ".gmameui/hi/" },	/* FIXME TODO Move this below */
 	{ PROP_FILE_CHEAT, "file-cheat", "/usr/lib/games/xmame/cheat.dat" },
 	{ PROP_FILE_HISCORE, "file-hiscore", "/usr/lib/games/xmame/hiscore.dat" },
 	{ PROP_FILE_HISTORY, "file-history", "/usr/lib/games/xmame/history.dat" },
-	{ PROP_FILE_MAMEINFO, "file-mameinfo", "/usr/lib/games/xmame/mameinfo.dat" },
 	{ PROP_FILE_MAMEINFO, "file-mameinfo", "/usr/lib/games/xmame/mameinfo.dat" },
 	
 	/* The following are per-user directories, and will not be user-configured. As a
@@ -164,10 +167,9 @@ static const directory_config directory_prefs [] = {
 	{ PROP_DIR_INP, "dir-inp", "inp" },
 	{ PROP_DIR_MEMCARD, "dir-memcard", "memcard" },
 	{ PROP_DIR_DIFF, "dir-diff", "diff" },		/* Hard drive diff files */
+	{ PROP_DIR_INI, "dir-ini", "ini" },
 	
 	/* TODO
-
-	-input  * Directory for saving input recording files (.inp) *
 	-comment
 	*/
 };
