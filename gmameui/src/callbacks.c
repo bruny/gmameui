@@ -45,7 +45,6 @@
 #include "progression_window.h"
 #include "io.h"
 #include "gui_prefs_dialog.h"
-#include "column_layout.h"
 
 static guint timeoutid;
 
@@ -77,7 +76,7 @@ on_play_and_record_input_activate (GtkAction *action,
 	   gui.c (select_inp) when cancelling the file selection
 	   gmameui.c (record_game) */
 	joy_focus_off ();
-/* FIXME TODO	select_inp (gui_prefs.current_game, FALSE);*/
+	select_inp (gui_prefs.current_game, FALSE);
 }
 
 
@@ -91,7 +90,7 @@ on_playback_input_activate (GtkAction *action,
 	   gui.c (select_inp)
 	   gmameui.c (playback_game)*/
 	joy_focus_off ();
-/* FIXME TODO	select_inp (gui_prefs.current_game, TRUE);*/
+	select_inp (gui_prefs.current_game, TRUE);
 }
 
 gboolean foreach_find_random_rom_in_store (GtkTreeModel *model,
