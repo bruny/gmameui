@@ -190,17 +190,22 @@ g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer,
 #endif
 
 #ifdef ENABLE_JOYSTICK
+	gchar *joystick_device;
+	
 	g_object_get (main_gui.gui_prefs,
 		      "usejoyingui", &usejoyingui,
+		      "joystick-name", &joystick_device,
 		      NULL);
 	if (usejoyingui) {
-		joydata = joystick_new (gui_prefs.Joystick_in_GUI);
+		joydata = joystick_new (joystick_device);
 
 		if (joydata)
 			g_message (_("Joystick %s found"), joydata->device_name);
 		else
 			g_message (_("No Joystick found"));
 	}
+	
+	g_free (joystick_device);
 #endif
 	/* doesn't matter if joystick is enabled or not but easier to handle after */
 	joy_focus_on ();
@@ -485,11 +490,16 @@ launch_emulation (RomEntry    *rom,
 	select_game (rom);
 
 #ifdef ENABLE_JOYSTICK
+	gchar *joystick_device;
+	
 	g_object_get (main_gui.gui_prefs,
 		      "usejoyingui", &usejoyingui,
+		      "joystick-name", &joystick_device,
 		      NULL);
 	if (usejoyingui)
-		joydata = joystick_new (gui_prefs.Joystick_in_GUI);
+		joydata = joystick_new (joystick_device);
+	
+	g_free (joystick_device);
 #endif	
 }
 
@@ -497,18 +507,20 @@ launch_emulation (RomEntry    *rom,
 void
 play_game (RomEntry *rom)
 {
+	gchar *current_rom_name;
 	gchar *opt;
 	gchar *general_options;
 	gchar *Vector_Related_options;
 	GameOptions *target;
 	gboolean use_xmame_options;
 
-	g_return_if_fail (rom != NULL);
-	g_return_if_fail (current_exec != NULL);
-
 	g_object_get (main_gui.gui_prefs,
+		      "current-rom", &current_rom_name,
 		      "usexmameoptions", &use_xmame_options,
 		      NULL);
+	
+//	g_return_if_fail (current_rom_name == NULL);
+	g_return_if_fail (current_exec != NULL);
 	
 	if (use_xmame_options) {
 		opt = g_strdup_printf ("%s %s 2>&1", current_exec->path, rom->romname);
@@ -685,25 +697,6 @@ void process_inp_function (RomEntry *rom, gchar *file, int action) {
 	/* reenable joystick, was disabled in callback.c (on_playback_input_activate/on_play_and_record_input_activate)*/
 	joy_focus_on ();
 }
-
-/* Prepare the commandline to use to playback a game */
-void
-playback_game (RomEntry *rom,
-	       gchar    *file)
-{
-	process_inp_function (rom, file, 0);
-
-}
-
-
-/* Prepare the commandline to use to record a game */
-void
-record_game (RomEntry *rom,
-	     gchar    *file)
-{
-	process_inp_function (rom, file, 1);
-}
-
 
 void
 exit_gmameui (void)
