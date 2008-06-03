@@ -1602,7 +1602,7 @@ g_timer_start (timer);
 
 	/* Create a model. */
 	if (tree_store)
-		store = (GtkTreeModel *) gtk_tree_store_new (NUMBER_COLUMN_TOTAL - 15,
+		store = (GtkTreeModel *) gtk_tree_store_new (NUMBER_COLUMN + 3,
 							     G_TYPE_STRING,     /* Name */
 							     G_TYPE_STRING,     /* Has samples */
 							     G_TYPE_STRING,     /* ROM name */
@@ -1611,20 +1611,13 @@ g_timer_start (timer);
 							     G_TYPE_STRING,     /* Year */
 							     G_TYPE_STRING,     /* Clone of */
 							     G_TYPE_STRING,     /* Driver */
-							     G_TYPE_INT,
-							     G_TYPE_INT,
-							     G_TYPE_INT,
-							     G_TYPE_INT,
-							     G_TYPE_INT,
-							     G_TYPE_INT,
 							     G_TYPE_STRING,     /* Ver added */
 							     G_TYPE_STRING,     /* Category */
-							     G_TYPE_INT,	/* Channels */
 							     G_TYPE_POINTER,     /* Rom Entry */
 							     GDK_TYPE_COLOR,     /* Text Color */
 							     GDK_TYPE_PIXBUF);   /* Pixbuf */
 	else
-		store = (GtkTreeModel *) gtk_list_store_new (NUMBER_COLUMN_TOTAL - 15,
+		store = (GtkTreeModel *) gtk_list_store_new (NUMBER_COLUMN + 3,
 							     G_TYPE_STRING,     /* Name */
 							     G_TYPE_STRING,     /* Has samples */
 							     G_TYPE_STRING,     /* ROM name */
@@ -1633,15 +1626,8 @@ g_timer_start (timer);
 							     G_TYPE_STRING,     /* Year */
 							     G_TYPE_STRING,     /* Clone of */
 							     G_TYPE_STRING,     /* Driver */
-							     G_TYPE_INT,
-							     G_TYPE_INT,
-							     G_TYPE_INT,
-							     G_TYPE_INT,
-							     G_TYPE_INT,
-							     G_TYPE_INT,
 							     G_TYPE_STRING,     /* Ver added */
 							     G_TYPE_STRING,     /* Category */
-							     G_TYPE_INT,	/* Channels */
 							     G_TYPE_POINTER,     /* Rom Entry */
 							     GDK_TYPE_COLOR,     /* Text Color */
 							     GDK_TYPE_PIXBUF);   /* Pixbuf */
@@ -1709,15 +1695,8 @@ g_timer_start (timer);
 						    YEAR,         tmprom->year,
 						    CLONE,        tmprom->cloneof,
 						    DRIVER,       tmprom->driver,
-						    DRIVERSTATUS, tmprom->status,
-						    COLOR_STATUS, tmprom->driver_status_color,
-						    SOUND_STATUS, tmprom->driver_status_sound,
-						    GRAPHIC_STATUS, tmprom->driver_status_graphic,
-						    NUMPLAYERS,   tmprom->num_players,
-						    NUMBUTTONS,   tmprom->num_buttons,
 						    MAMEVER,      tmprom->mame_ver_added,
 						    CATEGORY,     tmprom->category,
-						    CHANNELS,     tmprom->channels,
 						    ROMENTRY,     tmprom,                 /* rom entry */
 						    TEXTCOLOR,    &my_txtcolor,            /* text color */
 						    PIXBUF,       pixbuf,                 /* pixbuf */
@@ -1735,15 +1714,8 @@ g_timer_start (timer);
 						    YEAR,         tmprom->year,
 						    CLONE,        tmprom->cloneof,
 						    DRIVER,       tmprom->driver,
-						    DRIVERSTATUS, tmprom->status,
-						    COLOR_STATUS, tmprom->driver_status_color,
-						    SOUND_STATUS, tmprom->driver_status_sound,
-						    GRAPHIC_STATUS, tmprom->driver_status_graphic,
-						    NUMPLAYERS,   tmprom->num_players,
-						    NUMBUTTONS,   tmprom->num_buttons,
 						    MAMEVER,      tmprom->mame_ver_added,
 						    CATEGORY,     tmprom->category,
-						    CHANNELS,     tmprom->channels,
 						    ROMENTRY,     tmprom,                 /* rom entry */
 						    TEXTCOLOR,    &my_txtcolor,            /* text color */
 						    PIXBUF,       pixbuf,                 /* pixbuf */
@@ -2092,15 +2064,8 @@ update_game_in_list (RomEntry *tmprom)
 				    YEAR,                       tmprom->year,
 				    CLONE,                      tmprom->cloneof,
 				    DRIVER,                     tmprom->driver,
-				    DRIVERSTATUS,               tmprom->status ? _("Working") : _("Not Working"),
-				    COLOR_STATUS,		tmprom->driver_status_color,
-				    SOUND_STATUS, 		tmprom->driver_status_sound,
-				    GRAPHIC_STATUS,		tmprom->driver_status_graphic,
-				    NUMPLAYERS,                 tmprom->num_players,
-				    NUMBUTTONS,                 tmprom->num_buttons,
 				    MAMEVER,                    tmprom->mame_ver_added,
 				    CATEGORY,                   tmprom->category,
-				    CHANNELS,                   tmprom->channels,
 				    TEXTCOLOR,                  my_txtcolor,            /* text color */
 				    PIXBUF,                     pixbuf,                 /* pixbuf */
 				    -1);
@@ -2114,15 +2079,8 @@ update_game_in_list (RomEntry *tmprom)
 				    YEAR,                       tmprom->year,
 				    CLONE,                      tmprom->cloneof,
 				    DRIVER,                     tmprom->driver,
-				    DRIVERSTATUS,               tmprom->status ? _("Working") : _("Not Working"),
-				    COLOR_STATUS,		tmprom->driver_status_color,
-				    SOUND_STATUS, 		tmprom->driver_status_sound,
-				    GRAPHIC_STATUS,		tmprom->driver_status_graphic,
-				    NUMPLAYERS,                 tmprom->num_players,
-				    NUMBUTTONS,                 tmprom->num_buttons,
 				    MAMEVER,                    tmprom->mame_ver_added,
 				    CATEGORY,                   tmprom->category,
-				    CHANNELS,                   tmprom->channels,
 				    TEXTCOLOR,                  my_txtcolor,            /* text color */
 				    PIXBUF,                     pixbuf,                 /* pixbuf */
 				    -1);
@@ -2154,7 +2112,7 @@ precheck_for_record (RomEntry *rom,
 		switch (result) {
 		case GTK_RESPONSE_YES:
 			gtk_widget_hide (dialog);
-			record_game (rom, inp_selection);
+			process_inp_function (rom, inp_selection, 1);
 			break;
 		default:
 			break;
@@ -2162,7 +2120,7 @@ precheck_for_record (RomEntry *rom,
 		gtk_widget_destroy (dialog);
 
 	} else {
-		record_game (rom, inp_selection);
+		process_inp_function (rom, inp_selection, 1);
 	}
 }
 
@@ -2173,6 +2131,7 @@ select_inp (RomEntry *rom,
 	GtkWidget *inp_selection;
 	gchar *temp_text;
 	gchar *inp_dir;
+	gchar *current_rom_name;
 
 	if (play_record) {
 		inp_selection = gtk_file_chooser_dialog_new (_("Choose inp file to play"),
@@ -2192,12 +2151,13 @@ select_inp (RomEntry *rom,
 	
 	g_object_get (main_gui.gui_prefs,
 		      "dir-inp", &inp_dir,
+		      "current-rom", &current_rom_name,
 		      NULL);
 	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (inp_selection), inp_dir);
 	g_free (inp_dir);
 	
 	if (!play_record) {
-		temp_text = g_strdup_printf ("%s.inp", rom->romname);
+		temp_text = g_strdup_printf ("%s.inp", current_rom_name);
 		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (inp_selection), temp_text);
 		g_free (temp_text);
 	}
@@ -2205,17 +2165,16 @@ select_inp (RomEntry *rom,
 	/* reenable joystick, was disabled in callback.c (on_playback_input_activate/on_play_and_record_input_activate)*/
 	if (gtk_dialog_run (GTK_DIALOG (inp_selection)) == GTK_RESPONSE_ACCEPT) {
 		if (play_record) {
-			playback_game (rom, gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (inp_selection)));
+			process_inp_function (rom,
+					      gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (inp_selection)), 0);
 		} else {
 			precheck_for_record (rom, gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (inp_selection)));
 		}
 	}
 	gtk_widget_destroy (inp_selection);
+	
+	g_free (current_rom_name);
 }
-
-
-
-
 
 /**** Sidebar functionality ****/
 static void gmameui_sidebar_class_init    (GMAMEUISidebarClass *class);
@@ -2335,13 +2294,9 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	gtk_widget_show (sidebar->priv->history_box);
 
 	gtk_widget_show_all (GTK_WIDGET (sidebar));
-/* DELETE - Not using ScreenShotTab	
-	if (gui_prefs.ShowScreenShotTab == FALSE)
-		gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_notebook));
-	else
-		gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));*/
-gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));
-GMAMEUI_DEBUG ("Finished creating sidebar");
+
+	gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));
+	GMAMEUI_DEBUG ("Finished creating sidebar");
 }
 
 GtkWidget *

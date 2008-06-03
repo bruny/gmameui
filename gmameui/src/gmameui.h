@@ -52,16 +52,9 @@ typedef enum {
 	YEAR,
 	CLONE,
 	DRIVER,
-	DRIVERSTATUS,   /* Good | Imperfect | Preliminary */
-	COLOR_STATUS,	/* Good | Imperfect | Preliminary */
-	SOUND_STATUS,	/* Good | Imperfect | Preliminary */
-	GRAPHIC_STATUS,	/* Good | Imperfect | Preliminary */
-	NUMPLAYERS,
-	NUMBUTTONS,
 	MAMEVER,
 	CATEGORY,
-	CHANNELS,
-	NUMBER_COLUMN   /* 17 */
+	NUMBER_COLUMN   /* 10 */
 } Columns_type;
 
 /* Those are also columns. The only difference is that they are hidden */
@@ -72,6 +65,10 @@ typedef enum {
 	HAS_ROMS,
 	ROMOF,
 	STATUS,
+	DRIVERSTATUS,   /* Good | Imperfect | Preliminary */
+	COLOR_STATUS,	/* Good | Imperfect | Preliminary */
+	SOUND_STATUS,	/* Good | Imperfect | Preliminary */
+	GRAPHIC_STATUS,	/* Good | Imperfect | Preliminary */
 	CONTROL,
 	VECTOR,
 	CPU1,
@@ -82,8 +79,11 @@ typedef enum {
 	SOUND2,
 	SOUND3,
 	SOUND4,
+	NUMPLAYERS,
+	NUMBUTTONS,
 	FAVORITE,
 	IS_BIOS,
+	CHANNELS,
 	NUMBER_COLUMN_TOTAL /* 35 */
 } Columns_type_hidden;
 
@@ -150,16 +150,11 @@ struct gui_prefs_struct {
 
 	gint       *Splitters;
 	
-	/* directories specification */
-	gchar *CtrlrDirectory;
-	gchar *inipath;
-	
 	/* specifics option to GMAMEUI (path to catver, common path...)
 	   not in dir.ini */
 	gchar *catverDirectory;
 	
 	/* GUI Joystick options */
-//	gboolean   gui_joy;
 	gchar      *Joystick_in_GUI;
 };
 
@@ -198,12 +193,6 @@ void
 exit_gmameui (void);
 
 const gchar *rom_entry_get_list_name(RomEntry *rom);
-
-void
-playback_game (RomEntry *rom, gchar *user_data);
-
-void
-record_game (RomEntry *rom, gchar *user_data);
 
 /* Columns management functions */
 void
