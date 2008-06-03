@@ -855,8 +855,8 @@ gchar *create_io_options_string(XmameExecutable *exec)
 {
 	char *option_string;
 	
-	gchar *artwork_dir, *snapshot_dir, *hiscore_dir, *cheat_file, *hiscore_file, *history_file, *mameinfo_file;
-	gchar *nvram_dir, *cfg_dir, *state_dir, *inp_dir, *memcard_dir, *diff_dir;
+	gchar *artwork_dir, *snapshot_dir, *hiscore_dir, *ctrlr_dir, *cheat_file, *hiscore_file, *history_file, *mameinfo_file;
+	gchar *nvram_dir, *cfg_dir, *state_dir, *inp_dir, *memcard_dir, *diff_dir, *ini_dir;
 	
 	gchar *artworkpath_option,
 			*screenshotdir_option,
@@ -881,6 +881,7 @@ gchar *create_io_options_string(XmameExecutable *exec)
 		      "dir-artwork", &artwork_dir,
 		      "dir-snapshot", &snapshot_dir,
 		      "dir-hiscore", &hiscore_dir,
+		      "dir-ctrlr", &ctrlr_dir,
 		      "file-cheat", &cheat_file,
 		      "file-hiscore", &hiscore_file,
 		      "file-history", &history_file,
@@ -890,6 +891,7 @@ gchar *create_io_options_string(XmameExecutable *exec)
 		      "dir-inp", &inp_dir,
 		      "dir-memcard", &memcard_dir,
 		      "dir-diff", &diff_dir,
+		      "dir-ini", &ini_dir,
 		      NULL);
 	
 	artworkpath_option = xmame_get_option_string(exec, "artwork_directory", artwork_dir);
@@ -911,9 +913,9 @@ gchar *create_io_options_string(XmameExecutable *exec)
 	else
 */		cfg_directory_option = g_strdup("");
 
-	inipath_option = xmame_get_option_string(exec, "inipath", gui_prefs.inipath);
+	inipath_option = xmame_get_option_string(exec, "inipath", ini_dir);
 	nvram_directory_option = xmame_get_option_string(exec, "nvram_directory", nvram_dir);
-	ctrlr_directory_option = xmame_get_option_string(exec, "ctrlr_directory", gui_prefs.CtrlrDirectory);
+	ctrlr_directory_option = xmame_get_option_string(exec, "ctrlr_directory", ctrlr_dir);
 	state_directory_option = xmame_get_option_string(exec, "state_directory", state_dir);
 	input_directory_option = xmame_get_option_string(exec, "input_directory", inp_dir);
 	memcard_directory_option = xmame_get_option_string(exec, "memcard_directory", memcard_dir);
@@ -969,6 +971,7 @@ gchar *create_io_options_string(XmameExecutable *exec)
 	g_free (artwork_dir);
 	g_free (snapshot_dir);
 	g_free (hiscore_dir);
+	g_free (ctrlr_dir);
 	g_free (cheat_file);
 	g_free (hiscore_file);
 	g_free (history_file);
@@ -978,6 +981,7 @@ gchar *create_io_options_string(XmameExecutable *exec)
 	g_free (inp_dir);
 	g_free (memcard_dir);
 	g_free (diff_dir);
+	g_free (ini_dir);
 	
 	return option_string;
 }
