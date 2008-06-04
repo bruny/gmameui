@@ -28,22 +28,22 @@
 #include "gui.h"
 
 struct _MameGuiPrefsDialogPrivate {
-	GladeXML *xml;
+//	GladeXML *xml;
 
-	/* Startup preferences */
+	/* Startup preferences *
 	GtkWidget *gui_joy_entry;
 	GtkWidget *gui_joy_checkbutton;
 	GtkWidget *gui_use_xmame_options_checkbutton;
 	GtkWidget *checkgames_checkbutton;
-	GtkWidget *VersionCheck_checkbutton;
+	GtkWidget *VersionCheck_checkbutton;*/
 	
 	/* Column layout preferences */
 	
-	/* Miscellaneous option preferences */
+	/* Miscellaneous option preferences *
 	GtkWidget *theprefix_checkbutton;
 	GtkWidget *theprefix_label;
 	GtkWidget *clone_color_button;
-	GtkWidget *clone_label;
+	GtkWidget *clone_label;*/
 };
 
 /* Preferences dialog */
@@ -99,6 +99,10 @@ static void
 mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 {
 	/* Widget declarations */
+	GtkWidget *widget;
+	GtkWidget *clone_lbl;
+	GtkWidget *theprefix_label;
+	
 	GdkColor color;
 	GList *col_list;	/* GList of column checkbutton widgets */
 	GList *node;
@@ -112,7 +116,7 @@ mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 	gchar *clone_color;
 	
 	GValueArray *cols_shown;
-	
+GMAMEUI_DEBUG ("Initialising gui prefs dialog");	
 	dlg->priv = g_new0 (MameGuiPrefsDialogPrivate, 1);
 	
 	/* Now set up the dialog */
@@ -139,30 +143,28 @@ mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 				  "clone-color", &clone_color,
 				  NULL);
 
-	dlg->priv->checkgames_checkbutton = glade_xml_get_widget (xml, "gamecheck");
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (dlg->priv->checkgames_checkbutton),
-								  gamecheck);
-	g_signal_connect (dlg->priv->checkgames_checkbutton, "toggled", 
-					  G_CALLBACK (on_prefs_checkbutton_toggled), "gamecheck");
-	
+	widget = glade_xml_get_widget (xml, "gamecheck");
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), gamecheck);
+	g_signal_connect (widget, "toggled", 
+			  G_CALLBACK (on_prefs_checkbutton_toggled), "gamecheck");
+
 	/* TODO Set active based upon value */
-	dlg->priv->VersionCheck_checkbutton = glade_xml_get_widget (xml, "versioncheck");
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (dlg->priv->VersionCheck_checkbutton),
-								  versioncheck);
-	g_signal_connect (dlg->priv->VersionCheck_checkbutton, "toggled", 
+	widget = glade_xml_get_widget (xml, "versioncheck");
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), versioncheck);
+	g_signal_connect (widget, "toggled", 
 			  G_CALLBACK (on_prefs_checkbutton_toggled), "versioncheck");
 	
-	dlg->priv->gui_use_xmame_options_checkbutton = glade_xml_get_widget (xml, "usexmameoptions");
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (dlg->priv->gui_use_xmame_options_checkbutton),
-								  usexmameoptions);
-	g_signal_connect (dlg->priv->gui_use_xmame_options_checkbutton, "toggled", 
+	widget = glade_xml_get_widget (xml, "usexmameoptions");
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), usexmameoptions);
+	g_signal_connect (widget, "toggled", 
 			  G_CALLBACK (on_prefs_checkbutton_toggled), "usexmameoptions");
 	
-	dlg->priv->gui_joy_checkbutton = glade_xml_get_widget (xml, "usejoyingui");
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (dlg->priv->gui_joy_checkbutton),
-								  usejoyingui);
-	g_signal_connect (dlg->priv->gui_joy_checkbutton, "toggled", 
+	widget = glade_xml_get_widget (xml, "usejoyingui");
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), usejoyingui);
+	g_signal_connect (widget, "toggled", 
 			  G_CALLBACK (on_prefs_checkbutton_toggled), "usejoyingui");
+	
+	/* FIXME TODO - joy dev entry */
 	
 	/* Column layout widgets - set common details */
 	col_list = glade_xml_get_widget_prefix (xml, "col");
@@ -181,6 +183,7 @@ mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 		
 		node = g_list_next (node);
 	}
+
 	g_list_free (col_list);
 	g_list_free (node);
 
@@ -196,35 +199,34 @@ mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_driver")),
 								  g_value_get_int (g_value_array_get_nth (cols_shown, DRIVER)));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_cloneof")),
-								  g_value_get_int (g_value_array_get_nth (cols_shown, ROMOF)));
+								  g_value_get_int (g_value_array_get_nth (cols_shown, CLONE)));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_version")),
 								  g_value_get_int (g_value_array_get_nth (cols_shown, MAMEVER)));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_category")),
 								  g_value_get_int (g_value_array_get_nth (cols_shown, CATEGORY)));
-	
+
 	/* Miscellaneous option widgets */
-	dlg->priv->theprefix_label = glade_xml_get_widget (xml, "theprefix_lbl");
+	theprefix_label = glade_xml_get_widget (xml, "theprefix_lbl");
 	
-	dlg->priv->theprefix_checkbutton = glade_xml_get_widget (xml, "theprefix");
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (dlg->priv->theprefix_checkbutton),
-								  theprefix);
-	g_signal_connect (dlg->priv->theprefix_checkbutton, "toggled", 
-			  G_CALLBACK (on_prefs_checkbutton_theprefix_toggled), dlg->priv->theprefix_label);
+	widget = glade_xml_get_widget (xml, "theprefix");
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), theprefix);
+	g_signal_connect (widget, "toggled", 
+			  G_CALLBACK (on_prefs_checkbutton_theprefix_toggled), theprefix_label);
 	/* Default value may be off, so need to manually trigger */
-	on_prefs_checkbutton_theprefix_toggled (dlg->priv->theprefix_checkbutton, dlg->priv->theprefix_label);
+	on_prefs_checkbutton_theprefix_toggled (widget, theprefix_label);
 
-	dlg->priv->clone_label = glade_xml_get_widget (xml, "clone_label");
+	/* Set up colour button and example label */
+	clone_lbl = glade_xml_get_widget (xml, "clone_label");
 	
-	dlg->priv->clone_color_button = glade_xml_get_widget (xml, "clone_color");
+	widget = glade_xml_get_widget (xml, "clone_color");
 	gdk_color_parse (clone_color, &color);
-	gtk_color_button_set_color (GTK_COLOR_BUTTON (dlg->priv->clone_color_button), &color);
-	g_signal_connect (dlg->priv->clone_color_button, "color-set",
-					  G_CALLBACK (on_prefs_colour_button_toggled), dlg->priv->clone_label);
+	gtk_color_button_set_color (GTK_COLOR_BUTTON (widget), &color);
+	g_signal_connect (widget, "color-set",
+			  G_CALLBACK (on_prefs_colour_button_toggled), clone_lbl);
 	/* Default value may be off, so need to manually trigger */
-	on_prefs_colour_button_toggled (dlg->priv->clone_color_button, dlg->priv->clone_label);
+	on_prefs_colour_button_toggled (widget, clone_lbl);
 
-	gtk_dialog_set_default_response (GTK_DIALOG (dlg),
-									 GTK_RESPONSE_CLOSE);
+	gtk_dialog_set_default_response (GTK_DIALOG (dlg), GTK_RESPONSE_CLOSE);
 	
 	g_object_unref (xml);
 	
@@ -239,6 +241,7 @@ mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 	g_signal_connect_object (G_OBJECT (dlg), "response",
 							 G_CALLBACK (on_mame_gui_prefs_dialog_response),
 							 dlg, 0);
+GMAMEUI_DEBUG ("Initialising gui prefs dialog... done");
 }
 
 GtkWidget *
@@ -294,7 +297,7 @@ on_prefs_col_checkbutton_toggled (GtkWidget *toggle,
 	else if (g_ascii_strcasecmp (widget_name, "col_driver") == 0)
 		g_value_set_int (g_value_array_get_nth (shown_columns, DRIVER), toggle_val);
 	else if (g_ascii_strcasecmp (widget_name, "col_cloneof") == 0)
-		g_value_set_int (g_value_array_get_nth (shown_columns, ROMOF), toggle_val);
+		g_value_set_int (g_value_array_get_nth (shown_columns, CLONE), toggle_val);
 	else if (g_ascii_strcasecmp (widget_name, "col_version") == 0)
 		g_value_set_int (g_value_array_get_nth (shown_columns, MAMEVER), toggle_val);
 	else if (g_ascii_strcasecmp (widget_name, "col_category") == 0)
@@ -315,6 +318,8 @@ on_prefs_col_checkbutton_toggled (GtkWidget *toggle,
 	g_object_set (main_gui.gui_prefs,
 				  "cols-shown", shown_columns,
 				  NULL);
+	
+	g_value_array_free (shown_columns);
 }
 
 /* This callback is slightly different - we pass the GtkWidget representing
@@ -328,8 +333,10 @@ on_prefs_checkbutton_theprefix_toggled (GtkWidget *toggle,
 	gchar *text;
 
 	example_lbl = (GtkWidget *) user_data;
+
+	MameGuiPrefsDialog *dlg = (GtkWidget *) user_data;
 	
-	GMAMEUI_DEBUG ("%s toggled", "theprefix");
+	GMAMEUI_DEBUG ("theprefix toggled");
 	active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle));
 
 	/* Trigger the set, which causes a save in the mame_gui_prefs_set_property () function */
@@ -343,8 +350,7 @@ on_prefs_checkbutton_theprefix_toggled (GtkWidget *toggle,
 	else
 		text = g_strdup ("King of Fighters 2001, The (Set 1)");
 		
-	gtk_label_set_text (GTK_LABEL (example_lbl),
-						text);
+	gtk_label_set_text (GTK_LABEL (example_lbl), text);
 
 	g_free (text);
 }
@@ -375,6 +381,7 @@ on_prefs_colour_button_toggled (GtkWidget *color,
 	gtk_widget_modify_fg (clone_lbl, GTK_STATE_NORMAL, newcolour);
 	
 	g_free (color_string);
+	gdk_color_free (newcolour);
 
 }
 
@@ -405,9 +412,11 @@ on_mame_gui_prefs_dialog_response (GtkDialog *dialog,
 				  int response_id,
 				  MameGuiPrefsDialog *dlg)
 {
+GMAMEUI_DEBUG("Response from gui prefs dialog");
 	if (response_id == GTK_RESPONSE_CLOSE)
 		gtk_widget_hide (GTK_WIDGET (dlg));
 	
 	/* Recreate gamelist so that clone color etc take effect */
 	create_gamelist_content ();
+GMAMEUI_DEBUG("Response from gui prefs dialog... done");
 }
