@@ -1,0 +1,902 @@
+# Portuguese translations for GMAMEUI package.
+# Copyright (C) 2008 THE GMAMEUI'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the GMAMEUI package.
+# Alfredo Junix <junix@linuxinabox.org>, 2008.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GMAMEUI 0.2.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2008-05-28 12:12-0300\n"
+"PO-Revision-Date: 2008-05-28 13:56-0300\n"
+"Last-Translator: Alfredo Jr. <junix@linuxinabox.org>\n"
+"Language-Team: none\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../gmameui.desktop.in.h:1
+msgid "Arcade Machine Emulator Frontend"
+msgstr "Interface Gráfica para Emulador de Filperama"
+
+#: ../gmameui.desktop.in.h:2
+msgid "GMAMEUI Arcade Machine Emulator Frontend"
+msgstr "GMAMEUI Interface Gráfica para Emulador de Filperama"
+
+#: ../gmameui.desktop.in.h:3
+msgid "Play and browse classic arcade games"
+msgstr "Jogar e escolher jogos clássicos de fliperama"
+
+#: ../src/about.c:53
+msgid "translator-credits"
+msgstr "créditos de tradutores"
+
+#: ../src/about.c:61
+#: ../src/about.c:245
+msgid "Copyright (c) 2007-2008 Andrew Burton"
+msgstr "Copyright (c) 2007-2008 Andrew Burton"
+
+#: ../src/about.c:63
+#: ../src/about.c:241
+msgid "A program to play MAME under Linux"
+msgstr "Um programa para jogar MAME no Linux"
+
+#: ../src/about.c:108
+#: ../src/about.c:215
+msgid "Credits"
+msgstr "Créditos"
+
+#: ../src/about.c:124
+msgid "Developers"
+msgstr "Desenvolvedores"
+
+#: ../src/about.c:125
+msgid ""
+"Andrew Burton\n"
+"Code based on GXMame\n"
+"Stephane Pontier <shadow_walker@users.sourceforge.net>\n"
+"Benoit Dumont <vertigo17@users.sourceforge.net>\n"
+"Nicos Panayides <anarxia@gmx.net>\n"
+"Priit Laes <x-laes@users.sourceforge.net>\n"
+"William Jon McCann <mccann@jhu.edu>\n"
+msgstr ""
+"Andrew Burton\n"
+"Código baseado no GXMame\n"
+"Stephane Pontier <shadow_walker@users.sourceforge.net>\n"
+"Benoit Dumont <vertigo17@users.sourceforge.net>\n"
+"Nicos Panayides <anarxia@gmx.net>\n"
+"Priit Laes <x-laes@users.sourceforge.net>\n"
+"William Jon McCann <mccann@jhu.edu>\n"
+
+#: ../src/about.c:136
+msgid "Translators"
+msgstr "Tradutores"
+
+#: ../src/about.c:137
+msgid ""
+"The following people translated GXMame:\n"
+"German (de) - Tobias Wichtrey <tobias@tarphos.de>\n"
+"Greek (el) - Nicos Panayides <anarxia@gmx.net>\n"
+"Spanish (es) - Pablo Gonzalo del Campo <pablodc@bigfoot.com>\n"
+"French (fr) - Stephane Pontier <shadow_walker@users.sourceforge.net>\n"
+"Italian (it) - Diego Apollonio <aposoft@tiscalinet.it>\n"
+"Dutch (nl) - Francois Duprez <duprez@planet.nl>\n"
+"Polish (pl) - Dawid Cierniak <cierny@poczta.fm>\n"
+"Simplified Chinese (zh_CN) - Andrew Wong <andrew@thizlinux.com>\n"
+"Traditional Chinese (zh_TW) - Jouston Huang <jouston@jouston.no-ip.com>\n"
+msgstr ""
+"As seguintes pessoas traduziram o GXMame:\n"
+"Alemão (de) - Tobias Wichtrey <tobias@tarphos.de>\n"
+"Grego (el) - Nicos Panayides <anarxia@gmx.net>\n"
+"Espanhol (es) - Pablo Gonzalo del Campo <pablodc@bigfoot.com>\n"
+"Francês (fr) - Stephane Pontier <shadow_walker@users.sourceforge.net>\n"
+"Italiano (it) - Diego Apollonio <aposoft@tiscalinet.it>\n"
+"Holandês (nl) - Francois Duprez <duprez@planet.nl>\n"
+"Polonês (pl) - Dawid Cierniak <cierny@poczta.fm>\n"
+"Chinês Simplificado (zh_CN) - Andrew Wong <andrew@thizlinux.com>\n"
+"Chinês Tradicional (zh_TW) - Jouston Huang <jouston@jouston.no-ip.com>\n"
+
+#: ../src/about.c:211
+msgid "About GMAMEUI"
+msgstr "Sobre GMAMEUI"
+
+#: ../src/about.c:233
+msgid "GMAMEUI"
+msgstr "GMAMEUI"
+
+#: ../src/audit.c:252
+msgid "Don't know how to verify roms with this version of xmame."
+msgstr "Não foi possível verificar as roms com esta versão do xmame."
+
+#: ../src/audit.c:346
+#: ../src/audit.c:414
+msgid "Audit Stopped"
+msgstr "Auditoria Parada"
+
+#: ../src/audit.c:347
+#: ../src/audit.c:415
+msgid "Stopped"
+msgstr "Parada"
+
+#: ../src/audit.c:419
+#: ../src/audit.c:422
+msgid "Audit done"
+msgstr "Auditoria feita"
+
+#: ../src/audit.c:420
+msgid "Done"
+msgstr "Feito"
+
+#: ../src/callbacks.c:236
+#: ../src/gmameui.c:610
+#: ../src/network_game.c:150
+msgid "No xmame executables defined"
+msgstr "Nenhum executável do xmame foi definido"
+
+#: ../src/callbacks.c:470
+msgid "Clone color selection"
+msgstr "Seleção de cor do Clone"
+
+#: ../src/callbacks.c:755
+#, c-format
+msgid "Hide \"%s\" Column"
+msgstr "Esconder \"%s\" Coluna"
+
+#: ../src/cell-renderer-captioned-image.c:216
+msgid "Text"
+msgstr "Texto"
+
+#: ../src/cell-renderer-captioned-image.c:217
+msgid "Text to render"
+msgstr "Texto a renderizar"
+
+#: ../src/cell-renderer-captioned-image.c:223
+msgid "Pixbuf Object"
+msgstr "Objeto Pixbuf"
+
+#: ../src/cell-renderer-captioned-image.c:224
+msgid "The pixbuf to render."
+msgstr "O pixbuf a renderizar."
+
+#: ../src/directories.c:109
+msgid "Browse for Folder"
+msgstr "Navegar para a Pasta"
+
+#: ../src/directories.c:116
+msgid "Browse for File"
+msgstr "Navegar para o arquivo"
+
+#: ../src/directories.c:604
+msgid ""
+"Current Folder may not exist after loading the new catver file.\n"
+"Moving to the \"Available\" game folder"
+msgstr ""
+"Pasta Corrente pode não mais existir depois de carregar o novo arquivo catver.\n"
+"Movendo para a pasta do jogo \"Disponível\""
+
+#: ../src/directories.c:699
+msgid "No valid xmame executables found"
+msgstr "Nenhum executável válido do xmame foi encontrado"
+
+#: ../src/game_list.c:205
+#: ../src/io.c:210
+#: ../src/io.c:213
+#: ../src/properties.c:119
+msgid "Unknown"
+msgstr "Desconhecido"
+
+#: ../src/game_list.c:244
+msgid "Loading gamelist"
+msgstr "Carregando lista de jogos"
+
+#: ../src/game_list.c:279
+msgid "Game list is corrupted."
+msgstr "Lista de Jogos está corrompida."
+
+#: ../src/game_list.c:291
+msgid "Out of memory while loading gamelist"
+msgstr "Sem memória para carregar a lista de jogos"
+
+#: ../src/game_list.c:420
+#, c-format
+msgid "Loaded %d roms by %d manufacturers covering %d years."
+msgstr "Carregado %d roms por %d fabricantes abrangendo %d anos."
+
+#: ../src/game_list.c:422
+#, c-format
+msgid "with %d games supporting samples."
+msgstr "com %d jogos suportando amostras."
+
+#: ../src/game_list.c:582
+msgid "Saving gamelist."
+msgstr "Salvando lista de jogos."
+
+#: ../src/game_list.c:628
+msgid ""
+"Could not recognise the gamelist version.\n"
+"Do you want to rebuild the gamelist?"
+msgstr ""
+"Não foi possível reconhecer a versão da lista de jogos.\n"
+"Deseja recriar a lista de jogos?"
+
+#: ../src/game_list.c:637
+msgid ""
+"Gamelist not available,\n"
+"Do you want to build the gamelist?"
+msgstr ""
+"Lista de Jogos indisponível,\n"
+"Deseja criar a lista de jogos?"
+
+#: ../src/game_list.c:646
+msgid ""
+"Gamelist was created with an older version of GMAMEUI.\n"
+"The gamelist is not supported.\n"
+"Do you want to rebuild the gamelist?"
+msgstr ""
+"Lista de jogos foi criada com uma versão antiga do GMAMEUI.\n"
+"A lista de jogos não é suportada.\n"
+"Deseja recriar a lista de jogos?"
+
+#: ../src/game_list.c:660
+#, c-format
+msgid ""
+"The gamelist is from:\n"
+"%s %s\n"
+"and the current executable is:\n"
+"%s %s\n"
+"Do you want to rebuild the gamelist?"
+msgstr ""
+"A lista de jogo é de:\n"
+"%s %s\n"
+"e o executável corrente é:\n"
+"%s %s\n"
+"Deseja recriar a lista de jogos?"
+
+#: ../src/gmameui.c:85
+msgid "No xmame executable found"
+msgstr "Nenhum executável do xmame foi encontrado"
+
+#: ../src/gmameui.c:151
+msgid "dirs.ini not loaded, using default values"
+msgstr "dirs.ini não carregado, usando valores padrões"
+
+#: ../src/gmameui.c:155
+#, c-format
+msgid "Time to initialise: %.02f seconds"
+msgstr "Tempo para inicializar: %.02f segundos"
+
+#: ../src/gmameui.c:158
+msgid "gamelist not found, need to rebuild one"
+msgstr "lista de jogos não encontrada, necessario recriar uma"
+
+#: ../src/gmameui.c:161
+#, c-format
+msgid "Time to load gamelist: %.02f seconds"
+msgstr "Tempo para carregar lista de jogos: %.02f segundos"
+
+#: ../src/gmameui.c:164
+msgid "games.ini not loaded, using default values"
+msgstr "games.ini não carregado, usando valores padrões"
+
+#: ../src/gmameui.c:166
+#, c-format
+msgid "Time to load games ini: %.02f seconds"
+msgstr "Tempo para carregar games ini: %.02f segundos"
+
+#: ../src/gmameui.c:169
+msgid "catver not loaded, using default values"
+msgstr "catver não carregado, usando valores padrões"
+
+#: ../src/gmameui.c:175
+msgid "unable to load gmameui.ini, using default values"
+msgstr "impossível carregar gmameui.ini, usando valores padrões"
+
+#: ../src/gmameui.c:178
+msgid "default options not loaded, using default values"
+msgstr "opções padrões não carregadas, usando valores padrões"
+
+#: ../src/gmameui.c:182
+#, c-format
+msgid "Time to initialise GMAMEUI: %.02f seconds"
+msgstr "Tempo para inicializar GMAMEUI: %.02f segundos"
+
+#: ../src/gmameui.c:191
+#: ../src/gui_prefs.c:72
+#, c-format
+msgid "Joystick %s found"
+msgstr "Joystick %s encontrado"
+
+#: ../src/gmameui.c:193
+#: ../src/gui_prefs.c:74
+msgid "No Joystick found"
+msgstr "Nenhum Joystick foi encontrado"
+
+#: ../src/gmameui.c:360
+#: ../src/gmameui.c:369
+#, c-format
+msgid "Loading %s:"
+msgstr "Carregando %s:"
+
+#. if not print a message and return to the selection screen
+#: ../src/gmameui.c:604
+#, c-format
+msgid "Could not open '%s' as valid input file"
+msgstr "Não foi possível abrir '%s' como arquivo de entrada válido"
+
+#: ../src/gmameui.c:697
+msgid "Exiting GMAMEUI..."
+msgstr "Encerrando GMAMEUI..."
+
+#: ../src/gmameui.c:726
+msgid "Finished cleaning up GMAMEUI"
+msgstr "Terminada limpeza do GMAMEUI"
+
+#: ../src/gmameui.c:756
+msgid "Game"
+msgstr "Jogo"
+
+#: ../src/gmameui.c:758
+msgid "ROMs"
+msgstr "ROMs"
+
+#: ../src/gmameui.c:760
+msgid "Samples"
+msgstr "Amostras"
+
+#: ../src/gmameui.c:762
+msgid "Directory"
+msgstr "Diretório"
+
+#: ../src/gmameui.c:764
+msgid "Played"
+msgstr "Jogados"
+
+#: ../src/gmameui.c:766
+msgid "Manufacturer"
+msgstr "Fabricante"
+
+#: ../src/gmameui.c:768
+msgid "Year"
+msgstr "Ano"
+
+#: ../src/gmameui.c:770
+msgid "Clone of"
+msgstr "Clone de"
+
+#: ../src/gmameui.c:772
+msgid "Driver"
+msgstr "Driver"
+
+#. Available / Not Available
+#: ../src/gmameui.c:774
+msgid "Status"
+msgstr "Status"
+
+#: ../src/gmameui.c:776
+msgid "Rom of"
+msgstr "Rom de"
+
+#. Working / Not Working
+#: ../src/gmameui.c:778
+msgid "Driver Status"
+msgstr "Status do Driver"
+
+#: ../src/gmameui.c:780
+msgid "Driver Colors"
+msgstr "Cores do Driver"
+
+#: ../src/gmameui.c:782
+msgid "Driver Sound"
+msgstr "Som do Driver"
+
+#: ../src/gmameui.c:784
+msgid "Driver Graphics"
+msgstr "Gráfico do Driver"
+
+#: ../src/gmameui.c:786
+msgid "Players"
+msgstr "Jogadores"
+
+#: ../src/gmameui.c:788
+msgid "Buttons"
+msgstr "Botões"
+
+#: ../src/gmameui.c:790
+msgid "Version"
+msgstr "Versão"
+
+#: ../src/gmameui.c:792
+#: ../src/mame_options_dialog.c:82
+msgid "Category"
+msgstr "Categoria"
+
+#: ../src/gmameui.c:794
+msgid "Favorite"
+msgstr "Favorito"
+
+#: ../src/gmameui.c:796
+msgid "Channels"
+msgstr "Canais"
+
+#: ../src/gmameui.c:798
+msgid "BIOS"
+msgstr "BIOS"
+
+#: ../src/gui.c:701
+#, c-format
+msgid "Time to initialise icons: %.02f seconds"
+msgstr "Tempo para inicializar ícones: %.02f segundos"
+
+#: ../src/gui.c:706
+#, c-format
+msgid "Time to create main window and filters: %.02f seconds"
+msgstr "Tempo para criar janela principal e filtros: %.02f segundos"
+
+#: ../src/gui.c:744
+#, c-format
+msgid "Time to create gamelist: %.02f seconds"
+msgstr "Tempo para criar lista de jogos: %.02f segundos"
+
+#: ../src/gui.c:749
+#, c-format
+msgid "Time to create gamelist content: %.02f seconds"
+msgstr "Tempo para criar conteúdo da lista de jogos: %.02f segundos"
+
+#: ../src/gui.c:769
+#, c-format
+msgid "Time to complete start of UI: %.02f seconds"
+msgstr "Tempo para completar a inicialização da UI: %.02f segundos"
+
+#: ../src/gui.c:790
+#, c-format
+msgid "%s is not a valid executable"
+msgstr "%s não é um executável válido"
+
+#: ../src/gui.c:1535
+msgid "Wait..."
+msgstr "Espere..."
+
+#: ../src/gui.c:1613
+#: ../src/gui.c:1987
+msgid "Yes"
+msgstr "Sim"
+
+#: ../src/gui.c:1613
+#: ../src/gui.c:1987
+msgid "No"
+msgstr "Não"
+
+#. Status Bar Message
+#: ../src/gui.c:1733
+msgid "games"
+msgstr "jogos"
+
+#: ../src/gui.c:1733
+msgid "game"
+msgstr "jogo"
+
+#. update statusbar
+#: ../src/gui.c:1910
+msgid "No game selected"
+msgstr "Nenhum jogo selecionado"
+
+#: ../src/gui.c:1925
+#: ../src/gui.c:1955
+#, c-format
+msgid "Game search %i%% complete"
+msgstr "Procura por jogo %i%% completa"
+
+#: ../src/gui.c:2010
+#: ../src/gui.c:2032
+msgid "Working"
+msgstr "Funcionando"
+
+#: ../src/gui.c:2010
+#: ../src/gui.c:2032
+msgid "Not Working"
+msgstr "Não funciona"
+
+#: ../src/gui.c:2066
+#, c-format
+msgid ""
+"A file named '%s' already exists.\n"
+"Do you want to overwrite it?"
+msgstr ""
+"Um arqueivo de nome '%s' já existe.\n"
+"Deseja sobreescrever-lo?"
+
+#: ../src/gui.c:2092
+msgid "Choose inp file to play"
+msgstr "Escolha um arquivo inp para tocar"
+
+#: ../src/gui.c:2099
+msgid "Choose inp file to record"
+msgstr "Escolha um arquivo inp para gravar"
+
+#: ../src/interface.c:94
+msgid "GMAMEUI Arcade Machine Emulator"
+msgstr "GMAMEUI Interface Gráfica para Emulador de Filperama"
+
+#: ../src/interface.c:216
+msgid "Play Game"
+msgstr "Iniciar Jogo"
+
+#: ../src/interface.c:221
+msgid "Show Folders"
+msgstr "Mostrar Pastas"
+
+#: ../src/interface.c:232
+msgid "Show Sidebar"
+msgstr "Mostrar Barra Lateral"
+
+#: ../src/interface.c:237
+msgid "List"
+msgstr "Lista"
+
+#: ../src/interface.c:245
+msgid "List Tree"
+msgstr "Lista de Árvore"
+
+#: ../src/interface.c:253
+msgid "Details"
+msgstr "Detalhes"
+
+#: ../src/interface.c:261
+msgid "Details Tree"
+msgstr "Detalhes Árvore"
+
+#: ../src/io.c:682
+msgid "Performing quick check, please wait:"
+msgstr "Checagem rápida de performance, por favor espere:"
+
+#: ../src/keyboard.c:80
+msgid "French Layout"
+msgstr "Layout Francês"
+
+#: ../src/keyboard.c:81
+msgid "German Layout"
+msgstr "Layout Alemão"
+
+#: ../src/mameio.c:538
+#: ../src/mameio.c:688
+msgid "Creating game list..."
+msgstr "Criando lista de jogos..."
+
+#: ../src/mameio.c:539
+msgid "Creating game list, please wait"
+msgstr "Criando lista de jogos, por favor espere"
+
+#: ../src/mameio.c:566
+#: ../src/mameio.c:709
+#, c-format
+msgid "Creating game list (%d games)..."
+msgstr "Criando lista de jogos (%d jogos)..."
+
+#: ../src/mameio.c:608
+#, c-format
+msgid "Error executing %s"
+msgstr "Erro execuntando %s"
+
+#: ../src/mameio.c:691
+msgid "receiving data, please wait"
+msgstr "recebendo dados, por favor espere"
+
+#: ../src/mameio.c:707
+msgid "creating game list, Please wait:"
+msgstr "criando lista de jogos, por favor espere:"
+
+#: ../src/mameio.c:962
+msgid "xmame not found"
+msgstr "xmame não encontrado"
+
+#: ../src/mameio.c:977
+msgid "I don't know how to generate a gamelist for this version of xmame!"
+msgstr "Não é possível criar uma lista de jogos com esta versão do xmame!"
+
+#. FIXME: Make the debugging page last
+#: ../src/mame_options_dialog.c:131
+#: ../src/mame_options_dialog.c:134
+msgid "Debugging"
+msgstr "Debugando"
+
+#: ../src/network_game.c:273
+msgid "Network game options"
+msgstr "Opções de jogos de rede"
+
+#. network mode
+#: ../src/network_game.c:288
+msgid "Network Mode"
+msgstr "Modo de rede"
+
+#. client
+#: ../src/network_game.c:299
+msgid "Client"
+msgstr "Cliente"
+
+#: ../src/network_game.c:312
+msgid "Server"
+msgstr "Servidor"
+
+#. Server host:port
+#: ../src/network_game.c:324
+msgid "Host[:Port] : "
+msgstr "Host[:Porta] :"
+
+#. Number of players
+#: ../src/network_game.c:344
+msgid "Number of players : "
+msgstr "Número de jogadores"
+
+#. netmap key
+#: ../src/network_game.c:365
+msgid "Use NetMapKey"
+msgstr "Use NetMapKey"
+
+#. statedebug
+#: ../src/network_game.c:375
+msgid "Statedebug"
+msgstr "Statedebug"
+
+#. bind
+#: ../src/network_game.c:385
+msgid "Bind port:"
+msgstr "Porta de conexão:"
+
+#. parallelsync
+#: ../src/network_game.c:406
+msgid "Perform network input sync in advance"
+msgstr "Sincronizando entrada de rede antecipada"
+
+#: ../src/options.c:264
+msgid "Europe, 1 Slot (also been seen on a 4 slot)"
+msgstr "Europa, 1 Slot (também sendo visto com 4 slot)"
+
+#: ../src/options.c:265
+msgid "Europe, 4 Slot"
+msgstr "Europa, 4 Slot"
+
+#: ../src/options.c:266
+msgid "US, 2 Slot"
+msgstr "EUA, 2 Slot"
+
+#: ../src/options.c:267
+msgid "US, 6 Slot (V5?)"
+msgstr "EUA, 6 Slot (V5?)"
+
+#: ../src/options.c:268
+msgid "Asia S3 Ver 6"
+msgstr "Asia S3 Ver 6"
+
+#: ../src/options.c:269
+msgid "Japan, Ver 6 VS Bios"
+msgstr "Japão, Ver 6 VS Bios"
+
+#: ../src/options.c:270
+msgid "Japan, Older"
+msgstr "Japão, Antigo"
+
+#: ../src/options.c:271
+msgid "Universe Bios v1.0 (hack)"
+msgstr "Universal Bios v1.0 (hack)"
+
+#: ../src/options.c:272
+msgid "Universe Bios v1.1 (hack)"
+msgstr "Universal Bios v1.1 (hack)"
+
+#: ../src/options.c:273
+msgid "Debug (Development) Bios"
+msgstr "Debug (Desenvolvimento) Bios"
+
+#: ../src/options.c:274
+msgid "AES Console (Asia?) Bios"
+msgstr "AES Console (Asia?) Bios"
+
+#: ../src/options.c:275
+msgid "Universe Bios v1.2 (hack)"
+msgstr "Universal Bios v1.2 (hack)"
+
+#: ../src/options.c:778
+msgid "Display"
+msgstr "Exibir"
+
+#: ../src/options.c:869
+msgid "Draw every frame"
+msgstr "Desenhar todos os frame"
+
+#: ../src/options.c:871
+#, c-format
+msgid "Skip %i of 12 frames"
+msgstr "Saltar %i de 12 frames"
+
+#: ../src/options.c:919
+#: ../src/options.c:2435
+msgid "Auto"
+msgstr "Auto"
+
+#: ../src/options.c:920
+msgid "8 bits"
+msgstr "8 bits"
+
+#: ../src/options.c:921
+msgid "15 bits"
+msgstr "15 bits"
+
+#: ../src/options.c:922
+msgid "16 bits"
+msgstr "16 bits"
+
+#: ../src/options.c:923
+msgid "32 bits"
+msgstr "32 bits"
+
+#: ../src/options.c:946
+msgid "None"
+msgstr "Nenhum"
+
+#: ../src/options.c:947
+msgid "Clockwise"
+msgstr "No sentido horário"
+
+#: ../src/options.c:948
+msgid "Anti-clockwise"
+msgstr "No sentido anti-horário"
+
+#: ../src/options.c:1438
+msgid "GGI options"
+msgstr "Opções GGI"
+
+#: ../src/options.c:1447
+#: ../src/options.c:1542
+msgid "linear framebuffer (fast)"
+msgstr "linear framebuffer (rápido)"
+
+#: ../src/options.c:1451
+msgid "Force resolutions"
+msgstr "Forçar resoluções"
+
+#: ../src/options.c:1529
+msgid "SVGA options"
+msgstr "Opções SVGA"
+
+#: ../src/options.c:1538
+msgid "planar (modeX) modes"
+msgstr "planar (modoX) modos"
+
+#: ../src/options.c:1546
+msgid "Use tweaked VGA modes"
+msgstr "Usar otimizados modos VGA"
+
+#: ../src/options.c:1554
+msgid "Center X:"
+msgstr "Centro X:"
+
+#: ../src/options.c:1564
+msgid "Center Y:"
+msgstr "Centro Y:"
+
+#: ../src/options.c:1705
+msgid "Rendering"
+msgstr "Renderizando"
+
+#: ../src/options.c:1755
+msgid "Sound"
+msgstr "Som"
+
+#. workaround to allow correct translation of "" with gettext
+#: ../src/options.c:1842
+#, c-format
+msgid "Buffer size %s"
+msgstr "Tamanho do Buffer %s"
+
+#: ../src/options.c:2017
+msgid "Controllers"
+msgstr "Controles"
+
+#: ../src/options.c:2115
+msgid "Default Layout"
+msgstr "Layout Padrão"
+
+#: ../src/options.c:2418
+msgid "Miscellaneous"
+msgstr "Diversos"
+
+#: ../src/options.c:2436
+msgid "Standard"
+msgstr "Padrão"
+
+#: ../src/options.c:2437
+msgid "High"
+msgstr "Alto"
+
+#: ../src/options.c:2613
+msgid "Vector"
+msgstr "Vetor"
+
+#: ../src/progression_window.c:76
+msgid "Progress Window"
+msgstr "Janela de Progresso"
+
+#: ../src/progression_window.c:89
+msgid "Loading Game..."
+msgstr "Carregando Jogo..."
+
+#: ../src/progression_window.c:101
+msgid "rom"
+msgstr "rom"
+
+#: ../src/properties.c:80
+msgid "Can't audit game"
+msgstr "Não foi possível auditar jogo"
+
+#: ../src/properties.c:85
+#: ../src/properties.c:182
+msgid "None required"
+msgstr "Nenhum requerido"
+
+#: ../src/properties.c:116
+#: ../src/properties.c:157
+msgid "Passed"
+msgstr "Passou"
+
+#: ../src/properties.c:117
+#: ../src/properties.c:160
+msgid "Incorrect"
+msgstr "Incorreto"
+
+#: ../src/properties.c:118
+msgid "Best available"
+msgstr "Melhor disponível"
+
+#: ../src/properties.c:120
+msgid "Not available"
+msgstr "Não disponível"
+
+#: ../src/properties.c:164
+msgid "Not found"
+msgstr "Não encontrado"
+
+#: ../src/properties.c:305
+msgid " (sound)"
+msgstr "(som)"
+
+#: ../src/properties.c:402
+#, c-format
+msgid "%i colors"
+msgstr "%i cores"
+
+#: ../src/properties.c:431
+#: ../src/properties.c:434
+msgid "Checking..."
+msgstr "Checando..."
+
+#: ../src/properties.c:498
+#, c-format
+msgid "Properties for %s"
+msgstr "Propriedades para %s"
+
+#: ../src/properties.c:500
+msgid "Default Properties"
+msgstr "Propriedades Padrão"
+
+#: ../src/properties.c:515
+msgid "Reset to Defaults"
+msgstr "Restaurar padrões"
+
+#: ../src/properties.c:540
+msgid "Global game options"
+msgstr "Opções globais do jogo"
+
+#: ../src/properties.c:540
+msgid "Default options used by all games"
+msgstr "Opções padrões usadas por todos os jogos"
+
+#: ../src/xmame_executable.c:135
+#, c-format
+msgid "%s is not a valid xmame executable"
+msgstr "%s não é um executável do xmame válido"
+
+#: ../src/xmame_executable.c:206
+#, c-format
+msgid "This version of GMAMEUI supports up to %i xmame executables."
+msgstr "Esta versão do GMAMEUI suporta %i executáveis do xmame."
+
