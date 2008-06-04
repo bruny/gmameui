@@ -1138,6 +1138,7 @@ mame_options_instance_init (MameOptions *pr)
 	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "performance_vbox"));
 	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "misc_vbox"));
 	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "debugging_vbox"));
+	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "OpenGL"));
 	
 }
 

@@ -209,6 +209,8 @@ void on_options_activate (GtkAction *action,
 		GladeXML *xml = glade_xml_new (GLADEDIR "options.glade", NULL, NULL);
 		mame_options_add_page (main_gui.options, xml, "Display", "Display",
 		                       "gmameui-display-toolbar");
+		mame_options_add_page (main_gui.options, xml, "OpenGL", "OpenGL",
+		                       "gmameui-display-toolbar");
 		mame_options_add_page (main_gui.options, xml, "Sound", "Sound",
 		                       "gmameui-sound-toolbar");
 		mame_options_add_page (main_gui.options, xml, "Input", "Input",
