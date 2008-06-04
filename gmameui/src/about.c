@@ -48,9 +48,7 @@ about_window_show (void)
 		NULL
 	};
 
-	char *translators;
-
-	translators = _("translator-credits");
+	const char *translators = _("translator-credits");
 
 	pixbuf = gmameui_get_icon_from_stock ("gmameui-screen");
 
@@ -134,16 +132,9 @@ create_CreditsWindow (GtkWindow *parent)
 	gtk_notebook_append_page (credits_notebook, developers, developers_label);
 
 	translators_label = gtk_label_new (_("Translators"));
-	translators = gtk_label_new(_("The following people translated GXMame:\n"
-				      "German (de) - Tobias Wichtrey <tobias@tarphos.de>\n"
-				      "Greek (el) - Nicos Panayides <anarxia@gmx.net>\n"
-				      "Spanish (es) - Pablo Gonzalo del Campo <pablodc@bigfoot.com>\n"
-				      "French (fr) - Stephane Pontier <shadow_walker@users.sourceforge.net>\n"
-				      "Italian (it) - Diego Apollonio <aposoft@tiscalinet.it>\n"
-				      "Dutch (nl) - Francois Duprez <duprez@planet.nl>\n"
-				      "Polish (pl) - Dawid Cierniak <cierny@poczta.fm>\n"
-				      "Simplified Chinese (zh_CN) - Andrew Wong <andrew@thizlinux.com>\n"
-				      "Traditional Chinese (zh_TW) - Jouston Huang <jouston@jouston.no-ip.com>\n"));
+	translators = gtk_label_new(_("The following people translated GMAMEUI:\n"
+				      "Brazilian Portugese (pt_BR) - Alfredo Jr <junix@linuxinabox.org>\n"
+				      "Italian (it) - Ugo Viti <ugo.viti@initzero.it>\n"));
 	gtk_widget_show (translators);
 	gtk_notebook_append_page (credits_notebook, translators, translators_label);
 
