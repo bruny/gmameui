@@ -178,6 +178,7 @@ create_directories_selection (void)
 	gchar *title_dir;
 	gchar *cpanel_dir;
 	gchar *icon_dir;
+	gchar *ctrlr_dir;
 	gchar *cheat_file;
 	gchar *hiscore_file;
 	gchar *history_file;
@@ -194,6 +195,7 @@ create_directories_selection (void)
 		      "dir-title", &title_dir,
 		      "dir-cpanel", &cpanel_dir,
 		      "dir-icons", &icon_dir,
+		      "dir-ctrlr", &ctrlr_dir,
 		      "file-cheat", &cheat_file,
 		      "file-hiscore", &hiscore_file,
 		      "file-history", &history_file,
@@ -292,7 +294,7 @@ create_directories_selection (void)
 	hiscorefile_path_entry = glade_xml_get_widget (xml, "hiscorefile_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (hiscorefile_path_entry), hiscore_file);
 	ctrlr_directory_entry = glade_xml_get_widget (xml, "ctrlr_directory_entry");
-	gtk_entry_set_text (GTK_ENTRY (ctrlr_directory_entry), gui_prefs.CtrlrDirectory);
+	gtk_entry_set_text (GTK_ENTRY (ctrlr_directory_entry), ctrlr_dir);
 	icons_path_entry = glade_xml_get_widget (xml, "icons_path_entry");
 	gtk_entry_set_text (GTK_ENTRY (icons_path_entry), icon_dir);
 
@@ -413,6 +415,7 @@ create_directories_selection (void)
 	g_free (title_dir);
 	g_free (cpanel_dir);
 	g_free (icon_dir);
+	g_free (ctrlr_dir);
 	g_free (cheat_file);
 	g_free (hiscore_file);
 	g_free (history_file);
@@ -597,6 +600,7 @@ directories_selection_save_changes (GtkWidget *widget)
 	gchar *text = NULL;
 	gboolean changed_flag;
 	GValueArray *va_rom_paths;
+	gchar *ctrlr_dir;
 
 	ListMode current_mode;
 
@@ -606,6 +610,7 @@ directories_selection_save_changes (GtkWidget *widget)
 	
 	g_object_get (main_gui.gui_prefs,
 		      "current-mode", &current_mode,
+		      "dir-ctrlr", &ctrlr_dir,
 		      "rom-paths", &va_rom_paths,
 		      NULL);
 	
@@ -645,10 +650,13 @@ directories_selection_save_changes (GtkWidget *widget)
 
 	/* If the ctrlr directory has changed, we reload the default options */
 	if (!gtk_editable_get_chars (GTK_EDITABLE (ctrlr_directory_entry), 0, -1)
-	    || strcmp (gui_prefs.CtrlrDirectory, gtk_editable_get_chars (GTK_EDITABLE (ctrlr_directory_entry), 0, -1)))
+	    || strcmp (ctrlr_dir, gtk_editable_get_chars (GTK_EDITABLE (ctrlr_directory_entry), 0, -1)))
 	{
-		g_free (gui_prefs.CtrlrDirectory);
-		gui_prefs.CtrlrDirectory = gtk_editable_get_chars (GTK_EDITABLE (ctrlr_directory_entry), 0, -1);
+		g_free (ctrlr_dir);
+		//ctrlr_dir = gtk_editable_get_chars (GTK_EDITABLE (ctrlr_directory_entry), 0, -1);
+		g_object_set (main_gui.gui_prefs,
+			      "dir-ctrlr", gtk_editable_get_chars (GTK_EDITABLE (ctrlr_directory_entry), 0, -1),
+			      NULL);
 		load_options (NULL);
 	}
 
@@ -755,6 +763,7 @@ directories_selection_save_changes (GtkWidget *widget)
 	/* Update the state of the menus and toolbars */
 	gmameui_ui_set_items_sensitive ();
 
+	g_free (ctrlr_dir);
 	if (text)
 		g_free (text);
 }
