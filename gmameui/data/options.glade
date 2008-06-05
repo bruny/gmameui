@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Wed Jun  4 20:27:30 2008 -->
+<!--Generated with glade3 3.4.5 on Thu Jun  5 12:38:27 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="window1">
     <child>
@@ -618,6 +618,7 @@
                     <child>
                       <widget class="GtkHBox" id="hbox6">
                         <property name="visible">True</property>
+                        <property name="spacing">6</property>
                         <child>
                           <widget class="GtkLabel" id="label14">
                             <property name="visible">True</property>
@@ -631,8 +632,8 @@
                         <child>
                           <widget class="GtkComboBox" id="preferences_combo:text:soft,opengl:0:Video.video">
                             <property name="visible">True</property>
-                            <property name="items" translatable="yes">soft
-opengl</property>
+                            <property name="items" translatable="yes">Software
+OpenGL</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -708,8 +709,10 @@ opengl</property>
                     <child>
                       <widget class="GtkHBox" id="hbox9">
                         <property name="visible">True</property>
+                        <property name="spacing">6</property>
                         <child>
                           <widget class="GtkLabel" id="label17">
+                            <property name="visible">True</property>
                             <property name="xalign">0</property>
                             <property name="label" translatable="yes">Effect name:</property>
                           </widget>
@@ -719,7 +722,14 @@ opengl</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkComboBox" id="preferences_combo:string:1:0:Video.effect">
+                          <widget class="GtkComboBox" id="preferences_combo:text:aperture1x2rb,aperture1x3rb,aperture2x4bg,aperture2x4rb,aperture4x6,scanlines:0:Video.effect">
+                            <property name="visible">True</property>
+                            <property name="items" translatable="yes">aperture1x2rb
+aperture1x3rb
+aperture2x4bg
+aperture2x4rb
+aperture4x6
+scanlines</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -789,6 +799,7 @@ opengl</property>
                     <child>
                       <widget class="GtkHBox" id="hbox15">
                         <property name="visible">True</property>
+                        <property name="spacing">6</property>
                         <child>
                           <widget class="GtkLabel" id="label29">
                             <property name="visible">True</property>
