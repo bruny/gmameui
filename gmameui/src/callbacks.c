@@ -136,6 +136,8 @@ on_select_random_game_activate         (GtkMenuItem     *menuitem,
 {
 	gint random_game;
 
+	g_return_if_fail (visible_games > 0);
+
 	random_game = (gint) g_random_int_range (0, visible_games);
 	GMAMEUI_DEBUG ("random game#%i", random_game);
 
@@ -237,7 +239,6 @@ on_audit_all_games_activate (GtkMenuItem     *menuitem,
 {
 	if (!current_exec) {
 		gmameui_message (ERROR, NULL, _("No xmame executables defined"));
-		gtk_widget_destroy (user_data);
 		/* reenable joystick */
 		joy_focus_on ();
 		return;
