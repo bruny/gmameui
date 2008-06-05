@@ -349,22 +349,14 @@ GMAMEUI_DEBUG("Current exec set to %s", current_exec->path);
 	
 		if (!current_exec)
 			current_exec = xmame_table_get_by_index (0);
-	
-		gui_prefs.CtrlrDirectory = g_key_file_get_string (dirsini_list, "Directories", "CtrlrDirectory", &error);
-		gui_prefs.inipath = g_key_file_get_string (dirsini_list, "Directories", "inipath", &error);
+
 
 		gui_prefs.catverDirectory = g_key_file_get_string (dirsini_list, "Directories", "CatverDirectory", &error);		
 		
 		g_key_file_free (dirsini_list);
 GMAMEUI_DEBUG ("Finished loading directories ini file");
 	}
-	
-	/* Set defaults if the values were not available in the ini file */
-	if (!gui_prefs.CtrlrDirectory) gui_prefs.CtrlrDirectory = g_build_filename (XMAME_ROOT, "ctrlr", NULL);
-
-	/* The following configuration options are all stored under .gmameui */
-	if (!gui_prefs.inipath) gui_prefs.inipath = g_build_filename (g_get_home_dir (), ".gmameui" , "ini", NULL);
-	
+		
 	if (!gui_prefs.catverDirectory) gui_prefs.catverDirectory = g_build_filename (g_get_home_dir (), ".gmameui", NULL);
 
 	
@@ -388,10 +380,6 @@ GMAMEUI_DEBUG ("Saving dirs.ini");
 	if (xmame_table_size () > 0)
 		g_key_file_set_string_list (dirsini_list, "Directories", "xmame_executables_array",
 					    xmame_table_get_all(), xmame_table_size());
-
-	g_key_file_set_string (dirsini_list, "Directories", "CtrlrDirectory", gui_prefs.CtrlrDirectory);
-	
-	g_key_file_set_string (dirsini_list, "Directories", "inipath", gui_prefs.inipath);
 	
 	g_key_file_set_string (dirsini_list, "Directories", "CatverDirectory", gui_prefs.catverDirectory);
 	
@@ -557,19 +545,18 @@ get_ctrlr_list (void)
 	const gchar *dent;
 	gchar *filename;
 	gsize filename_len;
+	gchar *ctrlr_dir;
+	
+	g_object_get (main_gui.gui_prefs, "dir-ctrlr", &ctrlr_dir, NULL);
+	
+	GMAMEUI_DEBUG ("Getting the ctrlr list from directory %s", ctrlr_dir);
 
-	GMAMEUI_DEBUG ("Getting the ctrlr list. %s", gui_prefs.CtrlrDirectory);
-
-	di = g_dir_open (gui_prefs.CtrlrDirectory, 0, NULL);
-	if (!di)
-	{
-		GMAMEUI_DEBUG ("ERROR - unable to open folder %s", gui_prefs.CtrlrDirectory);
-	}
-	else
+	di = g_dir_open (ctrlr_dir, 0, NULL);
+	if (di)
 	{
 		while ( (dent = g_dir_read_name (di)))
 		{
-			filename = g_build_filename (gui_prefs.CtrlrDirectory, dent, NULL);
+			filename = g_build_filename (ctrlr_dir, dent, NULL);
 			if (g_file_test (filename, G_FILE_TEST_IS_DIR))
 				ctrlr_list = g_list_append (ctrlr_list, g_strdup (dent));
 
@@ -582,6 +569,10 @@ get_ctrlr_list (void)
 		}
 		g_dir_close (di);
 	}
+	else
+		GMAMEUI_DEBUG ("ERROR - unable to open folder %s", ctrlr_dir);
 
+	g_free (ctrlr_dir);
+	
 	return ctrlr_list;
 }
