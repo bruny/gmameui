@@ -1571,6 +1571,7 @@ create_gamelist_content (void)
 	RomEntry *selected_game;
 	ListMode current_mode;
 	gchar *current_rom_name;
+	gchar *clone_color;
 
 	GMAMEUI_DEBUG ("POPULATE GAME LIST");
 GTimer *timer = g_timer_new ();
@@ -1579,6 +1580,7 @@ g_timer_start (timer);
 	g_object_get (main_gui.gui_prefs,
 		      "current-mode", &current_mode,
 		      "current-rom", &current_rom_name,
+		      "clone-color", &clone_color,
 		      NULL);
 	
 	selected_game = gui_prefs.current_game;
@@ -1651,12 +1653,7 @@ g_timer_start (timer);
 			/* Clone Color + Pixbuf width */
 			if (strcmp (tmprom->cloneof, "-")) {
 				/* Clone */
-				gchar *clone_color;
-				g_object_get (main_gui.gui_prefs,
-					      "clone-color", &clone_color,
-					      NULL);
 				gdk_color_parse (clone_color, &my_txtcolor);
-				g_free (clone_color);
 			} else {
 				/* Original */
 				gdk_color_parse ("black", &my_txtcolor);
@@ -1698,7 +1695,7 @@ g_timer_start (timer);
 						    MAMEVER,      tmprom->mame_ver_added,
 						    CATEGORY,     tmprom->category,
 						    ROMENTRY,     tmprom,                 /* rom entry */
-						    TEXTCOLOR,    &my_txtcolor,            /* text color */
+						    TEXTCOLOR,    &my_txtcolor,           /* text color */
 						    PIXBUF,       pixbuf,                 /* pixbuf */
 						    -1);
 				if (is_root)
@@ -1768,6 +1765,7 @@ g_timer_start (timer);
 		g_free (message);
 	if (my_romname_root)
 		g_free (my_romname_root);
+	g_free (clone_color);
 
 	if (visible_games == 0)
 		select_game (NULL);
@@ -2014,16 +2012,18 @@ void
 update_game_in_list (RomEntry *tmprom)
 {
 	const gchar *my_hassamples;
-	GdkColor *my_txtcolor;
+	GdkColor my_txtcolor;
 	GdkPixbuf *pixbuf;
 	gboolean is_tree_store;
 	ListMode current_mode;
+	gchar *clone_color;
 
 	if (!tmprom)
 		return;
 
 	g_object_get (main_gui.gui_prefs,
 		      "current-mode", &current_mode,
+		      "clone-color", &clone_color,
 		      NULL);
 	
 	/* Whether the Tree Model will a tree or a list */
@@ -2038,18 +2038,12 @@ update_game_in_list (RomEntry *tmprom)
 		my_hassamples = (tmprom->has_samples == CORRECT) ? _("Yes") : _("No");
 	}
 	
-	/* Clone Color + Pixbuf width */
-	if (strcmp (tmprom->cloneof, "-")) {  /* Clone */
-		/* Clone */
-/* FIXME TODO		gchar *clone_color;
-		g_object_get (main_gui.gui_prefs,
-			      "clone-color", &clone_color,
-			      NULL);
-		gdk_color_parse (clone_color, &my_txtcolor);
-		g_free (clone_color);*/
-	} else { /* Original */
-		my_txtcolor = NULL; /* Black */
+	/* Clone colour */
+	if ((!strcmp (tmprom->cloneof, "-")) || (!clone_color)) {
+		clone_color = g_strdup ("black");
 	}
+	gdk_color_parse (clone_color, &my_txtcolor);
+	
 
 	/* Set the pixbuf for the status icon */
 	pixbuf = Status_Icons [tmprom->has_roms];
@@ -2066,7 +2060,7 @@ update_game_in_list (RomEntry *tmprom)
 				    DRIVER,                     tmprom->driver,
 				    MAMEVER,                    tmprom->mame_ver_added,
 				    CATEGORY,                   tmprom->category,
-				    TEXTCOLOR,                  my_txtcolor,            /* text color */
+				    TEXTCOLOR,                  &my_txtcolor,           /* text color */
 				    PIXBUF,                     pixbuf,                 /* pixbuf */
 				    -1);
 	} else {
@@ -2081,10 +2075,12 @@ update_game_in_list (RomEntry *tmprom)
 				    DRIVER,                     tmprom->driver,
 				    MAMEVER,                    tmprom->mame_ver_added,
 				    CATEGORY,                   tmprom->category,
-				    TEXTCOLOR,                  my_txtcolor,            /* text color */
+				    TEXTCOLOR,                  &my_txtcolor,           /* text color */
 				    PIXBUF,                     pixbuf,                 /* pixbuf */
 				    -1);
 	}
+	
+	g_free (clone_color);
 
 }
 
