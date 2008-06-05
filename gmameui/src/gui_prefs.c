@@ -610,6 +610,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	g_signal_connect (pr, "notify::joystick-name", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::theprefix", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::clone-color", (GCallback) mame_gui_prefs_save_string, NULL);
+	g_signal_connect (pr, "notify::current-rom", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::rom-paths", (GCallback) mame_gui_prefs_save_string_arr, NULL);
 	g_signal_connect (pr, "notify::sample-paths", (GCallback) mame_gui_prefs_save_string_arr, NULL); 
 	
