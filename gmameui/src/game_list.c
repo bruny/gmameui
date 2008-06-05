@@ -202,10 +202,7 @@ gamelist_add (RomEntry *rom)
 	if (!rom->year)
 		rom_entry_set_year (rom, _("Unknown"));
 
-	/* No need to insert sorted - appending cuts 2 seconds off start up
-	 game_list.roms = g_list_insert_sorted (game_list.roms, (gpointer) rom, (GCompareFunc )compare_game_name);
-	*/
-	game_list.roms = g_list_append (game_list.roms, (gpointer) rom);
+	game_list.roms = g_list_insert_sorted (game_list.roms, (gpointer) rom, (GCompareFunc )compare_game_name);
 
 	game_list.num_games++;
 
