@@ -831,7 +831,7 @@ g_message (_("Time to create gamelist: %.02f seconds"), g_timer_elapsed (mytimer
 g_message (_("Time to create gamelist content: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
 	/* Need to set the size here otherwise it move when we create the gamelist */
-	if (show_screenshot)
+	if (show_screenshot && gui_prefs.Splitters)
 		gtk_paned_set_position (main_gui.hpanedRight, gui_prefs.Splitters[1]);
 
 	/* Grab focus on the game list */
