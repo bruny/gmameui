@@ -357,6 +357,10 @@ void     on_view_type_changed                   (GtkRadioAction *action,
 		previous_mode = current_mode;
 		current_mode = val;
 		GMAMEUI_DEBUG ("Current mode changed %d --> %d", previous_mode, current_mode);
+		g_object_set (main_gui.gui_prefs,
+			      "current-mode", current_mode,
+			      "previous-mode", previous_mode,
+			      NULL);
 		
 		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group,
 						(current_mode == LIST_TREE) ||
@@ -373,11 +377,6 @@ void     on_view_type_changed                   (GtkRadioAction *action,
 			if ((previous_mode == DETAILS_TREE) || (previous_mode == LIST_TREE))
 				create_gamelist_content ();
 		}
-		
-		g_object_set (main_gui.gui_prefs,
-			      "current-mode", current_mode,
-			      "previous-mode", previous_mode,
-			      NULL);
 	}
 
 	 
