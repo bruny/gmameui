@@ -1,0 +1,9 @@
+<?xml version="1.0" standalone="no"?>
+<omf>
+  <resource>
+    <subject category="GNOME|Applications|Games"/>
+    <type>manual</type>
+    <relation seriesid="d9a457b0-92b0-4298-bf72-2eb53706d59f"/>
+    <rights type="GNU FDL" license.version="1.1" holder="HOWNER"/>
+  </resource>
+</omf>

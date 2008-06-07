@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+  <!ENTITY legal SYSTEM "legal.xml">
+  <!ENTITY appversion "0.2.2">
+  <!ENTITY manrevision "0.0.1">
+  <!ENTITY date "June 2008">
+  <!ENTITY app "GMAMEUI">
+]>
+<!--
+      (Do not remove this comment block.)
+  Version: 0.0.1
+  Last modified: June 07, 2008
+  Maintainers:
+               Andrew Burton <adb@iinet.net.au>
+-->
+<!-- =============Document Header ============================= -->
+<article id="index" lang="en">
+<!-- please do not change the id; for translations, change lang to -->
+<!-- appropriate code -->
+  <articleinfo>
+  	<title>&app; Manual V&manrevision;</title>
+	<copyright>
+		<year>2008</year>
+		<holder>Andrew Burton</holder>
+	</copyright>
+
+
+<!-- translators: uncomment this:
+  <copyright>
+   <year>2000</year>
+   <holder>ME-THE-TRANSLATOR (Latin translation)</holder>
+  </copyright>
+
+  -->
+<!-- An address can be added to the publisher information.  If a role is
+     not specified, the publisher/author is the same for all versions of the
+     document.  -->
+	<publisher>
+	 	<publishername>GNOME Documentation Project</publishername>
+	</publisher>
+
+   &legal;
+   <!-- This file  contains link to license for the documentation (GNU FDL), and
+   other legal stuff such as "NO WARRANTY" statement. Please do not change
+   any of this. -->
+   <authorgroup>
+   		<author role="maintainer">
+			<firstname>Andrew</firstname>
+			<surname>Burton</surname>
+			<affiliation>
+				<orgname>GNOME Documentation Project</orgname>
+				<address><email>adb@iinet.net.au</email></address>
+			</affiliation>
+		</author>
+   </authorgroup>
+
+<!-- According to GNU FDL, revision history is mandatory if you are -->
+<!-- modifying/reusing someone else's document.  If not, you can omit it. -->
+   <revhistory>
+      <revision> 
+		<revnumber>&app; Manual V&manrevision;</revnumber> 
+		<date>June 2008</date> 
+		<revdescription> 
+	  		<para role="author">Andrew Burton
+	  		</para>
+	  		<para role="publisher">GNOME Documentation Project</para>
+		</revdescription> 
+      </revision> 
+
+    </revhistory> 
+
+    <releaseinfo>This manual describes version &appversion; of &app;.
+    </releaseinfo> 
+    <legalnotice> 
+      <title>Feedback</title> 
+      <para>To report a bug or make a suggestion regarding the &app; application or
+      this manual, follow the directions in the <ulink url="ghelp:gnome-feedback"
+	  type="help">GNOME Feedback Page</ulink>. 
+      </para>
+<!-- Translators may also add here feedback address for translations -->
+    </legalnotice> 
+
+   <abstract role="description">
+     <para>GMAMEUI is a utility to manage and play classic arcade games in Linux.</para>
+   </abstract>
+
+  </articleinfo> 
+
+
+  <indexterm zone="index">
+    <primary>GMAMEUI</primary>
+  </indexterm>
+  <indexterm zone="index">
+    <primary>gmameui</primary>
+  </indexterm>
+  <indexterm zone="index">
+    <primary>arcade</primary>
+  </indexterm>
+  <indexterm zone="index">
+    <primary>mame</primary>
+  </indexterm>
+<!-- ============= Document Body ============================= -->
+<!-- ============= Introduction ============================== -->
+  <sect1 id="introduction">
+    <title>Introduction</title>
+
+  </sect1>
+  <sect1 id="rb-getting-started">
+  	<title>Getting Started</title>
+  </sect1>
+  </sect1>
+  <sect1 id="Usage">
+    <title>Using &app;</title>
+  </sect1>
+</article>
