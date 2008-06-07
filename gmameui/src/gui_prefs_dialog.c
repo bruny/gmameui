@@ -120,7 +120,7 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 	dlg->priv = g_new0 (MameGuiPrefsDialogPrivate, 1);
 	
 	/* Now set up the dialog */
-	GladeXML *xml = glade_xml_new (GLADEDIR "gmameui_prefs.glade", "dialog1", NULL);
+	GladeXML *xml = glade_xml_new (GLADEDIR "gmameui_prefs.glade", "dialog1", GETTEXT_PACKAGE);
 	if (!xml) {
 		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "gmameui_prefs.glade");
 		return;
@@ -220,12 +220,10 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 	
 	widget = glade_xml_get_widget (xml, "clone_color");
 	gdk_color_parse (clone_color, &color);
-	gtk_color_button_set_color (GTK_COLOR_BUTTON (widget), &color);
 	g_signal_connect (widget, "color-set",
 			  G_CALLBACK (on_prefs_colour_button_toggled), clone_lbl);
-	/* Default value may be off, so need to manually trigger */
-	on_prefs_colour_button_toggled (widget, clone_lbl);
-
+	gtk_color_button_set_color (GTK_COLOR_BUTTON (widget), &color);
+	
 	gtk_dialog_set_default_response (GTK_DIALOG (dlg), GTK_RESPONSE_CLOSE);
 	
 	g_object_unref (xml);
@@ -332,9 +330,7 @@ on_prefs_checkbutton_theprefix_toggled (GtkWidget *toggle,
 	gboolean active;
 	gchar *text;
 
-	example_lbl = (GtkWidget *) user_data;
-
-	MameGuiPrefsDialog *dlg = (GtkWidget *) user_data;
+	example_lbl = (GtkWidget *) user_data;	
 	
 	GMAMEUI_DEBUG ("theprefix toggled");
 	active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle));
@@ -366,8 +362,7 @@ on_prefs_colour_button_toggled (GtkWidget *color,
 	
 	newcolour = g_malloc (sizeof (GdkColor));
 	
-	gtk_color_button_get_color (GTK_COLOR_BUTTON (color),
-								newcolour);
+	gtk_color_button_get_color (GTK_COLOR_BUTTON (color), newcolour);
 	color_string = gdk_color_to_string (newcolour);
 	GMAMEUI_DEBUG ("clone-color changed colour to %s", color_string);
 
@@ -379,9 +374,11 @@ on_prefs_colour_button_toggled (GtkWidget *color,
 	/* Set the colour of the example label */
 	clone_lbl = (GtkWidget *) user_data;
 	gtk_widget_modify_fg (clone_lbl, GTK_STATE_NORMAL, newcolour);
-	
-	g_free (color_string);
-	gdk_color_free (newcolour);
+
+	if (color_string)
+		g_free (color_string);
+/*	if (newcolour)
+		gdk_color_free (newcolour);*/
 
 }
 
