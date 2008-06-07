@@ -44,6 +44,8 @@ AM_GNU_GETTEXT
 
 AC_PROG_INTLTOOL
 
+GNOME_DOC_INIT
+
 AC_ARG_WITH([xmame-dir],
   AC_HELP_STRING([--with-xmame-dir=DIR],[default path for xmame files]),
   AC_DEFINE_UNQUOTED(XMAME_ROOT, "$withval", [Path to xmame data files]),
