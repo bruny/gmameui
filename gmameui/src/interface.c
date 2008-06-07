@@ -121,7 +121,7 @@ create_MainWindow (void)
 	main_gui.manager = gtk_ui_manager_new ();
 	
 	action_group = gtk_action_group_new ("GmameuiWindowAlwaysSensitiveActions");
-	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (action_group,
 				      gmameui_always_sensitive_menu_entries,
 				      G_N_ELEMENTS (gmameui_always_sensitive_menu_entries),
@@ -131,7 +131,7 @@ create_MainWindow (void)
 	/* TODO window->priv->always_sensitive_action_group = action_group;*/
 
 	action_group = gtk_action_group_new ("GmameuiWindowExecROMActions");
-	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (action_group,
 				      gmameui_rom_and_exec_menu_entries,
 				      G_N_ELEMENTS (gmameui_rom_and_exec_menu_entries),
@@ -141,7 +141,7 @@ create_MainWindow (void)
 	main_gui.gmameui_rom_exec_action_group = action_group;	
 	
 	action_group = gtk_action_group_new ("GmameuiWindowROMActions");
-	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (action_group,
 				      gmameui_rom_menu_entries,
 				      G_N_ELEMENTS (gmameui_rom_menu_entries),
@@ -151,7 +151,7 @@ create_MainWindow (void)
 	main_gui.gmameui_rom_action_group = action_group;
 
 	action_group = gtk_action_group_new ("GmameuiWindowFavouriteActions");
-	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (action_group,
 				      gmameui_favourite_menu_entries,
 				      G_N_ELEMENTS (gmameui_favourite_menu_entries),
@@ -161,7 +161,7 @@ create_MainWindow (void)
 	main_gui.gmameui_favourite_action_group = action_group;
 	
 	action_group = gtk_action_group_new ("GmameuiWindowViewActions");
-	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (action_group,
 				      gmameui_view_expand_menu_entries,
 				      G_N_ELEMENTS (gmameui_view_expand_menu_entries),
@@ -171,7 +171,7 @@ create_MainWindow (void)
 	main_gui.gmameui_view_action_group = action_group;
 	
 	action_group = gtk_action_group_new ("GmameuiWindowToggleActions");
-	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_toggle_actions (action_group,
 					     gmameui_view_toggle_menu_entries,
 					     G_N_ELEMENTS (gmameui_view_toggle_menu_entries),
@@ -180,7 +180,7 @@ create_MainWindow (void)
 	g_object_unref (action_group);
 
 	action_group = gtk_action_group_new ("GmameuiWindowRadioActions");
-	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_radio_actions (action_group,
 					    gmameui_view_radio_menu_entries,
 					    G_N_ELEMENTS (gmameui_view_radio_menu_entries),
@@ -192,7 +192,7 @@ create_MainWindow (void)
 
 	/* Column popup */
 	action_group = gtk_action_group_new ("GmameuiColumnPopupActions");
-	gtk_action_group_set_translation_domain (action_group, NULL);
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (action_group,
 				      gmameui_column_entries,
 				      G_N_ELEMENTS (gmameui_column_entries),
@@ -314,7 +314,7 @@ create_MainWindow (void)
 	/* Availability-related filters */
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "All ROMs",
+		      "name", _("All ROMs"),
 		      "folderid", ALL,
 		      "type", DRIVER,
 		      "is", FALSE,
@@ -328,7 +328,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Available",
+		      "name", _("Available"),
 		      "folderid", AVAILABLE,
 		      "type", HAS_ROMS,
 		      "is", FALSE,
@@ -346,7 +346,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 		g_object_set (folder_filter,
-		      "name", "Unavailable",
+		      "name", _("Unavailable"),
 		      "folderid", UNAVAILABLE,
 		      "type", HAS_ROMS,
 		      "is", TRUE,
@@ -361,7 +361,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 			g_object_set (folder_filter,
-		      "name", "Incorrect",
+		      "name", _("Incorrect"),
 		      "folderid", FILTER_INCORRECT,
 		      "type", HAS_ROMS,
 		      "is", TRUE,
@@ -379,7 +379,7 @@ create_MainWindow (void)
 	/* Architecture-related filters */
 	folder_filter = gmameui_filter_new ();
 		g_object_set (folder_filter,
-		      "name", "Neo-Geo",
+		      "name", _("Neo-Geo"),
 		      "folderid", NEOGEO,
 		      "type", DRIVER,
 		      "is", TRUE,
@@ -392,7 +392,7 @@ create_MainWindow (void)
 
 		folder_filter = gmameui_filter_new ();
 		g_object_set (folder_filter,
-		      "name", "CPS1",
+		      "name", _("CPS1"),
 		      "folderid", CPS1,
 		      "type", DRIVER,
 		      "is", TRUE,
@@ -405,7 +405,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "CPS2",
+		      "name", _("CPS2"),
 		      "folderid", CPS2,
 		      "type", DRIVER,
 		      "is", TRUE,
@@ -418,7 +418,7 @@ create_MainWindow (void)
 
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "CPS3",
+		      "name", _("CPS3"),
 		      "folderid", CPS3,
 		      "type", DRIVER,
 		      "is", TRUE,
@@ -431,7 +431,7 @@ create_MainWindow (void)
 
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Sega System 16",
+		      "name", _("Sega System 16"),
 		      "folderid", SEGAS16,
 		      "type", DRIVER,
 		      "is", TRUE,
@@ -444,7 +444,7 @@ create_MainWindow (void)
 
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Sega Model 2",
+		      "name", _("Sega Model 2"),
 		      "folderid", SEGAM2,
 		      "type", DRIVER,
 		      "is", TRUE,
@@ -457,7 +457,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Namco System 22",
+		      "name", _("Namco System 22"),
 		      "folderid", NAMCOS22,
 		      "type", DRIVER,
 		      "is", TRUE,
@@ -470,7 +470,7 @@ create_MainWindow (void)
 
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "BIOS",
+		      "name", _("BIOS"),
 		      "folderid", FILTER_BIOS,
 		      "type", IS_BIOS,
 		      "is", TRUE,
@@ -484,7 +484,7 @@ create_MainWindow (void)
 	/* Custom filters */
 	folder_filter = gmameui_filter_new ();
 		g_object_set (folder_filter,
-		      "name", "Favourites",
+		      "name", _("Favorites"),
 		      "folderid", FAVORITES,
 		      "type", FAVORITE,
 		      "is", TRUE,
@@ -498,7 +498,7 @@ create_MainWindow (void)
 	
 		folder_filter = gmameui_filter_new ();
 		g_object_set (folder_filter,
-		      "name", "Played",
+		      "name", _("Played"),
 		      "folderid", PLAYED,
 		      "type", TIMESPLAYED,
 		      "is", FALSE,
@@ -513,7 +513,7 @@ create_MainWindow (void)
 	/* Imperfect filters */
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Colours",
+		      "name", _("Colors"),
 		      "folderid", IMPERFECT_COLORS,
 		      "type", COLOR_STATUS,
 		      "is", FALSE,
@@ -527,7 +527,7 @@ create_MainWindow (void)
 
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Sound",
+		      "name", _("Sound"),
 		      "folderid", IMPERFECT_SOUND,
 		      "type", SOUND_STATUS,
 		      "is", FALSE,
@@ -541,7 +541,7 @@ create_MainWindow (void)
 
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Graphics",
+		      "name", _("Graphics"),
 		      "folderid", IMPERFECT_GRAPHIC,
 		      "type", GRAPHIC_STATUS,
 		      "is", FALSE,
@@ -556,7 +556,7 @@ create_MainWindow (void)
 	/* Game information filters */
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Originals",
+		      "name", _("Originals"),
 		      "folderid", ORIGINALS,
 		      "type", CLONE,
 		      "is", TRUE,
@@ -569,7 +569,7 @@ create_MainWindow (void)
 
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Clones",
+		      "name", _("Clones"),
 		      "folderid", CLONES,
 		      "type", CLONE,
 		      "is", FALSE,
@@ -582,7 +582,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Samples",
+		      "name", _("Samples"),
 		      "folderid", SAMPLES,
 		      "type", HAS_SAMPLES,
 		      "is", FALSE,
@@ -596,7 +596,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Stereo",
+		      "name", _("Stereo"),
 		      "folderid", STEREO,
 		      "type", CHANNELS,
 		      "is", TRUE,
@@ -610,7 +610,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Raster",
+		      "name", _("Raster"),
 		      "folderid", RASTERS,
 		      "type", VECTOR,
 		      "is", FALSE,
@@ -623,7 +623,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Vector",
+		      "name", _("Vector"),
 		      "folderid", VECTORS,
 		      "type", VECTOR,
 		      "is", TRUE,
@@ -663,7 +663,7 @@ create_MainWindow (void)
 	
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Trackball",
+		      "name", _("Trackball"),
 		      "folderid", FILTER_CONTROL_TRACKBALL,
 		      "type", CONTROL,
 		      "is", TRUE,
@@ -677,7 +677,7 @@ create_MainWindow (void)
 
 	folder_filter = gmameui_filter_new ();
 	g_object_set (folder_filter,
-		      "name", "Lightgun",
+		      "name", _("Lightgun"),
 		      "folderid", FILTER_CONTROL_LIGHTGUN,
 		      "type", CONTROL,
 		      "is", TRUE,
