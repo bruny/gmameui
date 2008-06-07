@@ -15,6 +15,7 @@ EXTRA_DIST = autogen.sh \
 	intltool-update.in \
 	intltool-merge.in \
 	intltool-extract.in \
+	gnome-doc-utils \
 	m4 
 
 Graphicsdir = $(datadir)/applications
