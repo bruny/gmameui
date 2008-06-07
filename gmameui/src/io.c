@@ -278,9 +278,9 @@ load_gmameui_ini (void)
 	
 	GMAMEUI_DEBUG ("Loading gmameui.ini");
 
-	gui_prefs.Splitters = g_new0 (gint, 2);
-	gui_prefs.Splitters[0] = 150;
-	gui_prefs.Splitters[1] = 800;
+//	gui_prefs.Splitters = g_new0 (gint, 2);
+//	gui_prefs.Splitters[0] = 150;
+//	gui_prefs.Splitters[1] = 800;
 
 	gui_prefs.Joystick_in_GUI = g_strdup (get_joy_dev ());
 
@@ -301,7 +301,7 @@ load_gmameui_ini (void)
 
 	gui_prefs.Joystick_in_GUI = g_key_file_get_string (gmameui_ini_file, "Default", "Joystick_in_GUI", &error);
 	
-	gui_prefs.Splitters = g_key_file_get_integer_list (gmameui_ini_file, "Default", "Splitters", &sizes, &error);
+//	gui_prefs.Splitters = g_key_file_get_integer_list (gmameui_ini_file, "Default", "Splitters", &sizes, &error);
 
 	g_key_file_free (gmameui_ini_file);
 	g_free (filename);

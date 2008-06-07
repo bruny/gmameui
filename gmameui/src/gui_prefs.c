@@ -72,6 +72,9 @@ struct _MameGuiPrefsPrivate {
 	gboolean show_filterlist;
 	gboolean show_screenshot;
 	
+	gint xpos_filters;		/* The position of the paned for the filters*/
+	gint xpos_gamelist;		/* The position of the paned for the gamelist */
+	
 	screenshot_type ShowFlyer;
 	
 	ListMode current_mode;
@@ -150,6 +153,12 @@ mame_gui_prefs_set_property (GObject *object,
 			break;
 		case PROP_SHOW_FLYER:
 			prefs->priv->ShowFlyer = g_value_get_int (value);
+			break;
+		case PROP_XPOS_FILTERS:
+			prefs->priv->xpos_filters = g_value_get_int (value);
+			break;
+		case PROP_XPOS_GAMELIST:
+			prefs->priv->xpos_gamelist = g_value_get_int (value);
 			break;
 		case PROP_GAMECHECK:
 			prefs->priv->GameCheck = g_value_get_boolean (value);
@@ -278,6 +287,12 @@ mame_gui_prefs_get_property (GObject *object,
 		case PROP_SHOW_FLYER:
 			g_value_set_int (value, prefs->priv->ShowFlyer);
 			break;
+		case PROP_XPOS_FILTERS:
+			g_value_set_int (value, prefs->priv->xpos_filters);
+			break;
+		case PROP_XPOS_GAMELIST:
+			g_value_set_int (value, prefs->priv->xpos_gamelist);
+			break;
 		case PROP_GAMECHECK:
 			g_value_set_boolean (value, prefs->priv->GameCheck);
 			break;
@@ -363,7 +378,7 @@ mame_gui_prefs_finalize (GObject *obj)
 		g_value_array_free (pr->priv->sample_paths);
 	
 	int i;
-/* FIXME TODO*/
+
 	for (i = 0; i < NUM_DIRS; i++) {
 		if (pr->priv->directories[i])
 			g_free (pr->priv->directories[i]);
@@ -427,6 +442,13 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 	g_object_class_install_property (object_class,
 					 PROP_SORT_COL_DIR,
 					 g_param_spec_int ("sort-col-direction", "Sort Column Direction", "Direction in which column data is sorted", GTK_SORT_ASCENDING, GTK_SORT_DESCENDING, GTK_SORT_ASCENDING, G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
+					 PROP_XPOS_FILTERS,
+					 g_param_spec_int ("xpos-filters", "Filters Xpos", "X position of the filters hpaned", 0, 1000, 150, G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
+					 PROP_XPOS_GAMELIST,
+					 g_param_spec_int ("xpos-gamelist", "Gamelist Xpos", "X position of the gamelist hpaned", 0, 1000, 800, G_PARAM_READWRITE));
+	
 	/* Startup preferences */
 	g_object_class_install_property (object_class,
 					 PROP_GAMECHECK,
@@ -538,6 +560,8 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	}
 	pr->priv->sort_col = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "sort-col", &error);
 	pr->priv->sort_col_direction = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "sort-col-direction", &error);
+	pr->priv->xpos_filters = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "xpos-filters", &error);
+	pr->priv->xpos_gamelist = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "xpos-gamelist", &error);
 	
 	/* Startup preferences */
 	pr->priv->GameCheck = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "gamecheck", &error);
@@ -549,6 +573,8 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	/* Miscellaneous preferences */
 	pr->priv->theprefix = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "theprefix", &error);
 	pr->priv->clone_color = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "clone-color", &error);
+	if (!pr->priv->clone_color)
+		pr->priv->clone_color = g_strdup ("grey");
 	pr->priv->current_rom_name = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "current-rom", &error);
 
 	/* Load the ROM paths */
@@ -603,6 +629,8 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	g_signal_connect (pr, "notify::cols-width", (GCallback) mame_gui_prefs_save_int_arr, NULL);
 	g_signal_connect (pr, "notify::sort-col", (GCallback) mame_gui_prefs_save_int, NULL);
 	g_signal_connect (pr, "notify::sort-col-direction", (GCallback) mame_gui_prefs_save_int, NULL);
+	g_signal_connect (pr, "notify::xpos-filters", (GCallback) mame_gui_prefs_save_int, NULL);
+	g_signal_connect (pr, "notify::xpos-gamelist", (GCallback) mame_gui_prefs_save_int, NULL);
 	g_signal_connect (pr, "notify::gamecheck", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::versioncheck", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::usexmameoptions", (GCallback) mame_gui_prefs_save_bool, NULL);

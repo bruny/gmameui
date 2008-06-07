@@ -740,6 +740,8 @@ init_gui (void)
 	
 	gint ui_width;
 	gint ui_height;
+	gint xpos_filters;
+	gint xpos_gamelist;
 	gboolean show_filters;
 	gboolean show_screenshot;
 	gboolean show_statusbar;
@@ -770,10 +772,6 @@ g_message (_("Time to initialise icons: %.02f seconds"), g_timer_elapsed (mytime
 g_message (_("Time to create main window and filters: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
 
-	/* FIXME TODO
-	gtk_paned_set_position (main_gui.hpanedLeft, gui_prefs.Splitters[0]);
-	gtk_paned_set_position (main_gui.hpanedRight, gui_prefs.Splitters[1]);*/
-
 	gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));
 
 	g_object_get (main_gui.gui_prefs,
@@ -785,11 +783,16 @@ g_message (_("Time to create main window and filters: %.02f seconds"), g_timer_e
 		      "current-mode", &current_mode,
 		      "show-statusbar", &show_statusbar,
 		      "show-toolbar", &show_toolbar,
+		      "xpos-filters", &xpos_filters,
+		      "xpos-gamelist", &xpos_gamelist,
 		      NULL);
- GMAMEUI_DEBUG ("Size is %dx%d", ui_width, ui_height);
+
 	gtk_window_set_default_size (GTK_WINDOW (MainWindow),
 				     ui_width,
 				     ui_height);
+	
+	gtk_paned_set_position (main_gui.hpanedLeft, xpos_filters);
+	gtk_paned_set_position (main_gui.hpanedRight, xpos_gamelist);
 
 	/* FIXME TODO
 	gtk_window_move (GTK_WINDOW (MainWindow),
@@ -831,8 +834,8 @@ g_message (_("Time to create gamelist: %.02f seconds"), g_timer_elapsed (mytimer
 g_message (_("Time to create gamelist content: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
 	/* Need to set the size here otherwise it move when we create the gamelist */
-	if (show_screenshot && gui_prefs.Splitters)
-		gtk_paned_set_position (main_gui.hpanedRight, gui_prefs.Splitters[1]);
+	if (show_screenshot)
+		gtk_paned_set_position (main_gui.hpanedRight, xpos_gamelist);
 
 	/* Grab focus on the game list */
 	gtk_widget_grab_focus (main_gui.displayed_list);
@@ -1043,7 +1046,9 @@ gamelist_popupmenu_show (GdkEventButton *event)
 void
 hide_filters (void)
 {
-	gui_prefs.Splitters[0] = main_gui.scrolled_window_filters->allocation.width;
+	g_object_set (main_gui.gui_prefs,
+		      "xpos-filters", main_gui.scrolled_window_filters->allocation.width,
+		      NULL);
 	gtk_paned_set_position (main_gui.hpanedLeft, 0);
 
 	gtk_widget_hide (GTK_WIDGET (main_gui.scrolled_window_filters));
@@ -1052,7 +1057,11 @@ hide_filters (void)
 void
 show_filters (void)
 {
-	gtk_paned_set_position (main_gui.hpanedLeft, gui_prefs.Splitters[0]);
+	gint xpos_filters;
+	g_object_get (main_gui.gui_prefs,
+		      "xpos-filters", &xpos_filters,
+		      NULL);
+	gtk_paned_set_position (main_gui.hpanedLeft, xpos_filters);
 
 	gtk_widget_show (GTK_WIDGET (main_gui.scrolled_window_filters));
 }
@@ -1060,7 +1069,9 @@ show_filters (void)
 void
 hide_snaps (void)
 {
-	gui_prefs.Splitters[1] = main_gui.scrolled_window_games->allocation.width;
+	g_object_set (main_gui.gui_prefs,
+		      "xpos-gamelist", main_gui.scrolled_window_games->allocation.width,
+		      NULL);
 	gtk_paned_set_position (main_gui.hpanedRight, -1);
 
 	gtk_widget_hide (GTK_WIDGET (main_gui.screenshot_hist_frame));
@@ -1069,7 +1080,11 @@ hide_snaps (void)
 void
 show_snaps (void)
 {
-	gtk_paned_set_position (main_gui.hpanedRight, gui_prefs.Splitters[1]);
+	gint xpos_gamelist;
+	g_object_get (main_gui.gui_prefs,
+		      "xpos-gamelist", &xpos_gamelist,
+		      NULL);
+	gtk_paned_set_position (main_gui.hpanedLeft, xpos_gamelist);
 
 	gtk_widget_show (GTK_WIDGET (main_gui.screenshot_hist_frame));
 }

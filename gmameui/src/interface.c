@@ -38,6 +38,7 @@
 #include <gtk/gtkscrolledwindow.h>
 #include <gtk/gtkstock.h>
 #include <gtk/gtkvbox.h>
+#include <glib-object.h>	/* For GParamSpec */
 
 #include "callbacks.h"
 #include "interface.h"
@@ -56,6 +57,23 @@ on_MainWindow_delete_event (GtkWidget       *widget,
 	exit_gmameui ();
 	return TRUE;
 }
+
+
+static void
+on_hpaned_position_notify (GObject *object, GParamSpec *pspec, gpointer data)
+{
+	gint position;
+
+	g_object_get(object, pspec->name, &position, NULL);
+	GMAMEUI_DEBUG("position change report: object=%p, position value=%d, parameter=%p\n",
+	       object, position, data);
+	
+	g_object_set (main_gui.gui_prefs,
+		      "xpos-filters", main_gui.scrolled_window_filters->allocation.width,
+		      "xpos-gamelist", main_gui.scrolled_window_games->allocation.width,
+		      NULL);		
+}
+
 
 GtkWidget *
 create_MainWindow (void)
@@ -264,11 +282,14 @@ create_MainWindow (void)
 	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
 					 GTK_WIDGET (toolbar_icon));
 	
-  hpanedLeft = gtk_hpaned_new ();
-  gtk_widget_show (hpanedLeft);
-  main_gui.hpanedLeft = GTK_PANED (hpanedLeft);
-  gtk_box_pack_start (GTK_BOX (vbox1), hpanedLeft, TRUE, TRUE, 0);
-  gtk_paned_set_position (GTK_PANED (hpanedLeft), 150);
+	hpanedLeft = gtk_hpaned_new ();
+	gtk_widget_show (hpanedLeft);
+	main_gui.hpanedLeft = GTK_PANED (hpanedLeft);
+	gtk_box_pack_start (GTK_BOX (vbox1), hpanedLeft, TRUE, TRUE, 0);
+	gtk_paned_set_position (GTK_PANED (hpanedLeft), 150);
+	g_signal_connect (G_OBJECT (hpanedLeft), "notify::position",
+			  G_CALLBACK (on_hpaned_position_notify), NULL);
+	
   scrolledwindowFilters = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindowFilters);
   main_gui.scrolled_window_filters = scrolledwindowFilters;
@@ -712,11 +733,13 @@ create_MainWindow (void)
 	}
 
 	
-  hpanedRight = gtk_hpaned_new ();
-  gtk_widget_show (hpanedRight);
-  main_gui.hpanedRight = GTK_PANED (hpanedRight);
-  gtk_paned_pack2 (GTK_PANED (hpanedLeft), hpanedRight, TRUE, FALSE);
-  gtk_paned_set_position (GTK_PANED (hpanedRight), 300);
+	hpanedRight = gtk_hpaned_new ();
+	gtk_widget_show (hpanedRight);
+	main_gui.hpanedRight = GTK_PANED (hpanedRight);
+	gtk_paned_pack2 (GTK_PANED (hpanedLeft), hpanedRight, TRUE, FALSE);
+	gtk_paned_set_position (GTK_PANED (hpanedRight), 300);
+	g_signal_connect (G_OBJECT (hpanedRight), "notify::position",
+			  G_CALLBACK (on_hpaned_position_notify), NULL);
 
   scrolledwindowGames = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindowGames);
