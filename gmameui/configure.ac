@@ -94,6 +94,7 @@ AC_CONFIG_FILES([ Makefile
 src/Makefile
 data/Makefile
 intl/Makefile
+help/Makefile
 po/Makefile.in
 gmameui.spec
 ])
