@@ -1132,7 +1132,7 @@ mame_options_instance_init (MameOptions *pr)
 	   place to stop segfault when playing game before opening
 	   the options screen */
 	GladeXML *xml;
-	xml = glade_xml_new (GLADEDIR "options.glade", NULL, NULL);
+	xml = glade_xml_new (GLADEDIR "options.glade", NULL, GETTEXT_PACKAGE);
 	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "Display"));
 	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "Sound"));
 	mame_options_register_all_properties_from_glade_xml (pr, xml, glade_xml_get_widget (xml, "performance_vbox"));

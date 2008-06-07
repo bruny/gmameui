@@ -365,7 +365,7 @@ show_rom_properties ()
 	rom = gui_prefs.current_game;
 	game_checked = FALSE;
 	
-	GladeXML *xml = glade_xml_new (GLADEDIR "rom_info.glade", "dialog1", NULL);
+	GladeXML *xml = glade_xml_new (GLADEDIR "rom_info.glade", "dialog1", GETTEXT_PACKAGE);
 	
 	dialog = glade_xml_get_widget (xml, "dialog1");
 	

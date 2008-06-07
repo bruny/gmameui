@@ -2235,7 +2235,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	gtk_widget_show (sidebar->priv->screenshot_event_box);
 	gtk_widget_show (sidebar->priv->main_screenshot);
 	
-	xml = glade_xml_new (GLADEDIR "sidebar.glade", "screenshot_notebook", NULL);
+	xml = glade_xml_new (GLADEDIR "sidebar.glade", "screenshot_notebook", GETTEXT_PACKAGE);
 	
 	sidebar->priv->screenshot_hist_vbox = gtk_vbox_new (FALSE, 6);
 	gtk_container_set_border_width (GTK_CONTAINER (sidebar->priv->screenshot_hist_vbox), 6);
@@ -2288,7 +2288,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 			    G_CALLBACK (on_screenshot_notebook_switch_page),
 			    NULL);
 
-	xml = glade_xml_new (GLADEDIR "sidebar.glade", "history_scrollwin", NULL);
+	xml = glade_xml_new (GLADEDIR "sidebar.glade", "history_scrollwin", GETTEXT_PACKAGE);
 	
 	/* here we create the history box that will be filled later */
 	sidebar->priv->history_scrollwin = glade_xml_get_widget (xml, "history_scrollwin");

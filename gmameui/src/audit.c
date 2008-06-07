@@ -129,7 +129,7 @@ audit_response (GtkWidget *dialog,
 GtkWidget *
 create_checking_games_window (void)
 {
-	GladeXML *xml = glade_xml_new (GLADEDIR "audit_window.glade", NULL, NULL);
+	GladeXML *xml = glade_xml_new (GLADEDIR "audit_window.glade", NULL, GETTEXT_PACKAGE);
 	if (!xml) {
 		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "audit_window.glade");
 		return NULL;
