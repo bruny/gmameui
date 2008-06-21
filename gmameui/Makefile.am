@@ -2,7 +2,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src data po intl help
+SUBDIRS = src data po intl 
 
 EXTRA_DIST = autogen.sh \
 	gmameui.desktop.in \

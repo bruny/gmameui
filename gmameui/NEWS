@@ -1,3 +1,22 @@
+Overview of changes in GMAMEUI 0.2.3
+====================================
+
+* New GMAMEUI UI Preferences dialog, and preferences handling. Most preferences
+are now saved automatically as they changed (instant apply). The gmameui.ini
+file format has been changed, and the dirs.ini file will be made obsolete.
+
+* Add support for OpenGL options, and corresponding Options dialog page (SourceForge feature request 1977184)
+
+* Add support for -effect option (e.g. scanlines). Note that this is hard-coded to a set of pre-defined effects, and doesn't distinguish between available/unavailable effects. The effects .png files need to be placed in the artwork directory
+
+* Various bug fixes and code cleanups
+
+* Setup directory and build structure for Help
+
+* New translations:
+    Italian translation (Ugo Viti)
+    Brazilian translation (Junix)
+
 Overview of changes in GMAMEUI 0.2.2
 ====================================
 

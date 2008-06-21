@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([gmameui], [0.2.2])
+AC_INIT([gmameui], [0.2.3])
 AC_PREREQ(2.5)
 
 AM_INIT_AUTOMAKE
@@ -96,7 +96,6 @@ AC_CONFIG_FILES([ Makefile
 src/Makefile
 data/Makefile
 intl/Makefile
-help/Makefile
 po/Makefile.in
 gmameui.spec
 ])

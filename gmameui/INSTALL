@@ -7,10 +7,10 @@ To install from source:
 make
 make install (as root)
 
-To create and install a RedHat RPM file:
+To create a RedHat RPM file:
 
-Follow the above steps
-make dist
-Copy the tarball to /usr/src/rpm/SOURCES
-rpmbuild -bb --clean gmameui.spec
+rpmbuild -ta gmameui-x.y.z.tar.gz
 
+Releases (tarballs and RPMs) can be generated using:
+
+make release
