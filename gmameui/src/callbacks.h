@@ -55,6 +55,9 @@ void     on_properties_activate                 (GtkAction        *action,
 void     on_options_activate                    (GtkAction        *action,
                                                  gpointer         user_data);
 
+void     on_options_default_activate            (GtkAction        *action,
+                                                 gpointer         user_data);
+
 void     on_audit_all_games_activate            (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
 
@@ -106,8 +109,8 @@ void     on_rebuild_game_list_menu_activate     (GtkMenuItem     *menuitem,
 void     on_directories_menu_activate           (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
 
-void     on_default_option_menu_activate        (GtkMenuItem	*menuitem,
-                                                 gpointer	 user_data);
+/*void     on_default_option_menu_activate        (GtkMenuItem	*menuitem,
+                                                 gpointer	 user_data);*/
 
 void     on_preferences_activate             (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);

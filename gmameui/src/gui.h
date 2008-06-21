@@ -70,7 +70,7 @@ static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
 	{ "OptionDirs", NULL, N_("_Directories..."), NULL,
 	  N_("Set directory configuration"), G_CALLBACK (on_directories_menu_activate) },  
 	{ "OptionDefaultOpts", NULL, N_("Default _Options..."), NULL,
-	  N_("Set default game options"), G_CALLBACK (on_default_option_menu_activate) },
+	  N_("Set default game options"), G_CALLBACK (on_options_default_activate/*on_default_option_menu_activate*/) },
 	{ "OptionPreferences", GTK_STOCK_PREFERENCES, N_("_GMAMEUI Preferences..."), NULL,
 	  N_("Set GMAMEUI preferences"), G_CALLBACK (on_preferences_activate) },  
 	  	  

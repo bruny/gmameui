@@ -178,34 +178,17 @@ on_remove_from_favorites_activate      (GtkMenuItem     *menuitem,
 	update_favourites_list (FALSE);
 }
 
+/* If rom_name is NULL, then the default options are used and loaded, otherwise
+   the rom-specific options are used */
 static void
-show_properties_dialog (void)
+show_properties_dialog (gchar *rom_name)
 {
-	GtkWidget *properties_window;
-	if (!current_exec)
-		return;
-	/* have to test if a game is selected or not
-	   then only after launch the properties window */
-	/* joystick focus turned off, will be turned on again in properties.c (exit_properties_window) */
-	joy_focus_off ();
-	properties_window = create_properties_windows (gui_prefs.current_game);
-	gtk_widget_show (properties_window);
-}
-
-void
-on_properties_activate (GtkAction *action,
-			gpointer  user_data)
-{
-	show_rom_properties ();
-}
-
-void on_options_activate (GtkAction *action,
-			  gpointer  user_data)
-{
+	g_return_if_fail (current_exec != NULL);
+	
 	/* SDLMAME uses a different set of options to XMAME. If we are running
 	   XMAME, then use the legacy GXMAME method of maintaining the options */
 	if (current_exec->type == XMAME_EXEC_WIN32) {
-		
+		/* SDLMAME */
 		GtkWidget *options_dialog = mame_options_get_dialog (main_gui.options);
 
 		GladeXML *xml = glade_xml_new (GLADEDIR "options.glade", NULL, NULL);
@@ -229,8 +212,45 @@ void on_options_activate (GtkAction *action,
 		gtk_widget_destroy (GTK_WIDGET (options_dialog));
 
 	} else {
-		show_properties_dialog ();
+		/* XMAME options */
+		GtkWidget *properties_window;
+
+		/* have to test if a game is selected or not
+		   then only after launch the properties window */
+		/* joystick focus turned off, will be turned on again in properties.c (exit_properties_window) */
+		joy_focus_off ();
+		if (rom_name)
+			properties_window = create_properties_windows (gui_prefs.current_game);
+		else
+			properties_window = create_properties_windows (NULL);
+		gtk_widget_show (properties_window);
 	}
+}
+
+void
+on_properties_activate (GtkAction *action,
+			gpointer  user_data)
+{
+	show_rom_properties ();
+}
+
+void
+on_options_activate (GtkAction *action,
+		     gpointer  user_data)
+{
+	gchar *current_rom;
+	g_object_get (main_gui.gui_prefs, "current-rom", &current_rom, NULL);
+	
+	show_properties_dialog (current_rom);
+	
+	g_free (current_rom);
+}
+
+void
+on_options_default_activate (GtkAction *action,
+			     gpointer  user_data)
+{
+	show_properties_dialog (NULL);
 }
 
 void
@@ -486,20 +506,6 @@ on_directories_menu_activate           (GtkMenuItem     *menuitem,
 	directory_window = create_directories_selection ();
 	gtk_widget_show (directory_window);
 }
-
-void
-on_default_option_menu_activate        (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-	GtkWidget *general_properties_window;
-	if (!current_exec)
-		return;
-	/* have to test if a game is selected or not
-	   then only after lauche the properties window*/
-	general_properties_window = create_properties_windows (NULL);
-	gtk_widget_show (general_properties_window);
-}
-
 
 void
 on_preferences_activate             (GtkMenuItem     *menuitem,
