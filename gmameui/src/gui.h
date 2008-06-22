@@ -53,8 +53,6 @@ static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
 	{ "Help", NULL, N_("_Help") },
 
 	/* File menu */
-	{ "FileAuditAllGames", NULL, N_("_Audit All Games"), NULL,
-	  N_("Audit ROM and sample sets"), G_CALLBACK (on_audit_all_games_activate) },
 	{ "FileSelectRandom", NULL, N_("_Select Random Game"), NULL,
 	  N_("Play currently selected game"), G_CALLBACK (on_select_random_game_activate) },
 	{ "FileQuit", GTK_STOCK_QUIT, N_("_Quit"), "<control>Q",
@@ -65,12 +63,8 @@ static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
 	  N_("Refresh game list"), G_CALLBACK (on_refresh_activate) },
 
 	/* Option menu */
-	{ "OptionRebuildGameList", NULL, N_("_Rebuild Game List"), NULL,
-	  N_("Rebuild the game list from executable information"), G_CALLBACK (on_rebuild_game_list_menu_activate) },
 	{ "OptionDirs", NULL, N_("_Directories..."), NULL,
 	  N_("Set directory configuration"), G_CALLBACK (on_directories_menu_activate) },  
-	{ "OptionDefaultOpts", NULL, N_("Default _Options..."), NULL,
-	  N_("Set default game options"), G_CALLBACK (on_options_default_activate/*on_default_option_menu_activate*/) },
 	{ "OptionPreferences", GTK_STOCK_PREFERENCES, N_("_GMAMEUI Preferences..."), NULL,
 	  N_("Set GMAMEUI preferences"), G_CALLBACK (on_preferences_activate) },  
 	  	  
@@ -94,6 +88,17 @@ static const GtkActionEntry gmameui_rom_and_exec_menu_entries[] =
 	  N_("Playback a recorded game"), G_CALLBACK (on_playback_input_activate) },
 	{ "FileOptions", GTK_STOCK_PROPERTIES, N_("Options"), NULL,
 	  N_("Change the options of the selected game"), G_CALLBACK (on_options_activate) }, 
+};
+
+/* The following menu entries are enabled when MAME executable exists */
+static const GtkActionEntry gmameui_exec_menu_entries[] =
+{
+	{ "FileAuditAllGames", NULL, N_("_Audit All Games"), NULL,
+	  N_("Audit ROM and sample sets"), G_CALLBACK (on_audit_all_games_activate) },
+	{ "OptionRebuildGameList", NULL, N_("_Rebuild Game List"), NULL,
+	  N_("Rebuild the game list from executable information"), G_CALLBACK (on_rebuild_game_list_menu_activate) },
+	{ "OptionDefaultOpts", NULL, N_("Default _Options..."), NULL,
+	  N_("Set default game options"), G_CALLBACK (on_options_default_activate) },
 };
 
 /* The following menu entries are enabled when a ROM is selected */
@@ -152,8 +157,6 @@ static const GtkActionEntry gmameui_column_entries[] =
 {
 	{ "ColumnHide", NULL, N_("Hide Column"), NULL,
 	  N_("Hide Column"), G_CALLBACK (on_column_hide_activate) },
-/*DELETE	{ "ColumnLayout", NULL, N_("Column Layout..."), NULL,
-	  N_("Show or Hide Column"), G_CALLBACK (on_column_layout_activate) },*/
 };
 
 /**** Sidebar functionality ****/
@@ -230,8 +233,9 @@ struct main_gui_struct {
 	GtkWidget *executable_menu;
 	
 	GtkUIManager *manager;
-	GtkActionGroup *gmameui_rom_action_group;
-	GtkActionGroup *gmameui_rom_exec_action_group;
+	GtkActionGroup *gmameui_rom_action_group;   /* Item entries that require a ROM */
+	GtkActionGroup *gmameui_rom_exec_action_group;  /* Item entries that require both a ROM and an exec */
+	GtkActionGroup *gmameui_exec_action_group;  /* Item entries that require an exec */
 	GtkActionGroup *gmameui_favourite_action_group;
 	GtkActionGroup *gmameui_view_action_group;
 	GtkActionGroup *gmameui_exec_radio_action_group;	/* Executable radio buttons */

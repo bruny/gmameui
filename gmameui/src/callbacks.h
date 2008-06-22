@@ -139,6 +139,11 @@ void     on_mode_button_clicked                 (GtkToggleToolButton *button,
 void     on_row_selected                        (GtkTreeSelection *selection,
                                                  gpointer data);
 
+gboolean
+on_list_keypress (GtkWidget   *widget,
+		  GdkEventKey *event,
+		  gpointer    user_data);
+
 gboolean on_list_clicked                        (GtkWidget *widget,
                                                  GdkEventButton *event,
                                                  gpointer user_data);

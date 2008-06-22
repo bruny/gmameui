@@ -606,8 +606,20 @@ on_row_selected (GtkTreeSelection *selection,
 				   selection);
 }
 
-
-
+gboolean
+on_list_keypress (GtkWidget   *widget,
+		  GdkEventKey *event,
+		  gpointer    user_data)
+{
+	g_return_if_fail (gui_prefs.current_game != NULL);
+	
+	if (event && event->type == GDK_KEY_PRESS && (
+						      event->keyval == GDK_KP_Enter ||
+						      event->keyval == GDK_Return))
+		play_game (gui_prefs.current_game);
+	
+	return FALSE;
+}
 
 gboolean
 on_list_clicked (GtkWidget      *widget,
@@ -645,15 +657,13 @@ on_list_clicked (GtkWidget      *widget,
 	if (path)
 		gtk_tree_path_free (path);
 
-	if (event && event->type == GDK_2BUTTON_PRESS) {
-		if (event->button == 1) {
-			GMAMEUI_DEBUG ("double click");
-			play_game (game_data);
+	if (event) {
+		if (event->type == GDK_2BUTTON_PRESS && event->button == 1) {
+			play_game (game_data);			/* Double-click */
+		} else if (event->type == GDK_BUTTON_PRESS && event->button == 3) {
+			gamelist_popupmenu_show (event);	/* Right-click */
 		}
-	}
-
-	if (event && event->type == GDK_BUTTON_PRESS && event->button == 3)
-		gamelist_popupmenu_show (event);
+	}	
 
 	return FALSE;
 }

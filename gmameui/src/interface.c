@@ -111,7 +111,8 @@ create_MainWindow (void)
   g_object_set_data (G_OBJECT (MainWindow), "MainWindow", MainWindow);
   gtk_window_set_title (GTK_WINDOW (MainWindow), _("GMAMEUI Arcade Machine Emulator"));
   gtk_window_set_default_size (GTK_WINDOW (MainWindow), 640, 400);
-	gtk_widget_set_events (GTK_WIDGET (MainWindow), GDK_STRUCTURE_MASK);    /* Required to catch configure-event */
+	gtk_widget_set_events (GTK_WIDGET (MainWindow),
+			       GDK_STRUCTURE_MASK);     /* Required to catch configure-event */
 
   vbox1 = gtk_vbox_new (FALSE, 1);
   gtk_widget_show (vbox1);
@@ -138,7 +139,17 @@ create_MainWindow (void)
 				      MainWindow);
 	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
 	g_object_unref (action_group);
-	main_gui.gmameui_rom_exec_action_group = action_group;	
+	main_gui.gmameui_rom_exec_action_group = action_group;
+	
+	action_group = gtk_action_group_new ("GmameuiWindowExecActions");
+	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
+	gtk_action_group_add_actions (action_group,
+				      gmameui_exec_menu_entries,
+				      G_N_ELEMENTS (gmameui_exec_menu_entries),
+				      MainWindow);
+	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
+	g_object_unref (action_group);
+	main_gui.gmameui_exec_action_group = action_group;	
 	
 	action_group = gtk_action_group_new ("GmameuiWindowROMActions");
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
@@ -281,6 +292,11 @@ create_MainWindow (void)
 	gtk_widget_show (toolbar_icon);
 	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
 					 GTK_WIDGET (toolbar_icon));
+	
+	/* Enable keyboard shortcuts defined in the UI Manager */
+	gtk_window_add_accel_group (GTK_WINDOW (MainWindow),
+				    gtk_ui_manager_get_accel_group (main_gui.manager));
+
 	
 	hpanedLeft = gtk_hpaned_new ();
 	gtk_widget_show (hpanedLeft);

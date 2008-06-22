@@ -723,7 +723,7 @@ static gboolean on_main_window_moved_cb (GtkWidget *widget, GdkEventConfigure *e
 {
 	gint x, y, w, h;
 	gdk_drawable_get_size (GDK_DRAWABLE (widget->window), &x, &y);
-	gdk_window_get_position (GTK_WINDOW (widget), &w, &h);  /* FIXME TODO */
+	gdk_window_get_position (GDK_WINDOW (widget->window), &w, &h);
 
 	g_object_set (main_gui.gui_prefs,
 		      "ui-width", widget->allocation.width,
@@ -762,7 +762,7 @@ init_gui (void)
         gtk_window_set_default_icon_from_file (filename, NULL);
 	g_free (filename);
 
-	gmameui_icons_init ();
+	gmameui_icons_init ();	
 #ifdef ENABLE_DEBUG
 g_message (_("Time to initialise icons: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
@@ -882,8 +882,9 @@ set_current_executable (XmameExecutable *new_exec)
 		}
 	}
 
-	gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
-					valid);
+	/* Set sensitive the UI elements that require an executable to be set */
+	gtk_action_group_set_sensitive (main_gui.gmameui_rom_exec_action_group, valid);
+	gtk_action_group_set_sensitive (main_gui.gmameui_exec_action_group, valid);
 }
 
 /* executable selected from the menu */
@@ -938,7 +939,7 @@ add_exec_menu (void)
 			
 		action = g_object_new (GTK_TYPE_ACTION,
 				       "name", "execs-empty",
-				       "label", "No executables",
+				       "label", N_("No executables"),
 				       "sensitive", FALSE,
 				       NULL);
 		gtk_action_group_add_action (exec_radio_action_group, action);
@@ -1016,7 +1017,8 @@ void gmameui_ui_set_items_sensitive () {
 
 	gtk_action_group_set_sensitive (main_gui.gmameui_rom_exec_action_group,
 					rom_and_exec);
-
+	gtk_action_group_set_sensitive (main_gui.gmameui_exec_action_group,
+					xmame_table_size () > 0);
 	gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
 					gui_prefs.current_game);
 
@@ -1800,7 +1802,7 @@ create_gamelist (ListMode list_mode)
 
 	static gboolean first_run = TRUE;
 
-	GMAMEUI_DEBUG ("DISPLAY GAME LIST");
+	GMAMEUI_DEBUG ("Creating gamelist structure");
 
 	/* We Create the TreeView only if it is NULL (this will occur only once) */
 	if (main_gui.displayed_list == NULL) {
@@ -1843,6 +1845,7 @@ create_gamelist (ListMode list_mode)
 					  G_CALLBACK (on_column_click),
 					  column);
 		}
+
 		gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_games), main_gui.displayed_list);
 		gtk_widget_show_all (main_gui.scrolled_window_games);
 
@@ -1856,6 +1859,10 @@ create_gamelist (ListMode list_mode)
 		/* Callback - Click on the list */
 		g_signal_connect (G_OBJECT (main_gui.displayed_list), "button-press-event",
 				G_CALLBACK (on_list_clicked),
+				NULL);
+		/* Callback - Keypress on the list */
+		g_signal_connect (G_OBJECT (main_gui.displayed_list), "key-press-event",
+				G_CALLBACK (on_list_keypress),
 				NULL);
 		/* Callback - Column size modified */
 		g_signal_connect (G_OBJECT (main_gui.displayed_list), "size-request",
@@ -1934,6 +1941,7 @@ create_gamelist (ListMode list_mode)
 	first_run = FALSE;
 	dirty_icon_cache = FALSE;
 
+	GMAMEUI_DEBUG ("Creating gamelist structure... done");
 }
 
 void
@@ -1953,8 +1961,8 @@ select_game (RomEntry *rom)
 
 	if (rom) {
 		/* update statusbar */
-/* FIXME TODO		set_status_bar (rom_entry_get_list_name (rom),
-				rom_status_string_value [rom->has_roms]);*/
+		set_status_bar (rom_entry_get_list_name (rom),
+				rom_status_string_value [rom->has_roms]);
 
 		/* update screenshot panel */
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
