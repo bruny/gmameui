@@ -40,12 +40,6 @@ gboolean
 load_games_ini(void);
 
 gboolean
-load_gmameui_ini(void);
-
-gboolean
-load_dirs_ini(void);
-
-gboolean
 load_catver_ini(void);
 
 void
@@ -53,9 +47,6 @@ quick_check(void);
 
 gboolean
 save_games_ini(void);
-
-gboolean
-save_dirs_ini(void);
 
 GList *
 get_ctrlr_list (void);

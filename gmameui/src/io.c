@@ -111,7 +111,7 @@ load_games_ini (void)
 		return FALSE;
 	}
 
-	/* ADB FIXME Run through the list of available roms, and look for
+	/* FIXME TODO Run through the list of available roms, and look for
 	the key values; if the first cannot be found, assume the rest cannot be either */
 	gchar **gamelist = g_key_file_get_groups (gameini_list, NULL);
 	int i;
@@ -222,7 +222,8 @@ load_catver_ini (void)
 		tmprom->mame_ver_added = version;
 	}
 
-	filename = g_build_filename (gui_prefs.catverDirectory, "catver.ini", NULL);	
+	g_object_get (main_gui.gui_prefs, "file-catver", &filename, NULL);
+
 	if (!filename)
 		return FALSE;
 
@@ -264,133 +265,6 @@ load_catver_ini (void)
 	g_timer_stop (timer);
 	g_timer_destroy (timer);
 
-	return TRUE;
-}
-
-/* preferences for the gui */
-gboolean
-load_gmameui_ini (void)
-{
-	gchar *filename;
-	gchar *default_game = NULL;
-	gint i;
-	gsize sizes, columnsize;
-	
-	GMAMEUI_DEBUG ("Loading gmameui.ini");
-
-//	gui_prefs.Splitters = g_new0 (gint, 2);
-//	gui_prefs.Splitters[0] = 150;
-//	gui_prefs.Splitters[1] = 800;
-
-	gui_prefs.Joystick_in_GUI = g_strdup (get_joy_dev ());
-
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "gmameui.ini", NULL);
-
-	GKeyFile *gmameui_ini_file = g_key_file_new ();
-	GError *error = NULL;
-	gboolean result = g_key_file_load_from_file (gmameui_ini_file, filename, G_KEY_FILE_KEEP_COMMENTS, &error);
-
-	if (!result) {
-		GMAMEUI_DEBUG ("Error loading gmameui.ini: %s\n", error->message);
-		g_error_free (error);
-		g_free (filename);
-		return FALSE;
-	}
-
-	default_game = g_key_file_get_string (gmameui_ini_file, "Default", "DefaultGame", &error);
-
-	gui_prefs.Joystick_in_GUI = g_key_file_get_string (gmameui_ini_file, "Default", "Joystick_in_GUI", &error);
-	
-//	gui_prefs.Splitters = g_key_file_get_integer_list (gmameui_ini_file, "Default", "Splitters", &sizes, &error);
-
-	g_key_file_free (gmameui_ini_file);
-	g_free (filename);
-	
-	if (error)
-		g_error_free (error);
-	g_free (default_game);
-
-	return TRUE;
-}
-
-
-
-/* this is where directory paths are set (common with mame32k) */
-gboolean
-load_dirs_ini (void)
-{
-	gchar *filename;
-	gchar *mame_executable = NULL;
-	gchar **xmame_executables;
-	gsize paths;	/* FIXME Define max number of rom/sample dirs */
-	
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "dirs.ini", NULL);	
-GMAMEUI_DEBUG ("Loading directories ini file");
-	GKeyFile *dirsini_list = g_key_file_new ();
-	GError *error = NULL;
-	gboolean result = g_key_file_load_from_file (dirsini_list, filename, G_KEY_FILE_KEEP_COMMENTS, &error);
-	
-	if (!result) {
-		GMAMEUI_DEBUG ("Error loading %s - %s - setting default values", filename, error->message);	
-	
-		g_error_free (error);
-	} else {
-		mame_executable = g_key_file_get_string (dirsini_list, "Directories", "mame_executable", &error);
-		xmame_executables = g_key_file_get_string_list (dirsini_list, "Directories", "xmame_executables_array", &paths, &error);
-
-		int i;
-		for (i = 0; i < paths; i++)
-			xmame_table_add (xmame_executables[i]);
-		if (mame_executable) {
-			current_exec = xmame_table_get (mame_executable);
-GMAMEUI_DEBUG("Current exec set to %s", current_exec->path);
-			g_free (mame_executable);
-		}
-	
-		if (!current_exec)
-			current_exec = xmame_table_get_by_index (0);
-
-
-		gui_prefs.catverDirectory = g_key_file_get_string (dirsini_list, "Directories", "CatverDirectory", &error);		
-		
-		g_key_file_free (dirsini_list);
-GMAMEUI_DEBUG ("Finished loading directories ini file");
-	}
-		
-	if (!gui_prefs.catverDirectory) gui_prefs.catverDirectory = g_build_filename (g_get_home_dir (), ".gmameui", NULL);
-
-	
-	g_free (filename);
-	
-	return TRUE;
-}
-
-gboolean
-save_dirs_ini (void)
-{
-	gchar *filename;
-
-GMAMEUI_DEBUG ("Saving dirs.ini");
-
-	GKeyFile *dirsini_list = g_key_file_new ();
-
-	if (current_exec)
-		g_key_file_set_string (dirsini_list, "Directories", "mame_executable", current_exec->path);
-
-	if (xmame_table_size () > 0)
-		g_key_file_set_string_list (dirsini_list, "Directories", "xmame_executables_array",
-					    xmame_table_get_all(), xmame_table_size());
-	
-	g_key_file_set_string (dirsini_list, "Directories", "CatverDirectory", gui_prefs.catverDirectory);
-	
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "dirs.ini", NULL);	
-	g_key_file_save_to_file (dirsini_list, filename, NULL);
-	g_free (filename);
-	
-	g_key_file_free (dirsini_list);
-
-GMAMEUI_DEBUG ("Saving dirs.ini... done");
-	
 	return TRUE;
 }
 

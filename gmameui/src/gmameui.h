@@ -146,14 +146,6 @@ typedef enum {
 
 struct gui_prefs_struct {
 	RomEntry *current_game;
-//	folder_filters_list FolderID;   /* FIXME TODO Not used with current filters */
-	
-	/* specifics option to GMAMEUI (path to catver, common path...)
-	   not in dir.ini */
-	gchar *catverDirectory;
-	
-	/* GUI Joystick options */
-	gchar      *Joystick_in_GUI;
 };
 
 struct gui_prefs_struct gui_prefs;

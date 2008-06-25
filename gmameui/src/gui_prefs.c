@@ -26,6 +26,7 @@
 
 
 #include <string.h>
+#include <sys/stat.h>   /* For S_IRWXU */
 
 #include <gtk/gtkcheckbutton.h>
 #include <gtk/gtkentry.h>
@@ -101,8 +102,10 @@ struct _MameGuiPrefsPrivate {
 	gchar *clone_color;
 	//RomEntry *current_rom;
 	gchar *current_rom_name;
+	gchar *current_executable_name;
 	
 	/* Directory preferences */
+	GValueArray *executable_paths;
 	GValueArray *rom_paths;
 	GValueArray *sample_paths;      /* FIXME TODO Do we REALLY need to support multiple dirs here? */
 	gchar *directories[NUM_DIRS];
@@ -184,6 +187,15 @@ mame_gui_prefs_set_property (GObject *object,
 		case PROP_CURRENT_ROM:
 			//prefs->priv->current_rom = g_value_get_object (value);
 			prefs->priv->current_rom_name = g_strdup (g_value_get_string (value));
+			break;
+		case PROP_CURRENT_EXECUTABLE:
+			prefs->priv->current_executable_name = g_strdup (g_value_get_string (value));
+			break;	
+		case PROP_EXECUTABLE_PATHS:
+			va = g_value_get_boxed (value);
+			if (prefs->priv->rom_paths)
+				g_value_array_free (prefs->priv->executable_paths);
+			prefs->priv->executable_paths = va != NULL ? g_value_array_copy (va) : NULL;
 			break;
 		case PROP_ROM_PATHS:
 			va = g_value_get_boxed (value);
@@ -318,6 +330,12 @@ mame_gui_prefs_get_property (GObject *object,
 			//g_value_set_object (value, prefs->priv->current_rom);
 			g_value_set_string (value, prefs->priv->current_rom_name);
 			break;
+		case PROP_CURRENT_EXECUTABLE:
+			g_value_set_string (value, prefs->priv->current_executable_name);
+			break;
+		case PROP_EXECUTABLE_PATHS:
+			g_value_set_boxed (value, prefs->priv->executable_paths);
+			break;	
 		case PROP_ROM_PATHS:
 			g_value_set_boxed (value, prefs->priv->rom_paths);
 			break;
@@ -372,6 +390,13 @@ mame_gui_prefs_finalize (GObject *obj)
 	if (pr->priv->cols_width)
 		g_value_array_free (pr->priv->cols_width);
 	
+/*	if (pr->priv->current_rom_name)
+		g_free (pr->priv->current_rom_name);
+	if (pr->priv->current_executable_name)
+		g_free (pr->priv->current_executable_name);*/
+	
+	if (pr->priv->executable_paths)
+		g_value_array_free (pr->priv->executable_paths);
 	if (pr->priv->rom_paths)
 		g_value_array_free (pr->priv->rom_paths);
 	if (pr->priv->sample_paths)
@@ -477,6 +502,12 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 					 PROP_CURRENT_ROM,
 					 g_param_spec_string ("current-rom", "Current Rom", "The currently selected ROM", "", G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
+					 PROP_CURRENT_EXECUTABLE,
+					 g_param_spec_string ("current-executable", "Current executable", "The currently selected MAME executable", "", G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
+					 PROP_EXECUTABLE_PATHS,
+					 g_param_spec_value_array ("executable-paths", "Executable Paths", "Paths to the MAME executables", NULL, G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
 					 PROP_ROM_PATHS,
 					 g_param_spec_value_array ("rom-paths", "ROM Paths", "Directories containing MAME ROMs", NULL, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
@@ -511,6 +542,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	pr->priv->cols_shown = g_value_array_new (NUMBER_COLUMN);
 	pr->priv->cols_width = g_value_array_new (NUMBER_COLUMN);
 	
+	pr->priv->executable_paths = g_value_array_new (4);     /* FIXME TODO MAX_EXECUTABLES */
 	pr->priv->rom_paths = g_value_array_new (4);    /* FIXME TODO - define max number */
 	pr->priv->sample_paths = g_value_array_new (4); /* FIXME TODO - define max number */
 	
@@ -569,6 +601,8 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	pr->priv->use_xmame_options = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "usexmameoptions", &error);
 	pr->priv->gui_joy = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "usejoyingui", &error);
 	pr->priv->joystick_name = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "joystick-name", &error);
+	if (!pr->priv->joystick_name)
+		pr->priv->joystick_name = g_strdup (get_joy_dev ());
 	
 	/* Miscellaneous preferences */
 	pr->priv->theprefix = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "theprefix", &error);
@@ -576,7 +610,20 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	if (!pr->priv->clone_color)
 		pr->priv->clone_color = g_strdup ("grey");
 	pr->priv->current_rom_name = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "current-rom", &error);
+	pr->priv->current_executable_name = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "current-executable", &error);
 
+	/* Load the executable paths */
+	str_array = g_key_file_get_string_list (pr->priv->prefs_ini_file, "Preferences", "executable-paths", &paths, &error);
+	for (i = 0; i < paths; i++) {
+		GValue val = { 0, };
+		
+		g_value_init (&val, G_TYPE_STRING);
+		if ((str_array) && (str_array[i] != NULL))
+			g_value_set_string (&val, str_array[i]);	/* If not available, default to NULL */
+		GMAMEUI_DEBUG ("Value for executable-paths at %d is %s", i, g_value_get_string (&val));
+		g_value_array_append (pr->priv->executable_paths, &val);
+	}
+	
 	/* Load the ROM paths */
 	str_array = g_key_file_get_string_list (pr->priv->prefs_ini_file, "Preferences", "rom-paths", &paths, &error);
 	for (i = 0; i < paths; i++) {
@@ -611,6 +658,17 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 			pr->priv->directories[i] = g_strdup (directory_prefs[i].default_dir);   /* strdup, since we free in finalize */
 		GMAMEUI_DEBUG ("Setting directory %d (%s) to %s", i, directory_prefs[i].name, pr->priv->directories[i]);
 		
+		/* If directory does not exist (and it exists under $HOME/.gmameui), create it */
+		if (i >= PROP_DIR_CFG) {
+			gchar *dir;
+			dir = g_build_filename (g_get_home_dir (), ".gmameui", directory_prefs[i].default_dir, NULL);
+			if (!g_file_test (dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+				GMAMEUI_DEBUG ("Directory %s does not exist, creating it", dir);
+				g_mkdir (dir, S_IRWXU);
+			}
+			g_free (dir);
+		}
+		
 	}
 	GMAMEUI_DEBUG ("Reading directories preferences from file... done");
 	
@@ -639,6 +697,8 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	g_signal_connect (pr, "notify::theprefix", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::clone-color", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::current-rom", (GCallback) mame_gui_prefs_save_string, NULL);
+	g_signal_connect (pr, "notify::current-executable", (GCallback) mame_gui_prefs_save_string, NULL);
+	g_signal_connect (pr, "notify::executable-paths", (GCallback) mame_gui_prefs_save_string_arr, NULL);
 	g_signal_connect (pr, "notify::rom-paths", (GCallback) mame_gui_prefs_save_string_arr, NULL);
 	g_signal_connect (pr, "notify::sample-paths", (GCallback) mame_gui_prefs_save_string_arr, NULL); 
 	
@@ -838,7 +898,7 @@ static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param,
 		value[i] = g_strdup (g_value_get_string (g_value_array_get_nth (va, i)));
 	}
 	
-	GMAMEUI_DEBUG ("Saving %s - setting integer array value %s",
+	GMAMEUI_DEBUG ("Saving %s - setting string array value %s",
 		       pr->priv->filename, key);
 
 	/* Set the value and save the file */
@@ -850,8 +910,10 @@ static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param,
 		g_error_free (error);
 	}
 	
+	GMAMEUI_DEBUG ("Saving string array %s... done", key);
+	
 	g_free (key);
-	g_strfreev (value);
+	/* FIXME TODO g_strfreev (value);*/
 	
 	/* FIXME TODO Preferences is a temporary group name - need to find a way to
 	   add more groups */

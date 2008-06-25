@@ -97,6 +97,7 @@ create_MainWindow (void)
   GtkTooltips *tooltips;
   PangoFontDescription *fontdesc;
   gint font_size;
+	gchar *catver_file;
 	
 	GtkActionGroup *action_group;
 	GError *error = NULL;
@@ -706,7 +707,9 @@ create_MainWindow (void)
 	g_object_unref (folder_filter);	
 	
 	/* Catver.ini filters - Category and Version */
-	if (gui_prefs.catverDirectory) {		
+	g_object_get (main_gui.gui_prefs, "file-catver", &catver_file, NULL);
+	
+	if (catver_file) {
 		/* Categories */
 		for (listpointer = g_list_first (game_list.categories);
 		     (listpointer);
@@ -745,8 +748,8 @@ create_MainWindow (void)
 							      "Version");
 			     g_object_unref (folder_filter);
 		}
-
 	}
+	g_free (catver_file);
 
 	
 	hpanedRight = gtk_hpaned_new ();

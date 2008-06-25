@@ -88,8 +88,10 @@ enum
 	PROP_THEPREFIX,
 	PROP_CLONECOLOR,
 	PROP_CURRENT_ROM,
-	/* ROM and Sample paths - handled using GValueArrays, so
+	PROP_CURRENT_EXECUTABLE,
+	/* Executable, ROM and Sample paths - handled using GValueArrays, so
 	   different to other directory handling */
+	PROP_EXECUTABLE_PATHS,
 	PROP_ROM_PATHS,
 	PROP_SAMPLE_PATHS,
 	/* Directory and file preferences only after this point */
@@ -103,6 +105,7 @@ enum
 	PROP_DIR_ICONS,
 	PROP_DIR_CTRLR,
 	PROP_DIR_HISCORE,   /* FIXME TODO Move this below */
+	PROP_FILE_CATVER,
 	PROP_FILE_CHEAT,
 	PROP_FILE_HISCORE,
 	PROP_FILE_HISTORY,
@@ -128,6 +131,7 @@ enum {
 	DIR_ICONS,
 	DIR_CTRLR,
 	DIR_HISCORE,	/* FIXME TODO Move this below */
+	FILE_CATVER,
 	FILE_CHEAT,
 	FILE_HISCORE,
 	FILE_HISTORY,
@@ -154,6 +158,7 @@ static const directory_config directory_prefs [] = {
 	{ PROP_DIR_ICONS, "dir-icons", "/usr/lib/games/xmame/" },
 	{ PROP_DIR_CTRLR, "dir-ctrlr", "/usr/lib/games/xmame/" },
 	{ PROP_DIR_HISCORE, "dir-hiscore", ".gmameui/hi/" },	/* FIXME TODO Move this below */
+	{ PROP_FILE_CATVER, "file-catver", "/usr/lib/games/xmame/catver.ini" },
 	{ PROP_FILE_CHEAT, "file-cheat", "/usr/lib/games/xmame/cheat.dat" },
 	{ PROP_FILE_HISCORE, "file-hiscore", "/usr/lib/games/xmame/hiscore.dat" },
 	{ PROP_FILE_HISTORY, "file-history", "/usr/lib/games/xmame/history.dat" },

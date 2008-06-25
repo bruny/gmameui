@@ -879,8 +879,10 @@ set_current_executable (XmameExecutable *new_exec)
 	if (!valid) {
 		if (new_exec) {
 			gmameui_message (ERROR, NULL, _("%s is not a valid executable"), new_exec->path);
+			/* FIXME TODO Remove the executable from the list */
 		}
-	}
+	} else
+		g_object_set (main_gui.gui_prefs, "current-executable", new_exec->path, NULL);
 
 	/* Set sensitive the UI elements that require an executable to be set */
 	gtk_action_group_set_sensitive (main_gui.gmameui_rom_exec_action_group, valid);
@@ -906,9 +908,12 @@ on_executable_selected (GtkRadioAction *action,
 void
 add_exec_menu (void)
 {
+	gchar *current_exec;
 	int num_execs;
 	int i;
 	XmameExecutable *exec;
+
+	g_object_get (main_gui.gui_prefs, "current-executable", &current_exec, NULL);
 	
 	/* This is really hard to understand from the API. Why do they make it so hard?
 	   Ref: http://log.emmanuelebassi.net/archives/2006/08/boogie-woogie-bugle-boy/ */
@@ -954,7 +959,6 @@ add_exec_menu (void)
 				       FALSE);
 	} else {
 		for (i = 0; i < num_execs; i++) {
-		
 			exec = xmame_table_get_by_index (i);
 			gchar *exec_name = g_strdup_printf ("%s (%s) %s", exec->name, exec->target, exec->version);
 		
@@ -965,6 +969,7 @@ add_exec_menu (void)
 			action = g_object_new (GTK_TYPE_RADIO_ACTION,
 					       "name", action_name,
 					       "label", exec_name,
+					       "value", i,
 					       "stock_id", NULL,
 					       NULL);
 			g_signal_connect (action, "activate",
@@ -982,16 +987,25 @@ add_exec_menu (void)
 					       GTK_UI_MANAGER_MENUITEM,
 					       FALSE);
 			GMAMEUI_DEBUG ("Adding action '%s'", action_name);
+			
+			if (current_exec) {
+				if (g_ascii_strcasecmp (exec->path, current_exec) == 0) {
+					GMAMEUI_DEBUG ("Setting %s as current executable", exec->path);
+					gtk_radio_action_set_current_value (action, i);
+				}
+			}
 		
 			/* TODO Free the executable */
 		
 			g_free (action_name);
 			g_free (exec_name);
-			g_free (name);
+			g_free (name);	
 		}
+		
 	}
 	main_gui.gmameui_exec_radio_action_group = exec_radio_action_group;
-	 
+
+	g_free (current_exec);
 }
 
 void gmameui_ui_set_favourites_sensitive (gboolean rom_is_favourite)

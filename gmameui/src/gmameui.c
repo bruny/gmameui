@@ -150,12 +150,31 @@ gmameui_init (void)
 	if (!current_exec)
 		GMAMEUI_DEBUG ("No executable!");
 
-	if (!load_dirs_ini ())
-		g_message (_("dirs.ini not loaded, using default values"));	
-
 	/* Load GUI preferences */
 	main_gui.gui_prefs = mame_gui_prefs_new ();
 
+	/*if (!load_dirs_ini ())
+		g_message (_("dirs.ini not loaded, using default values"));*/
+	/* Set the MAME executable list */
+	GValueArray *va_exec_paths;
+	gchar *mame_executable = NULL;
+	int i;
+	g_object_get (main_gui.gui_prefs,
+		      "executable-paths", &va_exec_paths,
+		      "current-executable", &mame_executable,
+		      NULL);
+	for (i = 0; i < va_exec_paths->n_values; i++) {
+		xmame_table_add (g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
+	}
+	g_value_array_free (va_exec_paths);
+	
+	if (mame_executable) {
+		current_exec = xmame_table_get (mame_executable);
+		GMAMEUI_DEBUG("Current exec set to %s", current_exec->path);
+		g_free (mame_executable);
+	} else
+		current_exec = xmame_table_get_by_index (0);
+	
 	gamelist_init ();
 #ifdef ENABLE_DEBUG
 g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
@@ -174,11 +193,6 @@ g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer,
 		if (!load_catver_ini ())
 			g_message (_("catver not loaded, using default values"));
 	}
-
-	/* gmameui.ini file needs to be loaded after the gamelist while setting
-	   gui_prefs.current_game is done in load_gmameui_ini () */
-	if (!load_gmameui_ini ())
-		g_message (_("unable to load gmameui.ini, using default values"));
 	
 	if (!load_options (NULL))
 		g_message (_("default options not loaded, using default values"));
