@@ -314,8 +314,8 @@ game_filtered (RomEntry * rom)
 			 (!is && ! (rom->has_roms == (RomStatus)int_value)));
 		break;
 	case HAS_SAMPLES:
-		retval = ( (is && (rom->has_samples == int_value))  ||
-			 (!is && ! (rom->has_samples == int_value)));
+		retval = ( (is && (rom->nb_samples == int_value))  ||
+			 (!is && ! (rom->nb_samples == int_value)));
 		break;
 	case TIMESPLAYED:
 		retval = ( (is && (rom->timesplayed == int_value)) ||
