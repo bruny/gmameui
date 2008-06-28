@@ -886,6 +886,7 @@ gchar *create_io_options_string(XmameExecutable *exec)
 		      "file-hiscore", &hiscore_file,
 		      "file-history", &history_file,
 		      "file-mameinfo", &mameinfo_file,
+		      "dir-cfg", &cfg_dir,
 		      "dir-nvram", &nvram_dir,
 		      "dir-state", &state_dir,
 		      "dir-inp", &inp_dir,
@@ -902,18 +903,9 @@ gchar *create_io_options_string(XmameExecutable *exec)
 	historyfile_option = xmame_get_option_string(exec, "history_file", history_file);
 	mameinfofile_option = xmame_get_option_string(exec, "mameinfo_file", mameinfo_file);
 	diffdir_option = xmame_get_option_string(exec, "diff_directory", diff_dir);
-	
-	/* for this option, see in the input option as this option can change if cfname has bee set or not */
-/*	if (available_options.ConfigDirectory  && (strlen(gui_prefs.ConfigDirectory)>0))
-	{
-		escaped_path = escape_space(gui_prefs.ConfigDirectory);
-		cfg_directory_option = g_strdup_printf("-cfg_directory %s",escaped_path);
-		g_free(escaped_path);
- }
-	else
-*/		cfg_directory_option = g_strdup("");
 
 	inipath_option = xmame_get_option_string(exec, "inipath", ini_dir);
+	cfg_directory_option = xmame_get_option_string(exec, "cfg_directory", cfg_dir);
 	nvram_directory_option = xmame_get_option_string(exec, "nvram_directory", nvram_dir);
 	ctrlr_directory_option = xmame_get_option_string(exec, "ctrlr_directory", ctrlr_dir);
 	state_directory_option = xmame_get_option_string(exec, "state_directory", state_dir);
@@ -976,6 +968,7 @@ gchar *create_io_options_string(XmameExecutable *exec)
 	g_free (hiscore_file);
 	g_free (history_file);
 	g_free (mameinfo_file);
+	g_free (cfg_dir);
 	g_free (nvram_dir);
 	g_free (state_dir);
 	g_free (inp_dir);
@@ -1008,27 +1001,31 @@ gchar *create_rompath_options_string(XmameExecutable *exec)
 	   particularly for sdlmame, require ";" */
 	
 	rompath = g_new0 (gchar*, 0);
-	for (i = 0; i < va_rom_paths->n_values; i++) {
-		if (!rompath)
-			rompath = g_strdup (g_value_get_string (g_value_array_get_nth (va_rom_paths, i)));
-		else
-			rompath = g_strjoin ((g_strcasecmp (exec->name, "xmame") == 0) ? G_SEARCHPATH_SEPARATOR_S : ";",
-						rompath,
-						g_value_get_string (g_value_array_get_nth (va_rom_paths, i)),
-						NULL);
-		GMAMEUI_DEBUG ("In loop rompath is %s", rompath);
+	if (va_rom_paths) {
+		for (i = 0; i < va_rom_paths->n_values; i++) {
+			if (!rompath)
+				rompath = g_strdup (g_value_get_string (g_value_array_get_nth (va_rom_paths, i)));
+			else
+				rompath = g_strjoin ((g_strcasecmp (exec->name, "xmame") == 0) ? G_SEARCHPATH_SEPARATOR_S : ";",
+							rompath,
+							g_value_get_string (g_value_array_get_nth (va_rom_paths, i)),
+							NULL);
+			GMAMEUI_DEBUG ("In loop rompath is %s", rompath);
+		}
 	}
-	
+
 	samplepath = g_new0 (gchar*, 0);
-	for (i = 0; i < va_sample_paths->n_values; i++) {
-		if (!samplepath)
-			samplepath = g_strdup (g_value_get_string (g_value_array_get_nth (va_sample_paths, i)));
-		else
-			samplepath = g_strjoin ((g_strcasecmp (exec->name, "xmame") == 0) ? ";" : G_SEARCHPATH_SEPARATOR_S,
-						samplepath,
-						g_value_get_string (g_value_array_get_nth (va_sample_paths, i)),
-						NULL);
-		GMAMEUI_DEBUG ("In loop samplepath is %s", samplepath);
+	if (va_sample_paths) {
+		for (i = 0; i < va_sample_paths->n_values; i++) {
+			if (!samplepath)
+				samplepath = g_strdup (g_value_get_string (g_value_array_get_nth (va_sample_paths, i)));
+			else
+				samplepath = g_strjoin ((g_strcasecmp (exec->name, "xmame") == 0) ? G_SEARCHPATH_SEPARATOR_S : ";",
+							samplepath,
+							g_value_get_string (g_value_array_get_nth (va_sample_paths, i)),
+							NULL);
+			GMAMEUI_DEBUG ("In loop samplepath is %s", samplepath);
+		}
 	}
 
 	GMAMEUI_DEBUG ("Rompath is %s", rompath);
@@ -1037,8 +1034,10 @@ gchar *create_rompath_options_string(XmameExecutable *exec)
 	rompath_option_string = xmame_get_option_string(exec, "rompath", rompath);
 	samplepath_option_string = xmame_get_option_string(exec, "samplepath", samplepath);
 
-	g_free(rompath);
-	g_free(samplepath);
+	if (rompath)
+		g_free(rompath);
+	if (samplepath)
+		g_free(samplepath);
 
 	option_string = g_strjoin(" ",
 		rompath_option_string?rompath_option_string:"",
@@ -1048,8 +1047,10 @@ gchar *create_rompath_options_string(XmameExecutable *exec)
 	g_free(rompath_option_string);
 	g_free(samplepath_option_string);
 	
-	g_value_array_free (va_sample_paths);
-	g_value_array_free (va_rom_paths);
+	if (va_sample_paths)
+		g_value_array_free (va_sample_paths);
+	if (va_rom_paths)
+		g_value_array_free (va_rom_paths);
 
 	if (!option_string)
 		option_string = g_strdup("");

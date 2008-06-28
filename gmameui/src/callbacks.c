@@ -571,25 +571,16 @@ delayed_row_selected (GtkTreeSelection *selection)
 	RomEntry *game_data;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
-	gchar *current_rom_name;
-	
-	g_object_get (main_gui.gui_prefs, "current-rom", &current_rom_name, NULL);
 	
 	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
 		gtk_tree_model_get (model, &iter, ROMENTRY, &game_data, -1);
 
-		if (!current_rom_name) {
-			g_object_set (main_gui.gui_prefs, "current-rom", game_data->romname, NULL);
-			select_game (game_data);
-			return FALSE;
-		}
+		g_return_if_fail (game_data != NULL);
 
-		/* select the game only if it wasn't the previously selected one
-		 (prevent screenshot flickers)*/
-		if (g_ascii_strcasecmp (current_rom_name, game_data->romname) != 0)
-			select_game (game_data);
+		g_object_set (main_gui.gui_prefs, "current-rom", game_data->romname, NULL);
+
+		select_game (game_data);
 	}
-	g_free (current_rom_name);
 	
 	return FALSE;
 }
