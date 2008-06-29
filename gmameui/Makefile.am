@@ -2,7 +2,12 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src data po intl 
+### Don't execute make in the help subdirectory if DISABLE_DOC is set
+if DISABLE_DOC
+SUBDIRS = src data po intl
+else
+SUBDIRS = src data po intl help
+endif
 
 EXTRA_DIST = autogen.sh \
 	gmameui.desktop.in \
@@ -17,6 +22,8 @@ EXTRA_DIST = autogen.sh \
 	intltool-extract.in \
 	gnome-doc-utils.make \
 	m4 
+
+DISTCLEANFILES=gnome-doc-utils.make
 
 Graphicsdir = $(datadir)/applications
 Graphics_in_files = gmameui.desktop.in

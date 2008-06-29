@@ -44,7 +44,30 @@ AM_GNU_GETTEXT
 
 AC_PROG_INTLTOOL
 
+dnl ##########################
+dnl Gnome-Doc-Utils
+dnl ##########################
+AC_ARG_ENABLE(doc,
+  AC_HELP_STRING([--disable-doc],[do not build documentation (default: yes)])
+  ,,enable_doc=yes)
+
+AC_MSG_CHECKING(whether documentation should be built)
+if test ${enable_doc} = no; then
+   AC_MSG_RESULT([no])
+else
+   AC_MSG_RESULT([yes])
+fi
+
+if test ${enable_doc} = yes; then
 GNOME_DOC_INIT
+else
+dnl Do not care if GDU is not found
+GNOME_DOC_INIT(,,[:]) 
+dnl ENABLE_SK_TRUE="#"
+dnl ENABLE_SK_FALSE=""
+fi
+
+AM_CONDITIONAL(DISABLE_DOC, test ${enable_doc} = no)
 
 AC_ARG_WITH([xmame-dir],
   AC_HELP_STRING([--with-xmame-dir=DIR],[default path for xmame files]),
@@ -97,6 +120,7 @@ src/Makefile
 data/Makefile
 intl/Makefile
 po/Makefile.in
+help/Makefile
 gmameui.spec
 ])
 
@@ -106,6 +130,7 @@ echo
 echo $PACKAGE $VERSION
 echo
 echo Print debugging messages...... : $enable_debug
+echo Generate documentation........ : $enable_doc
 echo Joystick support.............. : $enable_joystick
 echo
 eval eval echo GMAMEUI will be installed in $bindir.
