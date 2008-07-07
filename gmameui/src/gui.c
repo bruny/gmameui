@@ -2121,51 +2121,26 @@ update_game_in_list (RomEntry *tmprom)
 
 }
 
-static void
-precheck_for_record (RomEntry *rom,
-		     gchar    *inp_selection)
-{
-	const gchar *inp_file;
-	inp_file = inp_selection;
-	/* test if the inp file exist */
-	GMAMEUI_DEBUG ("check play file selected: {%s}", inp_file);
-	if (g_file_test (inp_file, G_FILE_TEST_EXISTS)) {
-		/* if yes print a message and return to the selection screen */
-
-		GtkWidget *dialog;
-		gint result;
-
-		dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
-						 GTK_DIALOG_MODAL,
-						 GTK_MESSAGE_WARNING,
-						 GTK_BUTTONS_YES_NO,
-						 _("A file named '%s' already exists.\nDo you want to overwrite it?"),
-						 inp_file);
-		result = gtk_dialog_run (GTK_DIALOG (dialog));
-		switch (result) {
-		case GTK_RESPONSE_YES:
-			gtk_widget_hide (dialog);
-			process_inp_function (rom, inp_selection, 1);
-			break;
-		default:
-			break;
-		}
-		gtk_widget_destroy (dialog);
-
-	} else {
-		process_inp_function (rom, inp_selection, 1);
-	}
-}
-
 void
-select_inp (RomEntry *rom,
-	    gboolean  play_record)
+select_inp (gboolean play_record)
 {
 	GtkWidget *inp_selection;
-	gchar *temp_text;
 	gchar *inp_dir;
 	gchar *current_rom_name;
 
+	RomEntry *rom;
+	
+	g_return_if_fail (current_exec != NULL);
+	
+	joy_focus_off ();
+	
+	rom = gui_prefs.current_game;
+	
+	g_object_get (main_gui.gui_prefs,
+		      "dir-inp", &inp_dir,
+		      "current-rom", &current_rom_name,
+		      NULL);
+	
 	if (play_record) {
 		inp_selection = gtk_file_chooser_dialog_new (_("Choose inp file to play"),
 							     GTK_WINDOW (MainWindow),
@@ -2173,39 +2148,47 @@ select_inp (RomEntry *rom,
 							     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 							     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
 							     NULL);
-	} else {
-		inp_selection = gtk_file_chooser_dialog_new (_("Choose inp file to record"),
-							     GTK_WINDOW (MainWindow),
-							     GTK_FILE_CHOOSER_ACTION_SAVE,
-							     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-							     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-							     NULL);
-	}
-	
-	g_object_get (main_gui.gui_prefs,
-		      "dir-inp", &inp_dir,
-		      "current-rom", &current_rom_name,
-		      NULL);
-	gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (inp_selection), inp_dir);
-	g_free (inp_dir);
-	
-	if (!play_record) {
-		temp_text = g_strdup_printf ("%s.inp", current_rom_name);
-		gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (inp_selection), temp_text);
-		g_free (temp_text);
-	}
-
-	/* reenable joystick, was disabled in callback.c (on_playback_input_activate/on_play_and_record_input_activate)*/
-	if (gtk_dialog_run (GTK_DIALOG (inp_selection)) == GTK_RESPONSE_ACCEPT) {
-		if (play_record) {
+		gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (inp_selection), inp_dir);
+		
+		if (gtk_dialog_run (GTK_DIALOG (inp_selection)) == GTK_RESPONSE_ACCEPT) {
+			gtk_widget_hide (inp_selection);
 			process_inp_function (rom,
-					      gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (inp_selection)), 0);
-		} else {
-			precheck_for_record (rom, gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (inp_selection)));
+					      gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (inp_selection)),
+					      0);
 		}
+		gtk_widget_destroy (inp_selection);
+	} else {
+		gchar *inp_filename;
+		gchar *tmp;
+		tmp = g_strdup_printf("%s.inp", current_rom_name);
+		inp_filename = g_build_filename (inp_dir, tmp, NULL);
+		GMAMEUI_DEBUG ("Recording new inp file to %s", inp_filename);
+		
+		if (g_file_test (inp_filename, G_FILE_TEST_EXISTS)) {
+			GtkWidget *dialog;
+			gint result;
+
+			dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
+							 GTK_DIALOG_MODAL,
+							 GTK_MESSAGE_WARNING,
+							 GTK_BUTTONS_YES_NO,
+							 _("A file named '%s' already exists.\nDo you want to overwrite it?"),
+							 inp_filename);
+			if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
+				gtk_widget_hide (dialog);
+				process_inp_function (rom, inp_filename, 1);
+			}
+			gtk_widget_destroy (dialog);
+		} else 
+			process_inp_function (rom, inp_filename, 1);
+		
+		g_free (tmp);
+		g_free (inp_filename);	
 	}
-	gtk_widget_destroy (inp_selection);
 	
+	joy_focus_on ();
+	
+	g_free (inp_dir);
 	g_free (current_rom_name);
 }
 

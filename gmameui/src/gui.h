@@ -280,7 +280,7 @@ void show_progress_bar (void);
 void hide_progress_bar (void);
 void update_progress_bar (gfloat current_value);
 void update_game_in_list (RomEntry *rom);
-void select_inp (RomEntry *Rom, gboolean play_record);
+void select_inp (gboolean play_record);
 void create_Menu (void);
 void select_game (RomEntry *rom);
 

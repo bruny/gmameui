@@ -153,8 +153,6 @@ gmameui_init (void)
 	/* Load GUI preferences */
 	main_gui.gui_prefs = mame_gui_prefs_new ();
 
-	/*if (!load_dirs_ini ())
-		g_message (_("dirs.ini not loaded, using default values"));*/
 	/* Set the MAME executable list */
 	GValueArray *va_exec_paths;
 	gchar *mame_executable = NULL;
@@ -631,11 +629,9 @@ play_game (RomEntry *rom)
 
 void process_inp_function (RomEntry *rom, gchar *file, int action) {
 	char *filename;
-	char *filepath;
 	gchar *opt;
 	gchar *general_options;
 	gchar *vector_options;
-	gchar *function;
 	GameOptions *target;
 	
 	// 0 = playback; 1 = record
@@ -645,26 +641,17 @@ void process_inp_function (RomEntry *rom, gchar *file, int action) {
 		GMAMEUI_DEBUG ("play selected: {%s}",file);
 		/* nedd to do a test on the unescaped string here otherwise doesn't even find the file  */
 		if (g_file_test (file, G_FILE_TEST_EXISTS) == FALSE) {	
-	        /* if not print a message and return to the selection screen */
 			gmameui_message (ERROR, NULL, _("Could not open '%s' as valid input file"), file);
 			return;
 		}
 	}
 	
-	if (!current_exec) {
-		gmameui_message (ERROR, NULL, _("No xmame executables defined"));
-		/* Re-enable joystick */
-		joy_focus_on ();
-		return;
-	}
-	
 	filename = g_path_get_basename (file);
-	filepath = g_path_get_dirname (file);
 	
 	if (action == 0)
 		GMAMEUI_DEBUG ("Playback game %s", file);
 	else
-		GMAMEUI_DEBUG ("Record game %s" G_DIR_SEPARATOR_S "%s", filepath, filename);
+		GMAMEUI_DEBUG ("Record game %s", file);
 
 	/* prepares options*/
 	target = load_options (rom);
@@ -680,41 +667,43 @@ void process_inp_function (RomEntry *rom, gchar *file, int action) {
  		vector_options = g_strdup ("");
 	}
 	
-	/* create the command */
-	if (action == 0) {
-		function = g_strdup ("playback");
-	} else {
-		function = g_strdup ("record");
-
-	}
-	
-	opt = g_strdup_printf ("%s %s %s -input_directory %s -%s %s -%s %s 2>&1",
+	opt = g_strdup_printf ("%s %s %s ",
 			       current_exec->path,
 			       general_options,
-			       vector_options,
-			       filepath,
-			       function,
-			       filename,
-			       current_exec->noloadconfig_option,
-			       rom->romname);
-
-	/* Free options */
-	g_free (filename);
-	g_free (filepath);
-	g_free (function);
-
-	g_free (general_options);
-	g_free (vector_options);
+			       vector_options);
 	
+	/* create the command */
+	if (action == 0) {
+		gchar **splitname;
+		
+		splitname = g_strsplit (g_path_get_basename (filename), ".", 0);
+		opt = g_strconcat (opt, "-playback ",
+				   filename, " ",
+				   "-", current_exec->noloadconfig_option, " ",
+				   splitname[0], " 2>&1", NULL);
+		
+		g_strfreev (splitname);
+	} else {
+		gchar *romname;
+		g_object_get (main_gui.gui_prefs, "current-rom", &romname, NULL);
+		opt = g_strconcat (opt, "-record ",
+				   filename, " ",
+				   "-", current_exec->noloadconfig_option, " ",
+				   romname, " 2>&1", NULL);
+		g_free (romname);
+	}
+
 	if (target != &default_options)
 		game_options_free (target);
 	/* FIXME Playing back on xmame requires hitting enter to continue
 	   (run command from command line) */
 	launch_emulation (rom, opt);
+
+	/* Free options */
+	g_free (filename);
+	g_free (general_options);
+	g_free (vector_options);
 	g_free (opt);
-	
-	/* reenable joystick, was disabled in callback.c (on_playback_input_activate/on_play_and_record_input_activate)*/
-	joy_focus_on ();
 }
 
 void

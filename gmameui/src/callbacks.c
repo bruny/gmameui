@@ -64,19 +64,11 @@ on_play_activate (GtkAction *action,
 	play_game (gui_prefs.current_game);
 }
 
-/* FIXME TODO Consolidate the next two functions by passing
-   in TRUE or FALSE in the user_data */
 void
 on_play_and_record_input_activate (GtkAction *action,
 				   gpointer  user_data)
 {
-	g_return_if_fail (current_exec != NULL);
-	
-	/* joystick focus turned off, will be turned on again in:
-	   gui.c (select_inp) when cancelling the file selection
-	   gmameui.c (record_game) */
-	joy_focus_off ();
-	select_inp (gui_prefs.current_game, FALSE);
+	select_inp (FALSE);
 }
 
 
@@ -84,13 +76,7 @@ void
 on_playback_input_activate (GtkAction *action,
 			    gpointer  user_data)
 {
-	g_return_if_fail (current_exec != NULL);
-	
-	/* joystick focus turned off, will be turned on again in:
-	   gui.c (select_inp)
-	   gmameui.c (playback_game)*/
-	joy_focus_off ();
-	select_inp (gui_prefs.current_game, TRUE);
+	select_inp (TRUE);
 }
 
 gboolean foreach_find_random_rom_in_store (GtkTreeModel *model,
