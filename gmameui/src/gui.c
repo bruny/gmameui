@@ -816,7 +816,7 @@ g_message (_("Time to create main window and filters: %.02f seconds"), g_timer_e
 								 "/MenuBar/ViewMenu/ViewStatusBarMenu"),
 				      show_statusbar);
 	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
-								 "/MenuBar/ViewMenu/ViewToolbar"),
+								 "/MenuBar/ViewMenu/ViewToolbarMenu"),
 				      show_toolbar);
 
 	if (! ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))) {
@@ -2230,7 +2230,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	sidebar->priv = g_new0 (GMAMEUISidebarPrivate, 1);
 	
 	sidebar->priv->main_screenshot = gmameui_get_image_from_stock ("gmameui-screen");
-
+/* FIXME TODO
 	sidebar->priv->screenshot_event_box = gtk_event_box_new ();
 	gtk_box_pack_start (sidebar->priv->screenshot_hist_vbox,
 			    sidebar->priv->screenshot_event_box,
@@ -2239,7 +2239,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 			   GTK_WIDGET (sidebar->priv->main_screenshot));
 	gtk_widget_show (sidebar->priv->screenshot_event_box);
 	gtk_widget_show (sidebar->priv->main_screenshot);
-	
+*/	
 	xml = glade_xml_new (GLADEDIR "sidebar.glade", "screenshot_notebook", GETTEXT_PACKAGE);
 	
 	sidebar->priv->screenshot_hist_vbox = gtk_vbox_new (FALSE, 6);
@@ -2311,7 +2311,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 
 	gtk_widget_show_all (GTK_WIDGET (sidebar));
 
-	gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));
+/* FIXME TODO	gtk_widget_hide (GTK_WIDGET (sidebar->priv->screenshot_event_box));*/
 	GMAMEUI_DEBUG ("Finished creating sidebar");
 }
 

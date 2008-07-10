@@ -297,7 +297,6 @@ create_MainWindow (void)
 	/* Enable keyboard shortcuts defined in the UI Manager */
 	gtk_window_add_accel_group (GTK_WINDOW (MainWindow),
 				    gtk_ui_manager_get_accel_group (main_gui.manager));
-
 	
 	hpanedLeft = gtk_hpaned_new ();
 	gtk_widget_show (hpanedLeft);
@@ -317,6 +316,46 @@ create_MainWindow (void)
 	gtk_container_add (scrolledwindowFilters, main_gui.filters_list);
 	gtk_widget_show_all (main_gui.filters_list);
 
+		tri_status_bar = gtk_hbox_new (FALSE, 2);
+  gtk_widget_show (tri_status_bar);
+  main_gui.tri_status_bar = tri_status_bar;
+  gtk_box_pack_start (GTK_BOX (vbox1), tri_status_bar, FALSE, FALSE, 0);
+
+  statusbar1 = gtk_statusbar_new ();
+  gtk_widget_show (statusbar1);
+  main_gui.statusbar1 = GTK_STATUSBAR (statusbar1);
+  gtk_box_pack_start (GTK_BOX (tri_status_bar), statusbar1, TRUE, TRUE, 0);
+
+  fontdesc = pango_font_description_copy (GTK_WIDGET (tri_status_bar)->style->font_desc);
+  font_size = pango_font_description_get_size (fontdesc);
+
+  statusbar2 = gtk_statusbar_new ();
+  gtk_widget_show (statusbar2);
+  main_gui.statusbar2 = GTK_STATUSBAR (statusbar2);
+  gtk_box_pack_start (GTK_BOX (tri_status_bar), statusbar2, FALSE, FALSE, 0);
+  gtk_widget_set_size_request (statusbar2, PANGO_PIXELS (font_size) * 10, -1);
+
+  statusbar3 = gtk_statusbar_new ();
+  gtk_widget_show (statusbar3);
+  main_gui.statusbar3 = GTK_STATUSBAR (statusbar3);
+  gtk_box_pack_end (GTK_BOX (tri_status_bar), statusbar3, FALSE, FALSE, 0);
+  gtk_widget_set_size_request (statusbar3, PANGO_PIXELS (font_size) * 10, -1);
+
+  combo_progress_bar = gtk_hbox_new (FALSE, 2);
+  gtk_widget_show (combo_progress_bar);
+  main_gui.combo_progress_bar = combo_progress_bar;
+  gtk_box_pack_start (GTK_BOX (vbox1), combo_progress_bar, FALSE, FALSE, 0);
+
+  status_progress_bar = gtk_statusbar_new ();
+  gtk_widget_show (status_progress_bar);
+  main_gui.status_progress_bar = GTK_STATUSBAR (status_progress_bar);
+  gtk_box_pack_start (GTK_BOX (combo_progress_bar), status_progress_bar, TRUE, TRUE, 0);
+
+  progress_progress_bar = gtk_progress_bar_new ();
+  gtk_widget_show (progress_progress_bar);
+  main_gui.progress_progress_bar = GTK_PROGRESS_BAR (progress_progress_bar);
+  gtk_box_pack_end (GTK_BOX (combo_progress_bar), progress_progress_bar, TRUE, TRUE, 0);
+	
 	/* Populate the filters list - this should be done in filters_list.c */
 	
 	/* Recent versions of MAME use neodrvr */
@@ -760,66 +799,26 @@ create_MainWindow (void)
 	g_signal_connect (G_OBJECT (hpanedRight), "notify::position",
 			  G_CALLBACK (on_hpaned_position_notify), NULL);
 
-  scrolledwindowGames = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scrolledwindowGames);
-  main_gui.scrolled_window_games = scrolledwindowGames;
-  gtk_paned_pack1 (GTK_PANED (hpanedRight), scrolledwindowGames, TRUE, TRUE);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindowGames), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	scrolledwindowGames = gtk_scrolled_window_new (NULL, NULL);
+	gtk_widget_show (scrolledwindowGames);
+	main_gui.scrolled_window_games = scrolledwindowGames;
+	gtk_paned_pack1 (GTK_PANED (hpanedRight), scrolledwindowGames, TRUE, TRUE);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindowGames),
+					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
 	/* Create the screenshot and history sidebar */
 	GMAMEUISidebar *sidebar = gmameui_sidebar_new ();
 	gtk_paned_pack2 (GTK_PANED (hpanedRight), sidebar, FALSE, FALSE);
 	main_gui.screenshot_hist_frame = GMAMEUI_SIDEBAR (sidebar);
-	
-	
-  tri_status_bar = gtk_hbox_new (FALSE, 2);
-  gtk_widget_show (tri_status_bar);
-  main_gui.tri_status_bar = tri_status_bar;
-  gtk_box_pack_start (GTK_BOX (vbox1), tri_status_bar, FALSE, FALSE, 0);
 
-  statusbar1 = gtk_statusbar_new ();
-  gtk_widget_show (statusbar1);
-  main_gui.statusbar1 = GTK_STATUSBAR (statusbar1);
-  gtk_box_pack_start (GTK_BOX (tri_status_bar), statusbar1, TRUE, TRUE, 0);
+	g_signal_connect (G_OBJECT (MainWindow), "delete_event",
+			  G_CALLBACK (on_MainWindow_delete_event),
+			  NULL);
 
-  fontdesc = pango_font_description_copy (GTK_WIDGET (tri_status_bar)->style->font_desc);
-  font_size = pango_font_description_get_size (fontdesc);
+	g_object_set_data (G_OBJECT (MainWindow), "tooltips", tooltips);
 
-  statusbar2 = gtk_statusbar_new ();
-  gtk_widget_show (statusbar2);
-  main_gui.statusbar2 = GTK_STATUSBAR (statusbar2);
-  gtk_box_pack_start (GTK_BOX (tri_status_bar), statusbar2, FALSE, FALSE, 0);
-  gtk_widget_set_size_request (statusbar2, PANGO_PIXELS (font_size) * 10, -1);
+	gtk_window_add_accel_group (GTK_WINDOW (MainWindow), accel_group);
 
-  statusbar3 = gtk_statusbar_new ();
-  gtk_widget_show (statusbar3);
-  main_gui.statusbar3 = GTK_STATUSBAR (statusbar3);
-  gtk_box_pack_end (GTK_BOX (tri_status_bar), statusbar3, FALSE, FALSE, 0);
-  gtk_widget_set_size_request (statusbar3, PANGO_PIXELS (font_size) * 10, -1);
-
-  combo_progress_bar = gtk_hbox_new (FALSE, 2);
-  gtk_widget_show (combo_progress_bar);
-  main_gui.combo_progress_bar = combo_progress_bar;
-  gtk_box_pack_start (GTK_BOX (vbox1), combo_progress_bar, FALSE, FALSE, 0);
-
-  status_progress_bar = gtk_statusbar_new ();
-  gtk_widget_show (status_progress_bar);
-  main_gui.status_progress_bar = GTK_STATUSBAR (status_progress_bar);
-  gtk_box_pack_start (GTK_BOX (combo_progress_bar), status_progress_bar, TRUE, TRUE, 0);
-
-  progress_progress_bar = gtk_progress_bar_new ();
-  gtk_widget_show (progress_progress_bar);
-  main_gui.progress_progress_bar = GTK_PROGRESS_BAR (progress_progress_bar);
-  gtk_box_pack_end (GTK_BOX (combo_progress_bar), progress_progress_bar, TRUE, TRUE, 0);
-
-  g_signal_connect (G_OBJECT (MainWindow), "delete_event",
-                      G_CALLBACK (on_MainWindow_delete_event),
-                      NULL);
-
-  g_object_set_data (G_OBJECT (MainWindow), "tooltips", tooltips);
-
-  gtk_window_add_accel_group (GTK_WINDOW (MainWindow), accel_group);
-
-  return MainWindow;
+	return MainWindow;
 }
 

@@ -557,6 +557,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 		GMAMEUI_DEBUG ("Error loading %s - %s", pr->priv->filename, error->message);	
 	
 		g_error_free (error);
+		error = NULL;
 	}
 	/* FIXME TODO What happens if can't load from file? */
 
@@ -653,6 +654,14 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	for (i = 0; i < NUM_DIRS; i++) {
 		pr->priv->directories[i] = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences",
 								  directory_prefs[i].name, &error);
+		
+		if (error) {
+			GMAMEUI_DEBUG ("Error loading directory preference %s: %s",
+				       directory_prefs[i].name, error->message);
+			g_error_free (error);
+			error = NULL;
+		}
+		
 		/* If no values set, set default values */
 		if (!pr->priv->directories[i])
 			pr->priv->directories[i] = g_strdup (directory_prefs[i].default_dir);   /* strdup, since we free in finalize */
