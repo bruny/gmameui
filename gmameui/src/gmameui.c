@@ -224,7 +224,6 @@ g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer,
 
 }
 
-
 gboolean
 game_filtered (RomEntry * rom)
 {
@@ -362,7 +361,6 @@ game_filtered (RomEntry * rom)
 	return retval;
 }
 
-
 /* launch following the commandline prepared by play_game, playback_game and record_game 
    then test if the game is launched, detect error and update game status */
 void
@@ -492,6 +490,8 @@ launch_emulation (RomEntry    *rom,
 		g_list_free (extra_output);
 
 		/* update game informations */
+		/* FIXME TODO Set g_object rom info, which triggers signal to update game in list.
+		   This will then replace update_game_in_list call below */
 		rom->timesplayed++;
 		rom->has_roms = CORRECT;
 	}
@@ -499,7 +499,6 @@ launch_emulation (RomEntry    *rom,
 	gtk_widget_show (MainWindow);
 	/* update the gui for the times played and romstatus if there was any error */
 	update_game_in_list (rom);
-	select_game (rom);
 
 #ifdef ENABLE_JOYSTICK
 	gchar *joystick_device;
@@ -720,12 +719,6 @@ exit_gmameui (void)
 	joystick_close (joydata);
 	joydata = NULL;
 
-	/* Not necessary but it's easier to track down memory leaks
-	* if we free as much as we can
-	*/
-GMAMEUI_DEBUG ("Destroying window");
-	//gtk_widget_destroy (MainWindow); ADB COMMENTING THIS OUT REMOVES COLUMN REORDERING AT END
-GMAMEUI_DEBUG ("Destroying window - done");
 	gamelist_free ();
 	
 	xmame_table_free ();
@@ -739,6 +732,8 @@ GMAMEUI_DEBUG ("Destroying window - done");
 	
 	g_object_unref (main_gui.gui_prefs);
 	main_gui.gui_prefs = NULL;
+	
+	/* FIXME TODO gtk_widget_destroy (MainWindow);*/
 	
 	g_message (_("Finished cleaning up GMAMEUI"));
 	
@@ -764,90 +759,3 @@ get_columns_shown_list (void)
 	return MyColumns;
 }
 #endif
-
-const char *
-column_title (int column_num)
-{
-	switch (column_num) {
-	case GAMENAME:
-		return _("Game");
-	case HAS_ROMS:
-		return _("ROMs");
-	case HAS_SAMPLES:
-		return _("Samples");
-	case ROMNAME:
-		return _("Directory");
-	case TIMESPLAYED:
-		return _("Played");
-	case MANU:
-		return _("Manufacturer");
-	case YEAR:
-		return _("Year");
-	case CLONE:
-		return _("Clone of");
-	case DRIVER:
-		return _("Driver");
-	case STATUS:       /*  Available / Not Available */
-		return _("Status");
-	case ROMOF:
-		return _("Rom of");
-	case DRIVERSTATUS: /*  Working / Not Working */
-		return _("Driver Status");
-	case COLOR_STATUS:
-		return _("Driver Colors");
-	case SOUND_STATUS:
-		return _("Driver Sound");
-	case GRAPHIC_STATUS:
-		return _("Driver Graphics");
-	case NUMPLAYERS:
-		return _("Players");
-	case NUMBUTTONS:
-		return _("Buttons");
-	case MAMEVER:
-		return _("Version");
-	case CATEGORY:
-		return _("Category");
-	case FAVORITE:
-		return _("Favorite");
-	case CHANNELS:
-		return _("Channels");
-	case IS_BIOS:
-		return _("BIOS");
-	default:
-		return NULL;
-	}
-}
-
-/* FIXME This function should either set or return. Do we need to do both? */
-const gchar *
-rom_entry_get_list_name (RomEntry *rom)
-{
-	gboolean the_prefix;
-	
-	g_return_if_fail (rom != NULL);
-
-	g_object_get (main_gui.gui_prefs,
-		      "theprefix", &the_prefix,
-		      NULL);
-	
-	if (!rom->the_trailer) {
-		if (!rom->name_in_list) {
-			rom->name_in_list = g_strdup_printf ("%s %s", rom->gamename, rom->gamenameext);
-		}
-	} else  {
-		if (the_prefix) {
-			if (!rom->name_in_list || strncmp (rom->name_in_list, "The", 3)) {
-				g_free (rom->name_in_list);
-				rom->name_in_list = g_strdup_printf ("The %s %s", rom->gamename, rom->gamenameext);
-			}
-		} else {
-			if (!rom->name_in_list || !strncmp (rom->name_in_list, "The", 3)) {
-				g_free (rom->name_in_list);
-				rom->name_in_list = g_strdup_printf ("%s, The %s", rom->gamename, rom->gamenameext);
-			}
-		}
-
-	} 
-
-	return rom->name_in_list;
-}

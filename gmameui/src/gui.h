@@ -42,6 +42,8 @@
 #include "mame_options.h"
 #include "filters_list.h"
 #include "gui_prefs.h"
+#include "interface.h"
+#include "gmameui-gamelist-view.h"
 
 /* The following menu entries are always enabled */
 static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
@@ -250,6 +252,7 @@ struct main_gui_struct main_gui;
 
 void adjustment_scrolled (GtkAdjustment *adjustment,
                           gpointer       user_data);
+
 /* New icon code */
 void gmameui_icons_init (void);
 GdkPixbuf * gmameui_get_icon_from_stock (const char *);
@@ -258,30 +261,19 @@ GtkWidget * gmameui_get_image_from_stock (const char *);
 void add_exec_menu(void);
 void init_gui(void);
 
-/* to add the dropbox from the directory.c whenn changing list*/
-void add_exec_menu (void);
-void hide_filters (void);
-void show_filters (void);
-void hide_snaps (void);
-void show_snaps (void);
-
 GdkPixbuf * get_icon_for_rom (RomEntry *rom, guint size, ZIP *zip);
 GdkPixbuf * gmameui_get_icon_from_stock (const char *id);
 GtkWidget * gmameui_get_image_from_stock (const char *id);
+void get_status_icons (void);
 void        gmameui_icons_init (void);
 
-void create_gamelist_content (void);
-void create_gamelist (ListMode list_mode);
-RomEntry * gamelist_get_selected_game (void);
+
 void gamelist_popupmenu_show (GdkEventButton *event);
 void gmameui_toolbar_set_favourites_sensitive (gboolean rom_is_favourite);
 void gmameui_menu_set_view_mode_check (gint view_mode, gboolean state);
-void show_progress_bar (void);
-void hide_progress_bar (void);
-void update_progress_bar (gfloat current_value);
+
 void update_game_in_list (RomEntry *rom);
 void select_inp (gboolean play_record);
-void create_Menu (void);
 void select_game (RomEntry *rom);
 
 #endif /* __GUI_H__ */

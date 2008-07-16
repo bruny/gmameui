@@ -13,6 +13,7 @@ gmameui_SOURCES = \
 	rom_entry.h rom_entry.c \
 	mameio.c \
 	gui.c gui.h \
+	gmameui-gamelist-view.c gmameui-gamelist-view.h \
 	progression_window.c progression_window.h \
 	directories.c directories.h \
 	about.c about.h \

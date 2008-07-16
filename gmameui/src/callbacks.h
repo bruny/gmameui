@@ -24,11 +24,10 @@
 #ifndef __CALLBACKS_H__
 #define __CALLBACKS_H__
 
-#include <gtk/gtkcheckmenuitem.h>
 #include <gtk/gtkmenuitem.h>
 #include <gtk/gtktogglebutton.h>
 #include <gtk/gtktreeselection.h>
-#include <gtk/gtktreeviewcolumn.h>
+#include <gtk/gtktreeviewcolumn.h>*/
 
 /* Main window menu: File */
 void     on_play_activate                       (GtkAction *action,
@@ -64,41 +63,6 @@ void     on_audit_all_games_activate            (GtkMenuItem     *menuitem,
 void     on_exit_activate                       (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
 
-
-/* Main window menu: View */
-void     on_toolbar_view_menu_activate          (GtkAction *action,
-                                                 gpointer         user_data);
-
-void     on_status_bar_view_menu_activate       (GtkAction *action,
-                                                 gpointer         user_data);
-
-void     on_folder_list_activate                (GtkAction *action,
-                                                 gpointer         user_data);
-
-void     on_screen_shot_activate                (GtkAction *action,
-                                                 gpointer         user_data);
-
-void     on_list_view_menu_activate             (GtkCheckMenuItem *menuitem,
-                                                 gpointer         user_data);
-
-void     on_list_tree_view_menu_activate        (GtkCheckMenuItem *menuitem,
-                                                 gpointer         user_data);
-
-void     on_details_view_menu_activate          (GtkCheckMenuItem *menuitem,
-                                                 gpointer         user_data);
-
-void     on_details_tree_view_menu_activate     (GtkCheckMenuItem *menuitem,
-                                                 gpointer         user_data);
-
-void     on_view_type_changed                   (GtkRadioAction *action,
-                                                 gpointer       user_data);
-
-void     on_expand_all_activate                 (GtkMenuItem *menuitem,
-                                                 gpointer         user_data);
-
-void     on_collapse_all_activate               (GtkMenuItem *menuitem,
-                                                 gpointer         user_data);
-
 void     on_refresh_activate                    (GtkAction        *action,
                                                  gpointer         user_data);
 
@@ -119,53 +83,5 @@ void     on_preferences_activate             (GtkMenuItem     *menuitem,
 /* Main window menu: Help */
 void     on_about_activate                      (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
-
-
-/* Column Popup menu */
-void     on_column_hide_activate                (GtkMenuItem     *menuitem,
-                                                 gpointer         user_data);
-
-/* Toolbar */
-void     on_filterShowButton_toggled            (GtkToggleToolButton *togglebutton,
-                                                 gpointer             user_data);
-
-void     on_snapShowButton_toggled              (GtkToggleToolButton *togglebutton,
-                                                 gpointer             user_data);
-
-void     on_mode_button_clicked                 (GtkToggleToolButton *button,
-                                                 gpointer             user_data);
-
-/* Main list */
-void     on_row_selected                        (GtkTreeSelection *selection,
-                                                 gpointer data);
-
-gboolean
-on_list_keypress (GtkWidget   *widget,
-		  GdkEventKey *event,
-		  gpointer    user_data);
-
-gboolean on_list_clicked                        (GtkWidget *widget,
-                                                 GdkEventButton *event,
-                                                 gpointer user_data);
-
-void     on_columns_changed                     (GtkTreeView *treeview,
-                                                 gpointer user_data);
-
-void     on_displayed_list_resize_column        (GtkWidget *widget,
-                                                 GtkRequisition *requisition,
-                                                 gpointer user_data);
-
-void     on_displayed_list_sort_column_changed  (GtkTreeSortable *treesortable,
-                                                 gpointer user_data);
-
-void     on_displayed_list_row_collapsed        (GtkTreeView *treeview,
-                                                 GtkTreeIter *arg1,
-                                                 GtkTreePath *arg2,
-                                                 gpointer user_data);
-
-gboolean on_column_click                        (GtkWidget *button,
-                                                 GdkEventButton *event,
-                                                 GtkTreeViewColumn* column);
-
 
 #endif /* __CALLBACKS_H__ */

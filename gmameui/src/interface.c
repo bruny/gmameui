@@ -25,18 +25,7 @@
 #include "common.h"
 
 #include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-
 #include <gdk/gdkkeysyms.h>
-#include <gtk/gtkhpaned.h>
-#include <gtk/gtkhseparator.h>
-#include <gtk/gtkimagemenuitem.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtkmenubar.h>
-#include <gtk/gtkradiomenuitem.h>
-#include <gtk/gtkscrolledwindow.h>
-#include <gtk/gtkstock.h>
 #include <gtk/gtkvbox.h>
 #include <glib-object.h>	/* For GParamSpec */
 
@@ -50,53 +39,281 @@
 
 /* Close the main window */
 static gboolean
-on_MainWindow_delete_event (GtkWidget       *widget,
-			    GdkEvent        *event,
-			    gpointer         user_data)
+on_main_window_delete_event (GtkWidget *widget,
+			     GdkEvent *event,
+			     gpointer user_data)
 {
 	exit_gmameui ();
 	return TRUE;
 }
 
+static gboolean on_main_window_moved_cb (GtkWidget *widget, GdkEventConfigure *event, gpointer data)
+{
+	gint x, y, w, h;
+	gdk_drawable_get_size (GDK_DRAWABLE (widget->window), &x, &y);
+	gdk_window_get_position (GDK_WINDOW (widget->window), &w, &h);
 
-static void
+	g_object_set (main_gui.gui_prefs,
+		      "ui-width", widget->allocation.width,
+		      "ui-height", widget->allocation.height,
+		      NULL);
+	return FALSE;
+}
+
+/* When the draggable panes are changed, save their position */
+void
 on_hpaned_position_notify (GObject *object, GParamSpec *pspec, gpointer data)
 {
 	gint position;
 
 	g_object_get(object, pspec->name, &position, NULL);
-	GMAMEUI_DEBUG("position change report: object=%p, position value=%d, parameter=%p\n",
+	GMAMEUI_DEBUG("position change report: object=%p, position value=%d, parameter=%p",
 	       object, position, data);
-	
+
 	g_object_set (main_gui.gui_prefs,
 		      "xpos-filters", main_gui.scrolled_window_filters->allocation.width,
 		      "xpos-gamelist", main_gui.scrolled_window_games->allocation.width,
-		      NULL);		
+		      NULL);
 }
 
+void
+on_toolbar_view_menu_activate (GtkAction *action,
+			       gpointer          user_data)
+{
+	gboolean visible;
+
+	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+
+	if (visible)
+		gtk_widget_show (GTK_WIDGET (main_gui.toolbar));
+	else
+		gtk_widget_hide (GTK_WIDGET (main_gui.toolbar));
+
+	g_object_set (main_gui.gui_prefs,
+		      "show-toolbar", visible,
+		      NULL);
+}
+
+void
+on_folder_list_activate (GtkAction *action,
+			 gpointer         user_data)
+{
+	gboolean visible;
+
+	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+
+	g_object_set (main_gui.gui_prefs,
+		      "show-filterlist", visible,
+		      NULL);
+	
+	if (visible) {
+		/* Show filters */
+		gint xpos_filters;
+		g_object_get (main_gui.gui_prefs,
+			      "xpos-filters", &xpos_filters,
+			      NULL);
+		gtk_paned_set_position (main_gui.hpanedLeft, xpos_filters);
+
+		gtk_widget_show (GTK_WIDGET (main_gui.scrolled_window_filters));
+	} else {
+		/* Hide filters */
+		g_object_set (main_gui.gui_prefs,
+			      "xpos-filters", main_gui.scrolled_window_filters->allocation.width,
+			      NULL);
+		gtk_paned_set_position (main_gui.hpanedLeft, 0);
+
+		gtk_widget_hide (GTK_WIDGET (main_gui.scrolled_window_filters));
+	}
+
+}
+
+void
+on_screen_shot_activate (GtkAction *action,
+			 gpointer         user_data)
+{
+	gboolean visible;
+
+	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+	
+	g_object_set (main_gui.gui_prefs,
+		      "show-screenshot", visible,
+		      NULL);
+
+	if (visible) {
+		/* Show snapshot */
+		gint xpos_gamelist;
+		g_object_get (main_gui.gui_prefs,
+			      "xpos-gamelist", &xpos_gamelist,
+			      NULL);
+		gtk_paned_set_position (main_gui.hpanedRight, xpos_gamelist);
+
+		gtk_widget_show (GTK_WIDGET (main_gui.screenshot_hist_frame));
+	} else {
+		/* Hide snapshot */
+		g_object_set (main_gui.gui_prefs,
+			      "xpos-gamelist", main_gui.scrolled_window_games->allocation.width,
+			      NULL);
+		gtk_paned_set_position (main_gui.hpanedRight, -1);
+		gtk_widget_hide (GTK_WIDGET (main_gui.screenshot_hist_frame));
+	}
+}
+
+void
+on_status_bar_view_menu_activate       (GtkAction *action,
+                                        gpointer         user_data)
+{
+	gboolean visible;
+
+	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
+
+	if (visible)
+		gtk_widget_show (GTK_WIDGET (main_gui.tri_status_bar));
+	else
+		gtk_widget_hide (GTK_WIDGET (main_gui.tri_status_bar));
+
+	g_object_set (main_gui.gui_prefs,
+		      "show-statusbar", visible,
+		      NULL);
+}
+
+/* This function is called when the radio option defining the list mode is changed. */
+void     on_view_type_changed                   (GtkRadioAction *action,
+                                                 gpointer       user_data)
+{
+	gint val;
+	ListMode current_mode;
+	ListMode previous_mode;
+	
+	g_object_get (main_gui.gui_prefs,
+		      "current-mode", &current_mode,
+		      "previous-mode", &previous_mode,
+		      NULL);
+	
+	val = gtk_radio_action_get_current_value (action);
+
+	if (current_mode != val) {
+		previous_mode = current_mode;
+		current_mode = val;
+		GMAMEUI_DEBUG ("Current mode changed %d --> %d", previous_mode, current_mode);
+		g_object_set (main_gui.gui_prefs,
+			      "current-mode", current_mode,
+			      "previous-mode", previous_mode,
+			      NULL);
+		
+		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group,
+						(current_mode == LIST_TREE) ||
+						(current_mode == DETAILS_TREE));
+
+		/* Rebuild the UI */
+		create_gamelist (current_mode);
+
+		/* Rebuild the List only if we change from/to tree mode */
+		if ((current_mode == DETAILS_TREE) || (current_mode == LIST_TREE)) {
+			if ( (previous_mode != DETAILS_TREE) && (previous_mode != LIST_TREE))
+				create_gamelist_content ();
+		} else {
+			if ((previous_mode == DETAILS_TREE) || (previous_mode == LIST_TREE))
+				create_gamelist_content ();
+		}
+	}	 
+}
+
+void
+gmameui_menu_set_view_mode_check (gint view_mode, gboolean state)
+{
+	GtkWidget *widget;
+	
+	switch (view_mode) {
+		case (LIST):
+			widget = gtk_ui_manager_get_widget (main_gui.manager,
+							    "/MenuBar/ViewMenu/ViewListViewMenu");
+			break;
+		case (LIST_TREE):
+			widget = gtk_ui_manager_get_widget (main_gui.manager,
+							    "/MenuBar/ViewMenu/ViewTreeViewMenu");
+			break;
+		case (DETAILS):
+			widget = gtk_ui_manager_get_widget (main_gui.manager,
+							    "/MenuBar/ViewMenu/ViewDetailsListViewMenu");
+			break;
+		case (DETAILS_TREE):
+			widget = gtk_ui_manager_get_widget (main_gui.manager,
+							    "/MenuBar/ViewMenu/ViewDetailsTreeViewMenu");
+			break;
+	}
+	gtk_check_menu_item_set_active (widget, state);
+}
+
+void
+set_status_bar (gchar *game_name, gchar *game_status)
+{
+	gtk_statusbar_pop (main_gui.statusbar1, 1);
+	gtk_statusbar_push (main_gui.statusbar1, 1, game_name);
+
+	gtk_statusbar_pop (main_gui.statusbar2, 1);
+	gtk_statusbar_push (main_gui.statusbar2, 1, game_status);
+}
+
+void
+show_progress_bar (void)
+{
+/* FIXME TODO Not currently implemented 
+	if (gui_prefs.ShowStatusBar) {
+		gchar *displayed_message;
+		displayed_message = g_strdup_printf (_("Game search %i%% complete"), 0);
+		
+		gtk_widget_hide (GTK_WIDGET (main_gui.tri_status_bar));
+		gtk_statusbar_push (main_gui.status_progress_bar, 1, displayed_message);
+		gtk_widget_show (GTK_WIDGET (main_gui.combo_progress_bar));
+		g_free (displayed_message);
+	}	*/
+}
+
+void
+hide_progress_bar (void)
+{
+/* FIXME TODO Not currently implemented 
+	if (gui_prefs.ShowStatusBar) {
+		gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));
+		gtk_statusbar_pop (main_gui.status_progress_bar, 1);
+		gtk_widget_show (GTK_WIDGET (main_gui.tri_status_bar));
+	}*/
+}
+
+void
+update_progress_bar (gfloat current_value)
+{
+/* FIXME TODO Not currently implemented 
+	static gint current_displayed_value;
+	gchar *displayed_message;
+
+	if (gui_prefs.ShowStatusBar == FALSE)
+		return;
+
+	if (current_displayed_value!= (gint) (current_value * 100)) {
+		current_displayed_value= (gint) (current_value * 100);
+		displayed_message = g_strdup_printf (_("Game search %i%% complete"), current_displayed_value);
+		gtk_statusbar_pop (main_gui.status_progress_bar, 1);
+		gtk_statusbar_push (main_gui.status_progress_bar, 1, displayed_message);
+		g_free (displayed_message);
+	}
+
+	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (main_gui.progress_progress_bar), current_value);
+*/
+}
 
 GtkWidget *
 create_MainWindow (void)
 {
 
-  GtkWidget *MainWindow;
-  GtkWidget *vbox1;
-  GtkWidget *toolbar1;
-  GtkWidget *hpanedLeft;
-  GtkWidget *scrolledwindowFilters;
-  GtkWidget *hpanedRight;
-  GtkWidget *scrolledwindowGames;
-  GtkWidget *tri_status_bar;
-  GtkWidget *statusbar1;
-  GtkWidget *statusbar2;
-  GtkWidget *statusbar3;
-  GtkWidget *combo_progress_bar;
-  GtkWidget *status_progress_bar;
-  GtkWidget *progress_progress_bar;
-  GtkAccelGroup *accel_group;
-  GtkTooltips *tooltips;
-  PangoFontDescription *fontdesc;
-  gint font_size;
+	/* FIXME TODO
+	 GtkWidget *combo_progress_bar;
+	 GtkWidget *status_progress_bar;
+	 GtkWidget *progress_progress_bar;*/
+
+	GtkAccelGroup *accel_group;
+	GtkTooltips *tooltips;
+
 	gchar *catver_file;
 	
 	GtkActionGroup *action_group;
@@ -104,20 +321,61 @@ create_MainWindow (void)
 	
 	GtkWidget *menubar;
 	
-  tooltips = gtk_tooltips_new ();
+	GtkWidget *main_window;
+	GtkWidget *vbox;
+	PangoFontDescription *fontdesc;
+	gint font_size;
+	
+	gint ui_width, ui_height;
+	gint xpos_filters, xpos_gamelist;
+	gint show_filters, show_screenshot, show_flyer;
+	gint show_statusbar, show_toolbar;
+	gint current_mode;
+	
+	g_object_get (main_gui.gui_prefs,
+		      "ui-width", &ui_width,
+		      "ui-height", &ui_height,
+		      "show-filterlist", &show_filters,
+		      "show-screenshot", &show_screenshot,
+		      "show-flyer", &show_flyer,
+		      "current-mode", &current_mode,
+		      "show-statusbar", &show_statusbar,
+		      "show-toolbar", &show_toolbar,
+		      "xpos-filters", &xpos_filters,
+		      "xpos-gamelist", &xpos_gamelist,
+		      NULL);
+	
+	GladeXML *xml = glade_xml_new (GLADEDIR "main_gui.glade", "window1", GETTEXT_PACKAGE);
+	if (!xml) {
+		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "main_gui.glade");
+		return NULL;
+	}
+	main_window = glade_xml_get_widget (xml, "window1");
+	g_object_set_data (G_OBJECT (main_window), "MainWindow", main_window);
+	
+	vbox = glade_xml_get_widget (xml, "vbox");
+	
+	/* Set up the status bar at the bottom */
+	main_gui.tri_status_bar = glade_xml_get_widget (xml, "tri_status_bar");
+	main_gui.statusbar1 = glade_xml_get_widget (xml, "statusbar1");
+	main_gui.statusbar2 = glade_xml_get_widget (xml, "statusbar2");
+	main_gui.statusbar3 = glade_xml_get_widget (xml, "statusbar3");
+	
+	fontdesc = pango_font_description_copy (GTK_WIDGET (main_gui.tri_status_bar)->style->font_desc);
+	font_size = pango_font_description_get_size (fontdesc);
+	
+	gtk_widget_set_size_request (main_gui.statusbar2, PANGO_PIXELS (font_size) * 20, -1);
+	gtk_widget_set_size_request (main_gui.statusbar3, PANGO_PIXELS (font_size) * 20, -1);
+	
+	tooltips = gtk_tooltips_new ();
+	g_object_set_data (G_OBJECT (main_window), "tooltips", tooltips);
 
-  accel_group = gtk_accel_group_new ();
+	accel_group = gtk_accel_group_new ();
 
-  MainWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  g_object_set_data (G_OBJECT (MainWindow), "MainWindow", MainWindow);
-  gtk_window_set_title (GTK_WINDOW (MainWindow), _("GMAMEUI Arcade Machine Emulator"));
-  gtk_window_set_default_size (GTK_WINDOW (MainWindow), 640, 400);
-	gtk_widget_set_events (GTK_WIDGET (MainWindow),
+	gtk_window_set_title (GTK_WINDOW (main_window), _("GMAMEUI Arcade Machine Emulator"));
+	gtk_window_set_default_size (GTK_WINDOW (main_window), ui_width, ui_height);
+	gtk_widget_set_events (GTK_WIDGET (main_window),
 			       GDK_STRUCTURE_MASK);     /* Required to catch configure-event */
-
-  vbox1 = gtk_vbox_new (FALSE, 1);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (MainWindow), vbox1);
 	
 	/* Prepare the UI manager to build the menu and toolbar */
 	main_gui.manager = gtk_ui_manager_new ();
@@ -218,144 +476,60 @@ create_MainWindow (void)
 	{
 		GMAMEUI_DEBUG ("Error loading gmameui-ui.xml: %s", error->message);
 		g_error_free (error);
+		error = NULL;
 	}
 	
 	/* Set up the menu */
 	menubar = gtk_ui_manager_get_widget (main_gui.manager, "/MenuBar");
-	gtk_box_pack_start (GTK_BOX (vbox1), 
-			    menubar, 
-			    FALSE, 
-			    FALSE, 
-			    0);
+	gtk_box_pack_start (GTK_BOX (vbox), menubar, FALSE, FALSE, 0);	
 	
 	/* Dynamically add the list of known MAME executables to the toolbar */
 	add_exec_menu ();
-
+	
 	/* Set up the toolbar */
 	main_gui.toolbar = gtk_ui_manager_get_widget (main_gui.manager, "/ToolBar");
-	gtk_box_pack_start (GTK_BOX (vbox1), 
-			    main_gui.toolbar, 
-			    FALSE, 
-			    FALSE, 
-			    0);
+	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (main_gui.toolbar), FALSE, FALSE, 0);
 	
 	GtkWidget *toolbar_widget;
 	GtkWidget *toolbar_icon;
-	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
-						    "/ToolBar/FilePlayGame");
-	gtk_tool_button_set_stock_id (toolbar_widget, GTK_STOCK_NEW);
-	gtk_tool_button_set_label (toolbar_widget, N_("Play Game"));
 	
-	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
-						    "/ToolBar/ViewFolderList");
-	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-folders");
-	gtk_tool_button_set_label (toolbar_widget, N_("Show Folders"));
-	gtk_widget_show (toolbar_icon);
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
-					 GTK_WIDGET (toolbar_icon));
-
-	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
-						    "/ToolBar/ViewSidebarPanel");
-	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-screenshot");
-	gtk_widget_show (toolbar_icon);
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
-					 toolbar_icon);
-	gtk_tool_button_set_label (toolbar_widget, N_("Show Sidebar"));
+	int z;
+	for (z = 0; z < NUM_TOOLBAR_ITEMS; z++) {
+		toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
+							    toolbar_items[z].ui_name);
+		if (toolbar_items[z].stock_id != 0)
+			gtk_tool_button_set_stock_id (GTK_TOOL_BUTTON (toolbar_widget), toolbar_items[z].stock_id);
+		else {
+			toolbar_icon = gmameui_get_image_from_stock (toolbar_items[z].icon_name);
+			gtk_widget_show (toolbar_icon);
+			gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget), GTK_WIDGET (toolbar_icon));
+		}
+		gtk_tool_button_set_label (GTK_TOOL_BUTTON (toolbar_widget), toolbar_items[z].label);
+	}
 	
-	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
-						    "/ToolBar/ViewListView");
-	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-list");
-	gtk_tool_button_set_label (toolbar_widget, N_("List"));
-	gtk_widget_show (toolbar_icon);
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
-					 GTK_WIDGET (toolbar_icon));
-
-	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
-						    "/ToolBar/ViewTreeView");
-	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-tree");
-	gtk_tool_button_set_label (toolbar_widget, N_("List Tree"));
-	gtk_widget_show (toolbar_icon);
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
-					 GTK_WIDGET (toolbar_icon));
+	main_gui.hpanedLeft = glade_xml_get_widget (xml, "hpanedLeft");
+	main_gui.hpanedRight = glade_xml_get_widget (xml, "hpanedRight");
 	
-	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
-						    "/ToolBar/ViewDetailsListView");
-	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-list");
-	gtk_tool_button_set_label (toolbar_widget, N_("Details"));
-	gtk_widget_show (toolbar_icon);
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
-					 GTK_WIDGET (toolbar_icon));
-	
-	toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
-						    "/ToolBar/ViewDetailsTreeView");
-	toolbar_icon = gmameui_get_image_from_stock ("gmameui-view-tree");
-	gtk_tool_button_set_label (toolbar_widget, N_("Details Tree"));
-	gtk_widget_show (toolbar_icon);
-	gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget),
-					 GTK_WIDGET (toolbar_icon));
-	
-	/* Enable keyboard shortcuts defined in the UI Manager */
-	gtk_window_add_accel_group (GTK_WINDOW (MainWindow),
-				    gtk_ui_manager_get_accel_group (main_gui.manager));
-	
-	hpanedLeft = gtk_hpaned_new ();
-	gtk_widget_show (hpanedLeft);
-	main_gui.hpanedLeft = GTK_PANED (hpanedLeft);
-	gtk_box_pack_start (GTK_BOX (vbox1), hpanedLeft, TRUE, TRUE, 0);
-	gtk_paned_set_position (GTK_PANED (hpanedLeft), 150);
-	g_signal_connect (G_OBJECT (hpanedLeft), "notify::position",
-			  G_CALLBACK (on_hpaned_position_notify), NULL);
-	
-  scrolledwindowFilters = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scrolledwindowFilters);
-  main_gui.scrolled_window_filters = scrolledwindowFilters;
-  gtk_paned_pack1 (GTK_PANED (hpanedLeft), scrolledwindowFilters, FALSE, FALSE);
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindowFilters), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-
 	main_gui.filters_list = gmameui_filters_list_new ();
-	gtk_container_add (scrolledwindowFilters, main_gui.filters_list);
-	gtk_widget_show_all (main_gui.filters_list);
 
-		tri_status_bar = gtk_hbox_new (FALSE, 2);
-  gtk_widget_show (tri_status_bar);
-  main_gui.tri_status_bar = tri_status_bar;
-  gtk_box_pack_start (GTK_BOX (vbox1), tri_status_bar, FALSE, FALSE, 0);
+/* FIXME TODO
+	combo_progress_bar = gtk_hbox_new (FALSE, 2);
+	gtk_widget_show (combo_progress_bar);
+	main_gui.combo_progress_bar = combo_progress_bar;
+	gtk_box_pack_start (GTK_BOX (vbox1), combo_progress_bar, FALSE, FALSE, 0);
+	 
+	status_progress_bar = gtk_statusbar_new ();
+	gtk_widget_show (status_progress_bar);
+	main_gui.status_progress_bar = GTK_STATUSBAR (status_progress_bar);
+	gtk_box_pack_start (GTK_BOX (combo_progress_bar), status_progress_bar, TRUE, TRUE, 0);
+	 
+	progress_progress_bar = gtk_progress_bar_new ();
+	gtk_widget_show (progress_progress_bar);
+	main_gui.progress_progress_bar = GTK_PROGRESS_BAR (progress_progress_bar);
+	gtk_box_pack_end (GTK_BOX (combo_progress_bar), progress_progress_bar, TRUE, TRUE, 0);
+	 
+	gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));*/
 
-  statusbar1 = gtk_statusbar_new ();
-  gtk_widget_show (statusbar1);
-  main_gui.statusbar1 = GTK_STATUSBAR (statusbar1);
-  gtk_box_pack_start (GTK_BOX (tri_status_bar), statusbar1, TRUE, TRUE, 0);
-
-  fontdesc = pango_font_description_copy (GTK_WIDGET (tri_status_bar)->style->font_desc);
-  font_size = pango_font_description_get_size (fontdesc);
-
-  statusbar2 = gtk_statusbar_new ();
-  gtk_widget_show (statusbar2);
-  main_gui.statusbar2 = GTK_STATUSBAR (statusbar2);
-  gtk_box_pack_start (GTK_BOX (tri_status_bar), statusbar2, FALSE, FALSE, 0);
-  gtk_widget_set_size_request (statusbar2, PANGO_PIXELS (font_size) * 10, -1);
-
-  statusbar3 = gtk_statusbar_new ();
-  gtk_widget_show (statusbar3);
-  main_gui.statusbar3 = GTK_STATUSBAR (statusbar3);
-  gtk_box_pack_end (GTK_BOX (tri_status_bar), statusbar3, FALSE, FALSE, 0);
-  gtk_widget_set_size_request (statusbar3, PANGO_PIXELS (font_size) * 10, -1);
-
-  combo_progress_bar = gtk_hbox_new (FALSE, 2);
-  gtk_widget_show (combo_progress_bar);
-  main_gui.combo_progress_bar = combo_progress_bar;
-  gtk_box_pack_start (GTK_BOX (vbox1), combo_progress_bar, FALSE, FALSE, 0);
-
-  status_progress_bar = gtk_statusbar_new ();
-  gtk_widget_show (status_progress_bar);
-  main_gui.status_progress_bar = GTK_STATUSBAR (status_progress_bar);
-  gtk_box_pack_start (GTK_BOX (combo_progress_bar), status_progress_bar, TRUE, TRUE, 0);
-
-  progress_progress_bar = gtk_progress_bar_new ();
-  gtk_widget_show (progress_progress_bar);
-  main_gui.progress_progress_bar = GTK_PROGRESS_BAR (progress_progress_bar);
-  gtk_box_pack_end (GTK_BOX (combo_progress_bar), progress_progress_bar, TRUE, TRUE, 0);
-	
 	/* Populate the filters list - this should be done in filters_list.c */
 	
 	/* Recent versions of MAME use neodrvr */
@@ -791,34 +965,81 @@ create_MainWindow (void)
 	g_free (catver_file);
 
 	
-	hpanedRight = gtk_hpaned_new ();
-	gtk_widget_show (hpanedRight);
-	main_gui.hpanedRight = GTK_PANED (hpanedRight);
-	gtk_paned_pack2 (GTK_PANED (hpanedLeft), hpanedRight, TRUE, FALSE);
-	gtk_paned_set_position (GTK_PANED (hpanedRight), 300);
-	g_signal_connect (G_OBJECT (hpanedRight), "notify::position",
-			  G_CALLBACK (on_hpaned_position_notify), NULL);
-
-	scrolledwindowGames = gtk_scrolled_window_new (NULL, NULL);
-	gtk_widget_show (scrolledwindowGames);
-	main_gui.scrolled_window_games = scrolledwindowGames;
-	gtk_paned_pack1 (GTK_PANED (hpanedRight), scrolledwindowGames, TRUE, TRUE);
-	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindowGames),
-					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-
-	/* Create the screenshot and history sidebar */
+	
+	/* Enable keyboard shortcuts defined in the UI Manager */
+	gtk_window_add_accel_group (GTK_WINDOW (main_window), accel_group);     /* FIXME TODO Is this one required? */
+	gtk_window_add_accel_group (GTK_WINDOW (main_window),
+				    gtk_ui_manager_get_accel_group (main_gui.manager));
+	
+	/* Add filter list on LHS */
+	main_gui.scrolled_window_filters = glade_xml_get_widget (xml, "scrolledwindowFilters");
+	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_filters), GTK_WIDGET (main_gui.filters_list));
+	
+	/* Add placeholder for the games list in middle */
+	main_gui.scrolled_window_games = glade_xml_get_widget (xml, "scrolledwindowGames");
+	
+	/* Add screenshot and history sidebar on RHS */
 	GMAMEUISidebar *sidebar = gmameui_sidebar_new ();
-	gtk_paned_pack2 (GTK_PANED (hpanedRight), sidebar, FALSE, FALSE);
 	main_gui.screenshot_hist_frame = GMAMEUI_SIDEBAR (sidebar);
+	gtk_paned_pack2 (main_gui.hpanedRight, GTK_WIDGET (sidebar), TRUE, TRUE);
+	
+	/* Set state of radio/check menu and toolbar widgets */
+	gmameui_menu_set_view_mode_check (current_mode, TRUE);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
+								 "/MenuBar/ViewMenu/ViewSidebarPanelMenu")),
+				      show_screenshot);
 
-	g_signal_connect (G_OBJECT (MainWindow), "delete_event",
-			  G_CALLBACK (on_MainWindow_delete_event),
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
+								 "/MenuBar/ViewMenu/ViewFolderListMenu")),
+				      show_filters);
+	
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
+								 "/MenuBar/ViewMenu/ViewStatusBarMenu")),
+				      show_statusbar);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
+								 "/MenuBar/ViewMenu/ViewToolbarMenu")),
+				      show_toolbar);
+
+	if (! ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))) {
+		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
+	}
+	
+	/* Show the main window and all its children */
+	//gtk_widget_show_all (GTK_WIDGET (main_window));
+	
+	/* New stuff starts here */
+	
+	/* Create the UI of the Game List */
+	create_gamelist (current_mode);
+#ifdef ENABLE_DEBUG
+//g_message (_("Time to create gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+#endif
+	/* Feed the Game List */
+	create_gamelist_content ();
+#ifdef ENABLE_DEBUG
+//g_message (_("Time to create gamelist content: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+#endif
+	
+	
+	gtk_paned_set_position (GTK_PANED (main_gui.hpanedLeft), xpos_filters);
+	g_signal_connect (G_OBJECT (main_gui.hpanedLeft), "notify::position",
+			  G_CALLBACK (on_hpaned_position_notify), NULL);
+	
+	gtk_paned_set_position (GTK_PANED (main_gui.hpanedRight), xpos_gamelist);
+	g_signal_connect (G_OBJECT (main_gui.hpanedRight), "notify::position",
+			  G_CALLBACK (on_hpaned_position_notify), NULL);
+	
+	/* New stuff finishes here */
+	
+	
+	/* Connect signals */
+	g_signal_connect (G_OBJECT (main_window), "delete_event",
+			  G_CALLBACK (on_main_window_delete_event), NULL);
+
+	g_signal_connect (G_OBJECT (main_window), "configure_event",
+			  G_CALLBACK (on_main_window_moved_cb),
 			  NULL);
-
-	g_object_set_data (G_OBJECT (MainWindow), "tooltips", tooltips);
-
-	gtk_window_add_accel_group (GTK_WINDOW (MainWindow), accel_group);
-
-	return MainWindow;
+	
+	return main_window;
 }
 

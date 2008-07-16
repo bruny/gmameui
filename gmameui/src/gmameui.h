@@ -38,11 +38,6 @@
 #define ICON_TIMEOUT 100
 #define SEARCH_TIMEOUT 1000
 
-#define EXECUTABLE 1
-#define GAMELIST 2
-
-#define BUTTON_WIDTH 90
-
 typedef enum {
 	GAMENAME,
 	HAS_SAMPLES,
@@ -144,6 +139,7 @@ typedef enum {
 	DETAILS_TREE
 } ListMode;
 
+/* FIXME TODO Try and get rid of this struct */
 struct gui_prefs_struct {
 	RomEntry *current_game;
 };
@@ -152,8 +148,6 @@ struct gui_prefs_struct gui_prefs;
 
 /* global variables */
 XmameExecutable *current_exec; /* pointer in the xmame_table */
-
-guint visible_games;
 
 GMAMEUIFilter *selected_filter;
 
@@ -182,18 +176,9 @@ play_game (RomEntry *rom);
 void
 exit_gmameui (void);
 
-const gchar *rom_entry_get_list_name(RomEntry *rom);
-
-/* Columns management functions */
-void
-update_columns_tab (void);
-
 #if 0
 GList*
 get_columns_shown_list (void);
 #endif
-
-const char *
-column_title (int column_num);
 
 #endif /* __GMAMEUI_H__ */

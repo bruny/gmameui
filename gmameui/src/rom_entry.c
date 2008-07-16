@@ -23,6 +23,7 @@
  */
 
 #include "rom_entry.h"
+#include "gui.h"	/* For main_gui.gui_prefs */
 
 RomEntry *
 rom_entry_new (void)
@@ -33,8 +34,6 @@ rom_entry_new (void)
 	rom = (RomEntry*) g_malloc0 (sizeof (RomEntry));
 
 	for (i = 0; i < NB_CPU; i++) {
-		/*strcpy (rom->cpu_info[i].name, "-");
-		strcpy (rom->sound_info[i].name, "-");*/
 		rom->cpu_info[i].name = g_strdup ("-");
 		rom->sound_info[i].name = g_strdup ("-");
 	}
@@ -166,7 +165,6 @@ DriverStatus get_driver_status (gchar *driver_status)
 	return status;
 }
 
-
 gchar **
 rom_entry_get_manufacturers (RomEntry * rom)
 {
@@ -217,4 +215,38 @@ rom_entry_get_manufacturers (RomEntry * rom)
 		}
 	}
 	return manufacturer_fields;
+}
+
+/* FIXME This function should either set or return. Do we need to do both? */
+const gchar *
+rom_entry_get_list_name (RomEntry *rom)
+{
+	gboolean the_prefix;
+	
+	g_return_if_fail (rom != NULL);
+
+	g_object_get (main_gui.gui_prefs,
+		      "theprefix", &the_prefix,
+		      NULL);
+	
+	if (!rom->the_trailer) {
+		if (!rom->name_in_list) {
+			rom->name_in_list = g_strdup_printf ("%s %s", rom->gamename, rom->gamenameext);
+		}
+	} else  {
+		if (the_prefix) {
+			if (!rom->name_in_list || strncmp (rom->name_in_list, "The", 3)) {
+				g_free (rom->name_in_list);
+				rom->name_in_list = g_strdup_printf ("The %s %s", rom->gamename, rom->gamenameext);
+			}
+		} else {
+			if (!rom->name_in_list || !strncmp (rom->name_in_list, "The", 3)) {
+				g_free (rom->name_in_list);
+				rom->name_in_list = g_strdup_printf ("%s, The %s", rom->gamename, rom->gamenameext);
+			}
+		}
+
+	} 
+
+	return rom->name_in_list;
 }

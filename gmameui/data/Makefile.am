@@ -5,6 +5,7 @@ glade_DATA =    audit_window.glade \
 		sidebar.glade \
 		gmameui_prefs.glade \
 		options.glade \
-		rom_info.glade
+		rom_info.glade \
+		main_gui.glade
 
 EXTRA_DIST = $(glade_DATA)

@@ -64,11 +64,6 @@ const int ROM_ICON_SIZE = 16;
 
 static guint timeout_icon;
 
-gboolean foreach_find_rom_in_store (GtkTreeModel *model,
-				    GtkTreePath  *path,
-				    GtkTreeIter  *iter,
-				    gpointer      user_data);
-
 /**** Sidebar functionality ****/
 struct _GMAMEUISidebarPrivate {
 
@@ -122,14 +117,11 @@ set_game_pixbuff_from_iter (GtkTreeIter *iter,
 	    && (rect.y < page_size)
 	    && !tmprom->icon_pixbuf) {
 
-		    g_object_get (main_gui.gui_prefs,
-				  "current-mode", &current_mode,
-				  NULL);
+		g_object_get (main_gui.gui_prefs, "current-mode", &current_mode, NULL);
 		    
 		tmprom->icon_pixbuf = get_icon_for_rom (tmprom, ROM_ICON_SIZE, zip);
 
 		if (tmprom->icon_pixbuf) {
-
 			if ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))
 				gtk_tree_store_set (GTK_TREE_STORE (main_gui.tree_model), iter,
 						    PIXBUF, tmprom->icon_pixbuf,
@@ -142,6 +134,7 @@ set_game_pixbuff_from_iter (GtkTreeIter *iter,
 	}
 }
 
+/* This function is to set the game icon from the zip file for each visible game */
 static gboolean
 adjustment_scrolled_delayed (void)
 {
@@ -174,27 +167,27 @@ adjustment_scrolled_delayed (void)
 		valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (main_gui.tree_model), &iter);
 		set_game_pixbuff_from_iter (&iter,zip, (gint) (vadj->page_size));
 		i = 0;
-			while ((i < visible_games) && valid) {
-				tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-				if (gtk_tree_view_row_expanded (GTK_TREE_VIEW (main_gui.displayed_list), tree_path)) {
-					if (gtk_tree_model_iter_children (GTK_TREE_MODEL (main_gui.tree_model), &iter_child, &iter)) {
-						set_game_pixbuff_from_iter (&iter_child,zip, (gint) (vadj->page_size));
-						while ((i < visible_games) && (gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter_child)) ) {
-							set_game_pixbuff_from_iter (&iter_child, zip, (gint) (vadj->page_size));
-							i++;
-						}
-					}
-				}
-
-				gtk_tree_path_free (tree_path);
-				if (i < visible_games) {
-					valid=gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-					if (valid) {
-						set_game_pixbuff_from_iter (&iter,zip, (gint) (vadj->page_size));
+		while ((i < visible_games) && valid) {
+			tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
+			if (gtk_tree_view_row_expanded (GTK_TREE_VIEW (main_gui.displayed_list), tree_path)) {
+				if (gtk_tree_model_iter_children (GTK_TREE_MODEL (main_gui.tree_model), &iter_child, &iter)) {
+					set_game_pixbuff_from_iter (&iter_child,zip, (gint) (vadj->page_size));
+					while ((i < visible_games) && (gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter_child)) ) {
+						set_game_pixbuff_from_iter (&iter_child, zip, (gint) (vadj->page_size));
 						i++;
 					}
 				}
 			}
+
+			gtk_tree_path_free (tree_path);
+			if (i < visible_games) {
+				valid=gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter);
+				if (valid) {
+					set_game_pixbuff_from_iter (&iter,zip, (gint) (vadj->page_size));
+					i++;
+				}
+			}
+		}
 	}
 
 	/* Re-Enable the callback */
@@ -694,60 +687,12 @@ on_screenshot_notebook_switch_page (GtkNotebook *notebook,
 }
 
 void
-gmameui_menu_set_view_mode_check (gint view_mode, gboolean state)
-{
-	GtkWidget *widget;
-	
-	switch (view_mode) {
-		case (LIST):
-			widget = gtk_ui_manager_get_widget (main_gui.manager,
-							    "/MenuBar/ViewMenu/ViewListViewMenu");
-			break;
-		case (LIST_TREE):
-			widget = gtk_ui_manager_get_widget (main_gui.manager,
-							    "/MenuBar/ViewMenu/ViewTreeViewMenu");
-			break;
-		case (DETAILS):
-			widget = gtk_ui_manager_get_widget (main_gui.manager,
-							    "/MenuBar/ViewMenu/ViewDetailsListViewMenu");
-			break;
-		case (DETAILS_TREE):
-			widget = gtk_ui_manager_get_widget (main_gui.manager,
-							    "/MenuBar/ViewMenu/ViewDetailsTreeViewMenu");
-			break;
-	}
-	gtk_check_menu_item_set_active (widget, state);
-}
-
-static gboolean on_main_window_moved_cb (GtkWidget *widget, GdkEventConfigure *event, gpointer data)
-{
-	gint x, y, w, h;
-	gdk_drawable_get_size (GDK_DRAWABLE (widget->window), &x, &y);
-	gdk_window_get_position (GDK_WINDOW (widget->window), &w, &h);
-
-	g_object_set (main_gui.gui_prefs,
-		      "ui-width", widget->allocation.width,
-		      "ui-height", widget->allocation.height,
-		      NULL);
-	return FALSE;
-}
-
-void
 init_gui (void)
 {
 	GtkTooltips *tooltips;
 	gchar *filename;
-	
-	gint ui_width;
-	gint ui_height;
-	gint xpos_filters;
-	gint xpos_gamelist;
-	gboolean show_filters;
-	gboolean show_screenshot;
-	gboolean show_statusbar;
-	gboolean show_toolbar;
+
 	screenshot_type show_flyer;
-	ListMode current_mode;
 	
 #ifdef ENABLE_DEBUG
 	GTimer *mytimer;
@@ -769,73 +714,15 @@ g_message (_("Time to initialise icons: %.02f seconds"), g_timer_elapsed (mytime
 	/* Create the main window */
 	MainWindow = create_MainWindow ();
 #ifdef ENABLE_DEBUG
-g_message (_("Time to create main window and filters: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+g_message (_("Time to create main window, filters and gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
-
-	gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));
-
-	g_object_get (main_gui.gui_prefs,
-		      "ui-width", &ui_width,
-		      "ui-height", &ui_height,
-		      "show-filterlist", &show_filters,
-		      "show-screenshot", &show_screenshot,
-		      "show-flyer", &show_flyer,
-		      "current-mode", &current_mode,
-		      "show-statusbar", &show_statusbar,
-		      "show-toolbar", &show_toolbar,
-		      "xpos-filters", &xpos_filters,
-		      "xpos-gamelist", &xpos_gamelist,
-		      NULL);
-
-	gtk_window_set_default_size (GTK_WINDOW (MainWindow),
-				     ui_width,
-				     ui_height);
-	
-	gtk_paned_set_position (main_gui.hpanedLeft, xpos_filters);
-	gtk_paned_set_position (main_gui.hpanedRight, xpos_gamelist);
-
-	/* FIXME TODO
-	gtk_window_move (GTK_WINDOW (MainWindow),
-			 gui_prefs.GUIPosX,
-			 gui_prefs.GUIPosY);*/
 
 	/* Show and hence realize mainwindow so that MainWindow->window is available */
-	gtk_widget_show (MainWindow);
-
-	/* Set state of radio/check menu and toolbar widgets */
-	gmameui_menu_set_view_mode_check (current_mode, TRUE);
-	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
-								 "/MenuBar/ViewMenu/ViewSidebarPanelMenu"),
-				      show_screenshot);
-
-	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
-								 "/MenuBar/ViewMenu/ViewFolderListMenu"),
-				      show_filters);
+	gtk_widget_show_all (MainWindow);
 	
-	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
-								 "/MenuBar/ViewMenu/ViewStatusBarMenu"),
-				      show_statusbar);
-	gtk_toggle_action_set_active (gtk_ui_manager_get_action (main_gui.manager,
-								 "/MenuBar/ViewMenu/ViewToolbarMenu"),
-				      show_toolbar);
-
-	if (! ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))) {
-		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
-	}
-
-	/* Create the UI of the Game List */
-	create_gamelist (current_mode);
-#ifdef ENABLE_DEBUG
-g_message (_("Time to create gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
-#endif
-	/* Feed the Game List */
-	create_gamelist_content ();
-#ifdef ENABLE_DEBUG
-g_message (_("Time to create gamelist content: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
-#endif
-	/* Need to set the size here otherwise it move when we create the gamelist */
+	/* Need to set the size here otherwise it move when we create the gamelist 
 	if (show_screenshot)
-		gtk_paned_set_position (main_gui.hpanedRight, xpos_gamelist);
+		gtk_paned_set_position (main_gui.hpanedRight, xpos_gamelist);*/
 
 	/* Grab focus on the game list */
 	gtk_widget_grab_focus (main_gui.displayed_list);
@@ -848,12 +735,8 @@ g_message (_("Time to create gamelist content: %.02f seconds"), g_timer_elapsed 
 	                  NULL);
 
 	/* Need to set the notebook page here otherwise it segfault */
+	g_object_get (main_gui.gui_prefs, "show-flyer", &show_flyer, NULL);
 	gmameui_sidebar_set_current_page (main_gui.screenshot_hist_frame, show_flyer);
-	
-	/* Once we have created and populated the window, link to the configure-event */
-	g_signal_connect (G_OBJECT (MainWindow), "configure_event",
-			  G_CALLBACK (on_main_window_moved_cb),
-			  NULL);
 	
 #ifdef ENABLE_DEBUG
 	g_timer_stop (mytimer);
@@ -1057,52 +940,6 @@ gamelist_popupmenu_show (GdkEventButton *event)
 	gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,
 			NULL, NULL,
 			event->button, event->time);
-}
-
-void
-hide_filters (void)
-{
-	g_object_set (main_gui.gui_prefs,
-		      "xpos-filters", main_gui.scrolled_window_filters->allocation.width,
-		      NULL);
-	gtk_paned_set_position (main_gui.hpanedLeft, 0);
-
-	gtk_widget_hide (GTK_WIDGET (main_gui.scrolled_window_filters));
-}
-
-void
-show_filters (void)
-{
-	gint xpos_filters;
-	g_object_get (main_gui.gui_prefs,
-		      "xpos-filters", &xpos_filters,
-		      NULL);
-	gtk_paned_set_position (main_gui.hpanedLeft, xpos_filters);
-
-	gtk_widget_show (GTK_WIDGET (main_gui.scrolled_window_filters));
-}
-
-void
-hide_snaps (void)
-{
-	g_object_set (main_gui.gui_prefs,
-		      "xpos-gamelist", main_gui.scrolled_window_games->allocation.width,
-		      NULL);
-	gtk_paned_set_position (main_gui.hpanedRight, -1);
-
-	gtk_widget_hide (GTK_WIDGET (main_gui.screenshot_hist_frame));
-}
-
-void
-show_snaps (void)
-{
-	gint xpos_gamelist;
-	g_object_get (main_gui.gui_prefs,
-		      "xpos-gamelist", &xpos_gamelist,
-		      NULL);
-	gtk_paned_set_position (main_gui.hpanedLeft, xpos_gamelist);
-
-	gtk_widget_show (GTK_WIDGET (main_gui.screenshot_hist_frame));
 }
 
 /* get an icon for a rom, if not found, try the original game if the game is a clone */
@@ -1461,7 +1298,7 @@ gmameui_get_image_from_stock (const char *id)
 }
 
 /* this function checks if an icon update is needed and get the icon */
-static void
+void
 get_status_icons (void)
 {
 	if (dirty_icon_cache
@@ -1512,462 +1349,6 @@ get_status_icons (void)
 	}
 }
 
-void set_list_sortable_column ()
-{
-	ListMode current_mode;
-	gint sort_col;
-	gint sort_col_dir;
-	
-	g_object_get (main_gui.gui_prefs,
-		      "current-mode", &current_mode,
-		      "sort-col", &sort_col,
-		      "sort-col-direction", &sort_col_dir,
-		      NULL);
-	
-	if ((current_mode == DETAILS) || (current_mode == DETAILS_TREE)) {
-		GMAMEUI_DEBUG("Sorting - using sort order %d", sort_col);
-		gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model),
-						      sort_col, sort_col_dir);
-
-	} else {
-		g_signal_handlers_block_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
-		gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (main_gui.tree_model),
-						      GAMENAME, GTK_SORT_ASCENDING);
-		g_signal_handlers_unblock_by_func (G_OBJECT (main_gui.tree_model), (gpointer)on_displayed_list_sort_column_changed, NULL);
-	}	/* Select the correct row */
-}
-
-/* This function walks the tree store containing the ROM data until
-   it finds the row that has the ROM from the preferences. It then
-   scrolls to that row, and opens the parent row if the found
-   row is a child */
-gboolean foreach_find_rom_in_store (GtkTreeModel *model,
-				    GtkTreePath  *path,
-				    GtkTreeIter  *iter,
-				    gpointer      user_data)
-{
-	RomEntry *rom;
-	gchar *current_rom_name = (gchar *) user_data;
-/*	gchar *tree_path_str;*/
-	
-	/* Don't even bother trying to walk the store if the current game
-	   is not set. We are just wasting our time */
-	g_return_val_if_fail ((current_rom_name != NULL), TRUE);
-	
-	gtk_tree_model_get (model, iter,
-			    ROMENTRY, &rom,
-			    -1);
-/*	
-	tree_path_str = gtk_tree_path_to_string (path);
-	GMAMEUI_DEBUG ("Row %s: name is %s", tree_path_str, rom->romname);
-	g_free (tree_path_str);
-*/	
-	if (g_ascii_strcasecmp (rom->romname, current_rom_name) == 0) {
-		GMAMEUI_DEBUG ("Found row in tree view - %s", rom->romname);
-				
-		/* Scroll to selection */
-		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list),
-					      path, NULL, TRUE, 0.5, 0);
-
-		/* Need to expand the parent row (if a child) */
-		gtk_tree_view_expand_to_path (GTK_TREE_VIEW (main_gui.displayed_list),
-					      path);
-
-		/* And highlight the row */
-		gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list),
-					  path,
-					  NULL, FALSE);
-		
-		return TRUE;    /* Found the row we are after, no need to keep walking */
-	}
-	
-	return FALSE;   /* Do not stop walking the store, call us with next row */
-}
-
-void
-create_gamelist_content (void)
-{
-	GList *listpointer;
-	RomEntry *tmprom;
-	gchar *my_romname_root = NULL;
-	gchar *my_hassamples;
-	GdkColor my_txtcolor;
-	GtkTreeIter iter;
-	GtkTreeIter iter_root;
-	GtkTreeModel *store;
-	gboolean tree_store;   /* If the model is a tree or a list */
-	gboolean is_root;
-	gint j = 0;
-	gchar *message;
-	RomEntry *selected_game;
-	ListMode current_mode;
-	gchar *current_rom_name;
-	gchar *clone_color;
-
-	GMAMEUI_DEBUG ("POPULATE GAME LIST");
-GTimer *timer = g_timer_new ();
-g_timer_start (timer);
-	
-	g_object_get (main_gui.gui_prefs,
-		      "current-mode", &current_mode,
-		      "current-rom", &current_rom_name,
-		      "clone-color", &clone_color,
-		      NULL);
-	
-	selected_game = gui_prefs.current_game;
-
-	/* Status Bar Message */
-	gtk_statusbar_pop (main_gui.statusbar3, 1);
-	gtk_statusbar_push (main_gui.statusbar3, 1, _("Wait..."));
-	if ((main_gui.displayed_list) && (main_gui.tree_model)) {
-		store = NULL;
-		gtk_tree_view_set_model (GTK_TREE_VIEW (main_gui.displayed_list), GTK_TREE_MODEL (store));
-		/* Update UI */
-		/*while (gtk_events_pending ())
-			gtk_main_iteration ();*/
-	}
-
-	/* Whether the Tree Model will a tree or a list */
-	tree_store = ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE));
-
-	/* Get the status icon */
-	get_status_icons ();
-
-	/* Create a model. */
-	if (tree_store)
-		store = (GtkTreeModel *) gtk_tree_store_new (NUMBER_COLUMN + 3,
-							     G_TYPE_STRING,     /* Name */
-							     G_TYPE_STRING,     /* Has samples */
-							     G_TYPE_STRING,     /* ROM name */
-							     G_TYPE_INT,	/* Times played */
-							     G_TYPE_STRING,     /* Manu */
-							     G_TYPE_STRING,     /* Year */
-							     G_TYPE_STRING,     /* Clone of */
-							     G_TYPE_STRING,     /* Driver */
-							     G_TYPE_STRING,     /* Ver added */
-							     G_TYPE_STRING,     /* Category */
-							     G_TYPE_POINTER,     /* Rom Entry */
-							     GDK_TYPE_COLOR,     /* Text Color */
-							     GDK_TYPE_PIXBUF);   /* Pixbuf */
-	else
-		store = (GtkTreeModel *) gtk_list_store_new (NUMBER_COLUMN + 3,
-							     G_TYPE_STRING,     /* Name */
-							     G_TYPE_STRING,     /* Has samples */
-							     G_TYPE_STRING,     /* ROM name */
-							     G_TYPE_INT,	/* Times played */
-							     G_TYPE_STRING,     /* Manu */
-							     G_TYPE_STRING,     /* Year */
-							     G_TYPE_STRING,     /* Clone of */
-							     G_TYPE_STRING,     /* Driver */
-							     G_TYPE_STRING,     /* Ver added */
-							     G_TYPE_STRING,     /* Category */
-							     G_TYPE_POINTER,     /* Rom Entry */
-							     GDK_TYPE_COLOR,     /* Text Color */
-							     GDK_TYPE_PIXBUF);   /* Pixbuf */
-
-	/* fill the model with data */
-	for (listpointer = g_list_first (game_list.roms);
-	     (listpointer);
-	     listpointer= g_list_next (listpointer)) {
-		tmprom = (RomEntry *) listpointer->data;
-		if (game_filtered (tmprom)) {
-			GdkPixbuf *pixbuf = NULL;
-
-			rom_entry_get_list_name (tmprom);
-
-			/* Has Samples */
-			if (tmprom->nb_samples == 0)
-				my_hassamples = NULL;
-			else
-				my_hassamples = (tmprom->has_samples == CORRECT) ? _("Yes") : _("No");
-		
-			/* Clone Color + Pixbuf width */
-			if (strcmp (tmprom->cloneof, "-")) {
-				/* Clone */
-				gdk_color_parse (clone_color, &my_txtcolor);
-			} else {
-				/* Original */
-				gdk_color_parse ("black", &my_txtcolor);
-			}
-
-			/* Set the pixbuf for the status icon */
-			pixbuf = Status_Icons [tmprom->has_roms];
-
-			/* Determine if the row is a root */
-			if ( (j == 0) || !(strcmp (tmprom->cloneof, "-")) || !my_romname_root || (strcmp (tmprom->cloneof, my_romname_root)) ) {
-				is_root = TRUE;
-			} else {
-				is_root = FALSE;
-			}
-
-			/* Memorize the original names */
-			if (! (strcmp (tmprom->cloneof, "-"))) {
-				if (my_romname_root)
-					g_free (my_romname_root);
-
-				my_romname_root= g_strdup (tmprom->romname);
-			}
-
-			if (tree_store) {
-				if (is_root)
-					gtk_tree_store_append (GTK_TREE_STORE (store), &iter, NULL);  /* Acquire an iterator */
-				else
-					gtk_tree_store_append (GTK_TREE_STORE (store), &iter, &iter_root);  /* Acquire an iterator */
-
-				gtk_tree_store_set (GTK_TREE_STORE (store), &iter,
-						    GAMENAME,     tmprom->name_in_list,
-						    HAS_SAMPLES,  my_hassamples,
-						    ROMNAME,      tmprom->romname,
-						    TIMESPLAYED,  tmprom->timesplayed,
-						    MANU,         tmprom->manu,
-						    YEAR,         tmprom->year,
-						    CLONE,        tmprom->cloneof,
-						    DRIVER,       tmprom->driver,
-						    MAMEVER,      tmprom->mame_ver_added,
-						    CATEGORY,     tmprom->category,
-						    ROMENTRY,     tmprom,                 /* rom entry */
-						    TEXTCOLOR,    &my_txtcolor,           /* text color */
-						    PIXBUF,       pixbuf,                 /* pixbuf */
-						    -1);
-				if (is_root)
-					iter_root = iter;
-			} else {
-				gtk_list_store_append (GTK_LIST_STORE (store), &iter);  /* Acquire an iterator */
-				gtk_list_store_set (GTK_LIST_STORE (store), &iter,
-						    GAMENAME,     tmprom->name_in_list,
-						    HAS_SAMPLES,  my_hassamples,
-						    ROMNAME,      tmprom->romname,
-						    TIMESPLAYED,  tmprom->timesplayed,
-						    MANU,         tmprom->manu,
-						    YEAR,         tmprom->year,
-						    CLONE,        tmprom->cloneof,
-						    DRIVER,       tmprom->driver,
-						    MAMEVER,      tmprom->mame_ver_added,
-						    CATEGORY,     tmprom->category,
-						    ROMENTRY,     tmprom,                 /* rom entry */
-						    TEXTCOLOR,    &my_txtcolor,            /* text color */
-						    PIXBUF,       pixbuf,                 /* pixbuf */
-						    -1);
-			}
-			tmprom->position = iter;
-			tmprom->is_in_list = TRUE;
-			j++;
-		} else {
-			tmprom->is_in_list = FALSE;
-		}
-	}
-	visible_games = j;
-
-	/* Callbacks - Sorting order has changed */
-	main_gui.tree_model = GTK_TREE_MODEL (store);
-	if (main_gui.tree_model != NULL) {
-		g_signal_connect (G_OBJECT (main_gui.tree_model), "sort-column-changed",
-				  G_CALLBACK (on_displayed_list_sort_column_changed),
-				  NULL);
-	}
-
-	/* Update the corresponding tree view */
-	if (main_gui.displayed_list) {
-		/* Link the view with the model */
-		gtk_tree_view_set_model (GTK_TREE_VIEW (main_gui.displayed_list), GTK_TREE_MODEL (main_gui.tree_model));
-
-		/* Sort the list */
-		set_list_sortable_column ();
-
-		/* Find the selected game in the gamelist, and scroll to it, opening any expanders */
-		if (visible_games > 0) {
-			/* Scroll to the game specified from the preferences */
-			gtk_tree_model_foreach (GTK_TREE_MODEL (main_gui.tree_model), foreach_find_rom_in_store, current_rom_name);
-		}
-		/* Header clickable. */
-		gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
-						     (current_mode == DETAILS) ||
-						     (current_mode == DETAILS_TREE));
-		
-	}
-
-	/* Status Bar Message */
-	message = g_strdup_printf ("%d %s", visible_games, visible_games > 1 ? _("games") : _("game"));
-	gtk_statusbar_pop (main_gui.statusbar3, 1);
-	gtk_statusbar_push (main_gui.statusbar3, 1, message);
-
-	/* Free Memory */
-	if (message)
-		g_free (message);
-	if (my_romname_root)
-		g_free (my_romname_root);
-	g_free (clone_color);
-
-	if (visible_games == 0)
-		select_game (NULL);
-	else
-		select_game (selected_game);
-	GMAMEUI_DEBUG ("Time taken to create_gamelist_content is %.2f", g_timer_elapsed (timer, NULL));
-	g_timer_destroy (timer);
-}
-
-void
-create_gamelist (ListMode list_mode)
-{
-	gint i;
-	GtkTreeViewColumn *column;
-	GtkCellRenderer *renderer;
-	GtkTreeSelection *select;
-
-	static gboolean first_run = TRUE;
-
-	GMAMEUI_DEBUG ("Creating gamelist structure");
-
-	/* We Create the TreeView only if it is NULL (this will occur only once) */
-	if (main_gui.displayed_list == NULL) {
-		main_gui.displayed_list = gtk_tree_view_new ();
-		for (i = 0; i < NUMBER_COLUMN; i++) {
-			if (i == GAMENAME) {
-				/* Game name column contains both the status icon and the name */
-				column = gtk_tree_view_column_new ();
-				gtk_tree_view_column_set_title  (GTK_TREE_VIEW_COLUMN (column), column_title (i));
-				gtk_tree_view_column_set_sort_column_id (column, i);
-				/* TEXT */
-				renderer = gtk_cell_renderer_text_new ();
-				gtk_tree_view_column_pack_end (GTK_TREE_VIEW_COLUMN (column),
-							       renderer,
-							       FALSE);
-				gtk_tree_view_column_set_attributes (GTK_TREE_VIEW_COLUMN (column), renderer,
-								     "text", i,
-								     "foreground-gdk", TEXTCOLOR,
-								     NULL);
-				g_object_set (renderer, "ypad", 0, "yalign", 0.5, NULL);
-				/* Pixbuf */
-				renderer = gtk_cell_renderer_pixbuf_new ();
-				gtk_tree_view_column_pack_end (GTK_TREE_VIEW_COLUMN (column),
-							       renderer,
-							       FALSE);
-				gtk_tree_view_column_add_attribute (GTK_TREE_VIEW_COLUMN (column), renderer,
-								    "pixbuf", PIXBUF);
-				g_object_set (renderer, "xalign", 1.0, "ypad", 0, NULL);
-			} else {
-				renderer = gtk_cell_renderer_text_new ();
-				column = gtk_tree_view_column_new_with_attributes (column_title (i), renderer,
-										   "text", i,
-										   "foreground-gdk", TEXTCOLOR,
-										   NULL);
-				gtk_tree_view_column_set_sort_column_id (column, i);
-			}
-			gtk_tree_view_append_column (GTK_TREE_VIEW (main_gui.displayed_list), column);
-			gtk_tree_view_column_set_min_width (GTK_TREE_VIEW_COLUMN (column), 1);
-			g_signal_connect (column->button, "event",
-					  G_CALLBACK (on_column_click),
-					  column);
-		}
-
-		gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_games), main_gui.displayed_list);
-		gtk_widget_show_all (main_gui.scrolled_window_games);
-
-		/* Callback - Row has been selected */
-		select = gtk_tree_view_get_selection (GTK_TREE_VIEW (main_gui.displayed_list));
-		gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
-		g_signal_connect (G_OBJECT (select), "changed",
-				  G_CALLBACK (on_row_selected),
-				  NULL);
-
-		/* Callback - Click on the list */
-		g_signal_connect (G_OBJECT (main_gui.displayed_list), "button-press-event",
-				G_CALLBACK (on_list_clicked),
-				NULL);
-		/* Callback - Keypress on the list */
-		g_signal_connect (G_OBJECT (main_gui.displayed_list), "key-press-event",
-				G_CALLBACK (on_list_keypress),
-				NULL);
-		/* Callback - Column size modified */
-		g_signal_connect (G_OBJECT (main_gui.displayed_list), "size-request",
-				G_CALLBACK (on_displayed_list_resize_column),
-				  NULL);
-		/* Callback - Row has been collapsed */
-		g_signal_connect (G_OBJECT (main_gui.displayed_list), "row-collapsed",
-				G_CALLBACK (on_displayed_list_row_collapsed),
-				NULL);
-
-	}
-
-	/* Header clickable Tree Model must exist. */
-	if (main_gui.tree_model) {
-		/* We sort the list */
-		set_list_sortable_column();
-		
-		gtk_tree_view_set_headers_clickable (GTK_TREE_VIEW (main_gui.displayed_list),
-						     (list_mode == DETAILS) || (list_mode == DETAILS_TREE));
-	}
-
-	GValueArray *va_shown = NULL;
-	GValueArray *va_width = NULL;
-
-	g_object_get (main_gui.gui_prefs,
-		      "cols-shown", &va_shown,
-		      "cols-width", &va_width,
-		      NULL);
-	
-	/* Update the columns */
-	/* FIXME When switching from LIST mode to DETAILS, it puts a mess in the size of the
-	GAMENAME column even if I block the callback?????? */
-	g_signal_handlers_block_by_func (G_OBJECT (main_gui.displayed_list), (gpointer)on_displayed_list_resize_column, NULL);
-	for (i = 0; i < NUMBER_COLUMN; i++) {
-		/* Iterate over the columns */
-		column = gtk_tree_view_get_column (GTK_TREE_VIEW (main_gui.displayed_list), i);
-
-		/* Columns visible, Column size,... */
-		if ( (list_mode == DETAILS) || (list_mode == DETAILS_TREE)) {	/* COLUMNS */
-
-			//if (gui_prefs.ColumnShown[i]==FALSE) {
-			if (g_value_get_int (g_value_array_get_nth (va_shown, i)) == FALSE) {
-				gtk_tree_view_column_set_visible (column, FALSE);
-			} else {
-				gint col_width;
-				
-				col_width = g_value_get_int (g_value_array_get_nth (va_width, i));
-				gtk_tree_view_column_set_visible (column, TRUE);
-				if (col_width == 0) {
-					gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
-				} else {
-					gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_FIXED);
-					gtk_tree_view_column_set_fixed_width (column, col_width);
-				}
-				gtk_tree_view_column_set_resizable (column, TRUE);
-				
-				
-			}
-		} else {	/* NO COLUMNS */
-			if (i == GAMENAME) {
-				gtk_tree_view_column_set_visible (column, TRUE);
-				gtk_tree_view_column_set_sizing (column, GTK_TREE_VIEW_COLUMN_AUTOSIZE);
-				gtk_tree_view_column_set_resizable (column, FALSE);
-			} else {
-				gtk_tree_view_column_set_visible (column, FALSE);
-			}
-		}
-		/* Reordable is disable for the time beeing because it make conflics with
-		  'column popup menu' and 'sort on click header' */
-		gtk_tree_view_column_set_reorderable (GTK_TREE_VIEW_COLUMN (column), FALSE);
-	}
-	g_signal_handlers_unblock_by_func (G_OBJECT (main_gui.displayed_list), (gpointer)on_displayed_list_resize_column, NULL);
-
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (main_gui.displayed_list), TRUE);
-	
-	first_run = FALSE;
-	dirty_icon_cache = FALSE;
-
-	GMAMEUI_DEBUG ("Creating gamelist structure... done");
-}
-
-void
-set_status_bar (gchar *game_name, gchar *game_status)
-{
-	gtk_statusbar_pop (main_gui.statusbar1, 1);
-	gtk_statusbar_push (main_gui.statusbar1, 1, game_name);
-
-	gtk_statusbar_pop (main_gui.statusbar2, 1);
-	gtk_statusbar_push (main_gui.statusbar2, 1, game_status);
-}
-
 void
 select_game (RomEntry *rom)
 {
@@ -1995,54 +1376,6 @@ select_game (RomEntry *rom)
 	}
 
 	gmameui_ui_set_items_sensitive ();
-}
-
-void
-show_progress_bar (void)
-{
-/* FIXME TODO Not currently implemented 
-	if (gui_prefs.ShowStatusBar) {
-		gchar *displayed_message;
-		displayed_message = g_strdup_printf (_("Game search %i%% complete"), 0);
-		
-		gtk_widget_hide (GTK_WIDGET (main_gui.tri_status_bar));
-		gtk_statusbar_push (main_gui.status_progress_bar, 1, displayed_message);
-		gtk_widget_show (GTK_WIDGET (main_gui.combo_progress_bar));
-		g_free (displayed_message);
-	}	*/
-}
-
-void
-hide_progress_bar (void)
-{
-/* FIXME TODO Not currently implemented 
-	if (gui_prefs.ShowStatusBar) {
-		gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));
-		gtk_statusbar_pop (main_gui.status_progress_bar, 1);
-		gtk_widget_show (GTK_WIDGET (main_gui.tri_status_bar));
-	}*/
-}
-
-void
-update_progress_bar (gfloat current_value)
-{
-/* FIXME TODO Not currently implemented 
-	static gint current_displayed_value;
-	gchar *displayed_message;
-
-	if (gui_prefs.ShowStatusBar == FALSE)
-		return;
-
-	if (current_displayed_value!= (gint) (current_value * 100)) {
-		current_displayed_value= (gint) (current_value * 100);
-		displayed_message = g_strdup_printf (_("Game search %i%% complete"), current_displayed_value);
-		gtk_statusbar_pop (main_gui.status_progress_bar, 1);
-		gtk_statusbar_push (main_gui.status_progress_bar, 1, displayed_message);
-		g_free (displayed_message);
-	}
-
-	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (main_gui.progress_progress_bar), current_value);
-*/
 }
 
 void
@@ -2166,14 +1499,15 @@ select_inp (gboolean play_record)
 		
 		if (g_file_test (inp_filename, G_FILE_TEST_EXISTS)) {
 			GtkWidget *dialog;
-			gint result;
 
 			dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
 							 GTK_DIALOG_MODAL,
 							 GTK_MESSAGE_WARNING,
 							 GTK_BUTTONS_YES_NO,
-							 _("A file named '%s' already exists.\nDo you want to overwrite it?"),
-							 inp_filename);
+							 _("File exists"));
+			gtk_message_dialog_format_secondary_text (dialog,
+								  _("A file named '%s' already exists. Do you want to overwrite it?"),
+								  inp_filename);
 			if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
 				gtk_widget_hide (dialog);
 				process_inp_function (rom, inp_filename, 1);

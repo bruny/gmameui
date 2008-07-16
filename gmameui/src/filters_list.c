@@ -158,7 +158,8 @@ GMAMEUI_DEBUG ("Creating filters list");
 		col, cell,
 		(GtkTreeCellDataFunc) filters_list_text_cell_data_func,
 		fl, NULL);
-
+	g_object_set (cell, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
+				  
 	gtk_tree_view_column_add_attribute (col, cell,
 					    "text", GMAMEUI_FILTER_LIST_MODEL_COLUMN_NAME);
 
