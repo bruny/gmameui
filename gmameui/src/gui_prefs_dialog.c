@@ -27,6 +27,25 @@
 #include "common.h"
 #include "gui.h"
 
+typedef struct _column_layout column_layout;
+
+struct _column_layout {
+	gint column_id;
+	gchar *widget_name;
+};
+
+static const column_layout layout [] = {
+	{ HAS_SAMPLES, "col_samples" },
+	{ ROMNAME, "col_directory" },
+	{ TIMESPLAYED, "col_playcount" },
+	{ MANU, "col_manufacturer" },
+	{ YEAR, "col_year" },
+	{ DRIVER, "col_driver" },
+	{ CLONE, "col_cloneof" },
+	{ MAMEVER, "col_version" },
+	{ CATEGORY, "col_category" },
+};
+
 struct _MameGuiPrefsDialogPrivate {
 //	GladeXML *xml;
 
@@ -165,8 +184,16 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 			  G_CALLBACK (on_prefs_checkbutton_toggled), "usejoyingui");
 	
 	/* FIXME TODO - joy dev entry */
-	
-	/* Column layout widgets - set common details */
+
+	/* Column layout widgets - set values */
+	int i;
+	for (i = 0; i < 9; i++) {
+		GMAMEUI_DEBUG ("Processing %s", layout[i].widget_name);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, layout[i].widget_name)),
+					      g_value_get_int (g_value_array_get_nth (cols_shown, layout[i].column_id)));
+	}
+
+	/* Column layout widgets - set callbacks */
 	col_list = glade_xml_get_widget_prefix (xml, "col");
 	node = col_list;
 	while (node) {
@@ -178,33 +205,14 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 		GMAMEUI_DEBUG ("Adding widget %s", name);		
 		g_signal_connect (col_chk_widget, "toggled",
 						  G_CALLBACK (on_prefs_col_checkbutton_toggled), name);
-		
-		/* FIXME TODO Can't free name here - need to free it elsewhere */
+		/* FIXME TODO Can't free name here since it is used in the callback - need to free it elsewhere */
 		
 		node = g_list_next (node);
 	}
 
 	g_list_free (col_list);
 	g_list_free (node);
-
-	/* Column layout widgets - set specific values */
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_directory")),
-								  g_value_get_int (g_value_array_get_nth (cols_shown, ROMNAME)));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_playcount")),
-								  g_value_get_int (g_value_array_get_nth (cols_shown, TIMESPLAYED)));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_manufacturer")),
-								  g_value_get_int (g_value_array_get_nth (cols_shown, MANU)));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_year")),
-								  g_value_get_int (g_value_array_get_nth (cols_shown, YEAR)));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_driver")),
-								  g_value_get_int (g_value_array_get_nth (cols_shown, DRIVER)));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_cloneof")),
-								  g_value_get_int (g_value_array_get_nth (cols_shown, CLONE)));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_version")),
-								  g_value_get_int (g_value_array_get_nth (cols_shown, MAMEVER)));
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glade_xml_get_widget (xml, "col_category")),
-								  g_value_get_int (g_value_array_get_nth (cols_shown, CATEGORY)));
-
+	
 	/* Miscellaneous option widgets */
 	theprefix_label = glade_xml_get_widget (xml, "theprefix_lbl");
 	
@@ -246,20 +254,19 @@ GtkWidget *
 mame_gui_prefs_dialog_new (void)
 {
 	return g_object_new (MAME_TYPE_GUI_PREFS_DIALOG,
-						 "title", "GMAMEUI Preferences",
-						 NULL);
+			     "title", "GMAMEUI Preferences",
+			     NULL);
 }
 
 static void
-on_prefs_checkbutton_toggled (GtkWidget *toggle, 
-							  gchar *widget_name)
+on_prefs_checkbutton_toggled (GtkWidget *toggle, gchar *widget_name)
 {
 	GMAMEUI_DEBUG ("%s toggled", widget_name);
 
 	/* Trigger the set, which causes a save in the mame_gui_prefs_set_property () function */
 	g_object_set (main_gui.gui_prefs,
-				  widget_name, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle)),
-				  NULL);
+		      widget_name, gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle)),
+		      NULL);
 }
 
 /* This callback is invoked when one of the column checkbuttons is toggled */
@@ -269,39 +276,26 @@ on_prefs_col_checkbutton_toggled (GtkWidget *toggle,
 {
 	GValueArray *shown_columns;
 	gint toggle_val;
+	int i;
 	
 	g_return_if_fail (widget_name != NULL);
 	
-	g_object_get (main_gui.gui_prefs,
-				  "cols-shown", &shown_columns,
-				  NULL);
-	
 	GMAMEUI_DEBUG ("%s toggled", widget_name);
+	
+	g_object_get (main_gui.gui_prefs, "cols-shown", &shown_columns, NULL);
 	
 	/* Don't disable Gamename column */
 	g_value_set_int (g_value_array_get_nth (shown_columns, GAMENAME), TRUE);
 	
 	toggle_val = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle));
 	
-	/* This is a pretty ugly hack */
-	if (g_ascii_strcasecmp (widget_name, "col_directory") == 0)
-		g_value_set_int (g_value_array_get_nth (shown_columns, ROMNAME), toggle_val);
-	else if (g_ascii_strcasecmp (widget_name, "col_playcount") == 0)
-		g_value_set_int (g_value_array_get_nth (shown_columns, TIMESPLAYED), toggle_val);
-	else if (g_ascii_strcasecmp (widget_name, "col_manufacturer") == 0)
-		g_value_set_int (g_value_array_get_nth (shown_columns, MANU), toggle_val);
-	else if (g_ascii_strcasecmp (widget_name, "col_year") == 0)
-		g_value_set_int (g_value_array_get_nth (shown_columns, YEAR), toggle_val);
-	else if (g_ascii_strcasecmp (widget_name, "col_driver") == 0)
-		g_value_set_int (g_value_array_get_nth (shown_columns, DRIVER), toggle_val);
-	else if (g_ascii_strcasecmp (widget_name, "col_cloneof") == 0)
-		g_value_set_int (g_value_array_get_nth (shown_columns, CLONE), toggle_val);
-	else if (g_ascii_strcasecmp (widget_name, "col_version") == 0)
-		g_value_set_int (g_value_array_get_nth (shown_columns, MAMEVER), toggle_val);
-	else if (g_ascii_strcasecmp (widget_name, "col_category") == 0)
-		g_value_set_int (g_value_array_get_nth (shown_columns, CATEGORY), toggle_val);
-	else
-		GMAMEUI_DEBUG ("Column %s is unknown", widget_name);
+	/* Loop through each of the columns, and if the name matches the widget
+	   which emitted the signal, then set the value */
+	for (i = 0; i < 9; i++) {
+		if (g_ascii_strcasecmp (widget_name, layout[i].widget_name) == 0)
+			g_value_set_int (g_value_array_get_nth (shown_columns, layout[i].column_id),
+					 toggle_val);
+	}
 	
 	/* Debug purposes only */
 	/*
@@ -310,14 +304,12 @@ on_prefs_col_checkbutton_toggled (GtkWidget *toggle,
 					   g_value_get_int (g_value_array_get_nth (shown_columns, i)));
 	}*/
 
-	GMAMEUI_DEBUG("Setting integer array... done");	
-	
 	/* Trigger the set, which causes a save in the mame_gui_prefs_set_property () function */
-	g_object_set (main_gui.gui_prefs,
-				  "cols-shown", shown_columns,
-				  NULL);
+	g_object_set (main_gui.gui_prefs, "cols-shown", shown_columns, NULL);
 	
 	g_value_array_free (shown_columns);
+	
+	GMAMEUI_DEBUG("Setting integer array... done");	
 }
 
 /* This callback is slightly different - we pass the GtkWidget representing
@@ -409,11 +401,14 @@ on_mame_gui_prefs_dialog_response (GtkDialog *dialog,
 				  int response_id,
 				  MameGuiPrefsDialog *dlg)
 {
+	ListMode mode;
 GMAMEUI_DEBUG("Response from gui prefs dialog");
 	if (response_id == GTK_RESPONSE_CLOSE)
 		gtk_widget_hide (GTK_WIDGET (dlg));
 	
 	/* Recreate gamelist so that clone color etc take effect */
+	g_object_get (main_gui.gui_prefs, "current-mode", &mode, NULL);
+	create_gamelist (mode);
 	create_gamelist_content ();
 GMAMEUI_DEBUG("Response from gui prefs dialog... done");
 }
