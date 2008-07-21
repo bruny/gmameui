@@ -24,43 +24,74 @@
 #ifndef __GAME_LIST_H__
 #define __GAME_LIST_H__
 
-#include "common.h"
 #include <stdio.h>
-#include "xmame_executable.h"
 
+#include "common.h"
+#include "xmame_executable.h"
 #include "rom_entry.h"
 
+G_BEGIN_DECLS
 
+/* Gamelist object */
+#define MAME_TYPE_GAMELIST            (mame_gamelist_get_type ())
+#define MAME_GAMELIST(o)            (G_TYPE_CHECK_INSTANCE_CAST((o), MAME_TYPE_GAMELIST, MameGamelist))
+#define MAME_GAMELIST_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST ((k), MAME_TYPE_GAMELIST, MameGamelistClass))
+#define MAME_IS_GAMELIST(o)         (G_TYPE_CHECK_INSTANCE_TYPE ((o), MAME_TYPE_GAMELIST))
+#define MAME_IS_GAMELIST_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), MAME_TYPE_GAMELIST))
+#define MAME_GAMELIST_GET_CLASS(o)  (G_TYPE_INSTANCE_GET_CLASS ((o), MAME_TYPE_GAMELIST, MameGamelistClass))
 
+typedef struct _MameGamelist MameGamelist;
+typedef struct _MameGamelistClass MameGamelistClass;
+typedef struct _MameGamelistPrivate MameGamelistPrivate;
+
+struct _MameGamelist {
+	GObject parent;
+	
+	MameGamelistPrivate *priv;
+	/* define public instance variables here */
+};
+
+struct _MameGamelistClass {
+	GObjectClass parent;
+	/* define vtable methods and signals here */
+};
+
+/* Preferences */
+enum
+{
+	PROP_GAMELIST_0,
+	PROP_GAMELIST_NAME,
+	PROP_GAMELIST_VERSION,
+	PROP_GAMELIST_NUM_GAMES,
+	PROP_GAMELIST_NUM_SAMPLES,
+	NUM_GAMELIST_PROPERTIES
+};
+/*AAAGAMELIST DELETE
 typedef struct {
-	gchar *name;
-	gchar *version;
-	gint num_games;
-	gint num_sample_games;
-	GList *roms;
-	GList *years;
-	GList *manufacturers;
-	GList *drivers;
-	GList *categories;
-	GList *versions;
 	GList *not_checked_list;
 } GameList;
 
-GameList game_list;
+GameList game_list; */
 
-const gchar * glist_insert_unique (GList **list, const gchar *data);
+GType mame_gamelist_get_type (void);
+MameGamelist* mame_gamelist_new (void);
 
-void gamelist_init  (void);
-void gamelist_add   (RomEntry *rom);
-void gamelist_free  (void);
 
 void gamelist_check (XmameExecutable *exec);
 
 int xmame_exec_get_game_count(XmameExecutable *exec);
 
-RomEntry* get_rom_from_gamelist_by_name (gchar *romname);
-void rom_entry_set_driver (RomEntry *rom, const gchar *driver);
-void rom_entry_set_year   (RomEntry *rom, const gchar *year);
+RomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname);
+GList* mame_gamelist_get_roms_glist (MameGamelist *gl);
+GList* mame_gamelist_get_categories_glist (MameGamelist *gl);
+GList* mame_gamelist_get_versions_glist (MameGamelist *gl);
+
+void mame_gamelist_add_driver (MameGamelist *gl, gchar *driver);
+void mame_gamelist_add_year (MameGamelist *gl, gchar *year);
+void mame_gamelist_add_version (MameGamelist *gl, gchar *version);
+void mame_gamelist_add_category (MameGamelist *gl, gchar *category);
+void mame_gamelist_add_manufacturer (MameGamelist *gl, gchar *manufacturer);
+void mame_gamelist_set_not_checked_list (MameGamelist *gl, GList *source);
 
 /**
 * Creates a new gamelist using current_exec
@@ -71,11 +102,15 @@ gboolean gamelist_parse (XmameExecutable *exec);
 /**
 * Loads the game list from the gamelist file.
 */
-gboolean gamelist_load (void);
+gboolean mame_gamelist_load (MameGamelist *gl);
 
 /**
 * Saves the game list to the gamelist file.
 */
-gboolean gamelist_save (void);
+gboolean mame_gamelist_save (MameGamelist *gl);
+
+void mame_gamelist_add (MameGamelist *gl, RomEntry *rom);
+
+G_END_DECLS
 
 #endif

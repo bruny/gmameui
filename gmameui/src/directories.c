@@ -443,7 +443,7 @@ void add_item_to_tree_view (GtkWidget *button,
 	{
 		case GTK_RESPONSE_OK:
 			temp_text = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (chooser));
-			gtk_widget_destroy (chooser);
+			gtk_widget_destroy (chooser);	
 			
 			/* Check if what we are trying to add is not already in the list */
 			already_exist = FALSE;

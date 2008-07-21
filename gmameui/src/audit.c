@@ -56,48 +56,6 @@ static GtkWidget *stop_audit_button;
 
 static int audit_cancelled, close_audit;
 
-static GtkWidget *
-options_frame_new (const char *text)
-{
-	PangoFontDescription *font_desc;
-	GtkWidget *label;
-	GtkWidget *frame = gtk_frame_new (text);
-
-	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_NONE);
-
-	label = gtk_frame_get_label_widget (GTK_FRAME (frame));
-
-	font_desc = pango_font_description_new ();
-	pango_font_description_set_weight (font_desc,
-					   PANGO_WEIGHT_BOLD);
-	gtk_widget_modify_font (label, font_desc);
-	pango_font_description_free (font_desc);
-
-	return frame;
-}
-
-static GtkWidget *
-options_frame_create_child (GtkWidget *widget)
-{
-	GtkWidget *vbox;
-	GtkWidget *hbox;
-	GtkWidget *label;
-
-	hbox = gtk_hbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (widget), hbox);
-	gtk_widget_show (hbox);
-
-	label = gtk_label_new ("    ");
-	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
-	gtk_widget_show (label);
-
-	vbox = gtk_vbox_new (FALSE, 6);
-	gtk_box_pack_start (GTK_BOX (hbox), vbox, TRUE, TRUE, 0);
-	gtk_widget_show (vbox);
-
-	return vbox;
-}
-
 static gboolean
 stop_audit (GtkWidget *widget,
 	    GtkWidget *button)
@@ -231,6 +189,8 @@ launch_checking_games_window (void)
 	gchar title[BUFFER_SIZE];
 	gchar numb[10];
 	gfloat done;
+	gint num_roms;  /* Total number of ROMs supported */
+	gint num_samples;
 	guint nb_checked = 1, nb_good = 0, nb_incorrect = 0, nb_bestavailable = 0, nb_notfound = 0;
 	gboolean error_during_check = FALSE;
 	gchar *name;
@@ -252,10 +212,13 @@ launch_checking_games_window (void)
 		gmameui_message (ERROR, NULL, _("Don't know how to verify roms with this version of xmame."));
 		return;
 	}
+	
+	g_object_get (gui_prefs.gl, "num-games", &num_roms, "num-samples", &num_samples, NULL);
 
 	/* In more recent versions of MAME, only the available (i.e. where the filename exists)
 	   ROMs are audited. So, we need to set the status of all the others to 'unavailable' */
-	for (listpointer = g_list_first (game_list.roms);
+	GList *romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
+	for (listpointer = g_list_first (romlist);
 	     (listpointer != NULL);
 	     listpointer = g_list_next (listpointer))
 	{
@@ -286,7 +249,7 @@ launch_checking_games_window (void)
 		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_check_buffer), &text_iter);
 
 		auditresult = process_audit_romset (line, error_during_check);
-		done = (gfloat) (nb_good + nb_incorrect + nb_notfound + nb_bestavailable) / (gfloat) (game_list.num_games);
+		done = (gfloat) (nb_good + nb_incorrect + nb_notfound + nb_bestavailable) / (gfloat) (num_roms);
 		
 		if (auditresult == CORRECT) {
 			nb_good++;
@@ -316,7 +279,7 @@ launch_checking_games_window (void)
 
 			/* find the rom in the list - need to skip leading romset/sampleset */
 			name = g_strrstr (line, " ") + 1;
-			listpointer = g_list_find_custom (game_list.roms, name,
+			listpointer = g_list_find_custom (romlist, name,
 							  (GCompareFunc) g_ascii_strcasecmp);
 
 			if (listpointer) {
@@ -366,7 +329,7 @@ launch_checking_games_window (void)
 		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_check_buffer), &text_iter);
 		auditresult = process_audit_romset (line, error_during_check);
 		
-		done = (gfloat) ( (gfloat) (nb_checked) / (gfloat) (game_list.num_sample_games));
+		done = (gfloat) ( (gfloat) (nb_checked) / (gfloat) (num_samples));
 
 		if (auditresult == CORRECT) {
 			nb_good++;
@@ -385,7 +348,7 @@ launch_checking_games_window (void)
 			/* find the rom in the list - need to skip leading romset/sampleset */
 			name = g_strrstr (line, " ") + 1;
 
-			listpointer = g_list_find_custom (game_list.roms, name,
+			listpointer = g_list_find_custom (romlist, name,
 							  (GCompareFunc) g_ascii_strcasecmp);
 			if (listpointer) {
 				tmprom = (RomEntry *) listpointer->data;
@@ -417,7 +380,7 @@ launch_checking_games_window (void)
 	}
 
 	gtk_window_set_title (GTK_WINDOW (checking_games_window), _("Audit done"));
-		gtk_label_set_text (GTK_LABEL (checking_games_label), _("Done"));
+	gtk_label_set_text (GTK_LABEL (checking_games_label), _("Done"));
 	gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_check_buffer), &text_iter);
 	gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_check_buffer), &text_iter, _("Audit done"), -1);
 

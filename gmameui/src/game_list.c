@@ -22,10 +22,10 @@
  *
  */
 
-#include "game_list.h"
 #include <string.h>
 #include <stdlib.h>
 
+#include "game_list.h"
 #include "io.h"
 #include "gui.h"
 #include "rom_entry.h"
@@ -40,47 +40,222 @@
 #define SEP "\xAC"
 
 
+/* Internal MameGamelist functions */
+static void mame_gamelist_class_init (MameGamelistClass *klass);
+static void mame_gamelist_init (MameGamelist *gl);
+static void mame_gamelist_finalize (GObject *obj);
+static void mame_gamelist_set_property (GObject *object,
+					guint prop_id,
+					const GValue *value,
+					GParamSpec *pspec);
+static void mame_gamelist_get_property (GObject *object,
+					guint prop_id,
+					GValue *value,
+					GParamSpec *pspec);
+const gchar *
+glist_insert_unique (GList **list, const gchar *data);
+
+G_DEFINE_TYPE (MameGamelist, mame_gamelist, G_TYPE_OBJECT)
+
+struct _MameGamelistPrivate {
+	gchar *name;
+	gchar *version;
+	gint num_games;
+	gint num_sample_games;
+
+	GList *roms;
+	GList *years;
+	GList *manufacturers;
+	GList *drivers;
+	GList *categories;
+	GList *versions;
+	GList *not_checked_list;	/* Only used if def QUICK_CHECK_ENABLED */
+};
+
+
+
+static void
+mame_gamelist_class_init (MameGamelistClass *klass)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	
+	object_class->set_property = mame_gamelist_set_property;
+	object_class->get_property = mame_gamelist_get_property;
+	object_class->finalize = mame_gamelist_finalize;
+
+	g_object_class_install_property (object_class,
+					 PROP_GAMELIST_NAME,
+					 g_param_spec_string ("name", "Gamelist Name", "Name of the gamelist", NULL, G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
+					 PROP_GAMELIST_VERSION,
+					 g_param_spec_string ("version", "Gamelist version", "Version of the gamelist", NULL, G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
+					 PROP_GAMELIST_NUM_GAMES,
+					 g_param_spec_int ("num-games", "Number of games", "Number of games", 0, 10000, 0, G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
+					 PROP_GAMELIST_NUM_SAMPLES,
+					 g_param_spec_int ("num-samples", "Number of samples", "Number of samples", 0, 10000, 0, G_PARAM_READWRITE));
+}
+
+static void
+mame_gamelist_init (MameGamelist *gl)
+{
+	
+GMAMEUI_DEBUG ("Creating mame_gamelist object");	
+	gl->priv = g_new0 (MameGamelistPrivate, 1);
+	
+GMAMEUI_DEBUG ("Creating mame_gamelist object... done");
+}
+
+MameGamelist* mame_gamelist_new (void)
+{
+	return g_object_new (MAME_TYPE_GAMELIST, NULL);
+}
+
+static void
+mame_gamelist_finalize (GObject *obj)
+{
+	GMAMEUI_DEBUG ("Finalising mame_gamelist object");
+	
+	MameGamelist *gl = MAME_GAMELIST (obj);
+	
+	if (gl->priv->name)
+		g_free (gl->priv->name);
+	if (gl->priv->version)
+		g_free (gl->priv->version);
+GMAMEUI_DEBUG ("Freeing roms");
+	if (gl->priv->roms)
+	{
+		g_list_foreach (gl->priv->roms, (GFunc) rom_entry_free, NULL);
+		g_list_free (gl->priv->roms);
+	}
+GMAMEUI_DEBUG ("Freeing roms... done");
+	if (gl->priv->years)
+	{
+		g_list_foreach (gl->priv->years, (GFunc) g_free, NULL);
+		g_list_free (gl->priv->years);
+	}
+	if (gl->priv->manufacturers)
+	{
+		g_list_foreach (gl->priv->manufacturers, (GFunc) g_free, NULL);
+		g_list_free (gl->priv->manufacturers);
+	}
+	if (gl->priv->drivers)
+	{
+		g_list_foreach (gl->priv->drivers, (GFunc) g_free, NULL);
+		g_list_free (gl->priv->drivers);
+	}
+#ifdef QUICK_CHECK_ENABLED
+	if (gl->priv->not_checked_list) {
+		g_list_foreach (gl->priv->not_checked_list, (GFunc) rom_entry_free, NULL);
+		g_list_free (gl->priv->not_checked_list);
+	}
+#endif
+	if (gl->priv->categories) {
+		g_list_foreach (gl->priv->categories, (GFunc) g_free, NULL);
+		g_list_free (gl->priv->categories);
+	}
+	
+	if (gl->priv->versions) {
+		g_list_foreach (gl->priv->versions, (GFunc) g_free, NULL);
+		g_list_free (gl->priv->versions);
+	}
+	
+	g_free (gl->priv);
+	
+	GMAMEUI_DEBUG ("Finalising mame_gamelist object... done");
+
+}
+
+static void
+mame_gamelist_set_property (GObject *object,
+			    guint prop_id,
+			    const GValue *value,
+			    GParamSpec *pspec)
+{
+	MameGamelist *gl;
+GMAMEUI_DEBUG("Setting gamelist property %d with value %s", prop_id, g_value_get_string (value));
+	gl = MAME_GAMELIST (object);
+
+	switch (prop_id) {
+		case PROP_GAMELIST_NAME:
+			gl->priv->name = g_strdup (g_value_get_string (value));
+			break;
+		case PROP_GAMELIST_VERSION:
+			gl->priv->version = g_strdup (g_value_get_string (value));
+			break;
+		case PROP_GAMELIST_NUM_GAMES:
+			gl->priv->num_games = g_value_get_int (value);
+			break;
+		case PROP_GAMELIST_NUM_SAMPLES:
+			gl->priv->num_sample_games = g_value_get_int (value);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
+static void
+mame_gamelist_get_property (GObject *object,
+			    guint prop_id,
+			    GValue *value,
+			    GParamSpec *pspec)
+{
+	MameGamelist *gl = MAME_GAMELIST (object);
+
+	switch (prop_id) {
+		case PROP_GAMELIST_NAME:
+			g_value_set_string (value, gl->priv->name);
+			break;
+		case PROP_GAMELIST_VERSION:
+			g_value_set_string (value, gl->priv->version);
+			break;
+		case PROP_GAMELIST_NUM_GAMES:
+			g_value_set_int (value, gl->priv->num_games);
+			break;
+		case PROP_GAMELIST_NUM_SAMPLES:
+			g_value_set_int (value, gl->priv->num_sample_games);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
 /**
 * Inserts a string to a sorted glist if it's not present.
 * The function always returns a pointer to the string in the list.
+ FIXME TODO Calling functions not using return var
 */
 const gchar *
 glist_insert_unique (GList **list, const gchar *data) {
 	GList *listpointer;
 	gchar *data_copy;
 
-	if (!data)
+	/*g_return_val_if_fail (data != NULL, NULL);*/
+	if (data == NULL)
 		return NULL;
 
-	listpointer = g_list_first (*list);
+	/* Check if the data already exists in the list */
+	if (*list) {
+		listpointer = g_list_first (*list);
 
-	while ( (listpointer != NULL))
-	{
-		if (!strcmp (listpointer->data, data))
-			return listpointer->data;
+		while ( (listpointer != NULL))
+		{
+			if (!strcmp (listpointer->data, data)) {
+				return listpointer->data;
+			}
 		
-		listpointer = g_list_next (listpointer);
+			listpointer = g_list_next (listpointer);
+		}
 	}
 
+	/* Data does not exist in the list - add it */
 	data_copy = g_strdup (data);
 	*list = g_list_insert_sorted (*list, data_copy, (GCompareFunc)strcmp);
+
 	return data_copy;
-}
-
-void
-rom_entry_set_driver (RomEntry    *rom,
-		      const gchar *driver)
-{
-	rom->driver = g_strdup (driver);
-	glist_insert_unique (&game_list.drivers, driver);
-}
-
-void
-rom_entry_set_year (RomEntry    *rom,
-		    const gchar *year)
-{
-	rom->year = g_strdup (year);
-	glist_insert_unique (&game_list.years, year);
 }
 
 static gint
@@ -90,93 +265,27 @@ compare_game_name (RomEntry *rom1,
 	return strcmp (rom1->clonesort, rom2->clonesort);
 }
 
-
-static FILE *
-gamelist_open (const char *mode)
-{
-	FILE *handle;
-	gchar *filename = 
-		g_build_filename (g_get_home_dir (), ".gmameui", "gamelist", NULL);
-  
-	handle = fopen (filename, mode);
-	g_free (filename);
-
-	return handle;
-}
-
-void
-gamelist_init (void)
-{
-	memset (&game_list, 0, sizeof (GameList));
-}
-
-void
-gamelist_free (void)
-{
-
-	if (game_list.name)
-		g_free (game_list.name);
-	if (game_list.version)
-		g_free (game_list.version);
-GMAMEUI_DEBUG ("Freeing roms");
-	if (game_list.roms)
-	{
-		g_list_foreach (game_list.roms, (GFunc) rom_entry_free, NULL);
-		g_list_free (game_list.roms);
-	}
-GMAMEUI_DEBUG ("Freeing roms... done");
-	if (game_list.years)
-	{
-		g_list_foreach (game_list.years, (GFunc) g_free, NULL);
-		g_list_free (game_list.years);
-	}
-	if (game_list.manufacturers)
-	{
-		g_list_foreach (game_list.manufacturers, (GFunc) g_free, NULL);
-		g_list_free (game_list.manufacturers);
-	}
-	if (game_list.drivers)
-	{
-		g_list_foreach (game_list.drivers, (GFunc) g_free, NULL);
-		g_list_free (game_list.drivers);
-	}
-#ifdef QUICK_CHECK_ENABLED
-	if (game_list.not_checked_list) {
-		g_list_foreach (game_list.not_checked_list, (GFunc) rom_entry_free, NULL);
-		g_list_free (game_list.not_checked_list);
-	}
-#endif
-	gamelist_init ();
-}
-
 #define FIELDS_PER_RECORD 27 + (NB_CPU * 4)
 
-/**
-* Adds a rom entry to the gamelist.
-*
-*/
-void
-gamelist_add (RomEntry *rom)
-{
+void mame_gamelist_add (MameGamelist *gl, RomEntry *rom) {
 	gchar **manufacturer_fields;
 	int i;
 
-	if (!rom->romname) {
-		GMAMEUI_DEBUG ("Broken parser/gamelist loader. Romname was NULL.");
-	}
+	g_return_if_fail (gl != NULL);
+	g_return_if_fail (rom != NULL);
+	g_return_if_fail (rom->romname != NULL);
+
 
 	/*generate glist for manufacturers*/
 	manufacturer_fields = rom_entry_get_manufacturers (rom);
 	if (manufacturer_fields) {
-
 		for (i = 0; i < 2; i++) {
-			if (manufacturer_fields[i]) {
-				glist_insert_unique (&game_list.manufacturers, manufacturer_fields[i]);
-			}
+			if (manufacturer_fields[i])
+				mame_gamelist_add_manufacturer (gl, manufacturer_fields[i]);
 		}				
 		g_strfreev (manufacturer_fields);
 	}
-	
+/* FIXME TODO These should all be set in the rom creation */	
 	if (!rom->cloneof) {
 		rom->cloneof = g_strdup ("-");
 	}
@@ -202,30 +311,37 @@ gamelist_add (RomEntry *rom)
 	if (!rom->year)
 		rom_entry_set_year (rom, _("Unknown"));
 
-	game_list.roms = g_list_insert_sorted (game_list.roms, (gpointer) rom, (GCompareFunc )compare_game_name);
+	gl->priv->roms = g_list_insert_sorted (gl->priv->roms, (gpointer) rom, (GCompareFunc )compare_game_name);
 
-	game_list.num_games++;
+	gl->priv->num_games++;
 
 	if  (rom->nb_samples > 0)
-		game_list.num_sample_games++;
+		gl->priv->num_sample_games++;
 }
 
-/**
-* Loads the gamelist from the file.
-*
-* After calling this you must also call.
-*
-* load_games_ini ();
-* load_catver_ini ();
-* quick_check ();
-* create_filterslist_content ();
-* create_gamelist_content ();
-*/
-gboolean
-gamelist_load (void)
+GList* mame_gamelist_get_roms_glist (MameGamelist *gl) {
+	g_return_val_if_fail (gl != NULL, NULL);
+	
+	return gl->priv->roms;
+}
+
+GList* mame_gamelist_get_categories_glist (MameGamelist *gl) {
+	g_return_val_if_fail (gl != NULL, NULL);
+	
+	return gl->priv->categories;
+}
+
+GList* mame_gamelist_get_versions_glist (MameGamelist *gl) {
+	g_return_val_if_fail (gl != NULL, NULL);
+	
+	return gl->priv->versions;
+}
+
+gboolean mame_gamelist_load (MameGamelist *gl)
 {
+	gchar *filename;
 	FILE *gamelist;
-	gint romindex, j;
+	gint j;
 	gchar line[LINE_BUF];
 	gchar **tmp_array;
 	gchar *tmp, *p;
@@ -235,29 +351,28 @@ gamelist_load (void)
 	int i;
 	int supported_games = 0;	
 
-	romindex = 0;
-	g_message (_("Loading gamelist"));
+	g_return_val_if_fail (gl != NULL, FALSE);
+	
+	filename = g_build_filename (g_get_home_dir (), ".gmameui", "gamelist", NULL);
 
-
-	gamelist_free ();
-
-	game_list.version = NULL;
-	game_list.name = NULL;
-
-	gamelist = gamelist_open ("r");
+	g_message (_("AALoading gamelist %s"), filename);
+	
+	gamelist = fopen (filename, "r");
+	g_free (filename);
 
 	if (!gamelist) {
-		game_list.version = g_strdup ("unknown");
+		GMAMEUI_DEBUG ("Could not open gamelist file %s", filename);
+		gl->priv->version = g_strdup ("unknown");
 		return FALSE;
 	}
-
-
+	
 	while (fgets (line, LINE_BUF, gamelist)) {
 		p = line;
 		tmp = line;
 
 		/* Skip comments */
 		if (*tmp != '#') {
+			/* FIXME TODO Need to handle gamelist being empty */
 			while (*tmp && (*tmp != '\n')) {
 				tmp++;
 			}
@@ -270,7 +385,7 @@ gamelist_load (void)
 				if (!tmp_array[i]) {
 					g_strfreev (tmp_array);
 					fclose (gamelist);
-					game_list.version = g_strdup ("unknown");
+					gl->priv->version = g_strdup ("unknown");
 					gmameui_message (ERROR, NULL, _("Game list is corrupted."));	
 					return FALSE;
 				}
@@ -282,7 +397,7 @@ gamelist_load (void)
 			{
 				g_strfreev (tmp_array);
 				fclose (gamelist);
-				game_list.version = g_strdup ("unknown");
+				gl->priv->version = g_strdup ("unknown");
 				gmameui_message (ERROR, NULL, _("Out of memory while loading gamelist"));
 				return FALSE;
 			}
@@ -354,7 +469,7 @@ gamelist_load (void)
 
 			g_strfreev (tmp_array);
 
-			gamelist_add (rom);
+			mame_gamelist_add (gl, rom);
 			supported_games++;
 
 		} else if (!exe_version_checked) {
@@ -368,21 +483,21 @@ gamelist_load (void)
 			GMAMEUI_DEBUG ("Checking version of gamelist file: %s - %s", tmp_array[1], tmp_array[2]);
 
 			if (strcmp (tmp_array[1], "GMAMEUI") || !tmp_array[2]) {
-				game_list.version = g_strdup ("unknown");
+				gl->priv->version = g_strdup ("unknown");
 				g_strfreev (tmp_array);
 				fclose (gamelist);
 				return FALSE;
 			}
 			if (g_ascii_strtod (tmp_array[2], NULL) < 0.91)
 			{
-				game_list.version = g_strdup ("too old");
+				gl->priv->version = g_strdup ("too old");
 				g_strfreev (tmp_array);
 				fclose (gamelist);
 				return FALSE;
 			}
 			if (g_ascii_strtod (tmp_array[2], NULL) > 0.91)
 			{
-				game_list.version = g_strdup ("unknown");
+				gl->priv->version = g_strdup ("unknown");
 				g_strfreev (tmp_array);
 				fclose (gamelist);
 				return FALSE;
@@ -401,90 +516,29 @@ gamelist_load (void)
 			if (!strncmp (p, "Version", 7))
 			{
 				p += 8;
-				game_list.version = g_strdup (p);
+				gl->priv->version = g_strdup (p);
 			} if (!strncmp (p, "Name", 4))
 			{
 				p += 5;
-				game_list.name = g_strdup (p);
+				gl->priv->name = g_strdup (p);
 			}
 		}
 	}
 	fclose (gamelist);
 
-	GMAMEUI_DEBUG ("List for %s %s", game_list.name, game_list.version);
-	g_message (_("Loaded %d roms by %d manufacturers covering %d years."), game_list.num_games,
-				g_list_length (game_list.manufacturers),g_list_length (game_list.years));
-	g_message (_("with %d games supporting samples."), game_list.num_sample_games);
+	GMAMEUI_DEBUG ("List for %s %s", gl->priv->name, gl->priv->version);
+	g_message (_("Loaded %d roms by %d manufacturers covering %d years."), gl->priv->num_games,
+				g_list_length (gl->priv->manufacturers), g_list_length (gl->priv->years));
+	g_message (_("with %d games supporting samples."), gl->priv->num_sample_games);
 
-	return (TRUE);
-}
-
-/**
-* Prints the gamelist "prefix" to the file.
-* Must be called once before printing any rom entries.
-*/
-static void
-gamelist_prefix_print (FILE *handle)
-{
-	fprintf (handle,
-		"# GMAMEUI 0.91\n"
-		"# Name %s\n"
-		"# Version %s\n"
-		"# list of xmame games for GMAMEUI front-end\n"
-		"# The fileformat is: "
-		"romname"
-		"gamename"
-		"gamenameext"
-		"the_trailer"
-		"is_bios"
-		"year"
-		"manufacturer"
-		"cloneof"
-		"romof"
-		"driver"
-		"driverstatus"
-		"drivercolorstatus"
-		"driversoundstatus"
-		"drivergraphicstatus"
-		"colors"
-		"cpu1"
-		"cpu1_clock"
-		"cpu2"
-		"cpu2_clock"
-		"cpu3"
-		"cpu3_clock"
-		"cpu4"
-		"cpu4_clock"
-		"sound1"
-		"sound1_clock"
-		"sound2"
-		"sound2_clock"
-		"sound3"
-		"sound3_clock"
-		"sound4"
-		"sound4_clock"
-		"num_players"
-		"num_buttons"
-		"control"
-		"vector"
-		"screen_x"
-		"screen_y"
-		"screen_freq"
-		"horizontal"
-		"channels"
-		"num_roms"
-		"num_samples"
-		"sampleof\n",
-		game_list.name,
-		game_list.version
-	);
+	return (TRUE);	
 }
 
 /**
 * Appends a rom entry to the gamelist.
 */
 static void
-gamelist_print (FILE     *handle,
+mame_gamelist_print (FILE     *handle,
 		RomEntry *rom)
 {
 	int i;
@@ -565,32 +619,83 @@ gamelist_print (FILE     *handle,
 
 }
 
-/**
-* Saves the gamelist.
-*/
-gboolean
-gamelist_save (void)
-{
+gboolean mame_gamelist_save (MameGamelist *gl) {
 	GList *listpointer;
 	FILE *gamelist;
-
+GMAMEUI_DEBUG ("AASaving gamelist");
 	g_message (_("Saving gamelist."));
-	gamelist = gamelist_open ("w");
+	
+	g_return_val_if_fail (gl != NULL, FALSE);
+	
+	gchar *filename = g_build_filename (g_get_home_dir (), ".gmameui", "gamelist", NULL);
+  
+	gamelist = fopen (filename, "w");
+	g_free (filename);
 
-	if (!gamelist)
-		return FALSE;
+	g_return_val_if_fail (gamelist != NULL, FALSE);
 
-	gamelist_prefix_print (gamelist);
+	fprintf (gamelist,
+		"# GMAMEUI 0.91\n"
+		"# Name %s\n"
+		"# Version %s\n"
+		"# list of xmame games for GMAMEUI front-end\n"
+		"# The fileformat is: "
+		"romname" SEP
+		"gamename" SEP
+		"gamenameext" SEP
+		"the_trailer" SEP
+		"is_bios" SEP
+		"year" SEP
+		"manufacturer" SEP
+		"cloneof" SEP
+		"romof" SEP
+		"driver" SEP
+		"driverstatus" SEP
+		"drivercolorstatus" SEP
+		"driversoundstatus" SEP
+		"drivergraphicstatus" SEP
+		"colors" SEP
+		"cpu1" SEP
+		"cpu1_clock" SEP
+		"cpu2" SEP
+		"cpu2_clock" SEP
+		"cpu3" SEP
+		"cpu3_clock" SEP
+		"cpu4" SEP
+		"cpu4_clock" SEP
+		"sound1" SEP
+		"sound1_clock" SEP
+		"sound2" SEP
+		"sound2_clock" SEP
+		"sound3" SEP
+		"sound3_clock" SEP
+		"sound4" SEP
+		"sound4_clock" SEP
+		"num_players" SEP
+		"num_buttons" SEP
+		"control" SEP
+		"vector" SEP
+		"screen_x" SEP
+		"screen_y" SEP
+		"screen_freq" SEP
+		"horizontal" SEP
+		"channels" SEP
+		"num_roms" SEP
+		"num_samples" SEP
+		"sampleof\n",
+		gl->priv->name,
+		gl->priv->version
+	);
 
-	listpointer = g_list_first (game_list.roms);
+	listpointer = g_list_first (gl->priv->roms);
 
 	while (listpointer) {
-		gamelist_print (gamelist, (RomEntry*)listpointer->data);
+		mame_gamelist_print (gamelist, (RomEntry*)listpointer->data);
 		listpointer = g_list_next (listpointer);
 	}
 
 	fclose (gamelist);
-
+GMAMEUI_DEBUG ("AASaving gamelist... done");
 	return TRUE;
 }
 
@@ -607,11 +712,11 @@ gamelist_save (void)
 void
 gamelist_check (XmameExecutable *exec)
 {
-
 	GtkWidget *dialog = NULL;
 
 	gint result;
 	gboolean versioncheck;  /* Check the gamelist against the current executable */
+	gchar *gl_name, *gl_version;
 	
 	g_object_get (main_gui.gui_prefs,
 		      "versioncheck", &versioncheck,
@@ -620,7 +725,12 @@ gamelist_check (XmameExecutable *exec)
 	if (!exec)
 		return;
 
-	if (!game_list.version || !strcmp (game_list.version,"unknown")) {
+	g_object_get (gui_prefs.gl,
+		      "name", &gl_name,
+		      "version", &gl_version,
+		      NULL);
+	
+	if (!gl_version || !strcmp (gl_version, "unknown")) {
 		dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
 							GTK_DIALOG_MODAL,
 							GTK_MESSAGE_WARNING,
@@ -628,7 +738,7 @@ gamelist_check (XmameExecutable *exec)
 							_("Could not recognise the gamelist version.\n"
 							  "Do you want to rebuild the gamelist?"));
 
-	} else if (!strcmp (game_list.version,"none")) {
+	} else if (!strcmp (gl_version, "none")) {
 
 		dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
 							GTK_DIALOG_MODAL,
@@ -637,7 +747,7 @@ gamelist_check (XmameExecutable *exec)
 							_("Gamelist not available,\n"
  							  "Do you want to build the gamelist?"));
 
-	} else if (!strcmp (game_list.version,"too old")) {
+	} else if (!strcmp (gl_version, "too old")) {
 
 		dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
 							GTK_DIALOG_MODAL,
@@ -648,8 +758,8 @@ gamelist_check (XmameExecutable *exec)
 							  "Do you want to rebuild the gamelist?"));
 
 	} else if (versioncheck) {	
-		if (strcmp (exec->name, game_list.name) ||
-			strcmp (exec->version, game_list.version))
+		if (strcmp (exec->name, gl_name) ||
+			strcmp (exec->version, gl_version))
 		{
 
 			dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
@@ -661,8 +771,8 @@ gamelist_check (XmameExecutable *exec)
 							  "and the current executable is:\n"
 							  "%s %s\n"
 							  "Do you want to rebuild the gamelist?"),
-							  game_list.name,
-							  game_list.version,
+							  gl_name,
+							  gl_version,
 							  exec->name,
 							  exec->version);
 
@@ -682,12 +792,11 @@ gamelist_check (XmameExecutable *exec)
 				save_games_ini ();
 
 				if (gamelist_parse (exec)) {
-					gamelist_save ();
+					mame_gamelist_save (gui_prefs.gl);
 					load_games_ini ();
 					load_catver_ini ();
 					quick_check ();
 					create_gamelist_content ();
-					
 				}
 
 				gtk_widget_set_sensitive (main_gui.scrolled_window_games, TRUE);
@@ -697,11 +806,11 @@ gamelist_check (XmameExecutable *exec)
 	}		
 }
 
-RomEntry* get_rom_from_gamelist_by_name (gchar *romname) {
+RomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname) {
 	GList *listpointer;
 	RomEntry *tmprom = NULL;
 	
-	for (listpointer = g_list_first (game_list.roms);
+	for (listpointer = g_list_first (gl->priv->roms);
 	     (listpointer != NULL);
 	     listpointer = g_list_next (listpointer))
 	{
@@ -713,4 +822,40 @@ RomEntry* get_rom_from_gamelist_by_name (gchar *romname) {
 	}
 
 	return tmprom;
+}
+
+void mame_gamelist_add_driver (MameGamelist *gl, gchar *driver) {
+	g_return_if_fail (gl != NULL);
+	
+	glist_insert_unique (&gl->priv->drivers, driver);
+}
+
+void mame_gamelist_add_year (MameGamelist *gl, gchar *year) {
+	g_return_if_fail (gl != NULL);
+	
+	glist_insert_unique (&gl->priv->years, year);
+}
+
+void mame_gamelist_add_version (MameGamelist *gl, gchar *version) {
+	g_return_if_fail (gl != NULL);
+	
+	glist_insert_unique (&gl->priv->versions, version);
+}
+
+void mame_gamelist_add_category (MameGamelist *gl, gchar *category) {
+	g_return_if_fail (gl != NULL);
+	
+	glist_insert_unique (&gl->priv->categories, category);
+}
+
+void mame_gamelist_add_manufacturer (MameGamelist *gl, gchar *manufacturer) {
+	g_return_if_fail (gl != NULL);
+	
+	glist_insert_unique (&gl->priv->manufacturers, manufacturer);
+}
+
+void mame_gamelist_set_not_checked_list (MameGamelist *gl, GList *source) {
+	g_return_if_fail (gl != NULL);
+	
+	gl->priv->not_checked_list = g_list_copy (source);
 }

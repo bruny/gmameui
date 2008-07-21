@@ -129,6 +129,22 @@ rom_entry_set_name (RomEntry *rom,
 	rom->gamename = g_strdup (value);
 }
 
+void
+rom_entry_set_driver (RomEntry    *rom,
+		      const gchar *driver)
+{
+	rom->driver = g_strdup (driver);
+	mame_gamelist_add_driver (gui_prefs.gl, driver);
+}
+
+void
+rom_entry_set_year (RomEntry    *rom,
+		    const gchar *year)
+{
+	rom->year = g_strdup (year);
+	mame_gamelist_add_year (gui_prefs.gl, year);
+}
+
 ControlType get_control_type (gchar *control_type)
 {
 	ControlType type;
@@ -217,7 +233,8 @@ rom_entry_get_manufacturers (RomEntry * rom)
 	return manufacturer_fields;
 }
 
-/* FIXME This function should either set or return. Do we need to do both? */
+/* FIXME This function should either set or return. Do we need to do both? See
+   where it is called and use the most appropriate (pref. return, not set) */
 const gchar *
 rom_entry_get_list_name (RomEntry *rom)
 {

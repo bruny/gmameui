@@ -183,6 +183,8 @@ RomEntry * rom_entry_new (void);
 
 
 void rom_entry_set_name   (RomEntry *rom, gchar *value);
+void rom_entry_set_driver (RomEntry *rom, const gchar *driver);
+void rom_entry_set_year   (RomEntry *rom, const gchar *year);
 gchar **rom_entry_get_manufacturers (RomEntry * rom);
 const gchar *rom_entry_get_list_name(RomEntry *rom);
 ControlType get_control_type (gchar *control_type);

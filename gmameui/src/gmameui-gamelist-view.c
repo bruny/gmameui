@@ -124,7 +124,7 @@ gboolean foreach_find_random_rom_in_store (GtkTreeModel *model,
 	
 	return_val = FALSE;		/* Do not stop walking the store, call us with next row */
 	
-	target_row = (gint *) user_data;
+	target_row = (gint) user_data;
 	
 	if (current_row == target_row) {
 		/* Found the random row we are after */
@@ -243,7 +243,7 @@ delayed_row_selected (GtkTreeSelection *selection)
 	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
 		gtk_tree_model_get (model, &iter, ROMENTRY, &game_data, -1);
 
-		g_return_if_fail (game_data != NULL);
+		g_return_val_if_fail (game_data != NULL, FALSE);
 
 		g_object_set (main_gui.gui_prefs, "current-rom", game_data->romname, NULL);
 
@@ -270,7 +270,7 @@ on_list_keypress (GtkWidget   *widget,
 		  GdkEventKey *event,
 		  gpointer    user_data)
 {
-	g_return_if_fail (gui_prefs.current_game != NULL);
+	g_return_val_if_fail (gui_prefs.current_game != NULL, FALSE);
 	
 	if (event && event->type == GDK_KEY_PRESS && (
 						      event->keyval == GDK_KP_Enter ||
@@ -569,7 +569,15 @@ create_gamelist (ListMode list_mode)
 				gtk_tree_view_column_set_sort_column_id (column, i);
 			}
 			gtk_tree_view_append_column (GTK_TREE_VIEW (main_gui.displayed_list), column);
-			gtk_tree_view_column_set_min_width (GTK_TREE_VIEW_COLUMN (column), 1);
+			//gtk_tree_view_column_set_min_width (GTK_TREE_VIEW_COLUMN (column), 1);
+			
+			/* Set minimum width to the num of chars in the header TODO Also get sort directory size */
+			gint font_size, title_len;
+			title_len = g_utf8_strlen (gtk_tree_view_column_get_title (GTK_TREE_VIEW_COLUMN (column)), -1);
+			font_size = PANGO_PIXELS (pango_font_description_get_size (GTK_WIDGET(main_gui.displayed_list)->style->font_desc));
+			gtk_tree_view_column_set_min_width (GTK_TREE_VIEW_COLUMN (column), title_len*font_size);
+GMAMEUI_DEBUG ("Setting min width of column %s. title len is %d, font size is %d", gtk_tree_view_column_get_title (GTK_TREE_VIEW_COLUMN (column)), title_len, font_size);
+			
 			g_signal_connect (column->button, "event",
 					  G_CALLBACK (on_column_click),
 					  column);
@@ -751,8 +759,8 @@ g_timer_start (timer);
 							     GDK_TYPE_COLOR,     /* Text Color */
 							     GDK_TYPE_PIXBUF);   /* Pixbuf */
 
-	/* fill the model with data */
-	for (listpointer = g_list_first (game_list.roms);
+	/* Fill the model with data */
+	for (listpointer = g_list_first (mame_gamelist_get_roms_glist (gui_prefs.gl));
 	     (listpointer);
 	     listpointer= g_list_next (listpointer)) {
 		tmprom = (RomEntry *) listpointer->data;
@@ -882,7 +890,8 @@ g_timer_start (timer);
 		g_free (message);
 	if (my_romname_root)
 		g_free (my_romname_root);
-	g_free (clone_color);
+	if (clone_color)
+		g_free (clone_color);
 
 	if (visible_games == 0)
 		select_game (NULL);

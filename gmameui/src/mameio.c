@@ -128,7 +128,7 @@ static void CreateGameListGame(TCreateGameList *_this)
 	++_this->game_count;
 
 	if (rom->driver && rom->driver[0])
-		gamelist_add(rom);
+		mame_gamelist_add (gui_prefs.gl, rom);
 
 	CreateGameListProgress(_this);
 
@@ -541,10 +541,14 @@ static gboolean create_gamelist_xmlinfo(XmameExecutable *exec)
 	progress_window_show(_this.progress_window);
 	UPDATE_GUI;
 
-	gamelist_free();
+	if (gui_prefs.gl) {
+		g_object_unref (gui_prefs.gl);
+		gui_prefs.gl = NULL;
+		
+		gui_prefs.gl = mame_gamelist_new ();
+	}
 
-	game_list.name = g_strdup(exec->name);
-	game_list.version = g_strdup(exec->version);
+	g_object_set (gui_prefs.gl, "name", exec->name, "version", exec->version, NULL);
 
 	_this.total_games = xmame_exec_get_game_count(exec);
 	if (!_this.total_games) {
@@ -678,7 +682,7 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 	gint cpu_count;
 	gint sound_count;
 	gfloat done;
-	int total_games = 0;
+	int num_games = 0, total_games = 0;
 
 	GHashTable *driver_htable;
 	ProgressWindow *progress_window;
@@ -699,11 +703,15 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 		return FALSE;
 	}
 
-	gamelist_free();
+	if (gui_prefs.gl) {
+		g_object_unref (gui_prefs.gl);
+		gui_prefs.gl = NULL;
+		
+		gui_prefs.gl = mame_gamelist_new ();
+	}
 
-	game_list.name = g_strdup(exec->name);
-	game_list.version = g_strdup(exec->version);
-
+	g_object_set (gui_prefs.gl, "name", exec->name, "version", exec->version, NULL);
+	
 	g_message(_("creating game list, Please wait:"));
 
 	progress_window_set_title(progress_window, _("Creating game list (%d games)..."), total_games);
@@ -934,9 +942,9 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 			else
 				rom_entry_set_driver(rom, driver);
 
-			gamelist_add(rom);
+			mame_gamelist_add (gui_prefs.gl, rom);
 
-			done = (gfloat) ((gfloat) (game_list.num_games) /
+			done = (gfloat) ((gfloat) (num_games) /
 					 (gfloat) (total_games));
 
 			progress_window_set_value(progress_window, done);
@@ -950,6 +958,9 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 	
                 
 	progress_window_destroy(progress_window);
+	
+	g_object_set (gui_prefs.gl, "num-games", num_games, NULL);
+	
 	return TRUE;
 }
 

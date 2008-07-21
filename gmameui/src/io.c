@@ -90,12 +90,15 @@ load_games_ini (void)
 {
 	gchar *filename;
 	RomEntry *tmprom = NULL;
+	GList *romlist;
 		
 	GMAMEUI_DEBUG ("Loading games.ini");
 
 	filename = g_build_filename (g_get_home_dir (), ".gmameui", "games.ini", NULL);
 	if (!filename)
 		return FALSE;
+	
+	romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
 
 	GKeyFile *gameini_list = g_key_file_new ();
 	GError *error = NULL;
@@ -106,7 +109,7 @@ load_games_ini (void)
 		g_error_free (error);
 		g_key_file_free (gameini_list);
 
-		game_list.not_checked_list = g_list_copy (game_list.roms);
+		mame_gamelist_set_not_checked_list (gui_prefs.gl, romlist);
 
 		return FALSE;
 	}
@@ -116,7 +119,7 @@ load_games_ini (void)
 	gchar **gamelist = g_key_file_get_groups (gameini_list, NULL);
 	int i;
 	for (i = 0; gamelist[i] != NULL; i++) {
-		tmprom = get_rom_from_gamelist_by_name (gamelist[i]);
+		tmprom = get_rom_from_gamelist_by_name (gui_prefs.gl, gamelist[i]);
 		if (tmprom) {
 			tmprom->timesplayed = g_key_file_get_integer (gameini_list, gamelist[i], "PlayCount", &error);
 			if (!tmprom->timesplayed) tmprom->timesplayed = 0;	/* Set default */
@@ -149,7 +152,7 @@ save_games_ini (void)
 	FILE *game_ini_file;
 	gchar *filename;
 	RomEntry *rom;
-	GList *list_pointer;
+	GList *romlist, *list_pointer;
 	
 	
 	GMAMEUI_DEBUG ("Saving games.ini");
@@ -162,8 +165,10 @@ save_games_ini (void)
 		GMAMEUI_DEBUG ("unable to write games.ini");
 		return FALSE;
 	}
+	
+	romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
 		
-	for (list_pointer = g_list_first (game_list.roms);
+	for (list_pointer = g_list_first (romlist);
 	     (list_pointer != NULL);
 	     list_pointer=g_list_next (list_pointer))
 	{
@@ -185,7 +190,8 @@ gboolean
 load_catver_ini (void)
 {
 	gchar *filename;
-	GList *listpointer;
+	GList *romlist, *listpointer;
+	GList *catlist, *verlist;
 	RomEntry *tmprom = NULL;
 	gchar *category;
 	gchar *version;
@@ -196,25 +202,30 @@ load_catver_ini (void)
 	GTimer *timer = g_timer_new();
 	g_timer_start (timer);
 	
+	romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
+	catlist = mame_gamelist_get_categories_glist (gui_prefs.gl);
+	verlist = mame_gamelist_get_versions_glist (gui_prefs.gl);
+	
 	/* Initialize categories */
-	if (!game_list.categories) {
-		g_list_foreach (game_list.categories, (GFunc) g_free, NULL);
-		g_list_free (game_list.categories);
+	if (!catlist) {
+		g_list_foreach (catlist, (GFunc) g_free, NULL);
+		g_list_free (catlist);
 	}
+	
 	/* Initialize versions */
-	if (!game_list.versions) {
-		g_list_foreach (game_list.versions, (GFunc) g_free, NULL);
-		g_list_free (game_list.versions);
+	if (!verlist) {
+		g_list_foreach (verlist, (GFunc) g_free, NULL);
+		g_list_free (verlist);
 	}
 
 	category = g_strdup (_("Unknown"));
-	game_list.categories = g_list_append (NULL, category);
+	catlist = g_list_append (NULL, category);
 
 	version = g_strdup (_("Unknown"));
-	game_list.versions = g_list_append (NULL, version);
-
+	verlist = g_list_append (NULL, version);
+	
 	/* Set all roms to unknown */
-	for (listpointer = g_list_first (game_list.roms); (listpointer != NULL);
+	for (listpointer = g_list_first (romlist); (listpointer != NULL);
 		listpointer = g_list_next (listpointer))
 	{
 		tmprom = (RomEntry *) listpointer->data;
@@ -240,7 +251,7 @@ load_catver_ini (void)
 	/* For each game in the list of available roms, get the category and
 	   version from the ini file, and add to the list of known categories/versions
 	   for use in the custom filters */
-	for (listpointer = g_list_first (game_list.roms); listpointer; listpointer = g_list_next (listpointer)) {
+	for (listpointer = g_list_first (romlist); listpointer; listpointer = g_list_next (listpointer)) {
 		tmprom = (RomEntry *)listpointer->data;
 		/*GMAMEUI_DEBUG ("Parsing catver - %s", tmprom->romname);*/
 		category = g_key_file_get_string (catver_file, "Category", tmprom->romname, &error);
@@ -253,8 +264,11 @@ load_catver_ini (void)
 			/*GMAMEUI_DEBUG ("Error parsing catver - %s", error->message);*/
 			error = NULL;
 		}
-		tmprom->category = glist_insert_unique (&game_list.categories, category);
-		tmprom->mame_ver_added = glist_insert_unique (&game_list.versions, version);
+		tmprom->category = category;
+		mame_gamelist_add_category (gui_prefs.gl, category);
+
+		tmprom->mame_ver_added = version;
+		mame_gamelist_add_version (gui_prefs.gl, version);
 
 	}
 	g_key_file_free (catver_file);

@@ -95,9 +95,7 @@ void update_favourites_list (gboolean add) {
 
 	gmameui_ui_set_favourites_sensitive (add);
 	
-	g_object_get (selected_filter,
-		      "type", &type,
-		      NULL);
+	g_object_get (selected_filter, "type", &type, NULL);
 	/* problems because the row values are completly changed, I redisplay the complete game list */
 	if (type == FAVORITE)
 		create_gamelist_content ();
@@ -227,6 +225,7 @@ quick_refresh_list (void)
 	static gboolean quick_check_running;
 	GList *list_pointer;
 	RomEntry *rom;
+	GList *romlist;
 	
 	if (quick_check_running) {
 		GMAMEUI_DEBUG ("Quick check already running");
@@ -234,16 +233,19 @@ quick_refresh_list (void)
 	}
 
 	quick_check_running = 1;
+	
+	romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
+	
 // FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), FALSE);
 	/* remove all information concerning the presence of roms */
-	for (list_pointer = g_list_first (game_list.roms); list_pointer; list_pointer = g_list_next (list_pointer)) {
+	for (list_pointer = g_list_first (romlist); list_pointer; list_pointer = g_list_next (list_pointer)) {
 		rom = (RomEntry *)list_pointer->data;
 		rom->has_roms = UNKNOWN;
 	}
 	/* refresh the display */
 	create_gamelist_content ();
 
-	game_list.not_checked_list = g_list_copy (game_list.roms);
+	mame_gamelist_set_not_checked_list (gui_prefs.gl, romlist);
 
 	quick_check ();
 	/* final refresh only if we are in AVAILABLE or UNAVAILABLE Folder*/
@@ -273,7 +275,9 @@ on_rebuild_game_list_menu_activate     (GtkMenuItem     *menuitem,
 	GMAMEUI_DEBUG ("recreate game list");
 	gamelist_parse (current_exec);
 	GMAMEUI_DEBUG ("reload everything");
-	gamelist_save ();
+
+	mame_gamelist_save (gui_prefs.gl);
+
 	load_games_ini ();
 	load_catver_ini ();
 	create_gamelist_content ();

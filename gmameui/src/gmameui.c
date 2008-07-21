@@ -172,14 +172,15 @@ gmameui_init (void)
 		g_free (mame_executable);
 	} else
 		current_exec = xmame_table_get_by_index (0);
-	
-	gamelist_init ();
 #ifdef ENABLE_DEBUG
 g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
-	if (!gamelist_load ()) {
+
+	gui_prefs.gl = mame_gamelist_new ();
+	if (!mame_gamelist_load (gui_prefs.gl)) {
 		g_message (_("gamelist not found, need to rebuild one"));
 	} else {
+
 #ifdef ENABLE_DEBUG
 g_message (_("Time to load gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
@@ -709,17 +710,16 @@ void
 exit_gmameui (void)
 {
 	g_message (_("Exiting GMAMEUI..."));
-	/* prevent to erase games preference if the game list was not loaded
-	  (gamelist file corruption or rebuild of a list with a bogus executable)*/
-	if (game_list.roms)
-		save_games_ini ();
+
+	save_games_ini ();
 
 	save_options (NULL, NULL);
 
 	joystick_close (joydata);
 	joydata = NULL;
 
-	gamelist_free ();
+	g_object_unref (gui_prefs.gl);
+	gui_prefs.gl = NULL;
 	
 	xmame_table_free ();
 	xmame_options_free ();

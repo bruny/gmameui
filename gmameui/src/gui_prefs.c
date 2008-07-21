@@ -55,6 +55,9 @@ static void mame_gui_prefs_save_int (MameGuiPrefs *pr, GParamSpec *param, gpoint
 static void mame_gui_prefs_save_int_arr (MameGuiPrefs *pr, GParamSpec *param, gpointer user_data);
 static void mame_gui_prefs_save_string (MameGuiPrefs *pr, GParamSpec *param, gpointer user_data);
 static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param, gpointer user_data);
+static gboolean mame_gui_prefs_get_bool_property_from_key_file (MameGuiPrefs *pr, gchar *property);
+static gint mame_gui_prefs_get_int_property_from_key_file (MameGuiPrefs *pr, gchar *property);
+static gchar* mame_gui_prefs_get_string_property_from_key_file (MameGuiPrefs *pr, gchar *property);
 
 G_DEFINE_TYPE (MameGuiPrefs, mame_gui_prefs, G_TYPE_OBJECT)
 
@@ -562,15 +565,15 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	/* FIXME TODO What happens if can't load from file? */
 
 	/* UI preferences */
-	pr->priv->ui_width = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "ui-width", &error);
-	pr->priv->ui_height = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "ui-height", &error);
-	pr->priv->show_toolbar = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "show-toolbar", &error);
-	pr->priv->show_statusbar = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "show-statusbar", &error);
-	pr->priv->show_filterlist = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "show-filterlist", &error);
-	pr->priv->show_screenshot = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "show-screenshot", &error);
-	pr->priv->ShowFlyer = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "show-flyer", &error);
-	pr->priv->current_mode = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "current-mode", &error);
-	pr->priv->previous_mode = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "previous-mode", &error);
+	pr->priv->ui_width = mame_gui_prefs_get_int_property_from_key_file (pr, "ui-width");
+	pr->priv->ui_height = mame_gui_prefs_get_int_property_from_key_file (pr, "ui-height");
+	pr->priv->show_toolbar = mame_gui_prefs_get_bool_property_from_key_file (pr, "show-toolbar");
+	pr->priv->show_statusbar = mame_gui_prefs_get_bool_property_from_key_file (pr, "show-statusbar");
+	pr->priv->show_filterlist = mame_gui_prefs_get_bool_property_from_key_file (pr, "show-filterlist");
+	pr->priv->show_screenshot = mame_gui_prefs_get_bool_property_from_key_file (pr, "show-screenshot");
+	pr->priv->ShowFlyer = mame_gui_prefs_get_int_property_from_key_file (pr, "show-flyer");
+	pr->priv->current_mode = mame_gui_prefs_get_int_property_from_key_file (pr, "current-mode");
+	pr->priv->previous_mode = mame_gui_prefs_get_int_property_from_key_file (pr, "previous-mode");
 	int_array = g_key_file_get_integer_list (pr->priv->prefs_ini_file, "Preferences", "cols-shown", &columnsize, &error);
 	for (i = 0; i < NUMBER_COLUMN; ++i) {
 		GValue val = { 0, };
@@ -591,27 +594,27 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 		GMAMEUI_DEBUG ("Value for cols-width at %d is %d", i, g_value_get_int (&val));
 		g_value_array_append (pr->priv->cols_width, &val);
 	}
-	pr->priv->sort_col = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "sort-col", &error);
-	pr->priv->sort_col_direction = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "sort-col-direction", &error);
-	pr->priv->xpos_filters = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "xpos-filters", &error);
-	pr->priv->xpos_gamelist = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", "xpos-gamelist", &error);
+	pr->priv->sort_col = mame_gui_prefs_get_int_property_from_key_file (pr, "sort-col");
+	pr->priv->sort_col_direction = mame_gui_prefs_get_int_property_from_key_file (pr, "sort-col-direction");
+	pr->priv->xpos_filters = mame_gui_prefs_get_int_property_from_key_file (pr, "xpos-filters");
+	pr->priv->xpos_gamelist = mame_gui_prefs_get_int_property_from_key_file (pr, "xpos-gamelist");
 	
 	/* Startup preferences */
-	pr->priv->GameCheck = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "gamecheck", &error);
-	pr->priv->VersionCheck = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "versioncheck", &error);
-	pr->priv->use_xmame_options = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "usexmameoptions", &error);
-	pr->priv->gui_joy = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "usejoyingui", &error);
-	pr->priv->joystick_name = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "joystick-name", &error);
+	pr->priv->GameCheck = mame_gui_prefs_get_bool_property_from_key_file (pr, "gamecheck");
+	pr->priv->VersionCheck = mame_gui_prefs_get_bool_property_from_key_file (pr, "versioncheck");
+	pr->priv->use_xmame_options = mame_gui_prefs_get_bool_property_from_key_file (pr, "usexmameoptions");
+	pr->priv->gui_joy = mame_gui_prefs_get_bool_property_from_key_file (pr, "usejoyingui");
+	pr->priv->joystick_name = mame_gui_prefs_get_string_property_from_key_file (pr, "joystick-name");
 	if (!pr->priv->joystick_name)
 		pr->priv->joystick_name = g_strdup (get_joy_dev ());
 	
 	/* Miscellaneous preferences */
-	pr->priv->theprefix = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", "theprefix", &error);
-	pr->priv->clone_color = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "clone-color", &error);
+	pr->priv->theprefix = mame_gui_prefs_get_bool_property_from_key_file (pr, "theprefix");
+	pr->priv->clone_color = mame_gui_prefs_get_string_property_from_key_file (pr, "clone-color");
 	if (!pr->priv->clone_color)
 		pr->priv->clone_color = g_strdup ("grey");
-	pr->priv->current_rom_name = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "current-rom", &error);
-	pr->priv->current_executable_name = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", "current-executable", &error);
+	pr->priv->current_rom_name = mame_gui_prefs_get_string_property_from_key_file (pr, "current-rom");
+	pr->priv->current_executable_name = mame_gui_prefs_get_string_property_from_key_file (pr, "current-executable");
 
 	/* Load the executable paths */
 	str_array = g_key_file_get_string_list (pr->priv->prefs_ini_file, "Preferences", "executable-paths", &paths, &error);
@@ -652,15 +655,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	/* Directory preferences */
 	GMAMEUI_DEBUG ("Reading directories preferences from file");
 	for (i = 0; i < NUM_DIRS; i++) {
-		pr->priv->directories[i] = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences",
-								  directory_prefs[i].name, &error);
-		
-		if (error) {
-			GMAMEUI_DEBUG ("Error loading directory preference %s: %s",
-				       directory_prefs[i].name, error->message);
-			g_error_free (error);
-			error = NULL;
-		}
+		pr->priv->directories[i] = mame_gui_prefs_get_string_property_from_key_file (pr, directory_prefs[i].name);
 		
 		/* If no values set, set default values */
 		if (!pr->priv->directories[i])
@@ -926,4 +921,49 @@ static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param,
 	
 	/* FIXME TODO Preferences is a temporary group name - need to find a way to
 	   add more groups */
+}
+
+static gboolean mame_gui_prefs_get_bool_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
+	GError *error = NULL;
+	gboolean val;
+	
+	val = g_key_file_get_boolean (pr->priv->prefs_ini_file, "Preferences", property, &error);
+
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving boolean UI option %s - %s", property, error->message);
+		g_error_free (error);
+		error = NULL;
+	}
+	
+	return val;     /* If error, val will be NULL */
+}
+
+static gint mame_gui_prefs_get_int_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
+	GError *error = NULL;
+	gint val;
+	
+	val = g_key_file_get_integer (pr->priv->prefs_ini_file, "Preferences", property, &error);
+
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving integer UI option %s - %s", property, error->message);
+		g_error_free (error);
+		error = NULL;
+	}
+	
+	return val;     /* If error, val will be NULL */
+}
+
+static gchar* mame_gui_prefs_get_string_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
+	GError *error = NULL;
+	gchar* val;
+	
+	val = g_key_file_get_string (pr->priv->prefs_ini_file, "Preferences", property, &error);
+
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving string UI option %s - %s", property, error->message);
+		g_error_free (error);
+		error = NULL;
+	}
+	
+	return val;     /* If error, val will be NULL */
 }

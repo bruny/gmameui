@@ -263,32 +263,12 @@ get_rom_clone_name (RomEntry *rom)
 	if (strcmp (rom->cloneof, "-")) {
 		RomEntry *tmprom;
 
-		for (l = g_list_first (game_list.roms), game_found = FALSE; l; l = g_list_next (l)) {
-
-			tmprom = (RomEntry *)l->data;
-			if (!strcmp (tmprom->romname, rom->cloneof)) {
-				/* TODO FIXME Move name generation to a common rom_entry function */
-				gboolean the_prefix;
-				
-				g_object_get (main_gui.gui_prefs,
-					      "theprefix", &the_prefix,
-					      NULL);
-				
-				if (tmprom->the_trailer && the_prefix)
-					value = g_strdup_printf ("%s, The %s - \"%s\"",
-								 tmprom->gamename, tmprom->gamenameext, rom->cloneof);
-				else if (tmprom->the_trailer && !the_prefix)
-					value = g_strdup_printf ("The %s %s - \"%s\"",
-								 tmprom->gamename, tmprom->gamenameext, rom->cloneof);
-				else
-					value = g_strdup_printf ("%s %s - \"%s\"",
-								 tmprom->gamename, tmprom->gamenameext, rom->cloneof);
-				break;
-			}
-		}
-
-		if (!value)
+		tmprom = get_rom_from_gamelist_by_name (gui_prefs.gl, rom->cloneof);
+		if (tmprom) {
+			value = g_strdup_printf ("%s - \"%s\"", rom_entry_get_list_name (tmprom), rom->cloneof);
+		} else {
 			value = g_strdup_printf (" - \"%s\"", rom->cloneof);
+		}
 	}
 
 	return value;

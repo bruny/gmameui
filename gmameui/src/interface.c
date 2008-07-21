@@ -331,7 +331,7 @@ create_MainWindow (void)
 	gint show_filters, show_screenshot, show_flyer;
 	gint show_statusbar, show_toolbar;
 	gint current_mode;
-	
+		
 	g_object_get (main_gui.gui_prefs,
 		      "ui-width", &ui_width,
 		      "ui-height", &ui_height,
@@ -923,11 +923,13 @@ create_MainWindow (void)
 	g_object_get (main_gui.gui_prefs, "file-catver", &catver_file, NULL);
 	
 	if (catver_file) {
+		GList *catlist, *verlist;
 		/* Categories */
-		for (listpointer = g_list_first (game_list.categories);
+		catlist = mame_gamelist_get_categories_glist (gui_prefs.gl);
+		for (listpointer = g_list_first (catlist);
 		     (listpointer);
 		     listpointer = g_list_next (listpointer)) {
-			     folder_filter = gmameui_filter_new ();
+			folder_filter = gmameui_filter_new ();
 			     g_object_set (folder_filter,
 					   "name", (gchar *)listpointer->data,
 					   "folderid", CATEGORIES,
@@ -942,8 +944,10 @@ create_MainWindow (void)
 							      "Category");
 			     g_object_unref (folder_filter);
 		}
+		
 		/* Version */
-		for (listpointer = g_list_first (game_list.versions);
+		verlist = mame_gamelist_get_versions_glist (gui_prefs.gl);
+		for (listpointer = g_list_first (verlist);
 		     (listpointer);
 		     listpointer = g_list_next (listpointer)) {
 			     folder_filter = gmameui_filter_new ();
@@ -963,8 +967,6 @@ create_MainWindow (void)
 		}
 	}
 	g_free (catver_file);
-
-	
 	
 	/* Enable keyboard shortcuts defined in the UI Manager */
 	gtk_window_add_accel_group (GTK_WINDOW (main_window), accel_group);     /* FIXME TODO Is this one required? */
@@ -1006,7 +1008,7 @@ create_MainWindow (void)
 	
 	/* Show the main window and all its children */
 	//gtk_widget_show_all (GTK_WIDGET (main_window));
-	
+
 	/* New stuff starts here */
 	
 	/* Create the UI of the Game List */

@@ -142,6 +142,7 @@ typedef enum {
 /* FIXME TODO Try and get rid of this struct */
 struct gui_prefs_struct {
 	RomEntry *current_game;
+	MameGamelist *gl;
 };
 
 struct gui_prefs_struct gui_prefs;
