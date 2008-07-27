@@ -1,3 +1,288 @@
+2008-07-27 16:58  adburton
+
+	* NEWS, configure.ac: Prepare NEWS and configure.ac files in
+	  preparation for release
+
+2008-07-27 16:45  adburton
+
+	* src/: game_list.h, interface.c: Fix incorrect setting of gamelist
+	  width when toggling RH sidebar
+
+2008-07-21 21:49  adburton
+
+	* src/: audit.c, callbacks.c, directories.c, game_list.c,
+	  game_list.h, gmameui-gamelist-view.c, gmameui.c, gmameui.h,
+	  gui_prefs.c, interface.c, io.c, mameio.c, properties.c,
+	  rom_entry.c, rom_entry.h: Migrate struct gamelist to GObject,
+	  code refactoring, fix errors on startup
+
+2008-07-17 18:46  adburton
+
+	* data/gmameui_prefs.glade, src/gui_prefs_dialog.c: Code
+	  refactoring, added Samples column as a toggle, update column view
+	  after preferences dialog closed rather than on re-start
+
+2008-07-16 19:40  adburton
+
+	* data/Makefile.am, data/main_gui.glade, data/sidebar.glade,
+	  src/gmameui-gamelist-view.c, src/gmameui-gamelist-view.h,
+	  src/Makefile.am, src/callbacks.c, src/callbacks.h,
+	  src/filters_list.c, src/game_list.c, src/gmameui.c,
+	  src/gmameui.h, src/gui.c, src/gui.h, src/interface.c,
+	  src/interface.h, src/rom_entry.c, src/rom_entry.h: Code
+	  reorganisation, fix startup errors/warnings, ellipsize text
+	  columns in filters list and gamelist when size is reduced, remove
+	  filter horizontal scroll bar, add new Glade file for main UI
+
+2008-07-10 23:28  adburton
+
+	* src/: gui.c, gui_prefs.c, interface.c: Fix some non-critical
+	  errors on startup
+
+2008-07-07 18:12  adburton
+
+	* src/: callbacks.c, gmameui.c, gui.c, gui.h: Amend playback to use
+	  ROM of selected inp rather than requiring the user to select the
+	  correct ROM first
+
+2008-06-29 14:33  adburton
+
+	* Makefile.am, configure.ac: Add conditional check for building
+	  docs for non-Gnome users
+
+2008-06-28 15:17  adburton
+
+	* src/gmameui.c: Fix samples filter
+
+2008-06-28 14:23  adburton
+
+	* src/: callbacks.c, options_string.c: Fix segfault when generating
+	  options string for empty ROM or sample paths, move cursor to
+	  selected game on startup
+
+2008-06-25 20:31  adburton
+
+	* src/directories.c, src/gmameui.c, src/gmameui.h, src/gui.c,
+	  src/gui_prefs.c, src/gui_prefs.h, data/directories.glade,
+	  src/interface.c, src/io.c, src/io.h: Use gui_prefs object to set
+	  executable paths and catver file, make directory window
+	  instant-apply, fix segfault when no rom or sample path is set,
+	  remove redundant io.c file loading functions, retain selection of
+	  current executable
+
+2008-06-22 19:15  adburton
+
+	* src/: callbacks.c, callbacks.h, gui.c, gui.h, interface.c: Fix
+	  keyboard shortcut, allow Enter to start executable, fix UI
+	  manager group sensitivity when no executable is available
+
+2008-06-22 14:37  adburton
+
+	* gmameui.desktop, gmameui.spec: [no log message]
+
+2008-06-22 09:13  adburton
+
+	* Makefile.am: Fix dist error
+
+2008-06-22 09:09  adburton
+
+	* intltool-extract.in, intltool-merge.in, intltool-update.in: [no
+	  log message]
+
+2008-06-22 08:46  adburton
+
+	* configure.ac, INSTALL, NEWS, Makefile.am: Bump version for
+	  release, update NEWS and INSTALL, temporarily disable build of
+	  Help
+
+2008-06-21 20:10  adburton
+
+	* src/: callbacks.c, callbacks.h, gui.h: Options dialog is specific
+	  to XMAME or SDLMAME for both game-specific and default options
+
+2008-06-08 09:03  adburton
+
+	* configure.ac: Add GNOME_DOC_INIT call to configure.ac
+
+2008-06-07 19:28  adburton
+
+	* help/C/gmameui.xml: Fix broken XML
+
+2008-06-07 19:24  adburton
+
+	* Makefile.am: Added support for Help manual
+
+2008-06-07 19:20  adburton
+
+	* configure.ac, gnome-doc-utils.make: Added support for Help manual
+
+2008-06-07 19:20  adburton
+
+	* help/: ChangeLog, Makefile.am, gmameui.omf.in, C/Makefile.am,
+	  C/fdl-appendix.xml, C/gmameui.xml, C/legal.xml: Initial revision
+
+2008-06-07 18:38  adburton
+
+	* po/en_AU.po: Updated translations
+
+2008-06-07 18:22  adburton
+
+	* src/gui_prefs_dialog.c: Set translation domain for i18n, fix
+	  segfault on repeated entries to prefs dialog
+
+2008-06-07 18:21  adburton
+
+	* src/: audit.c, gui.c, mame_options.c, properties.c: Set
+	  translation domain for i18n
+
+2008-06-07 17:13  adburton
+
+	* src/interface.c: Added translation strings
+
+2008-06-07 16:03  adburton
+
+	* src/: gmameui.h, gui_prefs.c, gui_prefs.h, io.c, interface.c,
+	  gui.c: Add support for saving width of hpaned elements using
+	  gui_prefs
+
+2008-06-05 17:42  adburton
+
+	* po/: LINGUAS, POTFILES.in, en_AU.po: Added English (Australian)
+	  translation
+
+2008-06-05 17:01  adburton
+
+	* src/callbacks.c: Fix segfault when auditing with no executable
+	  set
+
+2008-06-05 14:42  adburton
+
+	* src/gui.c: Fixed segfault when Splitters preference not found
+
+2008-06-05 14:24  adburton
+
+	* po/it.po: [no log message]
+
+2008-06-05 12:40  adburton
+
+	* data/options.glade: Add preliminary support for -effect option
+
+2008-06-05 12:20  adburton
+
+	* src/directories.c: Migrate ctrlr and ini directory preferences to
+	  new preference handling
+
+2008-06-05 12:08  adburton
+
+	* src/io.c: Migrate ctrlr and ini directory preferences to new
+	  preference handling
+
+2008-06-05 10:37  adburton
+
+	* src/gui_prefs.c: Add callback on change of current ROM name
+
+2008-06-05 10:36  adburton
+
+	* src/gui.c: Modify colour handling when populating and updating
+	  list
+
+2008-06-05 10:28  adburton
+
+	* src/game_list.c: Fixed sorting of ROM entries in gamelist
+
+2008-06-05 10:24  adburton
+
+	* src/callbacks.c: Set current and previous list mode before calls
+	  to re-create the game list
+
+2008-06-04 22:37  adburton
+
+	* src/mame_options.c, src/callbacks.c, src/gmameui.c,
+	  data/options.glade: Add support for OpenGL options, add Options
+	  dialog page for OpenGL
+
+2008-06-04 19:26  adburton
+
+	* AUTHORS, src/about.c: Added translation string for About window,
+	  references to translators in AUTHORS
+
+2008-06-04 19:09  adburton
+
+	* po/: pt_BR.po, LINGUAS: Added Brazilian (Portugese) translation
+	  (thanks Junix)
+
+2008-06-04 19:01  adburton
+
+	* src/gui_prefs_dialog.c: Fixed segfault on preferences dialog open
+	  caused by private attributes
+
+2008-06-03 22:03  adburton
+
+	* src/options_string.c: Added support for ctrlr and ini directories
+
+2008-06-03 21:59  adburton
+
+	* src/: gui_prefs.c, gui_prefs.h: Added support for joystick name
+	  and ctrlr and ini directories
+
+2008-06-03 21:55  adburton
+
+	* src/: gmameui.h, gui.c: Removed columns from details view, code
+	  cleanups
+
+2008-06-03 21:54  adburton
+
+	* src/gmameui.c: Removed redundant functions, retrieve joystick
+	  name using g_object preferences
+
+2008-06-03 21:52  adburton
+
+	* src/callbacks.c: Removed column_layout.h dependency
+
+2008-06-03 18:30  adburton
+
+	* src/: gui_prefs_dialog.c, gui_prefs_dialog.h: Added preferences
+	  dialog for UI options
+
+2008-06-01 18:15  adburton
+
+	* Makefile.am, configure.ac, po/LINGUAS, po/POTFILES.in,
+	  gmameui.spec.in: Add RPM support, Italian translation (thanks Ugo
+	  Viti)
+
+2008-06-01 18:04  adburton
+
+	* INSTALL: Updated install documentation to cater for RPM .spec
+	  file
+
+2008-05-29 20:52  adburton
+
+	* src/: Makefile.am, callbacks.c, callbacks.h, column_layout.c,
+	  column_layout.h, directories.c, filters_list.c, game_list.c,
+	  gmameui-ui.xml, gmameui.c, gmameui.h, gtkjoy.c, gui.c, gui.h,
+	  gui_prefs.c, gui_prefs.h, interface.c, io.c, io.h,
+	  network_game.c, options_string.c, properties.c: Added new
+	  preferences dialog and handling structure
+
+2008-05-29 20:49  adburton
+
+	* data/gmameui_prefs.glade: Added new preferences dialog
+
+2008-05-29 20:48  adburton
+
+	* data/: Makefile.am, column_layout.glade, startup_prefs.glade:
+	  Removed and replace with new preferences dialog
+
+2008-05-15 22:22  adburton
+
+	* src/: Makefile.am, xmame_executable.c: Tagged for version 0.2.2
+	  release
+
+2008-05-15 21:29  adburton
+
+	* configure.ac, NEWS, ChangeLog, BUGS: Committed in preparation for
+	  release
+
 2008-05-15 20:55  adburton
 
 	* src/: gmameui.c, gmameui.h: Code cleanup, fix filters not working
