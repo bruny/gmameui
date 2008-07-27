@@ -66,12 +66,6 @@ enum
 	PROP_GAMELIST_NUM_SAMPLES,
 	NUM_GAMELIST_PROPERTIES
 };
-/*AAAGAMELIST DELETE
-typedef struct {
-	GList *not_checked_list;
-} GameList;
-
-GameList game_list; */
 
 GType mame_gamelist_get_type (void);
 MameGamelist* mame_gamelist_new (void);

@@ -150,9 +150,6 @@ on_screen_shot_activate (GtkAction *action,
 		gtk_widget_show (GTK_WIDGET (main_gui.screenshot_hist_frame));
 	} else {
 		/* Hide snapshot */
-		g_object_set (main_gui.gui_prefs,
-			      "xpos-gamelist", main_gui.scrolled_window_games->allocation.width,
-			      NULL);
 		gtk_paned_set_position (main_gui.hpanedRight, -1);
 		gtk_widget_hide (GTK_WIDGET (main_gui.screenshot_hist_frame));
 	}
