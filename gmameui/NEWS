@@ -1,3 +1,33 @@
+Overview of changes in GMAMEUI 0.2.4
+====================================
+
+* Fixed segfault when closing the Directories window with no ROM or Sample paths set
+
+* Minor UI changes
+  - Emulation can be started by pressing Enter
+  - Set minimum column width based on column's title
+  - Add samples as a toggle column in Gui Prefs dialog
+  - Update gamelist view after Gui Prefs dialog is closed, rather than on restart
+  - Ellipsize text columns in filters list and gamelist when size is reduced
+  - Remove filter horizontal scrollbar
+  - Changing the MAME executable is retained on restart (fixing regression bug)
+  - Fix keyboard shortcuts
+  - Add support for setting cpanel directory
+  - Scroll to the last selected ROM on startup (fixing regression bug)
+  - Samples filter now works again (fixing regression bug)
+
+* Playing back input (.inp) files no longer requires user to have selected the matching ROM. GMAMEUI automatically opens the ROM based on the .inp filename
+
+* Recording input files silently records to the .inp directory, creating it if it doesn't exist
+
+* Code refactoring
+  - Migrating gamelist to GObject for easier refactoring and maintenance
+  - Migrate main window to Glade for UI generation
+  - Fix some startup errors/warnings, particularly GTK-Critical ones relating to g_key_file and GError
+  - Directories window now instant-apply, removing redundant save code on exit
+
+* Added configure switch --disable-doc to avoid building documentation on non-Gnome systems
+
 Overview of changes in GMAMEUI 0.2.3
 ====================================
 

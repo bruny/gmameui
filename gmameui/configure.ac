@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([gmameui], [0.2.3])
+AC_INIT([gmameui], [0.2.4])
 AC_PREREQ(2.5)
 
 AM_INIT_AUTOMAKE
