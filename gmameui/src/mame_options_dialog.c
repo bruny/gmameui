@@ -148,6 +148,7 @@ mame_options_dialog_init (MameOptionsDialog *dlg)
 	/* Widget declarations */
 	GtkWidget *hbox;
 	GtkWidget *scrolled_window;
+	GtkWidget *btn_close;
 	GtkTreeSelection *selection;
 	GtkTreeSortable *sortable;
 	
@@ -213,7 +214,8 @@ mame_options_dialog_init (MameOptionsDialog *dlg)
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dlg)->vbox), hbox,
 			    TRUE, TRUE, 0);
 	
-	gtk_dialog_add_button (GTK_DIALOG (dlg), GTK_STOCK_CLOSE, -7);
+	btn_close = gtk_dialog_add_button (GTK_DIALOG (dlg), GTK_STOCK_CLOSE, -7);
+	gtk_widget_grab_default (btn_close);
 	
 	gtk_widget_show (hbox);
 }

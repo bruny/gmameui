@@ -68,16 +68,12 @@ struct _MameGuiPrefsDialogPrivate {
 /* Preferences dialog */
 static void mame_gui_prefs_dialog_class_init (MameGuiPrefsDialogClass *class);
 static void mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg);
-static void on_prefs_checkbutton_toggled (GtkWidget *toggle, 
-										  gchar *widget_name);
-static void on_prefs_col_checkbutton_toggled (GtkWidget *toggle,
-											  gchar *widget_name);
-static void on_prefs_checkbutton_theprefix_toggled (GtkWidget *toggle, 
-													gpointer user_data);
-static void on_prefs_colour_button_toggled (GtkWidget *color, 
-											gpointer user_data);
-static void on_mame_gui_prefs_dialog_destroyed (GtkWidget *prefs_dialog,
-												gpointer user_data);
+static void on_prefs_entry_changed (GtkWidget *entry, gchar *widget_name);
+static void on_prefs_checkbutton_toggled (GtkWidget *toggle, gchar *widget_name);
+static void on_prefs_col_checkbutton_toggled (GtkWidget *toggle, gchar *widget_name);
+static void on_prefs_checkbutton_theprefix_toggled (GtkWidget *toggle, gpointer user_data);
+static void on_prefs_colour_button_toggled (GtkWidget *color, gpointer user_data);
+static void on_mame_gui_prefs_dialog_destroyed (GtkWidget *prefs_dialog, gpointer user_data);
 static gboolean on_mame_gui_prefs_dialog_deleted (GtkWidget *window,
 				                       GdkEventAny *event,
 				                       MameGuiPrefsDialog *dlg);
@@ -130,6 +126,7 @@ mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 	gboolean versioncheck;
 	gboolean usexmameoptions;
 	gboolean usejoyingui;
+	gchar *joystick_name;
 	gboolean theprefix;
 	
 	gchar *clone_color;
@@ -150,17 +147,18 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 	/* Startup option widgets */
 	
 	g_object_get (main_gui.gui_prefs,
-				  /* Startup options */
-				  "gamecheck", &gamecheck,
-				  "versioncheck", &versioncheck,
-				  "usexmameoptions", &usexmameoptions,
-				  "usejoyingui", &usejoyingui,
-				  /* Column options */
-				  "cols-shown", &cols_shown,
-				  /* Miscellaneous options */
-				  "theprefix", &theprefix,
-				  "clone-color", &clone_color,
-				  NULL);
+		      /* Startup options */
+		      "gamecheck", &gamecheck,
+		      "versioncheck", &versioncheck,
+		      "usexmameoptions", &usexmameoptions,
+		      "usejoyingui", &usejoyingui,
+		      "joystick-name", &joystick_name,
+		      /* Column options */
+		      "cols-shown", &cols_shown,
+		      /* Miscellaneous options */
+		      "theprefix", &theprefix,
+		      "clone-color", &clone_color,
+		      NULL);
 
 	widget = glade_xml_get_widget (xml, "gamecheck");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), gamecheck);
@@ -183,7 +181,10 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 	g_signal_connect (widget, "toggled", 
 			  G_CALLBACK (on_prefs_checkbutton_toggled), "usejoyingui");
 	
-	/* FIXME TODO - joy dev entry */
+	widget = glade_xml_get_widget (xml, "gui_joy_entry");
+	gtk_entry_set_text (GTK_ENTRY (widget), joystick_name);
+	g_signal_connect (widget, "changed", 
+			  G_CALLBACK (on_prefs_entry_changed), "joystick-name");
 
 	/* Column layout widgets - set values */
 	int i;
@@ -256,6 +257,17 @@ mame_gui_prefs_dialog_new (void)
 	return g_object_new (MAME_TYPE_GUI_PREFS_DIALOG,
 			     "title", "GMAMEUI Preferences",
 			     NULL);
+}
+
+static void
+on_prefs_entry_changed (GtkWidget *entry, gchar *widget_name)
+{
+	GMAMEUI_DEBUG ("%s text changed", widget_name);
+
+	/* Trigger the set, which causes a save in the mame_gui_prefs_set_property () function */
+	g_object_set (main_gui.gui_prefs,
+		      widget_name, gtk_entry_get_text (GTK_ENTRY (entry)),
+		      NULL);
 }
 
 static void

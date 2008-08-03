@@ -89,9 +89,7 @@ on_toolbar_view_menu_activate (GtkAction *action,
 	else
 		gtk_widget_hide (GTK_WIDGET (main_gui.toolbar));
 
-	g_object_set (main_gui.gui_prefs,
-		      "show-toolbar", visible,
-		      NULL);
+	g_object_set (main_gui.gui_prefs, "show-toolbar", visible, NULL);
 }
 
 void
@@ -102,24 +100,17 @@ on_folder_list_activate (GtkAction *action,
 
 	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 
-	g_object_set (main_gui.gui_prefs,
-		      "show-filterlist", visible,
-		      NULL);
+	g_object_set (main_gui.gui_prefs, "show-filterlist", visible, NULL);
 	
 	if (visible) {
 		/* Show filters */
 		gint xpos_filters;
-		g_object_get (main_gui.gui_prefs,
-			      "xpos-filters", &xpos_filters,
-			      NULL);
+		g_object_get (main_gui.gui_prefs, "xpos-filters", &xpos_filters, NULL);
 		gtk_paned_set_position (main_gui.hpanedLeft, xpos_filters);
 
 		gtk_widget_show (GTK_WIDGET (main_gui.scrolled_window_filters));
 	} else {
 		/* Hide filters */
-		g_object_set (main_gui.gui_prefs,
-			      "xpos-filters", main_gui.scrolled_window_filters->allocation.width,
-			      NULL);
 		gtk_paned_set_position (main_gui.hpanedLeft, 0);
 
 		gtk_widget_hide (GTK_WIDGET (main_gui.scrolled_window_filters));
@@ -142,9 +133,7 @@ on_screen_shot_activate (GtkAction *action,
 	if (visible) {
 		/* Show snapshot */
 		gint xpos_gamelist;
-		g_object_get (main_gui.gui_prefs,
-			      "xpos-gamelist", &xpos_gamelist,
-			      NULL);
+		g_object_get (main_gui.gui_prefs, "xpos-gamelist", &xpos_gamelist, NULL);
 		gtk_paned_set_position (main_gui.hpanedRight, xpos_gamelist);
 
 		gtk_widget_show (GTK_WIDGET (main_gui.screenshot_hist_frame));
@@ -168,9 +157,7 @@ on_status_bar_view_menu_activate       (GtkAction *action,
 	else
 		gtk_widget_hide (GTK_WIDGET (main_gui.tri_status_bar));
 
-	g_object_set (main_gui.gui_prefs,
-		      "show-statusbar", visible,
-		      NULL);
+	g_object_set (main_gui.gui_prefs, "show-statusbar", visible, NULL);
 }
 
 /* This function is called when the radio option defining the list mode is changed. */
@@ -335,9 +322,9 @@ create_MainWindow (void)
 		      "show-filterlist", &show_filters,
 		      "show-screenshot", &show_screenshot,
 		      "show-flyer", &show_flyer,
-		      "current-mode", &current_mode,
 		      "show-statusbar", &show_statusbar,
 		      "show-toolbar", &show_toolbar,
+		      "current-mode", &current_mode,
 		      "xpos-filters", &xpos_filters,
 		      "xpos-gamelist", &xpos_gamelist,
 		      NULL);
@@ -963,6 +950,7 @@ create_MainWindow (void)
 			     g_object_unref (folder_filter);
 		}
 	}
+	gtk_widget_show (main_gui.filters_list);
 	g_free (catver_file);
 	
 	/* Enable keyboard shortcuts defined in the UI Manager */
@@ -991,7 +979,7 @@ create_MainWindow (void)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
 								 "/MenuBar/ViewMenu/ViewFolderListMenu")),
 				      show_filters);
-	
+
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
 								 "/MenuBar/ViewMenu/ViewStatusBarMenu")),
 				      show_statusbar);

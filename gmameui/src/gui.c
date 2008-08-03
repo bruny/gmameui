@@ -718,7 +718,7 @@ g_message (_("Time to create main window, filters and gamelist: %.02f seconds"),
 #endif
 
 	/* Show and hence realize mainwindow so that MainWindow->window is available */
-	gtk_widget_show_all (MainWindow);
+	gtk_widget_show (MainWindow);
 	
 	/* Need to set the size here otherwise it move when we create the gamelist 
 	if (show_screenshot)
