@@ -24,8 +24,9 @@
 #ifndef __XMAME_EXECUTABLE_H__
 #define __XMAME_EXECUTABLE_H__
 
-#include "common.h"
 #include <stdio.h>
+#include <sys/types.h>  /* For pid_t */
+#include "common.h"
 #include "xmame_options.h"
 
 typedef enum {
@@ -198,4 +199,11 @@ __attribute__((format(printf, 2, 3)))
 ;
 
 void xmame_close_pipe (const XmameExecutable *exec, FILE *pipe);
+
+void
+mame_exec_launch_command (gchar *command, pid_t *pid, int *stdout, int *stderr);
+
+GIOChannel *
+mame_executable_set_up_io_channel (gint fd, GIOCondition cond, GIOFunc func, gpointer data);
+
 #endif

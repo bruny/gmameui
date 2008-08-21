@@ -26,13 +26,54 @@
 
 #include <gtk/gtk.h>
 
-GtkWidget *
-create_checking_games_window (void);
+G_BEGIN_DECLS
+#define GMAMEUI_TYPE_AUDIT            (gmameui_audit_get_type ())
+#define GMAMEUI_AUDIT(o)            (G_TYPE_CHECK_INSTANCE_CAST((o), GMAMEUI_TYPE_AUDIT, GmameuiAudit))
+#define GMAMEUI_AUDIT_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST ((k), GMAMEUI_TYPE_AUDIT, GmameuiAuditClass))
+#define GMAMEUI_IS_AUDIT(o)         (G_TYPE_CHECK_INSTANCE_TYPE ((o), GMAMEUI_TYPE_AUDIT))
+#define GMAMEUI_IS_AUDIT_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), GMAMEUI_TYPE_AUDIT))
+#define GMAMEUI_AUDIT_GET_CLASS(o)  (G_TYPE_INSTANCE_GET_CLASS ((o), GMAMEUI_TYPE_AUDIT, GmameuiAuditClass))
 
-void
-launch_checking_games_window (void);
+typedef struct _GmameuiAudit GmameuiAudit;
+typedef struct _GmameuiAuditClass GmameuiAuditClass;
+typedef struct _GmameuiAuditPrivate GmameuiAuditPrivate;
 
-gint
-process_audit_romset (gchar *line, gboolean error_during_check);
+struct _GmameuiAudit {
+	GObject parent;
+	
+	GmameuiAuditPrivate *priv;
+	/* define public instance variables here */
+};
+
+struct _GmameuiAuditClass {
+	GObjectClass parent;
+	/* define vtable methods and signals here */
+	
+	/* Signal prototypes */
+	void  (* romset_audited) (GmameuiAudit *audit, gchar *audit_line, gint type, gint auditresult);
+};
+
+/* Properties */
+enum
+{
+	PROP_AUDIT_0,
+	NUM_AUDIT_PROPERTIES
+};
+
+enum {
+	AUDIT_TYPE_ROM,
+	AUDIT_TYPE_SAMPLE
+};
+
+GType gmameui_audit_get_type (void);
+GmameuiAudit* gmameui_audit_new (void);
+
+void   mame_audit_start_full           (void);
+void   mame_audit_start_single         (gchar *romname);
+void   mame_audit_stop_full_audit      (GmameuiAudit *au);
+gchar* get_romset_name_from_audit_line (gchar *line);
+
+G_END_DECLS
+
 
 #endif

@@ -1405,3 +1405,81 @@ xmame_get_options (XmameExecutable *exec)
 	
 	return exec->options;
 }
+
+/* Sets up an IO channel that calls func whenever data is available */
+GIOChannel *
+mame_executable_set_up_io_channel (gint fd, GIOCondition cond, GIOFunc func, gpointer data)
+{
+	GIOChannel *ioc;
+
+	/* set up handler for data */
+	ioc = g_io_channel_unix_new (fd);
+
+	g_io_channel_set_encoding (ioc, NULL, NULL);
+	/*g_io_channel_set_buffered (ioc, FALSE);*/
+
+	/* Tell the io channel to close the file descriptor
+	 *  when the io channel gets destroyed */
+	g_io_channel_set_close_on_unref (ioc, TRUE);
+
+	g_io_channel_set_flags (ioc, G_IO_FLAG_NONBLOCK, NULL);
+	
+	/* g_io_add_watch() adds its own reference,
+	 *  which will be dropped when the watch source
+	 *  is removed from the main loop (which happens
+	 *  when we return FALSE from the callback) */
+	g_io_add_watch (ioc, cond, func, data);
+	g_io_channel_unref (ioc);
+
+	GMAMEUI_DEBUG ("Set up IO channel on fd %d", fd);
+	
+	return ioc;
+}
+
+/*
+ * Execute a MAME command
+ * command is a string
+ * command_pid is the address of a pid_t to store the process ID of the launched process
+ * child_stdout is the descripter of the stdout stream
+ * child_stderr is the descripter of the stderr stream
+ * e.g. mame_exec_launch_command (command, &command_pid, &child_stdout, &child_stderr); 
+ */
+void
+mame_exec_launch_command (gchar *command, pid_t *pid, int *stdout, int *stderr) {
+	gchar **argv  = NULL;
+	GError *error = NULL;
+	
+	if (!g_shell_parse_argv (command, NULL, &argv, &error)) {
+		GMAMEUI_DEBUG ("Could not parse MAME command line arguments: %s", error->message);
+		g_error_free (error);
+		error = NULL;
+		return;
+	}
+
+	int arg = 0;
+	GMAMEUI_DEBUG ("Command line for command is:");
+	while (argv[arg] != NULL) {
+		printf("%s ", argv[arg++]);
+	}
+	printf("\n");
+
+	/* Note - passing pointers to the fds, so will not prefix the pointer &,
+	   in contrast to most tutorials or examples */
+	if (!g_spawn_async_with_pipes (NULL, argv, NULL,
+				       G_SPAWN_DO_NOT_REAP_CHILD,
+				       NULL, NULL,
+				       pid,
+				       NULL,
+				       stdout,
+				       stderr,
+				       &error)) {
+		GMAMEUI_DEBUG ("Error spawning MAME command: %s", error->message);
+		g_error_free (error);
+		error = NULL;
+	} else {
+		GMAMEUI_DEBUG ("Created new child process with pid %lu", (gulong) *pid);
+	}
+
+	g_strfreev (argv);
+	argv = NULL;
+}

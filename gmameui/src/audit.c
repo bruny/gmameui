@@ -28,196 +28,545 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/types.h>  /* For pid_t */
+#include <sys/wait.h>   /* For WIF* */
+#include <signal.h>      /* For SIGTERM */
 #include <gdk/gdkkeysyms.h>
 #include <glade/glade.h>
 
 #include "gui.h"
 #include "audit.h"
 #include "options_string.h"
+#include "xmame_executable.h"
+#include "gmameui-marshaller.h"
 
 #define BUFFER_SIZE 1000
 
-static GtkWidget *roms_check_progressbar;
-static GtkWidget *samples_check_progressbar;
-static GtkWidget *checking_games_window;
-static GtkWidget *checking_games_label;
-static GtkWidget *details_check_text;
-static GtkTextBuffer *details_check_buffer;
-static GtkWidget *correct_roms_value;
-static GtkWidget *bestavailable_roms_value;
-static GtkWidget *notfound_roms_value;
-static GtkWidget *incorrect_roms_value;
-static GtkWidget *total_roms_value;
-static GtkWidget *correct_samples_value;
-static GtkWidget *incorrect_samples_value;
-static GtkWidget *total_samples_value;
-static GtkWidget *close_audit_button;
-static GtkWidget *stop_audit_button;
+static void
+process_audit_romset (gchar *line, gint settype);
 
-static int audit_cancelled, close_audit;
+/* Audit class stuff */
+G_DEFINE_TYPE (GmameuiAudit, gmameui_audit, G_TYPE_OBJECT)
+
+struct _GmameuiAuditPrivate {
+	gchar *name;
+};
+
+/* Signals enumeration */
+enum
+{
+	ROMSET_AUDITED,		/* Emitted when a romset or sampleset line is found */
+	ROM_AUDIT_COMPLETE,     /* Emitted when the romset audit process has finished */
+	SAMPLE_AUDIT_COMPLETE,  /* Emitted when the sampleset audit process has finished */
+	LAST_SIGNAL
+};
+
+
+static pid_t        command_pid;
+static int          child_stdout;
+static int          child_stderr;
+
+static pid_t        command_sample_pid;
+static int          child_sample_stdout;
+static int          child_sample_stderr;
+
+/* Audit class stuff */
+static guint signals[LAST_SIGNAL] = { 0 };
+
+static void gmameui_audit_class_init (GmameuiAuditClass *klass);
+static void gmameui_audit_init (GmameuiAudit *au);
+static void gmameui_audit_finalize (GObject *obj);
+
+static void
+gmameui_audit_class_init (GmameuiAuditClass *klass)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	
+/*	object_class->set_property = gmameui_audit_set_property;
+	object_class->get_property = gmameui_audit_get_property;*/
+	object_class->finalize = gmameui_audit_finalize;
+	
+	signals[ROMSET_AUDITED] = g_signal_new ("romset-audited",
+						G_OBJECT_CLASS_TYPE (object_class),
+						G_SIGNAL_RUN_FIRST,
+						G_STRUCT_OFFSET (GmameuiAuditClass, romset_audited),
+						NULL, NULL,     /* Accumulator and accumulator data */
+						gmameui_marshaller_VOID__STRING_INT_INT,
+						G_TYPE_NONE,    /* Return type */
+						3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT	/* Three parameters */
+						);
+	
+
+	signals[ROM_AUDIT_COMPLETE] = g_signal_new ("rom-audit-complete",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_FIRST,
+						0,		/* This signal is not handled by the class */
+						NULL, NULL,     /* Accumulator and accumulator data */
+						g_cclosure_marshal_VOID__VOID,
+						G_TYPE_NONE,    /* Return type */
+						0	        /* No parameters */
+						);
+	
+	signals[SAMPLE_AUDIT_COMPLETE] = g_signal_new ("sample-audit-complete",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_FIRST,
+						0,		/* This signal is not handled by the class */
+						NULL, NULL,     /* Accumulator and accumulator data */
+						g_cclosure_marshal_VOID__VOID,
+						G_TYPE_NONE,    /* Return type */
+						0	        /* No parameters */
+						);
+}
+
+static void
+gmameui_audit_init (GmameuiAudit *au)
+{
+	
+GMAMEUI_DEBUG ("Creating gmameui_audit object");	
+	au->priv = g_new0 (GmameuiAuditPrivate, 1);
+	
+GMAMEUI_DEBUG ("Creating gmameui_audit object... done");
+}
+
+GmameuiAudit* gmameui_audit_new (void)
+{
+	return g_object_new (GMAMEUI_TYPE_AUDIT, NULL);
+}
+
+static void
+gmameui_audit_finalize (GObject *obj)
+{
+	GMAMEUI_DEBUG ("Finalising gmameui_audit object");
+	
+	GmameuiAudit *au = GMAMEUI_AUDIT (obj);
+	
+	
+	g_free (au->priv);
+	
+	GMAMEUI_DEBUG ("Finalising gmameui_audit object... done");
+
+}
+
+
+/* Function takes a line e.g. 'rom astro is bad' and extracts the romname -
+   this is usually the second word. This is usually used so that the calling
+   area can then find the relevant ROM and update it */
+gchar*
+get_romset_name_from_audit_line (gchar *line)
+{
+	gchar *romname, *p;
+	
+	/* Return if romname is NULL or contains no spaces */
+	g_return_val_if_fail (line != NULL, NULL);
+	g_return_val_if_fail (strstr (line, " ") != NULL, NULL);
+	
+	romname = strstr (line, " ") + 1;
+	
+	/* FIXME TODO sampleset not found contains " around romname */
+	for (p = strstr (line, " ") + 1; (*p && (*p != ' ') && (*p != '\n')); p++);
+	*p = '\0';
+	
+	/*GMAMEUI_DEBUG ("%s - %s", line, romname);*/
+	
+	return romname;
+}
+
+static void
+spawned_audit_complete (GPid child_pid, gint status, gpointer user_data)
+{
+	g_print ("Child PID: %lu exit status: %d\n", (gulong) child_pid, status);
+
+	/* Not sure how the exit status works on win32. Unix code follows */
+
+#ifdef G_OS_UNIX
+
+	if (WIFEXITED (status)) /* Did child terminate in a normal way? */
+	{
+		if (WEXITSTATUS (status) == EXIT_SUCCESS)
+		{
+			g_print ("Child PID: %lu exited normally without errors.\n", (gulong) child_pid);
+		}
+		else
+		{
+			g_print ("Child PID: %lu exited with an error (code %d).\n", 
+			         (gulong) child_pid, WEXITSTATUS (status));
+		}
+
+	}
+	else if (WIFSIGNALED (status)) /* was it terminated by a signal */
+	{
+		g_print ("Child PID: %lu was terminated by signal %d\n", 
+		         (gulong) child_pid, WTERMSIG (status));
+		
+	}
+	else 
+	{
+		g_print ("Child PID: %lu was terminated in some other way.\n", 
+		         (gulong) child_pid);
+	}
+
+#endif /* G_OS_UNIX */
+
+	g_spawn_close_pid (child_pid); /* does nothing on unix, needed on win32 */
+
+}
 
 static gboolean
-stop_audit (GtkWidget *widget,
-	    GtkWidget *button)
+handle_sample_audit_command_stdout_io (GIOChannel * ioc,
+				GIOCondition condition,
+				gpointer data)
 {
-	audit_cancelled = TRUE;
-	gtk_widget_set_sensitive (button, FALSE);
-	close_audit = FALSE;
-GMAMEUI_DEBUG("Audit stopped");
+	gboolean broken_pipe = FALSE;
+	
+	if (condition & G_IO_IN) {      /* G_IO_IN = Data to read on the pipe */
+		GError * error = NULL;
+		GString * string;
+
+		string = g_string_new (NULL);
+		
+		while (ioc->is_readable != TRUE);
+		
+		do {
+			gint status;
+			do {
+				status = g_io_channel_read_line_string (ioc, string, NULL, &error);
+				if (status == G_IO_STATUS_EOF) {
+					/* G_IO_STATUS_EOF = End of file */
+					broken_pipe = TRUE;
+				} else if (status == G_IO_STATUS_AGAIN) {
+					/* G_IO_STATUS_AGAIN = Resource temporarily unavailable */
+					if (gtk_events_pending ()) {
+						while (gtk_events_pending ()) {
+							gtk_main_iteration ();
+						}
+					}
+				} 
+			} while (status == G_IO_STATUS_AGAIN && broken_pipe == FALSE);
+
+			if (broken_pipe == TRUE) {
+				break;
+			}
+
+			if (status != G_IO_STATUS_NORMAL) {
+				if (error != NULL) {
+					g_warning ("handle_audit_command_stdout_io(): %s", error->message);
+					g_error_free (error);
+				}
+				continue;
+			}
+			
+			string = g_string_truncate (string, string->len - 1);
+			if (string->len <= 1) {
+				continue;
+			}
+
+			process_audit_romset (string->str, AUDIT_TYPE_SAMPLE);
+
+			while (gtk_events_pending ())
+				gtk_main_iteration ();
+			
+		} while (g_io_channel_get_buffer_condition (ioc) & G_IO_IN);
+
+		g_string_free (string, TRUE);
+	}
+	
+	if (!(condition & G_IO_IN) || broken_pipe == TRUE) {
+		GMAMEUI_DEBUG ("Sample audit completed");
+
+		g_signal_emit (gui_prefs.audit, signals[SAMPLE_AUDIT_COMPLETE], 0, NULL);
+		return FALSE;
+	}
+
 	return TRUE;
 }
 
+static gboolean
+handle_audit_command_stdout_io (GIOChannel * ioc,
+				GIOCondition condition,
+				gpointer data)
+{
+	gboolean broken_pipe = FALSE;
+	
+	if (condition & G_IO_IN) {      /* G_IO_IN = Data to read on the pipe */
+		GError * error = NULL;
+		GString * string;
+		string = g_string_new (NULL);
+		
+		while (ioc->is_readable != TRUE);
+		
+		do {
+			gint status;
+			do {
+				status = g_io_channel_read_line_string (ioc, string, NULL, &error);
+				if (status == G_IO_STATUS_EOF) {
+					/* G_IO_STATUS_EOF = End of file */
+					broken_pipe = TRUE;
+				} else if (status == G_IO_STATUS_AGAIN) {
+					/* G_IO_STATUS_AGAIN = Resource temporarily unavailable */
+/*DELETE					if (gtk_events_pending ()) {
+						while (gtk_events_pending ()) {
+							gtk_main_iteration ();
+						}
+					}*/
+				} 
+			} while (status == G_IO_STATUS_AGAIN && broken_pipe == FALSE);
 
+			if (broken_pipe == TRUE) {
+				break;
+			}
+
+			if (status != G_IO_STATUS_NORMAL) {
+				if (error != NULL) {
+					g_warning ("handle_audit_command_stdout_io(): %s", error->message);
+					g_error_free (error);
+				}
+				continue;
+			}
+			
+			string = g_string_truncate (string, string->len - 1);
+			if (string->len <= 1) {
+				continue;
+			}
+
+			process_audit_romset (string->str, AUDIT_TYPE_ROM);
+
+			while (gtk_events_pending ())
+				gtk_main_iteration ();
+			
+		} while (g_io_channel_get_buffer_condition (ioc) & G_IO_IN);
+
+		g_string_free (string, TRUE);
+	}
+	
+	if (!(condition & G_IO_IN) || broken_pipe == TRUE) {
+		/* FIXME TODO Pipe finishes for auditing single rom before ROM_AUDITED signal can be emitted
+		   Test with the less complicated example before using this one */
+		GMAMEUI_DEBUG ("Audit completed");
+
+		g_signal_emit (gui_prefs.audit, signals[ROM_AUDIT_COMPLETE], 0, NULL);
+		g_io_channel_shutdown (ioc, TRUE, NULL);
+		
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/* The sample auditing returns details about the sampleset being incorrect on stderr,
+   so we need to catch if on this pipe. Note the romset being incorrect happens on
+   stdout, so can be caught on the stdout pipe. */
+static gboolean
+handle_audit_command_stderr_io (GIOChannel * ioc,
+				GIOCondition condition,
+				gpointer data)
+{
+	gboolean broken_pipe = FALSE;
+
+	if (condition & G_IO_IN) {      /* G_IO_IN = Data to read on the pipe */
+		GError * error = NULL;
+		GString * string;
+
+		string = g_string_new (NULL);
+		
+		while (ioc->is_readable != TRUE);
+		
+		do {
+			gint status;
+			do {
+				status = g_io_channel_read_line_string (ioc, string, NULL, &error);
+				if (status == G_IO_STATUS_EOF) {
+					/* G_IO_STATUS_EOF = End of file */
+					broken_pipe = TRUE;
+				} else if (status == G_IO_STATUS_AGAIN) {
+					/* G_IO_STATUS_AGAIN = Resource temporarily unavailable */
+/*DELETE					if (gtk_events_pending ()) {
+						while (gtk_events_pending ()) {
+							gtk_main_iteration ();
+						}
+					}*/
+				} /*else if (string->len != 0) {
+					GMAMEUI_DEBUG ("Line from IO err channel is %s", string->str);
+				}*/
+			} while (status == G_IO_STATUS_AGAIN && broken_pipe == FALSE);
+
+			if (broken_pipe == TRUE) {
+				break;
+			}
+
+			if (status != G_IO_STATUS_NORMAL) {
+				if (error != NULL) {
+					g_warning ("handle_audit_command_stderr_io(): %s", error->message);
+					g_error_free (error);
+				}
+			}
+			
+			string = g_string_truncate (string, string->len - 1);
+			if (string->len <= 1) {
+				continue;
+			}
+
+			process_audit_romset (string->str, AUDIT_TYPE_SAMPLE);
+			
+		} while (g_io_channel_get_buffer_condition (ioc) & G_IO_IN);
+
+		g_string_free (string, TRUE);
+	}
+	
+	if (!(condition & G_IO_IN) || broken_pipe == TRUE) {
+		g_io_channel_shutdown (ioc, TRUE, NULL);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+/* This function processes a line from the output of the MAME audit functions
+   verifyroms and verifysamples. This result is emitted as a signal so any
+   interested client can handle it. This lets us run the audit as a separate
+   process and handle the output on a line-by-line process. */
 static void
-audit_response (GtkWidget *dialog,
-		gint       response_id,
-		gpointer   user_data)
-{
-	switch (response_id) {
-	case GTK_RESPONSE_REJECT:
-		stop_audit (dialog, user_data);
-		break;
-	case GTK_RESPONSE_CLOSE:
-		gtk_widget_destroy (dialog);
-	default:
-		break;
-	}
-}
-
-GtkWidget *
-create_checking_games_window (void)
-{
-	GladeXML *xml = glade_xml_new (GLADEDIR "audit_window.glade", NULL, GETTEXT_PACKAGE);
-	if (!xml) {
-		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "audit_window.glade");
-		return NULL;
-	}
-	checking_games_window = glade_xml_get_widget (xml, "checking_games_window");
-	gtk_widget_show (checking_games_window);
-
-	stop_audit_button = glade_xml_get_widget (xml, "stop_audit_button");
-	close_audit_button = glade_xml_get_widget (xml, "close_audit_button");
-
-	/* only allows to click it when the audit is done */
-	gtk_widget_set_sensitive (close_audit_button, FALSE);
-
-	details_check_buffer = gtk_text_buffer_new (NULL);
-	details_check_text = glade_xml_get_widget (xml, "details_check_text");
-	gtk_text_view_set_buffer (GTK_TEXT_VIEW (details_check_text), details_check_buffer);
-
-	checking_games_label = glade_xml_get_widget (xml, "checking_games_label");
-#if GTK_CHECK_VERSION(2,6,0)
-	gtk_label_set_ellipsize (GTK_LABEL (checking_games_label), PANGO_ELLIPSIZE_MIDDLE);
-#endif
-
-	correct_roms_value = glade_xml_get_widget (xml, "correct_roms_value");
-	bestavailable_roms_value = glade_xml_get_widget (xml, "bestavailable_roms_value");
-	incorrect_roms_value = glade_xml_get_widget (xml, "incorrect_roms_value");
-	notfound_roms_value = glade_xml_get_widget (xml, "notfound_roms_value");
-	total_roms_value = glade_xml_get_widget (xml, "total_roms_value");
-	roms_check_progressbar = glade_xml_get_widget (xml, "roms_check_progressbar");
-
-	correct_samples_value = glade_xml_get_widget (xml, "correct_samples_value");
-	incorrect_samples_value = glade_xml_get_widget (xml, "incorrect_samples_value");
-	total_samples_value = glade_xml_get_widget (xml, "total_samples_value");
-	samples_check_progressbar = glade_xml_get_widget (xml, "samples_check_progressbar");
-
-	g_signal_connect (checking_games_window, "response",
-			  G_CALLBACK (audit_response), stop_audit_button);
-			  
-	return checking_games_window;
-}
-
-gint process_audit_romset (gchar *line, gboolean error_during_check) {
+process_audit_romset (gchar *line, gint settype) {
 	gchar *p;
+	gchar *tmp;
+	gint result;
+	
+	result = 0;
+	
+	tmp = g_strdup (line);
 
 	/* 0121	romset name [parent] is {good|bad|best available}
 	   0105 romset name {correct|incorrect|best available} */
 	/* Only process the romset lines; individual chips are ignored */
-	if ((!strncmp (line, "romset", 6)) || (!strncmp (line, "sampleset", 9))) {
-		for (p = strstr (line, " ") + 1/*line + 7*/; (*p && (*p != ' ') && (*p != '\n')); p++);
+	if ((strncmp (tmp, "romset", 6) == 0) || (strncmp (tmp, "sampleset", 9) == 0)) {
+		for (p = strstr (tmp, " ") + 1; (*p && (*p != ' ') && (*p != '\n')); p++);
 		*p = '\0';
 		p++;
 
 		/* FIXME TODO ROMs report 'is bad' even if the error is just an
 		   incorrect length on one of the roms */
-		if ((strstr (p, "incorrect") && error_during_check == TRUE)
-			|| (strstr (p, "is bad") && error_during_check == TRUE))
+		if (strstr (p, "incorrect") || strstr (p, "is bad"))
 		{
 			/* Version 0.107 (?) and earlier used:
 			    romset XXX incorrect
 			   Version 0.117 (?) and later used:
 			    romset XXX is bad */
-			return INCORRECT;
-		} else 
-		if ((strstr (p, "correct")) || (strstr(p, "is good"))) {
+			result = INCORRECT;
+		} else if ((strstr (p, "correct")) || (strstr(p, "is good"))) {
 			/* Version 0.107 (?) and earlier used:
 			    romset XXX correct
 			   Version 0.117 (?) and later used:
 			    romset XXX is good */
-			return CORRECT;
-		}  else if (strstr (p, "not found")) {
-			return NOT_AVAIL;
+			result = CORRECT;
+		} else if (strstr (p, "not found")) {
+			result = NOT_AVAIL;
 		} else if (strstr (p, "best available")) {
 			/* Version 0.107 (?) and earlier used:
 			    romset XXX best available
 			   Version 0.117 (?) and later used:
 			    romset XXX is best available */
-			return BEST_AVAIL;
+			result = BEST_AVAIL;
 		} else {
-			printf ("Audit: Could not recognise line %s\n", p);
-			return UNKNOWN;
+			GMAMEUI_DEBUG ("Audit: Could not recognise line %s", p);
+			result = UNKNOWN;
 		}
 
-		error_during_check = FALSE;
-
-	} else if (!strncmp (line, "name", 4) || !strncmp (line, "---", 3)) {
+	} else if (!strncmp (tmp, "name", 4) || !strncmp (tmp, "---", 3)) {
 		/* do nothing */
 	} else {
-		error_during_check = TRUE;
-		return NOTROMSET;
+		/* Line is for a rom within a romset */
+		result = NOTROMSET;
 	}
+
+	/* Emit signal for clients to handle as they see fit */
+	g_signal_emit (gui_prefs.audit, signals[ROMSET_AUDITED], 0, line, settype, result);
+	 
+	g_free (tmp);
+
 }
 
-/* due to the pipe buffer size,
-   freeze the qui a moment before displaying results */
-void
-launch_checking_games_window (void)
+/* Start the audit for a single ROM */
+void mame_audit_start_single (gchar *romname)
 {
-	FILE *xmame_pipe;
-	gchar line[BUFFER_SIZE];
-	gchar title[BUFFER_SIZE];
-	gchar numb[10];
-	gfloat done;
-	gint num_roms;  /* Total number of ROMs supported */
-	gint num_samples;
-	guint nb_checked = 1, nb_good = 0, nb_incorrect = 0, nb_bestavailable = 0, nb_notfound = 0;
-	gboolean error_during_check = FALSE;
-	gchar *name;
+	gchar *command;
 	gchar *rompath_option;
-	gint auditresult;
+	const gchar *option_name;
+	
+	rompath_option = create_rompath_options_string (current_exec);
+	option_name = xmame_get_option_name (current_exec, "verifyroms");
+	
+	//command = g_strdup_printf ("%s -%s %s %s 2>/dev/null",
+	command = g_strdup_printf ("%s -%s %s %s",
+				   current_exec->path,
+				   option_name,
+				   rompath_option,
+				   romname);
+	
+	mame_exec_launch_command (command, &command_pid, &child_stdout, &child_stderr);
+
+	/* Add a function to watch for stdout */
+	mame_executable_set_up_io_channel(child_stdout,
+			  G_IO_IN|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL,
+			  handle_audit_command_stdout_io,
+			  NULL);
+	
+	/* Add a function to call when the spawned process finishes */
+	g_child_watch_add (command_pid, (GChildWatchFunc) spawned_audit_complete, NULL);
+	
+	g_free (command);
+
+	/* Samples */
+	option_name = xmame_get_option_name (current_exec, "verifysamples");
+	command = g_strdup_printf("%s -%s %s %s",
+				  current_exec->path,
+				  option_name,
+				  rompath_option,
+				  romname);
+
+	mame_exec_launch_command (command, &command_sample_pid, &child_sample_stdout, &child_sample_stderr);
+	
+	/* Add a function to watch for stdout */
+	mame_executable_set_up_io_channel(child_sample_stdout,
+					  G_IO_IN|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL,
+					  handle_sample_audit_command_stdout_io, NULL);
+
+	/* Add a function to watch for stderr. Lines "sampleset "cosmicg" not found! return on the stderr,
+	   so will not be found and processed if we don't monitor stderr as well */
+	mame_executable_set_up_io_channel(child_sample_stderr,
+					  G_IO_IN|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL,
+					  handle_audit_command_stderr_io, NULL);
+
+	/* Add a function to call when the spawned process finishes */
+	g_child_watch_add (command_sample_pid, (GChildWatchFunc) spawned_audit_complete, NULL);
+	
+	/* Free strings */
+	g_free (command);	
+}
+
+/* Start the full audit across all ROMs */
+void
+mame_audit_start_full (void)
+{
+	gchar *rompath_option;
 	GList *listpointer;
 	RomEntry *tmprom = NULL;
-	GtkTextIter text_iter;
-	const gchar *option_name;	
-
+	const gchar *option_name;
+	
+	gchar *command;
+	
 	if (!xmame_get_options (current_exec))
 		return;
 
-	audit_cancelled = FALSE;
-	close_audit = FALSE;
 	option_name = xmame_get_option_name (current_exec, "verifyroms");
 
 	if (!option_name) {
 		gmameui_message (ERROR, NULL, _("Don't know how to verify roms with this version of xmame."));
 		return;
 	}
-	
-	g_object_get (gui_prefs.gl, "num-games", &num_roms, "num-samples", &num_samples, NULL);
 
 	/* In more recent versions of MAME, only the available (i.e. where the filename exists)
 	   ROMs are audited. So, we need to set the status of all the others to 'unavailable' */
-	GList *romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
+	GList *romlist;
+	romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
 	for (listpointer = g_list_first (romlist);
 	     (listpointer != NULL);
 	     listpointer = g_list_next (listpointer))
@@ -225,177 +574,62 @@ launch_checking_games_window (void)
 		tmprom = (RomEntry *) listpointer->data;
 		tmprom->has_roms = NOT_AVAIL;
 	}
-
 	
 	rompath_option = create_rompath_options_string (current_exec);
-		
-	xmame_pipe = xmame_open_pipe (current_exec, "-%s %s",
-				      option_name, rompath_option);
-	
-	if (!xmame_pipe) {
-		GMAMEUI_DEBUG ("Could not run audit");
-		g_free (rompath_option);
-		return;
-	}
 
-	/* Loading */
-	fflush (xmame_pipe);
-	
-	while (fgets (line, BUFFER_SIZE, xmame_pipe) && !audit_cancelled) {
-		/* jump the last comments */
-		if (line[0] == '\0' || line[1] == '\0')
-			break;
-	
-		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_check_buffer), &text_iter);
+	/* FIXME TODO  2>/dev/null will send stderr to /dev/null, so we won't need to add g_io_watch to it */
+	command = g_strdup_printf("%s -%s %s", current_exec->path, option_name, rompath_option);
 
-		auditresult = process_audit_romset (line, error_during_check);
-		done = (gfloat) (nb_good + nb_incorrect + nb_notfound + nb_bestavailable) / (gfloat) (num_roms);
-		
-		if (auditresult == CORRECT) {
-			nb_good++;
-			g_snprintf (numb, 10, "%d", nb_good);
-			gtk_label_set_text (GTK_LABEL (correct_roms_value), numb);}
-		else if (auditresult == INCORRECT) {
-			nb_incorrect++;
-			g_snprintf (numb, 10, "%d", nb_incorrect);
-			gtk_label_set_text (GTK_LABEL (incorrect_roms_value), numb);
-			sprintf (title, "%s: Incorrect\n", line);
-			gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_check_buffer), &text_iter, title, -1);}
-		else if (auditresult == BEST_AVAIL) {
-			nb_bestavailable++;
-			g_snprintf (numb, 10,"%d", nb_bestavailable);
-			gtk_label_set_text (GTK_LABEL (bestavailable_roms_value), numb);
-		} else if (auditresult == NOT_AVAIL) {
-			nb_notfound++;
-			g_snprintf (numb, 10, "%d", nb_notfound);
-			gtk_label_set_text (GTK_LABEL (notfound_roms_value), numb);
-			sprintf (title, "%s: Not found\n", line);
-			gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_check_buffer), &text_iter, title, -1);
-		}
+	mame_exec_launch_command (command, &command_pid, &child_stdout, &child_stderr);
 
-		if (auditresult != NOTROMSET) {
-			g_snprintf (numb, 10, "%d", nb_good + nb_incorrect + nb_notfound + nb_bestavailable);
-			gtk_label_set_text (GTK_LABEL (total_roms_value), numb);
+	/* Add a function to watch for stdout */
+	mame_executable_set_up_io_channel(child_stdout,
+			  G_IO_IN|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL,
+			  handle_audit_command_stdout_io,
+			  NULL);
 
-			/* find the rom in the list - need to skip leading romset/sampleset */
-			name = g_strrstr (line, " ") + 1;
-			listpointer = g_list_find_custom (romlist, name,
-							  (GCompareFunc) g_ascii_strcasecmp);
+	/* Add a function to watch for stderr 
+	mame_executable_set_up_io_channel(child_stderr,
+			  G_IO_IN|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL,
+			  handle_audit_command_stderr_io,
+			  NULL);*/
 
-			if (listpointer) {
-				tmprom = (RomEntry *) listpointer->data;
-				tmprom->has_roms = auditresult;
-				g_snprintf (title, BUFFER_SIZE, "%s", rom_entry_get_list_name (tmprom));
-			}
-			
-			g_snprintf (title, BUFFER_SIZE, "%s", name);
-			gtk_label_set_text (GTK_LABEL (checking_games_label), title);
-			
-			gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (roms_check_progressbar), done);
-		} else {
-			gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_check_buffer), &text_iter, line, -1);
-			error_during_check = TRUE;
-		}
+	/* Add a function to call when the spawned process finishes. This
+	   is compulsory since we use G_SPAWN_DO_NOT_REAP_CHILD */
+	g_child_watch_add (command_pid, (GChildWatchFunc) spawned_audit_complete, NULL);
 
-		while (gtk_events_pending ())
-			gtk_main_iteration ();
-		fflush (xmame_pipe);
-	}
+	/* Free strings */
+	g_free (command);
 
-	xmame_close_pipe (current_exec, xmame_pipe);
-
-	if (audit_cancelled) {
-		g_free (rompath_option);
-		gtk_window_set_title (GTK_WINDOW (checking_games_window), _("Audit Stopped"));
-		gtk_label_set_text (GTK_LABEL (checking_games_label), _("Stopped"));
-		goto audit_finished;
-	}
 	/* Samples now */
-	nb_good = nb_incorrect = 0;
-	nb_checked = 1;
+	command = g_strdup_printf("%s -%s %s", current_exec->path, xmame_get_option_name (current_exec, "verifysamples"), rompath_option);
 
-	xmame_pipe = xmame_open_pipe (current_exec, "-%s %s", 
-				      xmame_get_option_name (current_exec, "verifysamples"),
-				      rompath_option);
-
-	g_free (rompath_option);
-
-	/* Loading */
-	while (fgets (line, BUFFER_SIZE, xmame_pipe) && !audit_cancelled) {
-		/* jump the last comments */
-		if (line[0] == '\0' || line[1] == '\0')
-			break;
+	mame_exec_launch_command (command, &command_sample_pid, &child_sample_stdout, &child_sample_stderr);
 	
-		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_check_buffer), &text_iter);
-		auditresult = process_audit_romset (line, error_during_check);
-		
-		done = (gfloat) ( (gfloat) (nb_checked) / (gfloat) (num_samples));
+	/* Add a function to watch for stdout */
+	mame_executable_set_up_io_channel(child_sample_stdout,
+					  G_IO_IN|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL,
+					  handle_sample_audit_command_stdout_io, NULL);
 
-		if (auditresult == CORRECT) {
-			nb_good++;
-			g_snprintf (numb, 10,"%d", nb_good);
-			gtk_label_set_text (GTK_LABEL (correct_samples_value), numb);
-		} else if (auditresult == INCORRECT) {
-			nb_incorrect++;
-			g_snprintf (numb, 10, "%d", nb_incorrect);
-			gtk_label_set_text (GTK_LABEL (incorrect_samples_value), numb);
-		}
+	/* Add a function to watch for stderr */
+	mame_executable_set_up_io_channel(child_sample_stderr,
+					  G_IO_IN|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL,
+					  handle_audit_command_stderr_io, NULL);
 
-		if (auditresult != NOTROMSET) {
-			g_snprintf (numb, 10,"%d", nb_good+nb_incorrect);
-			gtk_label_set_text (GTK_LABEL (total_samples_value), numb);
-			
-			/* find the rom in the list - need to skip leading romset/sampleset */
-			name = g_strrstr (line, " ") + 1;
+	/* Add a function to call when the spawned process finishes */
+	g_child_watch_add (command_sample_pid, (GChildWatchFunc) spawned_audit_complete, NULL);
+	
+	/* Free strings */
+	g_free (command);
 
-			listpointer = g_list_find_custom (romlist, name,
-							  (GCompareFunc) g_ascii_strcasecmp);
-			if (listpointer) {
-				tmprom = (RomEntry *) listpointer->data;
-				tmprom->has_samples = auditresult;
-
-				g_snprintf (title, BUFFER_SIZE, "%s", rom_entry_get_list_name (tmprom));
-			}
-			/*continue with the GUI */
-			nb_checked++;
-			error_during_check = FALSE;
-			g_snprintf (title, BUFFER_SIZE, "%s", name);
-			gtk_label_set_text (GTK_LABEL (checking_games_label), title);
-
-			gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (samples_check_progressbar), done);
-		} else {
-			gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_check_buffer), &text_iter, line, -1);
-			error_during_check = TRUE;
-		}
-		while (gtk_events_pending ())
-			gtk_main_iteration ();
-		fflush (xmame_pipe);
-	}
-	pclose (xmame_pipe);
-
-	if (audit_cancelled) {
-		gtk_window_set_title (GTK_WINDOW (checking_games_window), _("Audit Stopped"));
-		gtk_label_set_text (GTK_LABEL (checking_games_label), _("Stopped"));
-		goto audit_finished;
-	}
-
-	gtk_window_set_title (GTK_WINDOW (checking_games_window), _("Audit done"));
-	gtk_label_set_text (GTK_LABEL (checking_games_label), _("Done"));
-	gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_check_buffer), &text_iter);
-	gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_check_buffer), &text_iter, _("Audit done"), -1);
-
-audit_finished:
-
-	gtk_widget_set_sensitive (stop_audit_button, FALSE);
-	gtk_widget_set_sensitive (close_audit_button, TRUE);
-
-	create_gamelist_content ();
-	if (close_audit)
-		gtk_widget_destroy (checking_games_window);
-	audit_cancelled = FALSE;
-
-	while (gtk_events_pending ())
-		gtk_main_iteration ();
 }
 
-
+/* Stop the audit in process; this will trigger a signal emission for HUP */
+void
+mame_audit_stop_full_audit (GmameuiAudit *au)
+{
+	if (command_pid > 0)
+		kill (command_pid, SIGTERM);
+	if (command_sample_pid > 0)
+		kill (command_sample_pid, SIGTERM);
+}

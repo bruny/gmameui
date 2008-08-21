@@ -176,6 +176,9 @@ gmameui_init (void)
 g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
 
+		/* Create a new audit object */
+		gui_prefs.audit = gmameui_audit_new ();
+	
 	gui_prefs.gl = mame_gamelist_new ();
 	if (!mame_gamelist_load (gui_prefs.gl)) {
 		g_message (_("gamelist not found, need to rebuild one"));
@@ -721,6 +724,9 @@ exit_gmameui (void)
 	g_object_unref (gui_prefs.gl);
 	gui_prefs.gl = NULL;
 	
+	g_object_unref (gui_prefs.audit);
+	gui_prefs.audit = NULL;
+
 	xmame_table_free ();
 	xmame_options_free ();
 

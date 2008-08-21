@@ -39,6 +39,7 @@
 #include "directories.h"
 #include "gmameui.h"
 #include "audit.h"
+#include "gmameui-audit-dlg.h"
 #include "gui.h"
 #include "properties.h"
 #include "progression_window.h"
@@ -148,7 +149,7 @@ show_properties_dialog (gchar *rom_name)
 		                       "gmameui-rom");
 
 		
-		gtk_dialog_run (GTK_WIDGET (options_dialog));
+		gtk_dialog_run (GTK_DIALOG (options_dialog));
 		gtk_widget_destroy (GTK_WIDGET (options_dialog));
 
 	} else {
@@ -197,6 +198,8 @@ void
 on_audit_all_games_activate (GtkMenuItem     *menuitem,
 			     gpointer         user_data)
 {
+	GtkWidget *audit_dlg;
+	
 	if (!current_exec) {
 		gmameui_message (ERROR, NULL, _("No xmame executables defined"));
 		/* reenable joystick */
@@ -206,9 +209,8 @@ on_audit_all_games_activate (GtkMenuItem     *menuitem,
 
 	gamelist_check (current_exec);
 
-	create_checking_games_window ();
-	UPDATE_GUI;
-	launch_checking_games_window ();
+	audit_dlg = mame_audit_dialog_new (NULL);
+	gtk_widget_show (audit_dlg);	
 }
 
 

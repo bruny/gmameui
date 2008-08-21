@@ -2,6 +2,9 @@
 
 bin_PROGRAMS = gmameui
 
+BUILT_SOURCES = \
+	gmameui-marshaller.c gmameui-marshaller.h
+
 gmameui_SOURCES = \
 	common.c common.h \
 	gmameui.c gmameui.h \
@@ -18,6 +21,7 @@ gmameui_SOURCES = \
 	directories.c directories.h \
 	about.c about.h \
 	audit.c audit.h \
+	gmameui-audit-dlg.c gmameui-audit-dlg.h \
 	properties.c properties.h \
 	options.c options.h \
 	options_string.c options_string.h \
@@ -34,7 +38,15 @@ gmameui_SOURCES = \
 	cell-renderer-captioned-image.c cell-renderer-captioned-image.h \
 	filters_list.c filters_list.h \
 	filter.c filter.h \
-	gossip-cell-renderer-expander.c gossip-cell-renderer-expander.h 
+	gossip-cell-renderer-expander.c gossip-cell-renderer-expander.h \
+	$(BUILT_SOURCES)
+
+gmameui-marshaller.h: gmameui-marshallers.list 
+	glib-genmarshal --prefix=gmameui_marshaller --header $< > $@
+
+gmameui-marshaller.c: gmameui-marshallers.list 
+	echo "#include \"gmameui-marshaller.h\"" > $@ && \
+	glib-genmarshal --prefix=gmameui_marshaller --body $< >> $@
 
 gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(INTLLIBS) 
 
@@ -47,5 +59,6 @@ AM_CPPFLAGS = -g -Wall $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
 ui_DATA = gmameui-ui.xml
 uidir = $(datadir)/gmameui/ui/
 
-EXTRA_DIST = $(ui_DATA)
+EXTRA_DIST = $(ui_DATA) gmameui-marshallers.list
 
+CLEANFILES = $(BUILT_SOURCES)

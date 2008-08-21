@@ -33,6 +33,7 @@
 #include "xmame_executable.h"
 #include "game_list.h"
 #include "filter.h"
+#include "audit.h"
 
 #define SELECT_TIMEOUT 110
 #define ICON_TIMEOUT 100
@@ -143,6 +144,7 @@ typedef enum {
 struct gui_prefs_struct {
 	RomEntry *current_game;
 	MameGamelist *gl;
+	GmameuiAudit *audit;
 };
 
 struct gui_prefs_struct gui_prefs;
