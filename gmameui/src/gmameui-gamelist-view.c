@@ -33,9 +33,11 @@
 static guint timeoutid;
 
 /* Private function prototypes */
-void set_list_sortable_column ();
+static void
+set_list_sortable_column ();
 
-const char *
+static const
+char *
 column_title (int column_num)
 {
 	switch (column_num) {
@@ -88,7 +90,8 @@ column_title (int column_num)
 	}
 }
 
-void set_list_sortable_column ()
+static void
+set_list_sortable_column ()
 {
 	ListMode current_mode;
 	gint sort_col;
@@ -776,7 +779,7 @@ g_timer_start (timer);
 				my_hassamples = (tmprom->has_samples == CORRECT) ? _("Yes") : _("No");
 		
 			/* Clone Color + Pixbuf width */
-			if (strcmp (tmprom->cloneof, "-")) {
+			if (g_ascii_strcasecmp (tmprom->cloneof, "-") != 0) {
 				/* Clone */
 				gdk_color_parse (clone_color, &my_txtcolor);
 			} else {
@@ -788,14 +791,17 @@ g_timer_start (timer);
 			pixbuf = Status_Icons [tmprom->has_roms];
 
 			/* Determine if the row is a root */
-			if ( (j == 0) || !(strcmp (tmprom->cloneof, "-")) || !my_romname_root || (strcmp (tmprom->cloneof, my_romname_root)) ) {
+			if ((j == 0) ||
+			    (g_ascii_strcasecmp (tmprom->cloneof, "-") == 0) || 
+			    !my_romname_root ||
+			    (g_ascii_strcasecmp (tmprom->cloneof, my_romname_root) != 0)) {
 				is_root = TRUE;
 			} else {
 				is_root = FALSE;
 			}
 
 			/* Memorize the original names */
-			if (! (strcmp (tmprom->cloneof, "-"))) {
+			if (!(g_ascii_strcasecmp (tmprom->cloneof, "-"))) {
 				if (my_romname_root)
 					g_free (my_romname_root);
 

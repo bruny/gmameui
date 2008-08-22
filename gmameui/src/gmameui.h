@@ -171,6 +171,9 @@ gboolean
 game_filtered (RomEntry * rom);
 
 void
+process_inp_function (RomEntry *rom, gchar *file, int action);
+
+void
 launch_emulation (RomEntry *rom, const gchar *command_line);
 
 void

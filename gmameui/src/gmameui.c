@@ -41,6 +41,7 @@
 #include "gui.h"
 #include "io.h"
 #include "game_options.h"
+#include "mame_options.h"
 #include "options_string.h"
 #include "progression_window.h"
 #include "gtkjoy.h"
@@ -156,7 +157,7 @@ gmameui_init (void)
 	/* Set the MAME executable list */
 	GValueArray *va_exec_paths;
 	gchar *mame_executable = NULL;
-	int i;
+	guint i;
 	g_object_get (main_gui.gui_prefs,
 		      "executable-paths", &va_exec_paths,
 		      "current-executable", &mame_executable,
@@ -232,7 +233,6 @@ gboolean
 game_filtered (RomEntry * rom)
 {
 	gchar **manufacturer;
-/* comparing taxt and text */
 	
 	gboolean is;
 	Columns_type type;
@@ -241,7 +241,7 @@ game_filtered (RomEntry * rom)
 	
 	gboolean retval;
 
-	g_return_if_fail (selected_filter != NULL);
+	g_return_val_if_fail (selected_filter != NULL, FALSE);
 	
 	retval = FALSE;
 	

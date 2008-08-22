@@ -22,10 +22,9 @@
  *
  */
 
-#include <gtk/gtk.h>
-
 #include "common.h"
 #include "mame_options_dialog.h"
+#include "cell-renderer-captioned-image.h"
 
 struct _MameOptionsDialogPrivate {
 	GtkWidget *treeview;	/* This is for functionality of the sidebar */

@@ -24,7 +24,6 @@
 
 #include "common.h"
 #include <stdarg.h>
-#include <gtk/gtkdialog.h>
 
 void
 gmameui_message (GtkDialogFlags type,

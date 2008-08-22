@@ -164,7 +164,7 @@ on_status_bar_view_menu_activate       (GtkAction *action,
 void     on_view_type_changed                   (GtkRadioAction *action,
                                                  gpointer       user_data)
 {
-	gint val;
+	guint val;
 	ListMode current_mode;
 	ListMode previous_mode;
 	
@@ -225,7 +225,7 @@ gmameui_menu_set_view_mode_check (gint view_mode, gboolean state)
 							    "/MenuBar/ViewMenu/ViewDetailsTreeViewMenu");
 			break;
 	}
-	gtk_check_menu_item_set_active (widget, state);
+	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), state);
 }
 
 void
@@ -348,8 +348,8 @@ create_MainWindow (void)
 	fontdesc = pango_font_description_copy (GTK_WIDGET (main_gui.tri_status_bar)->style->font_desc);
 	font_size = pango_font_description_get_size (fontdesc);
 	
-	gtk_widget_set_size_request (main_gui.statusbar2, PANGO_PIXELS (font_size) * 20, -1);
-	gtk_widget_set_size_request (main_gui.statusbar3, PANGO_PIXELS (font_size) * 20, -1);
+	gtk_widget_set_size_request (GTK_WIDGET (main_gui.statusbar2), PANGO_PIXELS (font_size) * 20, -1);
+	gtk_widget_set_size_request (GTK_WIDGET (main_gui.statusbar3), PANGO_PIXELS (font_size) * 20, -1);
 	
 	tooltips = gtk_tooltips_new ();
 	g_object_set_data (G_OBJECT (main_window), "tooltips", tooltips);
@@ -950,7 +950,7 @@ create_MainWindow (void)
 			     g_object_unref (folder_filter);
 		}
 	}
-	gtk_widget_show (main_gui.filters_list);
+	gtk_widget_show (GTK_WIDGET (main_gui.filters_list));
 	g_free (catver_file);
 	
 	/* Enable keyboard shortcuts defined in the UI Manager */

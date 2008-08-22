@@ -25,7 +25,7 @@
 #define _MAME_OPTIONS_H
 
 #include <glade/glade.h>
-#include "mame_options_dialog.h"
+
 
 
 G_BEGIN_DECLS
@@ -79,51 +79,19 @@ struct _MameOptionsClass
 
 GType mame_options_get_type (void);
 
+MameOptions *
+mame_options_new (void);
+
+GtkWidget *
+mame_options_get_dialog (MameOptions *pr);
+
 void mame_options_add_page (MameOptions* pr, GladeXML *gxml,
 							const gchar* glade_widget_name,
 							const gchar* title,
 							const gchar *icon_filename);
 
-/*
- * Registers all properties defined for widgets below the 'parent' widget
- * in the given gxml glade UI tree
- */
-void mame_options_register_all_properties_from_glade_xml (MameOptions* pr,
-														  GladeXML *gxml,
-														  GtkWidget *parent);
-gboolean
-mame_options_register_property_from_string (MameOptions *pr,
-											GtkWidget *object,
-											const gchar *property_desc);
-
-gboolean
-mame_options_register_property_raw (MameOptions *pr, GtkWidget *object,
-									const gchar *key,
-									const gchar *default_value,
-									guint flags,
-									GmameuiPropertyObjectType object_type,
-									GmameuiPropertyDataType  data_type);
-
-/* Sets the value (string) of a key */
-void mame_options_set (MameOptions *pr,
-					   const gchar *key,
-					   const gchar *value);
-									
-/* Sets the value (int) of a key */
-void mame_options_set_int (MameOptions *pr,
-						   const gchar *key,
-						   const gint value);
-
-/* Gets the value (string) of a key */
-/* Must free the return string */
-gchar * mame_options_get (MameOptions *pr,
-						  const gchar *key);
-
-/* Gets the value (int) of a key. If not found, 0 is returned */
-gint mame_options_get_int (MameOptions *pr,
-						   const gchar *key);
-
-void add_option_to_option_list (MameOptions *pr, gchar *key, gchar *value);
+gchar *
+mame_options_get_option_string (MameOptions *pr, gchar *category);
 
 G_END_DECLS
 

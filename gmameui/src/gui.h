@@ -192,9 +192,9 @@ GType gmameui_sidebar_get_type (void);
 
 GtkWidget *gmameui_sidebar_new (void);
 
-static void
-gmameui_sidebar_set_page (GMAMEUISidebar *sidebar, RomEntry *rom, screenshot_type page);
-
+/*DELETEstatic void
+gmameui_sidebar_set_page (GMAMEUISidebar *sidebar, RomEntry *rom, screenshot_type page);*/
+/*DELETE
 static void
 gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom);
 
@@ -202,7 +202,7 @@ static gboolean
 gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, RomEntry *rom);
 
 static void
-gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);
+gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);*/
 
 /**** End Sidebar functionality ****/
 
@@ -270,6 +270,7 @@ void        gmameui_icons_init (void);
 
 void gamelist_popupmenu_show (GdkEventButton *event);
 void gmameui_ui_set_favourites_sensitive (gboolean rom_is_favourite);
+void gmameui_ui_set_items_sensitive (void);
 void gmameui_menu_set_view_mode_check (gint view_mode, gboolean state);
 
 void update_game_in_list (RomEntry *rom);

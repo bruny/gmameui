@@ -29,9 +29,9 @@
 #include <glade/glade.h>
 
 #include "mame_options.h"
+#include "mame_options_dialog.h"
 #include "io.h"
-#include "common.h"
-#include "xmame_executable.h"
+#include "gui.h"	/* gmameui_get_icon_from_stock */
 
 struct _MameOptionValue
 {
@@ -73,6 +73,53 @@ struct _MameOptionsPriv
 
 #define PREFERENCE_PROPERTY_PREFIX "preferences_"
 
+
+/*
+ * Registers all properties defined for widgets below the 'parent' widget
+ * in the given gxml glade UI tree
+ */
+static void
+mame_options_register_all_properties_from_glade_xml (MameOptions* pr,
+						     GladeXML *gxml,
+						     GtkWidget *parent);
+static gboolean
+mame_options_register_property_from_string (MameOptions *pr,
+					    GtkWidget *object,
+					    const gchar *property_desc);
+
+static gboolean
+mame_options_register_property_raw (MameOptions *pr, GtkWidget *object,
+				    const gchar *key, const gchar *default_value,
+				    guint flags, GmameuiPropertyObjectType object_type,
+				    GmameuiPropertyDataType  data_type);
+
+/* Sets the value (string) of a key */
+static void
+mame_options_set (MameOptions *pr, const gchar *key, const gchar *value);
+									
+/* Sets the value (int) of a key */
+static void
+mame_options_set_int (MameOptions *pr, const gchar *key, const gint value);
+
+/* Sets the value (double) of a key */
+static void
+mame_options_set_double (MameOptions *pr, const gchar *key, gdouble value);
+
+/* Gets the value (string) of a key */
+/* Must free the return string */
+static gchar*
+mame_options_get (MameOptions *pr, const gchar *key);
+
+/* Gets the value (int) of a key. If not found, 0 is returned */
+static gint
+mame_options_get_int (MameOptions *pr, const gchar *key);
+
+static void
+mame_options_generate_custom_settings (MameOptions *pr);
+
+static void
+add_option_to_option_list (MameOptions *pr, const gchar *key, gchar *value);
+
 /* Returns an options string for a particular category (e.g. Performance, Video, etc)
    String needs to be free'd when finished
  */
@@ -84,10 +131,10 @@ mame_options_get_option_string (MameOptions *pr, gchar *category)
 	gsize category_len;
 	GError *error = NULL;
 	MameProperty *prop;
-	int i;
+	guint i;
 
-	g_return_if_fail (pr->priv->options_file != NULL);
-	g_return_if_fail (g_hash_table_size (pr->priv->properties) != 0);
+	g_return_val_if_fail (pr->priv->options_file != NULL, NULL);
+	g_return_val_if_fail (g_hash_table_size (pr->priv->properties) != 0, NULL);
 	
 	options_string = g_strdup ("");
 
@@ -136,6 +183,10 @@ mame_options_get_option_string (MameOptions *pr, gchar *category)
 				/* Don't add empty strings */
 				if (g_ascii_strcasecmp (value, "") != 0)
 					options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
+				break;
+			case GMAMEUI_PROPERTY_DATA_TYPE_COLOR:
+			case GMAMEUI_PROPERTY_DATA_TYPE_FONT:
+				g_assert_not_reached ();
 				break;
 		}
 		g_free (value);}
@@ -193,20 +244,21 @@ mame_options_set (MameOptions *pr, const gchar *key,
 
 /* All the widgets that cannot be handled via the GladeXML naming scheme are
    managed here, e.g. effect name, which is determined by .png files in artwork dir */
+static void
 mame_options_generate_custom_settings (MameOptions *pr)
 {
 	/*FIXME TODO
 	* Get the GladeXML file *
 	get the widget
 	add the entries*/
-	GtkComboBox *box = gtk_combo_box_new_text ();   // FIXME TODO Should be a widget attribute in priv
-	gtk_combo_box_append_text (box, "aperture1x2rb");
-	gtk_combo_box_append_text (box, "aperture1x3rb");
-	gtk_combo_box_append_text (box, "aperture2x4bg");
-	gtk_combo_box_append_text (box, "aperture2x4rb");
-	gtk_combo_box_append_text (box, "aperture4x6");
-	gtk_combo_box_append_text (box, "scanlines");
-	gtk_widget_show (GTK_WIDGET (box));
+	GtkWidget *box = gtk_combo_box_new_text ();   // FIXME TODO Should be a widget attribute in priv
+	gtk_combo_box_append_text (GTK_COMBO_BOX (box), "aperture1x2rb");
+	gtk_combo_box_append_text (GTK_COMBO_BOX (box), "aperture1x3rb");
+	gtk_combo_box_append_text (GTK_COMBO_BOX (box), "aperture2x4bg");
+	gtk_combo_box_append_text (GTK_COMBO_BOX (box), "aperture2x4rb");
+	gtk_combo_box_append_text (GTK_COMBO_BOX (box), "aperture4x6");
+	gtk_combo_box_append_text (GTK_COMBO_BOX (box), "scanlines");
+	gtk_widget_show (box);
 
 	/* Set the signal - in the handler, get the value using
 	   gtk_combo_box_get_active_text (); */
@@ -225,8 +277,6 @@ on_preferences_dialog_destroyed (GtkWidget *preferencess_dialog,
 GtkWidget *
 mame_options_get_dialog (MameOptions *pr)
 {
-	GList *plugins;
-
 	if (pr->priv->prefs_dialog)
 		return pr->priv->prefs_dialog;
 	else
@@ -278,7 +328,7 @@ mame_options_get_type ()
  * Return value: A #MameOptions object.
  */
 MameOptions *
-mame_options_new ()
+mame_options_new (void)
 {
 	/* TODO Pass in object RomEntry - if null, then its default options */
 	MameOptions *pr;
@@ -336,7 +386,7 @@ mame_options_set_int (MameOptions *pr, const gchar *key,
 	g_free (val);
 }
 
-void
+static void
 mame_options_set_double (MameOptions *pr, const gchar *key,
 							gdouble value)
 {
@@ -435,8 +485,7 @@ get_property_value_as_string (MameProperty *prop)
 	switch (prop->object_type)
 	{
 	case GMAMEUI_PROPERTY_OBJECT_TYPE_TOGGLE:
-		int_value =
-			gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (prop->object));
+		int_value = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (prop->object));
 		text_value = g_strdup_printf ("%d", int_value);
 		break;
 	case GMAMEUI_PROPERTY_OBJECT_TYPE_HSCALE:
@@ -444,33 +493,34 @@ get_property_value_as_string (MameProperty *prop)
 		text_value = g_strdup_printf ("%f", double_value);
 		break;
 	case GMAMEUI_PROPERTY_OBJECT_TYPE_SPIN:
-		int_value =
-			gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prop->object));
+		int_value = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prop->object));
 		text_value = g_strdup_printf ("%d", int_value);
 		break;
-
 	case GMAMEUI_PROPERTY_OBJECT_TYPE_ENTRY:
-		text_value =
-			gtk_editable_get_chars (GTK_EDITABLE (prop->object), 0, -1);
+		text_value = gtk_editable_get_chars (GTK_EDITABLE (prop->object), 0, -1);
 		break;
 	case GMAMEUI_PROPERTY_OBJECT_TYPE_COMBO:
 		{
-			gint idx;
-			values = g_object_get_data(G_OBJECT(prop->object), "untranslated");
-			idx = gtk_combo_box_get_active(GTK_COMBO_BOX(prop->object));
-			if (values[idx] != NULL)
-				text_value = g_strdup(values[idx]);
-			break;
-		}
-/*
-	case GMAMEUI_PROPERTY_OBJECT_TYPE_FOLDER:
-		text_value = gtk_file_chooser_get_current_folder (
-				GTK_FILE_CHOOSER (prop->object));
+		gint idx;
+		values = g_object_get_data(G_OBJECT(prop->object), "untranslated");
+		idx = gtk_combo_box_get_active(GTK_COMBO_BOX(prop->object));
+		if (values[idx] != NULL)
+			text_value = g_strdup(values[idx]);
 		break;
-	case GMAMEUI_PROPERTY_OBJECT_TYPE_FILE:
-		text_value = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (prop->object));
-			 break;*/
+		}
+	case GMAMEUI_PROPERTY_OBJECT_TYPE_TEXT:
+	case GMAMEUI_PROPERTY_OBJECT_TYPE_FOLDER:
+	/*case GMAMEUI_PROPERTY_OBJECT_TYPE_FILE:*/
+		/* Haven't catered for these yet
+		   Folder:
+		    text_value = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (prop->object));
+		   File:
+		    text_value = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (prop->object));
+		*/
+		g_assert_not_reached ();
+		break;
 	}
+	
 	if (text_value && (strlen (text_value) == 0))
 	{
 		g_free (text_value);
@@ -668,27 +718,25 @@ set_property_value_as_string (MameProperty *prop, const gchar *value)
 		
 		gtk_range_set_value (GTK_RANGE (prop->object), double_value);
 		break;
-/*
 	case GMAMEUI_PROPERTY_OBJECT_TYPE_FOLDER:
+	/*case GMAMEUI_PROPERTY_OBJECT_TYPE_FILE:*/
+		/* Not in use at the moment */
+		g_assert_not_reached ();
+		break;
+		/*
 		if (value)
 			gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (prop->object), value);
-		break;
-	case GMAMEUI_PROPERTY_OBJECT_TYPE_FILE:
-		if (value)
-		{
-			gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (prop->object),
-															 value);
-		}
-		break;*/
+			OR
+			gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (prop->object), value);
+		*/
 	}
 }
 
 static void
 register_callbacks (MameOptions *pr, MameProperty *p)
 {
-	gchar *key_error_msg;
-	
 	g_object_set_data (G_OBJECT (p->object), "MameOptions", pr);
+	
 	switch (p->object_type) {
 		case GMAMEUI_PROPERTY_OBJECT_TYPE_ENTRY:
 			g_signal_connect (G_OBJECT(p->object), "changed",
@@ -742,7 +790,7 @@ register_callbacks (MameOptions *pr, MameProperty *p)
 
 }
 
-void add_option_to_option_list (MameOptions *pr, gchar *key, gchar *value)
+void add_option_to_option_list (MameOptions *pr, const gchar *key, gchar *value)
 {
 	MameOptionValue *obj;
 	GList *listpointer;

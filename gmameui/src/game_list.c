@@ -355,7 +355,7 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 	
 	filename = g_build_filename (g_get_home_dir (), ".gmameui", "gamelist", NULL);
 
-	g_message (_("AALoading gamelist %s"), filename);
+	g_message (_("Loading gamelist %s"), filename);
 	
 	gamelist = fopen (filename, "r");
 	g_free (filename);
@@ -622,7 +622,7 @@ mame_gamelist_print (FILE     *handle,
 gboolean mame_gamelist_save (MameGamelist *gl) {
 	GList *listpointer;
 	FILE *gamelist;
-GMAMEUI_DEBUG ("AASaving gamelist");
+GMAMEUI_DEBUG ("Saving gamelist");
 	g_message (_("Saving gamelist."));
 	
 	g_return_val_if_fail (gl != NULL, FALSE);
@@ -695,7 +695,7 @@ GMAMEUI_DEBUG ("AASaving gamelist");
 	}
 
 	fclose (gamelist);
-GMAMEUI_DEBUG ("AASaving gamelist... done");
+GMAMEUI_DEBUG ("Saving gamelist... done");
 	return TRUE;
 }
 
@@ -809,6 +809,8 @@ gamelist_check (XmameExecutable *exec)
 RomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname) {
 	GList *listpointer;
 	RomEntry *tmprom = NULL;
+	
+	g_return_val_if_fail ((gl != NULL), NULL);
 	
 	for (listpointer = g_list_first (gl->priv->roms);
 	     (listpointer != NULL);

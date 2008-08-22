@@ -22,12 +22,11 @@
  *
  */
 
-#include "xmame_executable.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <ctype.h>
+#include <ctype.h>      /* For isdigit */
+#include "xmame_executable.h"
+#include "xmame_options.h"
 #include "io.h"
 
 const gchar *noloadconfig_option_name [] = {
@@ -1042,7 +1041,7 @@ xmame_get_option_string (const XmameExecutable *exec,
 	gchar *escaped_args;
 	gchar *opt_string;
 
-	g_return_if_fail (exec->options != NULL);
+	g_return_val_if_fail (exec->options != NULL, NULL);
 
 	opt = g_hash_table_lookup (exec->options, option_name);
 	if (!opt) {
@@ -1345,7 +1344,7 @@ xmame_get_options (XmameExecutable *exec)
 	gchar line[BUFFER_SIZE];
 	GHashTable *option_hash;
 
-	g_return_if_fail (exec != NULL);
+	g_return_val_if_fail (exec != NULL, NULL);
 
 	if (exec->options)
 		return exec->options;
@@ -1353,7 +1352,7 @@ xmame_get_options (XmameExecutable *exec)
 	GMAMEUI_DEBUG ("Getting options using parameter %s\n", exec->showusage_option);
 	
 	xmame_pipe = xmame_open_pipe (exec, "-%s", exec->showusage_option);
-	g_return_if_fail (xmame_pipe != NULL);
+	g_return_val_if_fail (xmame_pipe != NULL, NULL);
 
 	GMAMEUI_DEBUG ("checking xmame options");
 	if (fgets (line, BUFFER_SIZE, xmame_pipe))

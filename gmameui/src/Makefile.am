@@ -30,7 +30,6 @@ gmameui_SOURCES = \
 	gui_prefs_dialog.c gui_prefs_dialog.h \
 	unzip.c unzip.h \
 	keyboard.c keyboard.h \
-	network_game.h network_game.c \
 	xmame_options.h xmame_options.c \
 	xmame_executable.h xmame_executable.c \
 	mame_options.c mame_options.h \
@@ -40,6 +39,9 @@ gmameui_SOURCES = \
 	filter.c filter.h \
 	gossip-cell-renderer-expander.c gossip-cell-renderer-expander.h \
 	$(BUILT_SOURCES)
+
+REDUNDANT_FILES = \
+	network_game.h network_game.c 
 
 gmameui-marshaller.h: gmameui-marshallers.list 
 	glib-genmarshal --prefix=gmameui_marshaller --header $< > $@
@@ -59,6 +61,6 @@ AM_CPPFLAGS = -g -Wall $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
 ui_DATA = gmameui-ui.xml
 uidir = $(datadir)/gmameui/ui/
 
-EXTRA_DIST = $(ui_DATA) gmameui-marshallers.list
+EXTRA_DIST = $(ui_DATA) gmameui-marshallers.list $(REDUNDANT_FILES)
 
 CLEANFILES = $(BUILT_SOURCES)

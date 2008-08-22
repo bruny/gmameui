@@ -24,9 +24,7 @@
 #ifndef __XMAME_EXECUTABLE_H__
 #define __XMAME_EXECUTABLE_H__
 
-#include <stdio.h>
 #include <sys/types.h>  /* For pid_t */
-#include "common.h"
 #include "xmame_options.h"
 
 typedef enum {

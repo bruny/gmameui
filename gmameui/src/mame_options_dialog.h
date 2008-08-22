@@ -52,6 +52,13 @@ GType mame_options_dialog_get_type (void);
 
 GtkWidget *mame_options_dialog_new (void);
 
+void
+mame_options_dialog_add_page (MameOptionsDialog *dlg,
+							  const gchar *name,
+							  const gchar *title,
+							  GdkPixbuf *icon,
+							  GtkWidget *page);
+
 G_END_DECLS
 
 #endif

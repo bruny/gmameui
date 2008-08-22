@@ -24,9 +24,6 @@
 #ifndef __GAME_LIST_H__
 #define __GAME_LIST_H__
 
-#include <stdio.h>
-
-#include "common.h"
 #include "xmame_executable.h"
 #include "rom_entry.h"
 

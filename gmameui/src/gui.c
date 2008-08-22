@@ -67,7 +67,7 @@ static guint timeout_icon;
 /**** Sidebar functionality ****/
 struct _GMAMEUISidebarPrivate {
 
-	GtkBox    *screenshot_hist_vbox;
+	GtkBox   *screenshot_hist_vbox;
 	GtkWidget *screenshot_event_box;
 
 	GtkWidget *main_screenshot;
@@ -92,6 +92,16 @@ struct _GMAMEUISidebarPrivate {
 
 	
 };
+
+static void
+gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom);
+
+static gboolean
+gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, RomEntry *rom);
+
+static void
+gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);
+
 /**** Sidebar functionality ****/
 
 static void
@@ -916,12 +926,14 @@ void gmameui_ui_set_items_sensitive () {
 					rom_and_exec);
 	gtk_action_group_set_sensitive (main_gui.gmameui_exec_action_group,
 					xmame_table_size () > 0);
-	gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
-					gui_prefs.current_game);
 
-	/* Disable favourites if no current game */
+	/* Disable ROM and Favourites UI items if no current game */
+	gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
+					(gui_prefs.current_game != NULL));
 	gtk_action_group_set_sensitive (main_gui.gmameui_favourite_action_group,
 					(gui_prefs.current_game != NULL));
+	
+	/* Set the Add/Remove Favourites depending whether the game is a favourite */
 	if (gui_prefs.current_game != NULL)
 		gmameui_ui_set_favourites_sensitive (gui_prefs.current_game->favourite);
 }

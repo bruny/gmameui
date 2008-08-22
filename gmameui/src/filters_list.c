@@ -1,3 +1,26 @@
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 8; tab-width: 8 -*- */
+/*
+ * GMAMEUI
+ *
+ * Copyright 2008 Andrew Burton <adb@iinet.net.au>
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+#include <stdio.h>
 #include <gtk/gtk.h>
 
 #include "filters_list.h"
@@ -31,9 +54,12 @@ filters_list_get_group (GMAMEUIFiltersList *fl,
 			GtkTreeIter       *iter_group_to_set,
 			GtkTreeIter       *iter_separator_to_set,
 			gboolean          *created);
-static gboolean filters_list_filter_func                     (GtkTreeModel           *model,
-							      GtkTreeIter            *iter,
-							      GMAMEUIFiltersList      *list);
+
+static gboolean
+filters_list_filter_func (GtkTreeModel           *model,
+			  GtkTreeIter            *iter,
+			  GMAMEUIFiltersList      *list);
+
 static void
 filters_list_pixbuf_cell_data_func (GtkTreeViewColumn *tree_column,
 				    GtkCellRenderer   *cell,
@@ -54,18 +80,15 @@ filters_list_expander_cell_data_func (GtkTreeViewColumn *column,
 				      GtkTreeIter       *iter,
 				      GMAMEUIFiltersList *list);
 
-static void     filters_list_row_activated_cb                (GMAMEUIFiltersList      *list,
-							      GtkTreePath            *path,
-							      GtkTreeViewColumn      *col,
-							      gpointer                user_data);
+static void
+filters_list_row_activated_cb        (GMAMEUIFiltersList      *list,
+				      GtkTreePath            *path,
+				      GtkTreeViewColumn      *col,
+				      gpointer                user_data);
 
 static void
 filters_list_selection_changed_cb (GtkTreeSelection *selection,
 				    GMAMEUIFiltersList     *fl);
-
-void
-gmameui_filters_list_select (GMAMEUIFiltersList *fl,
-							 GMAMEUIFilter *filter);
 
 G_DEFINE_TYPE (GMAMEUIFiltersList, gmameui_filters_list,
 			   GTK_TYPE_TREE_VIEW);

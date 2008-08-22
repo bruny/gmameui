@@ -149,7 +149,7 @@ ControlType get_control_type (gchar *control_type)
 {
 	ControlType type;
 	
-	g_return_if_fail (control_type != NULL);
+	g_return_val_if_fail (control_type != NULL, 0);
 
 	/* FIXME TODO There are additional types to add */
 	if (g_ascii_strcasecmp (control_type, "trackball") == 0)
@@ -166,7 +166,7 @@ DriverStatus get_driver_status (gchar *driver_status)
 {
 	DriverStatus status;
 	
-	g_return_if_fail (driver_status != NULL);
+	g_return_val_if_fail (driver_status != NULL, 0);
 
 	/* FIXME TODO There are additional types to add */
 	if (g_ascii_strcasecmp (driver_status, "good") == 0)
@@ -240,7 +240,7 @@ rom_entry_get_list_name (RomEntry *rom)
 {
 	gboolean the_prefix;
 	
-	g_return_if_fail (rom != NULL);
+	g_return_val_if_fail (rom != NULL, NULL);
 
 	g_object_get (main_gui.gui_prefs,
 		      "theprefix", &the_prefix,

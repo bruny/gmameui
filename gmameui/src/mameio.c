@@ -508,8 +508,8 @@ static gboolean CreateGameListRun(TCreateGameList *_this)
 				"near \"%.*s\"<>\"%.*s"
 				"\n",
 				errorCode, XML_ErrorString(errorCode),
-				XML_GetCurrentLineNumber(xmlParser),
-				XML_GetCurrentColumnNumber(xmlParser),
+				(int) XML_GetCurrentLineNumber(xmlParser),
+				(int) XML_GetCurrentColumnNumber(xmlParser),
 				(int) XML_GetCurrentByteIndex(xmlParser),
 				sizePre, bufferPre,
 				sizePost, bufferPost);

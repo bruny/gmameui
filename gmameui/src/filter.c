@@ -5,11 +5,11 @@
 struct _GMAMEUIFilterPrivate
 {
 	
-	const gchar *name;
+	gchar *name;
 	folder_filters_list folderid;
 	Columns_type type;
 	gboolean is;
-	const gchar *value;
+	gchar *value;
 	gint int_value; /* should be a union with value */
 	gboolean update_list;
 	GdkPixbuf *pixbuf;
@@ -29,7 +29,7 @@ enum
 	PROP_PIXBUF
 };
 
-static void gmameui_filter_finalize (GMAMEUIFilter *filter);
+static void gmameui_filter_finalize (GObject *obj);
 static void gmameui_filter_class_init    (GMAMEUIFilterClass *class);
 static void gmameui_filter_init (GMAMEUIFilter      *filter);
 static void gmameui_filter_set_property (GObject *object,
@@ -48,17 +48,17 @@ G_DEFINE_TYPE (GMAMEUIFilter, gmameui_filter,
 			   GTK_TYPE_HBOX);
 
 static void
-gmameui_filter_finalize (GMAMEUIFilter *filter)
+gmameui_filter_finalize (GObject *obj)
 {
 	GMAMEUI_DEBUG ("Freeing filter");
-	GMAMEUIFilter *fl = GMAMEUI_FILTER (filter);
+	GMAMEUIFilter *fl = GMAMEUI_FILTER (obj);
 	
 	g_free (fl->priv->name);
 	g_object_unref (fl->priv->pixbuf);
 	
 	g_object_unref (fl->priv);
 	
-	((GObjectClass *) gmameui_filter_parent_class)->finalize (filter);
+	((GObjectClass *) gmameui_filter_parent_class)->finalize (obj);
 	GMAMEUI_DEBUG ("Freeing filter - done");
 }
 

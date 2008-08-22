@@ -24,7 +24,6 @@
 
 #include <glade/glade.h>
 
-#include "common.h"
 #include "gmameui.h"			/* Contains the GmameuiAudit object */
 #include "audit.h"
 #include "gmameui-gamelist-view.h"  /* For create_gamelist_content () */
