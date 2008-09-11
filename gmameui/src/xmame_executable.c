@@ -829,18 +829,22 @@ parse_option (gchar *line,
 }
 
 gboolean
-xmame_has_option (const XmameExecutable *exec,
-		  const gchar           *option_name)
+xmame_has_option (XmameExecutable *exec, const gchar *option_name)
 {
+	g_return_val_if_fail (exec != NULL, FALSE);
+	
 	return xmame_get_option (exec, option_name) != NULL;
 }
 
 const MameOption *
-xmame_get_option (const XmameExecutable *exec,
-		  const gchar           *option_name)
+xmame_get_option (XmameExecutable *exec, const gchar *option_name)
 {
+	g_return_val_if_fail (exec != NULL, NULL);
+
+	/* If the Executable has no options hash table,
+	   then implicitly create it */
 	if (!exec->options)
-		return NULL;
+		exec->options = xmame_get_options (exec);
 
 #ifdef ENABLE_DEBUG
 	if (!xmame_option_get_gmameui_name (option_name))
@@ -1349,12 +1353,11 @@ xmame_get_options (XmameExecutable *exec)
 	if (exec->options)
 		return exec->options;
 
-	GMAMEUI_DEBUG ("Getting options using parameter %s\n", exec->showusage_option);
+	GMAMEUI_DEBUG (_("Getting list of valid MAME options using parameter %s"), exec->showusage_option);
 	
 	xmame_pipe = xmame_open_pipe (exec, "-%s", exec->showusage_option);
 	g_return_val_if_fail (xmame_pipe != NULL, NULL);
 
-	GMAMEUI_DEBUG ("checking xmame options");
 	if (fgets (line, BUFFER_SIZE, xmame_pipe))
 	{
 		int more_input = 0;
@@ -1368,28 +1371,28 @@ xmame_get_options (XmameExecutable *exec)
 			if (my_opt) {
 				gmameui_name = xmame_option_get_gmameui_name (my_opt->name);
 
-#ifdef OPTIONS_DEBUG
-				GMAMEUI_DEBUG ("Found option: %s %s%s (%s)",
+				/* Note: Newer versions of MAME do not report the type */
+				GMAMEUI_DEBUG (_("Found option: %s %s%s (%s)"),
 					my_opt->type ? my_opt->type : "",
 					my_opt->no_option ? "[no]" : "",
 					my_opt->name,
 					gmameui_name);
-				GMAMEUI_DEBUG ("Description: \"%s\"", my_opt->description);
-#  ifdef ENABLE_DEBUG
+				GMAMEUI_DEBUG (_("Description: \"%s\""), my_opt->description);
+
 				if (my_opt->possible_values) {
 					int i;
-					GMAMEUI_DEBUG ("Possible values: ");
+					GMAMEUI_DEBUG (_("Possible values: "));
 					for (i = 0; my_opt->possible_values[i]; i++) {
 						GMAMEUI_DEBUG ("%i %s", i, my_opt->possible_values[i]);
 					}
 				}
-#  endif
-#endif
+
 				if (gmameui_name)
 					g_hash_table_insert (option_hash, (gpointer)gmameui_name, my_opt);
 			}
 		} while (more_input);
 
+		/* Delete existing options hash table */
 		if (exec->options)
 			g_hash_table_destroy (exec->options);
 

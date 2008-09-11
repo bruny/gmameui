@@ -118,10 +118,14 @@ static void
 mame_options_generate_custom_settings (MameOptions *pr);
 
 static void
-add_option_to_option_list (MameOptions *pr, const gchar *key, gchar *value);
+add_option_to_option_list (MameOptions *pr, const gchar *key, const gchar *value);
 
 /* Returns an options string for a particular category (e.g. Performance, Video, etc)
    String needs to be free'd when finished
+ 
+   Within each category, the list of parameters is retrieved from the gmameui.ini keyfile,
+   and each parameter checked that it is valid for this version of MAME
+ 
  */
 gchar *
 mame_options_get_option_string (MameOptions *pr, gchar *category)
@@ -158,38 +162,48 @@ mame_options_get_option_string (MameOptions *pr, gchar *category)
 			GMAMEUI_DEBUG ("No property found for key %s", key);
 		} else {
 		
-		error = NULL;
+			error = NULL;
+			
+			/* Check that the selected version of MAME supports this option */
+			GMAMEUI_DEBUG (_("Checking that MAME supports the option %s..."), keylist[i]);
+			if (xmame_has_option (current_exec, keylist[i])) {
+				GMAMEUI_DEBUG (_("...it does"));
+				
+				value = g_key_file_get_value (pr->priv->options_file, category, keylist[i], &error);
+				if (error) {
+					GMAMEUI_DEBUG (_("Error retrieving options value for key %s in category %s: %s"),
+						       keylist[i], category, error->message);
+					g_error_free (error);
+					break;
+				}
 		
-		value = g_key_file_get_value (pr->priv->options_file, category, keylist[i], &error);
-		if (error) {
-			GMAMEUI_DEBUG ("Error retrieving options value for key %s in category %s: %s",
-				       keylist[i], category, error->message);
-			g_error_free (error);
-			break;
-		}
-		
-		switch (prop->data_type) {
-			case GMAMEUI_PROPERTY_DATA_TYPE_BOOL:
-				if (g_ascii_strcasecmp (value, "1") == 0)
-					options_string = g_strconcat (options_string, " -", keylist[i], NULL);
-				break;
-			case GMAMEUI_PROPERTY_DATA_TYPE_INT:
-				options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
-				break;
-			case GMAMEUI_PROPERTY_DATA_TYPE_DOUBLE:
-				options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
-				break;
-			case GMAMEUI_PROPERTY_DATA_TYPE_TEXT:
-				/* Don't add empty strings */
-				if (g_ascii_strcasecmp (value, "") != 0)
-					options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
-				break;
-			case GMAMEUI_PROPERTY_DATA_TYPE_COLOR:
-			case GMAMEUI_PROPERTY_DATA_TYPE_FONT:
-				g_assert_not_reached ();
-				break;
-		}
-		g_free (value);}
+				switch (prop->data_type) {
+					case GMAMEUI_PROPERTY_DATA_TYPE_BOOL:
+						if (g_ascii_strcasecmp (value, "1") == 0)
+							options_string = g_strconcat (options_string, " -", keylist[i], NULL);
+						break;
+					case GMAMEUI_PROPERTY_DATA_TYPE_INT:
+						options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
+						break;
+					case GMAMEUI_PROPERTY_DATA_TYPE_DOUBLE:
+						options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
+						break;
+					case GMAMEUI_PROPERTY_DATA_TYPE_TEXT:
+						/* Don't add empty strings */
+						if (g_ascii_strcasecmp (value, "") != 0)
+							options_string = g_strconcat (options_string, " -", keylist[i], " ", value, NULL);
+						break;
+					case GMAMEUI_PROPERTY_DATA_TYPE_COLOR:
+					case GMAMEUI_PROPERTY_DATA_TYPE_FONT:
+						g_assert_not_reached ();
+						break;
+				}       /* Switch */
+				g_free (value);
+
+			} else {
+				GMAMEUI_DEBUG (_("...it doesn't"));
+			}
+		}       /* If prop */
 		g_free (key);
 	}
 
@@ -790,7 +804,7 @@ register_callbacks (MameOptions *pr, MameProperty *p)
 
 }
 
-void add_option_to_option_list (MameOptions *pr, const gchar *key, gchar *value)
+void add_option_to_option_list (MameOptions *pr, const gchar *key, const gchar *value)
 {
 	MameOptionValue *obj;
 	GList *listpointer;

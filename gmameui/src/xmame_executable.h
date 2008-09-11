@@ -24,6 +24,7 @@
 #ifndef __XMAME_EXECUTABLE_H__
 #define __XMAME_EXECUTABLE_H__
 
+
 #include <sys/types.h>  /* For pid_t */
 #include "xmame_options.h"
 
@@ -128,10 +129,10 @@ int               xmame_compare_raw_version (const XmameExecutable *exec, const 
 const GHashTable * xmame_get_options (XmameExecutable *exec);
 
 /** Checks if the executable has the given option */
-gboolean xmame_has_option (const XmameExecutable *exec, const gchar *option_name);
+gboolean xmame_has_option (XmameExecutable *exec, const gchar *option_name);
 
 /** Returns the option with the given name */
-const MameOption *xmame_get_option (const XmameExecutable *exec, const gchar *option_name);
+const MameOption *xmame_get_option (XmameExecutable *exec, const gchar *option_name);
 
 /** Returns the option string for this option.
 * If the option does not exist or it does not take arguments it returns NULL.
