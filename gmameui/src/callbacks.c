@@ -30,6 +30,10 @@
 #include <gtk/gtkmain.h>
 #include <gtk/gtktreestore.h>
 
+#ifdef ENABLE_LIBGNOME
+#include <libgnome/libgnome.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -315,6 +319,51 @@ GMAMEUI_DEBUG("Done running dialog");
 
 
 /* Main window menu: Help */
+void
+on_help_activate                       (GtkAction     *action,
+                                        gpointer       user_data)
+{
+	GError *error = NULL;
+#ifdef ENABLE_GTKSHOWURI
+	/* gtk_show_uri requires > GTK2.13 */
+	guint timestamp;
+	
+	timestamp = gtk_get_current_event_time ();	
+	gtk_show_uri (NULL, "ghelp:gmameui", timestamp, &error);
+#elif ENABLE_LIBGNOME
+	/* The following requires libgnome to be compiled in (which it is
+	   by default) */
+	gboolean ret;
+	ret = gnome_url_show ("ghelp:gmameui", &error);
+#else
+	/* GTK2.13 is not available and the user has not compiled in
+	   libgnome (may be a XFCE or KDE user) */
+	GtkWidget *helpunavail_dlg;
+	helpunavail_dlg = gmameui_dialog_create (GTK_MESSAGE_ERROR,
+						 NULL,
+						 _("GMAMEUI Help could not be started"));
+	gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (helpunavail_dlg),
+						  _("The Help file could not be opened. This will happen "
+						   "if the version of GTK is not at least 2.13 and "
+						   "libgnome support has not been compiled in."));
+	gtk_dialog_run (GTK_DIALOG (helpunavail_dlg));
+	gtk_widget_destroy (helpunavail_dlg);
+#endif
+	
+	if (error) {
+		GtkWidget *helperr_dlg;
+		helperr_dlg = gmameui_dialog_create (GTK_MESSAGE_ERROR,
+						     NULL,
+						     _("There was an error opening the Help file"));
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (helperr_dlg),
+							  error->message);
+		gtk_dialog_run (GTK_DIALOG (helperr_dlg));
+		gtk_widget_destroy (helperr_dlg);
+		g_error_free (error);
+		error = NULL;
+	}
+}
+
 void
 on_about_activate                      (GtkMenuItem     *menuitem,
                                         gpointer         user_data)

@@ -72,7 +72,7 @@ static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
 	  	  
 	/* Help menu */
 	{"HelpContents", GTK_STOCK_HELP, N_("_Contents"), "F1",
-	 N_("Open the GMAMEUI manual"), NULL/*G_CALLBACK (on_help_activate)*/ },
+	 N_("Open the GMAMEUI manual"), G_CALLBACK (on_help_activate) },
 	{ "HelpAbout", GTK_STOCK_ABOUT, NULL, NULL,
 	 N_("About this application"), G_CALLBACK (on_about_activate) }
 };

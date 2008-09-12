@@ -22,13 +22,31 @@ dnl AC_DEFINE(GDK_PIXBUF_DISABLE_DEPRECATED,,Do not support deprecated GDK-pixbu
 
 AM_PATH_GTK_2_0(2.4.0, , AC_MSG_ERROR(Cannot find GTK2))
 
+dnl Check if the version of GTK supports gtk_show_uri for spawning Help
+AM_PATH_GTK_2_0(2.13.4,AC_DEFINE(ENABLE_GTKSHOWURI, 1, Enable gtk_show_uri to spawn Help),AC_MSG_WARN(Version of GTK does not support gtk_show_uri))
+
 PKG_CHECK_MODULES(GLADE2, libglade-2.0, [], AC_MSG_ERROR([*** libglade2 not found!]))
 AC_SUBST(GLADE2_CFLAGS)
 AC_SUBST(GLADE2_LIBS)
 
-dnl PKG_CHECK_MODULES(GNOME, libgnome-2.0, [], AC_MSG_ERROR([*** libgnome2 not found!]))
-dnl AC_SUBST(GNOME_CFLAGS)
-dnl AC_SUBST(GNOME_LIBS)
+dnl Need to add a way to not build using libgnome if user is using XFCE for e.g.
+dnl or if GTK2.13 is available, since libgnome is only used to spawn Help
+AC_ARG_ENABLE(libgnome,
+  AC_HELP_STRING([--enable-libgnome],[include libgnome support (default: yes)])
+  ,,enable_libgnome=yes)
+
+AC_MSG_CHECKING(whether libgnome support should be included)
+if test ${enable_libgnome} = no; then
+   AC_MSG_RESULT([no])
+else
+   AC_MSG_RESULT([yes])
+
+   dnl libgnome support included, needed to check for modules, and define
+   dnl it so that IFDEF code can be built
+   PKG_CHECK_MODULES(GNOME, libgnome-2.0, AC_DEFINE(ENABLE_LIBGNOME, 1, libgnome support will be built), AC_MSG_ERROR([*** libgnome2 not found!]))
+   AC_SUBST(GNOME_CFLAGS)
+   AC_SUBST(GNOME_LIBS)
+fi
 
 AC_PATH_PROG(gmameuipath, gmameui)
 dnl Subst PACKAGE_PIXMAPS_DIR.
