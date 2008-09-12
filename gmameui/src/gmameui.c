@@ -178,8 +178,6 @@ gmameui_init (void)
 		g_free (mame_executable);
 	} else {
 		current_exec = xmame_table_get_by_index (0);
-		GMAMEUI_DEBUG (_("No MAME executable set; picking default at position 0: %s"),
-			       current_exec->path);
 	}
 #ifdef ENABLE_DEBUG
 g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
