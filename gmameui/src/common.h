@@ -79,8 +79,18 @@ static void GMAMEUI_DEBUG (const gchar *format, ...)
 #define	WARNING GTK_MESSAGE_WARNING
 #define	MESSAGE GTK_MESSAGE_INFO
 
-void gmameui_message (GtkDialogFlags type, GtkWindow *window, const gchar *format, ...)
+void
+gmameui_message (GtkDialogFlags type, GtkWindow *window, const gchar *format, ...)
      __attribute__((format (printf, 3, 4)));
+
+GtkWidget *
+gmameui_dialog_create (GtkDialogFlags type, GtkWindow *window, const gchar *format, ...)
+     __attribute__((format (printf, 3, 4)));
+
+/* Receive a list and remove any duplicates, freeing the nodes, before
+   returning the list */
+GList *
+glist_remove_duplicates (GList *list);
 
 #define UPDATE_GUI do { while (gtk_events_pending ()) { gtk_main_iteration (); } } while (0)
 

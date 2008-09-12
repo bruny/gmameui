@@ -145,7 +145,10 @@ gmameui_init (void)
 	/* init globals */
 	memset (Status_Icons, 0, sizeof (GdkPixbuf *) * NUMBER_STATUS);
 
+	GMAMEUI_DEBUG (_("Initialising list of possible MAME executable options"));
 	xmame_options_init ();
+
+	GMAMEUI_DEBUG (_("Initialising MAME executables"));
 	xmame_table_init ();
 	
 	if (!current_exec)
@@ -163,16 +166,21 @@ gmameui_init (void)
 		      "current-executable", &mame_executable,
 		      NULL);
 	for (i = 0; i < va_exec_paths->n_values; i++) {
+		GMAMEUI_DEBUG (_("Adding executable from preferences file: %s"),
+			       g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
 		xmame_table_add (g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
 	}
 	g_value_array_free (va_exec_paths);
 	
 	if (mame_executable) {
 		current_exec = xmame_table_get (mame_executable);
-		GMAMEUI_DEBUG("Current exec set to %s", current_exec->path);
+		GMAMEUI_DEBUG (_("Current exec set to %s"), current_exec->path);
 		g_free (mame_executable);
-	} else
+	} else {
 		current_exec = xmame_table_get_by_index (0);
+		GMAMEUI_DEBUG (_("No MAME executable set; picking default at position 0: %s"),
+			       current_exec->path);
+	}
 #ifdef ENABLE_DEBUG
 g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
@@ -376,8 +384,11 @@ launch_emulation (RomEntry    *rom,
 	gchar *p, *p2;
 	gfloat done = 0;
 	gint nb_loaded = 0;
-	GList *extra_output = NULL, *extra_output2 = NULL;
-	gboolean error_during_load,other_error;
+	GList *extra_output = NULL;
+	
+	gboolean error_rom, error_mame;	 /* Error with the load */
+	gboolean warning_rom;		 /* Warning with the load */
+	
 	ProgressWindow *progress_window;
 #ifdef ENABLE_JOYSTICK
 	gboolean usejoyingui;
@@ -385,8 +396,10 @@ launch_emulation (RomEntry    *rom,
 	joystick_close (joydata);
 	joydata = NULL;
 #endif
+	
+	/* FIXME Progress of loading ROMs is not reported in newer versions of MAME
+	   (e.g. SDLMame), so there is no way of updating a progress window */
 	progress_window = progress_window_new (TRUE);
-
 	progress_window_set_title (progress_window, _("Loading %s:"), rom_entry_get_list_name (rom));
 	progress_window_show (progress_window);
 
@@ -398,39 +411,71 @@ launch_emulation (RomEntry    *rom,
 	GMAMEUI_DEBUG (_("Loading %s:"), rom->gamename);
 
 	/* Loading */
-	error_during_load = other_error = FALSE;
+	
+	/* XMAME loads the ROM first and then prepares the display. We watch the
+	   pipe during the ROM loading until we reach "done.", which is XMAME's way
+	   of indicating the ROM has loaded. Errors with particular ROMs are not
+	   displayed until after "done.", which is why we have two clauses looking
+	   for NOT FOUND below */
+	
+	/* The following are examples of output lines from MAME:
+	 sv02.bin NOT FOUND (SDLMAME)
+	 WARNING: the game might not run correctly. (SDLMAME)
+	 mcu.bin      NOT FOUND (NO GOOD DUMP KNOWN) (XMAME)
+	 s92-23c      NOT FOUND (XMAME)
+	 ERROR: required files are missing, the game cannot be run.
+	 
+	 SDL found mode:720x450x32 (XMAME - SDL)
+	 
+	 XMAME generates the following output which can be parsed:
+	 loading rom 0: epr11282.a4
+	 loading rom 1: epr11280.a1
+	 info: sysdep_mixer: using oss plugin
+	 OSD: Info: Ideal mode for this game = 384x225
+	 
+	 SVGAlib: Info: Found videomode 640x400x32
+	 svgalib: Failed to initialize mouse
+	*/
+	
+	error_rom = error_mame = FALSE;
 	while (fgets (line, BUFFER_SIZE, xmame_pipe)) {
-			/* remove the last \n */
+		/* remove the last \n */
 		for (p = line; (*p && (*p != '\n')); p++);
 		*p = '\0';
 
 		GMAMEUI_DEBUG ("xmame: %s", line);
 
 		if (!strncmp (line,"loading", 7)) {
+			/* Only works with XMAME */
+			/* xmame: loading rom 16: s92_18.bin */
+			
 			nb_loaded++;
 			/*search for the : */
 			for (p = line; (*p && (*p != ':')); p++);
 			p = p + 2;
 			for (p2 = p; (*p2 && (*p2 != '\n')); p2++);
 			p2 = '\0';
-			done = (gfloat) ( (gfloat) (nb_loaded) /
-					  (gfloat) (rom->nb_roms));
+
+			done = (gfloat) (nb_loaded / rom->nb_roms);
 
 			progress_window_set_value (progress_window, done);
 			progress_window_set_text (progress_window, p);
 
-		} else if (!strncmp (line, "Master Mode: Waiting", 20)) {
-			for (p = line; *p != ':'; p++);
-			p++;
-			
-			progress_window_set_text (progress_window, p);
-		} else if (!g_ascii_strncasecmp (line, "error", 5) ||
-			   !g_ascii_strncasecmp (line, "Can't bind socket", 17)) {
-			/* the game didn't even began to load*/
-			other_error = TRUE;
+		} else if (!g_ascii_strncasecmp (line, "Ignoring", 8)) {
+			/* Ignore any errors starting with 'Ignoring' */
+			continue;
+		} else if (g_str_has_suffix (line, "NOT FOUND")) {
+			/* Catch errors relating to missing ROMs (SDLMAME catches them here) */
+			error_rom = TRUE;
 			extra_output = g_list_append (extra_output, g_strdup (line));
+		} else if (g_str_has_suffix (line, "(NO GOOD DUMP KNOWN)")) {
+			/* Catch errors relating to best available ROMs (SDLMAME catches them here) */
+			warning_rom = TRUE;
 		}
 
+		/* XMAME writes "done." to the command line once the ROMs have been
+		   loaded, but before they are checked and before the display is
+		   prepared. SDLMAME doesn't do this */
 		if (!strncmp (line, "done", 4))
 			break;
 
@@ -440,68 +485,87 @@ launch_emulation (RomEntry    *rom,
 	progress_window_destroy (progress_window);
 	while (gtk_events_pending ()) gtk_main_iteration ();
 
-	/*check if errors */
+	/* Parse the output and check for errors */
 	while (fgets (line, BUFFER_SIZE, xmame_pipe)) {
 		for (p = line; (*p && (*p != '\n')); p++);
 		*p = '\0';
 
 		GMAMEUI_DEBUG ("xmame: %s", line);
 
-		if (!strncmp (line, "GLmame", 6) || !strncmp (line, "based", 5))
-			continue;
-		else if (!g_ascii_strncasecmp (line, "error", 5)) {		/* bad rom or no rom found */ 
-			error_during_load = TRUE;
-			break;
-		} else if (!strncmp (line, "GLERROR", 7)) {		/* OpenGL initialization errors */
-			other_error = TRUE;
-		}						/* another error occurred after game loaded */
-		else if (!strncmp (line, "X Error", 7) ||		/* X11 mode not found*/
-			 !strncmp (line, "SDL: Unsupported", 16) ||
-			 !strncmp (line, "Unable to start", 15) ||
-			 !strncmp (line, "Unspected X Error", 17)) {
-			other_error = TRUE;
+		if (!strncmp (line, "X Error", 7) ||		/* X11 mode not found*/
+		    !strncmp (line, "GLERROR", 7) ||		/* OpenGL initialization errors */
+		    !strncmp (line, "SDL: Unsupported", 16) ||
+		    !strncmp (line, "Unable to start", 15) ||
+		    !strncmp (line, "svgalib: ", 9))		/* XMAME SVGA */
+		{
+			GMAMEUI_DEBUG (_("Error with MAME graphics creation: %s"), line);
+			error_mame = TRUE;
+			extra_output = g_list_append (extra_output, g_strdup (line));
+		} else if (g_str_has_suffix (line, "NOT FOUND")) {
+			/* Catch errors relating to missing ROMs (XMAME catches them here) */
+			error_rom = TRUE;
+			extra_output = g_list_append (extra_output, g_strdup (line));
+		} else if (g_str_has_suffix (line, "(NO GOOD DUMP KNOWN)")) {
+			/* Catch errors relating to best available ROMs (XMAME catches them here) */
+			warning_rom = TRUE;
 		}
-		extra_output = g_list_append (extra_output, g_strdup (line));	
 	}
 	
+	extra_output = glist_remove_duplicates (extra_output);
+	
 	pclose (xmame_pipe);
-	if (error_during_load || other_error) {
-		int size;
-		char **message = NULL;
-		GMAMEUI_DEBUG ("error during load");
-		size = g_list_length (extra_output) + 1;
-		message = g_new (gchar *, size);
-		size = 0;
+	if (error_rom || error_mame) {
+		/* There was an error during the load. Create a dialog to present the errors */
+		GtkWidget *dialog;
+		gchar *title;
+		gchar *secmessage;
 		
-		for (extra_output2 = g_list_first (extra_output); extra_output2;) {
-			message [size++] = extra_output2->data;
-			extra_output2 = g_list_next (extra_output2);
+		if (error_rom) {
+			title = g_strdup (_("GMAMEUI could not load the ROM"));
+			secmessage = g_strdup (_("The following ROMs were not found:\n"));
+		} else if (error_mame) {
+			title = g_strdup (_("MAME did not start successfully"));
+			secmessage = g_strdup (_("The following errors were reported:\n"));
 		}
-		message[size] = NULL;
+			
+		GMAMEUI_DEBUG ("error during load");
+		
+		GList *node;
+		for (node = g_list_first (extra_output); node; node = node->next) {
+			secmessage = g_strconcat (secmessage, node->data, "\n", NULL);
+		}
+		dialog = gmameui_dialog_create (ERROR, NULL, title);
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
+							  secmessage);
 
-		gmameui_message (ERROR, NULL, g_strjoinv ("\n", message));
-		g_strfreev (message);
-		
-		g_list_free (extra_output);
-		
-		/* update game informations if it was an rom problem */
-		if (error_during_load)
-			rom->has_roms = INCORRECT;
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (dialog);
+
+		g_free (title);
+		g_free (secmessage);
+
+		/* Update game information if there was a ROM problem */
+		if (error_rom) rom->has_roms = INCORRECT;
 		
 	} else {
+		/* Game was successfully loaded */
 		GMAMEUI_DEBUG ("game over");
-		g_list_foreach (extra_output, (GFunc)g_free, NULL);
-		g_list_free (extra_output);
 
-		/* update game informations */
+		/* Update game informations */
 		/* FIXME TODO Set g_object rom info, which triggers signal to update game in list.
 		   This will then replace update_game_in_list call below */
 		rom->timesplayed++;
-		rom->has_roms = CORRECT;
+
+		/* Update game information if there was a ROM warning, otherwise set to correct */
+		warning_rom ? rom->has_roms = BEST_AVAIL : CORRECT;
 	}
+	
+	g_list_foreach (extra_output, (GFunc)g_free, NULL);
+	g_list_free (extra_output);
 
 	gtk_widget_show (MainWindow);
-	/* update the gui for the times played and romstatus if there was any error */
+	
+	/* Update the ROM with the times played or status if there was any error */
 	update_game_in_list (rom);
 
 #ifdef ENABLE_JOYSTICK
