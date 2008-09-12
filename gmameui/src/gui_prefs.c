@@ -31,12 +31,14 @@
 #include <gtk/gtkcheckbutton.h>
 #include <gtk/gtkentry.h>
 #include <gtk/gtklabel.h>
+#include <glib/gstdio.h>	/* For g_mkdir */
 #include <glade/glade.h>
 
 #include "common.h"
 #include "gmameui.h"
 #include "gui_prefs.h"
 #include "rom_entry.h"
+#include "io.h"
 
 /* Preferences */
 static void mame_gui_prefs_class_init (MameGuiPrefsClass *klass);
@@ -433,10 +435,10 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 	/* UI preferences */
 	g_object_class_install_property (object_class,
 					 PROP_UI_WIDTH,
-					 g_param_spec_int ("ui-width", "Window Width", "Width of the main window", 0, 2000, 640, G_PARAM_READWRITE));
+					 g_param_spec_int ("ui-width", "Window Width", "Width of the main window", 0, 2000, 800, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_UI_HEIGHT,
-					 g_param_spec_int ("ui-height", "Window Height", "Height of the main window", 0, 2000, 480, G_PARAM_READWRITE));
+					 g_param_spec_int ("ui-height", "Window Height", "Height of the main window", 0, 2000, 600, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_SHOW_TOOLBAR,
 					 g_param_spec_boolean ("show-toolbar", "Show Toolbar", "Show the main toolbar", TRUE, G_PARAM_READWRITE));
@@ -475,7 +477,7 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 					 g_param_spec_int ("xpos-filters", "Filters Xpos", "X position of the filters hpaned", 0, 1000, 150, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_XPOS_GAMELIST,
-					 g_param_spec_int ("xpos-gamelist", "Gamelist Xpos", "X position of the gamelist hpaned", 0, 1000, 800, G_PARAM_READWRITE));
+					 g_param_spec_int ("xpos-gamelist", "Gamelist Xpos", "X position of the gamelist hpaned", 0, 1000, 500, G_PARAM_READWRITE));
 	
 	/* Startup preferences */
 	g_object_class_install_property (object_class,
@@ -503,10 +505,10 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 					 g_param_spec_string ("clone-color", "Clone Color", "Clone Color", "#FFFFFF", G_PARAM_READWRITE));      /* Default to black */
 	g_object_class_install_property (object_class,
 					 PROP_CURRENT_ROM,
-					 g_param_spec_string ("current-rom", "Current Rom", "The currently selected ROM", "", G_PARAM_READWRITE));
+					 g_param_spec_string ("current-rom", "Current Rom", "The currently selected ROM", NULL, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_CURRENT_EXECUTABLE,
-					 g_param_spec_string ("current-executable", "Current executable", "The currently selected MAME executable", "", G_PARAM_READWRITE));
+					 g_param_spec_string ("current-executable", "Current executable", "The currently selected MAME executable", NULL, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_EXECUTABLE_PATHS,
 					 g_param_spec_value_array ("executable-paths", "Executable Paths", "Paths to the MAME executables", NULL, G_PARAM_READWRITE));
@@ -562,7 +564,6 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 		g_error_free (error);
 		error = NULL;
 	}
-	/* FIXME TODO What happens if can't load from file? */
 
 	/* UI preferences */
 	pr->priv->ui_width = mame_gui_prefs_get_int_property_from_key_file (pr, "ui-width");
@@ -923,6 +924,9 @@ static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param,
 	   add more groups */
 }
 
+/* Retrieve a boolean property from the preferences ini file. If an error occurs (usually because
+   the preferences file does not exist, or the key value is not present, then the default value
+   in the g_param_spec is used instead */
 static gboolean mame_gui_prefs_get_bool_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
 	GError *error = NULL;
 	gboolean val;
@@ -931,13 +935,28 @@ static gboolean mame_gui_prefs_get_bool_property_from_key_file (MameGuiPrefs *pr
 
 	if (error) {
 		GMAMEUI_DEBUG ("Error retrieving boolean UI option %s - %s", property, error->message);
+		
 		g_error_free (error);
 		error = NULL;
+		
+		GParamSpec *spec;
+		GValue value = { 0, };
+
+		spec = g_object_class_find_property (G_OBJECT_GET_CLASS (pr), property);
+		
+		g_value_init (&value, G_TYPE_BOOLEAN);
+		g_param_value_set_default (spec, &value);
+		
+		val = g_value_get_boolean (&value);
+		GMAMEUI_DEBUG (_("Retrieving default boolean value for %s: %i"), property, val);
 	}
 	
-	return val;     /* If error, val will be NULL */
+	return val;
 }
 
+/* Retrieve an integer property from the preferences ini file. If an error occurs (usually because
+   the preferences file does not exist, or the key value is not present, then the default value
+   in the g_param_spec is used instead */
 static gint mame_gui_prefs_get_int_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
 	GError *error = NULL;
 	gint val;
@@ -948,11 +967,25 @@ static gint mame_gui_prefs_get_int_property_from_key_file (MameGuiPrefs *pr, gch
 		GMAMEUI_DEBUG ("Error retrieving integer UI option %s - %s", property, error->message);
 		g_error_free (error);
 		error = NULL;
+
+		GParamSpec *spec;
+		GValue value = { 0, };
+
+		spec = g_object_class_find_property (G_OBJECT_GET_CLASS (pr), property);
+		
+		g_value_init (&value, G_TYPE_INT);
+		g_param_value_set_default (spec, &value);
+		
+		val = g_value_get_int (&value);
+		GMAMEUI_DEBUG (_("Retrieving default integer value for %s: %i"), property, val);
 	}
 	
-	return val;     /* If error, val will be NULL */
+	return val;
 }
 
+/* Retrieve a gchar* property from the preferences ini file. If an error occurs (usually because
+   the preferences file does not exist, or the key value is not present, then the default value
+   in the g_param_spec is used instead */
 static gchar* mame_gui_prefs_get_string_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
 	GError *error = NULL;
 	gchar* val;
@@ -963,7 +996,18 @@ static gchar* mame_gui_prefs_get_string_property_from_key_file (MameGuiPrefs *pr
 		GMAMEUI_DEBUG ("Error retrieving string UI option %s - %s", property, error->message);
 		g_error_free (error);
 		error = NULL;
+		
+		GParamSpec *spec;
+		GValue value = { 0, };
+
+		spec = g_object_class_find_property (G_OBJECT_GET_CLASS (pr), property);
+		
+		g_value_init (&value, G_TYPE_STRING);
+		g_param_value_set_default (spec, &value);
+		
+		val = g_strdup (g_value_get_string (&value));
+		GMAMEUI_DEBUG (_("Retrieving default string value for %s: %s"), property, val);
 	}
 	
-	return val;     /* If error, val will be NULL */
+	return val;
 }
