@@ -387,7 +387,7 @@ on_romset_audited (GmameuiAudit *audit, gchar *audit_line, gint type, gint audit
 		}
 
 		update_game_in_list (rom);
-	} else {
+	} else if (g_str_has_prefix (audit_line, rom->romname)) {
 		/* Line relates to a ROM within the ROM set */
 		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_audit_result_buffer), &text_iter);
 		gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_audit_result_buffer), &text_iter, audit_line, -1);
@@ -395,6 +395,8 @@ on_romset_audited (GmameuiAudit *audit, gchar *audit_line, gint type, gint audit
 		/* Append carriage return */
 		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_audit_result_buffer), &text_iter);
 		gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_audit_result_buffer), &text_iter, "\n", -1);
+	} else {
+		/* Other output from MAME that we can ignore */
 	}
 }
 

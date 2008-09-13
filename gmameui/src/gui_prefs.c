@@ -502,7 +502,7 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 					 g_param_spec_boolean ("theprefix", "Display 'The'", "Display 'The' as a prefix in the gamelist", TRUE, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_CLONECOLOR,
-					 g_param_spec_string ("clone-color", "Clone Color", "Clone Color", "#FFFFFF", G_PARAM_READWRITE));      /* Default to black */
+					 g_param_spec_string ("clone-color", "Clone Color", "Clone Color", "##5F5F5F", G_PARAM_READWRITE));      /* Default to grey */
 	g_object_class_install_property (object_class,
 					 PROP_CURRENT_ROM,
 					 g_param_spec_string ("current-rom", "Current Rom", "The currently selected ROM", NULL, G_PARAM_READWRITE));

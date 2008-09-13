@@ -104,6 +104,9 @@ gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);
 
 /**** Sidebar functionality ****/
 
+static GdkPixbuf *
+get_pixbuf_from_zip_file (ZIP *zip, gchar *romname, gchar *parent_romname);
+
 static void
 set_game_pixbuff_from_iter (GtkTreeIter *iter,
 			    ZIP         *zip,
@@ -126,7 +129,6 @@ set_game_pixbuff_from_iter (GtkTreeIter *iter,
 	    && (rect.y + rect.height) > 0
 	    && (rect.y < page_size)
 	    && !tmprom->icon_pixbuf) {
-
 		g_object_get (main_gui.gui_prefs, "current-mode", &current_mode, NULL);
 		    
 		tmprom->icon_pixbuf = get_icon_for_rom (tmprom, ROM_ICON_SIZE, zip);
@@ -179,6 +181,7 @@ adjustment_scrolled_delayed (void)
 		i = 0;
 		while ((i < visible_games) && valid) {
 			tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
+			/* Set the icon for all children if the parent row is expanded */
 			if (gtk_tree_view_row_expanded (GTK_TREE_VIEW (main_gui.displayed_list), tree_path)) {
 				if (gtk_tree_model_iter_children (GTK_TREE_MODEL (main_gui.tree_model), &iter_child, &iter)) {
 					set_game_pixbuff_from_iter (&iter_child,zip, (gint) (vadj->page_size));
@@ -460,6 +463,79 @@ set_game_info (const RomEntry *rom,
 	return set_info (entry_name, text_buffer);
 }
 
+/* Get a pixbuf from a zip file for a specified rom. If the pixbuf could not
+   be found, search for a pixbuf for the parent */
+static GdkPixbuf *
+get_pixbuf_from_zip_file (ZIP *zip, gchar *romname, gchar *parent_romname)
+{
+	struct zipent* zipent;
+	GdkPixbuf *pixbuf = NULL;
+	gchar *filename;
+	gchar *tmp_buffer;
+	gchar *parent_tmp_buffer = NULL;
+	gsize parent_buf_size = 0;
+	gchar *parent_filename;
+	GError *error = NULL;
+
+	GdkPixbufLoader *loader;
+
+	filename = g_strdup_printf ("%s.", romname);
+	parent_filename = g_strdup_printf ("%s.", parent_romname);
+
+	while ((zipent = readzip (zip)) != 0) {
+		/* this should allows to find any format of picture in the zip, not only bmp */
+		if (!strncmp (filename,zipent->name, strlen (romname) + 1)) {
+			GMAMEUI_DEBUG (_("Found file name %s with CRC: %u, size %i"),
+				       zipent->name,
+				       zipent->crc32,
+				       zipent->uncompressed_size);
+			
+			tmp_buffer = read_zipentry (zip, zipent);
+			
+			if (tmp_buffer) {
+				GMAMEUI_DEBUG (_("Attempting to uncompress %s"), zipent->name);
+				/* if the file successfully uncompress, try to load it in a pixbuf loader */
+				loader = gdk_pixbuf_loader_new ();
+				if (gdk_pixbuf_loader_write (loader, (guchar *)tmp_buffer, (gsize) zipent->uncompressed_size, &error)) {
+					pixbuf = gdk_pixbuf_loader_get_pixbuf (loader);
+					gdk_pixbuf_loader_close (loader, &error);
+					GMAMEUI_DEBUG (_("Loaded pixbuf"));
+				} else {
+					GMAMEUI_DEBUG (_("Error while uncompressing %s: %s"), zipent->name, error->message);
+					g_error_free (error);
+					error = NULL;
+				}
+				g_free (tmp_buffer);
+				tmp_buffer = NULL;
+			}
+			/* prevent to read all zip file if we have found the picture's game (uncompressed successfuly or not) */
+			break;
+
+		} else if (!strncmp (parent_filename, zipent->name, strlen (parent_romname) + 1)) {
+			parent_tmp_buffer = read_zipentry (zip, zipent);
+			parent_buf_size = zipent->uncompressed_size;
+		}
+	}
+	g_free (filename);
+	g_free (parent_filename);
+
+	/* no picture found try parent game if any*/
+	if (!pixbuf && parent_tmp_buffer) {
+		loader = gdk_pixbuf_loader_new ();
+		if (!gdk_pixbuf_loader_write (loader, (guchar *)parent_tmp_buffer, parent_buf_size, &error)) {
+			GMAMEUI_DEBUG (_("Error while uncompressing %s: %s"), zipent->name, error->message);
+		} else {
+			pixbuf = gdk_pixbuf_loader_get_pixbuf (loader);
+			gdk_pixbuf_loader_close (loader, &error);
+		}
+	}
+
+	g_free (parent_tmp_buffer);
+					   
+	return pixbuf;
+}
+
+
 /* Returns a GtkWidget representing a GtkImage */
 static GtkWidget *
 get_pixbuf (RomEntry       *rom,
@@ -518,9 +594,6 @@ get_pixbuf (RomEntry       *rom,
 	
 	filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", directory_name, rom->romname);
 	filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", directory_name, rom->cloneof);
-// FIXME TODO	zipfile = g_build_filename (gui_prefs.SnapshotDirectory, "snap.zip", NULL);
-
-	GMAMEUI_DEBUG ("directory is %s, filename is %s, parent is %s", directory_name, filename, filename_parent);
 
 	GMAMEUI_DEBUG ("Looking for image %s", filename);
 	pixbuf = gdk_pixbuf_new_from_file (filename, error);
@@ -535,102 +608,48 @@ get_pixbuf (RomEntry       *rom,
 	if (filename_parent)
 		g_free (filename_parent);
 	
-	if (!pixbuf) {
-		if (sctype == SNAPSHOTS) {
-			gchar *snapshot_dir;
-			g_object_get (main_gui.gui_prefs,
-				      "dir-snapshot", &snapshot_dir,
-				      NULL);
+	if (!pixbuf && (sctype == SNAPSHOTS)) {
+
+		gchar *snapshot_dir;
+		g_object_get (main_gui.gui_prefs,
+			      "dir-snapshot", &snapshot_dir,
+			      NULL);
 			
-			/* Since MAME 0.111, snapshots are now in a subdirectory per game
-			   with numeric names 0000.png, 0001.png, etc. */
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", snapshot_dir, rom->romname);
-			GMAMEUI_DEBUG ("Looking for image %s", filename);
+		/* Since MAME 0.111, snapshots are now in a subdirectory per game
+		   with numeric names 0000.png, 0001.png, etc. */
+		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", snapshot_dir, rom->romname);
+		GMAMEUI_DEBUG ("Looking for image %s", filename);
+		pixbuf = gdk_pixbuf_new_from_file (filename,error);
+		g_free (filename);
+
+		/* If not found, look in parent folder */
+		if ((!pixbuf) && strcmp (rom->cloneof,"-")) {
+			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", snapshot_dir, rom->cloneof);
+			GMAMEUI_DEBUG ("Looking for parent image %s", filename);
 			pixbuf = gdk_pixbuf_new_from_file (filename,error);
 			g_free (filename);
-
-			/* If not found, look in parent folder */
-			if ((!pixbuf) && strcmp (rom->cloneof,"-")) {
-				filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", snapshot_dir, rom->cloneof);
-				GMAMEUI_DEBUG ("Looking for parent image %s", filename);
-				pixbuf = gdk_pixbuf_new_from_file (filename,error);
-				g_free (filename);
-			}
-			
-			g_free (snapshot_dir);
 		}
+			
+		g_free (snapshot_dir);
 	}
 	
-	/* FIXME TODO
-	* we havent found the picture in the directory, maybe we could try in a zipfile *
+	/* we havent found the picture in the directory, maybe we could try in a zipfile */
 	if (!pixbuf) {
 		ZIP *zip;
-		struct zipent* zipent;
-		gchar *tmp_buffer;
-		gchar *parent_tmp_buffer = NULL;
-		gsize parent_buf_size = 0;
-		gchar *parent_filename;
-
+		gchar *snapshotdir;
+		g_object_get (main_gui.gui_prefs, "dir-snapshot", &snapshotdir, NULL);
+		zipfile = g_build_filename (snapshotdir, "snap.zip", NULL);
 		zip = openzip (zipfile);
 
 		if (zip) {
-			GdkPixbufLoader *loader;
-
-			GMAMEUI_DEBUG ("Succesfully open zip file '%s' !", zipfile);
-			filename = g_strdup_printf ("%s.", rom->romname);
-			parent_filename = g_strdup_printf ("%s.", rom->cloneof);
-
-			while ( (zipent = readzip (zip)) != 0) {
-				* this should allows to find any format of picture in the zip, not only bmp *
-				if (!strncmp (filename,zipent->name, strlen (rom->romname) + 1)) {
-					GMAMEUI_DEBUG ("found file name %s\twith CRC:%i\tsize%i",
-							zipent->name,
-							zipent->crc32,
-							zipent->uncompressed_size);
-					tmp_buffer = read_zipentry (zip, zipent);
-					if (tmp_buffer) {	* if the file successfully uncompress, try to load it in a pixbuf loader *
-						loader = gdk_pixbuf_loader_new ();
-						if (!gdk_pixbuf_loader_write (loader, (guchar *)tmp_buffer, zipent->uncompressed_size, error)) {
-							GMAMEUI_DEBUG ("Error while uncompressing %s from %s", zipent->name, zipfile);
-						} else {
-							gdk_pixbuf_loader_close (loader,error);
-							pixbuf = gdk_pixbuf_loader_get_pixbuf (loader);
-						}
-						g_free (tmp_buffer);
-					}
-					* prevent to read all zip file if we have found the picture's game (uncompressed successfuly or not) *
-					break;
-
-				} else if (!strncmp (parent_filename, zipent->name, strlen (rom->cloneof) + 1)) {
-					parent_tmp_buffer = read_zipentry (zip, zipent);
-					parent_buf_size = zipent->uncompressed_size;
-				}
-			}
-			g_free (filename);
-			g_free (parent_filename);
-
-			* no picture found try parent game if any*
-			if (!pixbuf && parent_tmp_buffer) {
-				loader = gdk_pixbuf_loader_new ();
-				if (!gdk_pixbuf_loader_write (loader, (guchar *)parent_tmp_buffer, parent_buf_size, error)) {
-					GMAMEUI_DEBUG ("Error while uncompressing %s from %s", zipent->name, zipfile);
-				} else {
-					gdk_pixbuf_loader_close (loader, error);
-					pixbuf = gdk_pixbuf_loader_get_pixbuf (loader);
-				}
-			}
-
-			g_free (parent_tmp_buffer);
-		}
-
-		if (zip)
+			GMAMEUI_DEBUG ("Looking for image in zip file %s", zipfile);
+			pixbuf = get_pixbuf_from_zip_file (zip, rom->romname, rom->cloneof);
 			closezip (zip);
-		else
-			GMAMEUI_DEBUG ("Error, cannot open zip file '%s' !\n", zipfile);
+		} else
+			GMAMEUI_DEBUG (_("Error - cannot open zip file %s"), zipfile);
 
 		g_free (zipfile);
-		
-	}*/
+	}
 
 	if (pixbuf) {
 		GdkPixbuf *scaled_pixbuf;
@@ -961,14 +980,15 @@ get_icon_for_rom (RomEntry *rom,
 		  ZIP      *zip)
 {
 	GdkPixbuf *pixbuf, *scaled_pixbuf = NULL;
-	gchar filename [MAX_ROMNAME + 1], *filename2;
-	gchar parent_filename [MAX_ROMNAME + 1];
+	gchar *filename2;
 	gchar *icon_dir;
 	GError **error = NULL;
 
 	if (!rom)
 		return NULL;
 
+	GMAMEUI_DEBUG ("Attempting to get icon for ROM %s", rom->romname);
+	
 	g_object_get (main_gui.gui_prefs,
 		      "dir-icons", &icon_dir,
 		      NULL);
@@ -977,74 +997,29 @@ get_icon_for_rom (RomEntry *rom,
 	pixbuf = gdk_pixbuf_new_from_file (filename2, error);
 	g_free (filename2);
 
-		/* no picture found try parent game if any*/
+	/* no picture found try parent game if any*/
 	if ((pixbuf == NULL) && strcmp (rom->cloneof, "-")) {
+		GMAMEUI_DEBUG ("Attempting to get icon for ROM %s from parent %s", rom->romname, rom->cloneof);
 		filename2 = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.ico", icon_dir, rom->cloneof);
-		pixbuf = gdk_pixbuf_new_from_file (filename, error);
+		pixbuf = gdk_pixbuf_new_from_file (filename2, error);
 		g_free (filename2);
 	}
 
 	/* we havent found the picture in the directory, maybe we could try in a zipfile */
 	if (pixbuf == NULL) {
-		struct zipent * zipent;
-		char *tmp_buffer;
-		char *parent_tmp_buffer = NULL;
-		gsize parent_buf_size = 0;
 		if (zip != 0) {
-			GdkPixbufLoader *loader;
-
+			GMAMEUI_DEBUG ("Attempting to get icon for ROM %s from icon zipfile", rom->romname);
 			rewindzip (zip);
-			g_snprintf (filename, MAX_ROMNAME + 1 , "%s.", rom->romname);
-			g_snprintf (parent_filename, MAX_ROMNAME + 1, "%s.", rom->cloneof);
-					
-			while ( (zipent = readzip (zip)) != 0) {
-				/* this should allows to find any format of picture in the zip, not only bmp */
-				if (!strncmp (filename, zipent->name, strlen (rom->romname) + 1)) {
-					tmp_buffer = read_zipentry (zip, zipent);
-					if (tmp_buffer) {
-						/* if the file successfully uncompress, try to load it in a pixbuf loader */
-						loader = gdk_pixbuf_loader_new ();
-						if (!gdk_pixbuf_loader_write (loader, (guchar *)tmp_buffer, zipent->uncompressed_size, error)) {
-							GMAMEUI_DEBUG ("Error while uncompressing %s ", zipent->name);
-						} else {
-							gdk_pixbuf_loader_close (loader, error);
-							pixbuf = gdk_pixbuf_loader_get_pixbuf (loader);
-						}
-						g_free (tmp_buffer);
-						tmp_buffer = NULL;
-					}
-					/* prevent to read all zip file if we have found the picture's game (uncompressed successfuly or not) */
-					break;
-				} else if (strcmp (rom->cloneof, "-") && !strncmp (parent_filename, zipent->name, strlen (rom->cloneof) + 1)) {
-					parent_tmp_buffer = read_zipentry (zip, zipent);
-					parent_buf_size = zipent->uncompressed_size;
-				}
-			}
-
-			/* no picture found try parent game if any */
-			if (pixbuf == NULL) {
-				if (parent_tmp_buffer) {
-					loader = gdk_pixbuf_loader_new ();
-					if (!gdk_pixbuf_loader_write (loader, (guchar *)parent_tmp_buffer, parent_buf_size, error)) {
-						GMAMEUI_DEBUG ("Error while uncompressing %s ",zipent->name);
-					} else {
-						gdk_pixbuf_loader_close (loader,error);
-						pixbuf = gdk_pixbuf_loader_get_pixbuf (loader);
-					}
-						parent_tmp_buffer = NULL;
-				}
-			}
-
-			if (parent_tmp_buffer)
-				g_free (parent_tmp_buffer);
+			pixbuf = get_pixbuf_from_zip_file (zip, rom->romname, rom->cloneof);					
 		}
 	}
 
-	if (pixbuf) {
-		scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf,
-							size, size, GDK_INTERP_BILINEAR);
+	if (pixbuf != NULL) {
+		GMAMEUI_DEBUG ("Found icon for ROM %s, scaling to size %ix%i", rom->romname, size, size);
+		scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf, size, size, GDK_INTERP_BILINEAR);
 		g_object_unref (pixbuf);
-	}
+	} else
+		GMAMEUI_DEBUG ("Could not find icon for %s", rom->romname);
 	
 	g_free (icon_dir);
 	
@@ -1517,7 +1492,7 @@ select_inp (gboolean play_record)
 							 GTK_MESSAGE_WARNING,
 							 GTK_BUTTONS_YES_NO,
 							 _("File exists"));
-			gtk_message_dialog_format_secondary_text (dialog,
+			gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
 								  _("A file named '%s' already exists. Do you want to overwrite it?"),
 								  inp_filename);
 			if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_YES) {
