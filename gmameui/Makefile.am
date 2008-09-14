@@ -21,9 +21,11 @@ EXTRA_DIST = autogen.sh \
 	intltool-merge.in \
 	intltool-extract.in \
 	gnome-doc-utils.make \
-	m4 
+	m4 \
+	gmameui.spec.in	\
+	gmameui.spec
 
-DISTCLEANFILES=gnome-doc-utils.make
+#DISTCLEANFILES=gnome-doc-utils.make
 
 Graphicsdir = $(datadir)/applications
 Graphics_in_files = gmameui.desktop.in
@@ -41,8 +43,9 @@ icon_DATA = 	gmameui.png \
 docdir = $(datadir)/doc/$(PACKAGE)
 doc_DATA = BUGS NEWS COPYING AUTHORS README TODO ChangeLog
 
-rpmdir = /usr/src/rpm/SPECS
-rpm_DATA = gmameui.spec
+# not needed for rpm building
+#rpmdir = /usr/src/rpm/SPECS
+#rpm_DATA = gmameui.spec
 
 man_MANS = gmameui.6
 

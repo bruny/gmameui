@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-13 12:12+1000\n"
+"POT-Creation-Date: 2008-09-14 15:38+1000\n"
 "PO-Revision-Date: 2008-05-15 22:55+0200\n"
 "Last-Translator: Ugo Viti <ugo.viti@initzero.it>\n"
 "Language-Team: Ugo Viti <ugo.viti@initzero.it>\n"
@@ -99,6 +99,40 @@ msgstr "Naviga per File"
 msgid "No valid xmame executables found"
 msgstr ""
 
+#. Now add the categories
+#: ../src/filters_list.c:202 ../src/interface.c:545
+#, fuzzy
+msgid "Available"
+msgstr "Non disponibile"
+
+#: ../src/filters_list.c:203
+msgid "Architecture"
+msgstr ""
+
+#: ../src/filters_list.c:204
+msgid "Imperfect"
+msgstr ""
+
+#: ../src/filters_list.c:205
+#, fuzzy
+msgid "Game Details"
+msgstr "Dettagli"
+
+#: ../src/filters_list.c:206
+#, fuzzy
+msgid "Custom"
+msgstr "Auto"
+
+#: ../src/filters_list.c:207 ../src/gmameui-gamelist-view.c:81
+#: ../src/mame_options_dialog.c:81 ../data/gmameui_prefs.glade.h:6
+msgid "Category"
+msgstr "Categoria"
+
+#: ../src/filters_list.c:208 ../src/gmameui-gamelist-view.c:79
+#: ../data/gmameui_prefs.glade.h:20
+msgid "Version"
+msgstr "Versione"
+
 #: ../src/game_list.c:312 ../src/io.c:221 ../src/io.c:224
 #: ../src/properties.c:370
 msgid "Unknown"
@@ -171,76 +205,6 @@ msgstr ""
 "e l'attuale eseguibile è:\n"
 "%s %s\n"
 "Vuoi ricostruire la lista dei giochi?"
-
-#: ../src/gui.c:722
-#, c-format
-msgid "Time to initialise icons: %.02f seconds"
-msgstr "Tempo di inizializzazione delle icone: %.02f secondi"
-
-#: ../src/gui.c:727
-#, fuzzy, c-format
-msgid "Time to create main window, filters and gamelist: %.02f seconds"
-msgstr ""
-"Tempo per la creazione della finestra principale e dei filtri: %.02f secondi"
-
-#: ../src/gui.c:753
-#, c-format
-msgid "Time to complete start of UI: %.02f seconds"
-msgstr "Tempo per completare l'avvio della UI: %.02f secondi"
-
-#: ../src/gui.c:774
-#, c-format
-msgid "%s is not a valid executable"
-msgstr "%s non è un eseguibile valido"
-
-#: ../src/gui.c:840
-#, fuzzy
-msgid "No executables"
-msgstr "Nessun eseguibile MAME definito"
-
-#. update statusbar
-#: ../src/gui.c:1383
-msgid "No game selected"
-msgstr "Nessun gioco selezionato"
-
-#: ../src/gui.c:1420
-msgid "Yes"
-msgstr "Si"
-
-#: ../src/gui.c:1420
-msgid "No"
-msgstr "No"
-
-#: ../src/gui.c:1490
-msgid "Choose inp file to play"
-msgstr "Scegli un file 'inp' da visualizzare"
-
-#: ../src/gui.c:1519
-#, fuzzy
-msgid "File exists"
-msgstr "Lista Cart_elle"
-
-#: ../src/gui.c:1521
-#, fuzzy, c-format
-msgid "A file named '%s' already exists. Do you want to overwrite it?"
-msgstr ""
-"Un file chiamato '%s' esite già.\n"
-"Vuoi sovrascriverlo?"
-
-#: ../src/gui_prefs.c:951
-#, c-format
-msgid "Retrieving default boolean value for %s: %i"
-msgstr ""
-
-#: ../src/gui_prefs.c:980
-#, c-format
-msgid "Retrieving default integer value for %s: %i"
-msgstr ""
-
-#: ../src/gui_prefs.c:1009
-#, c-format
-msgid "Retrieving default string value for %s: %s"
-msgstr ""
 
 #: ../src/gmameui.c:86
 msgid "No xmame executable found"
@@ -349,6 +313,475 @@ msgstr "Sto uscendo da GMAMEUI..."
 msgid "Finished cleaning up GMAMEUI"
 msgstr "Finito di ripulire GMAMEUI"
 
+#: ../src/gmameui-audit-dlg.c:221 ../data/audit_window.glade.h:5
+msgid "Auditing MAME ROMs"
+msgstr ""
+
+#: ../src/gmameui-audit-dlg.c:273 ../data/audit_window.glade.h:6
+msgid "Auditing ROMs"
+msgstr ""
+
+#: ../src/gmameui-audit-dlg.c:315
+msgid "Audit Stopped"
+msgstr "Analisi interrotta"
+
+#: ../src/gmameui-audit-dlg.c:316
+msgid "Stopped"
+msgstr "Interrotta"
+
+#: ../src/gmameui-audit-dlg.c:440
+#, c-format
+msgid "Auditing romset %s"
+msgstr ""
+
+#: ../src/gmameui-audit-dlg.c:454
+#, fuzzy, c-format
+msgid "Auditing sampleset %s"
+msgstr "Analizza le ROM ed i suoni"
+
+#: ../src/gmameui-audit-dlg.c:508 ../src/gmameui-audit-dlg.c:511
+#, fuzzy
+msgid "Audit done"
+msgstr "Analisi eseguita"
+
+#: ../src/gmameui-audit-dlg.c:509
+msgid "Done"
+msgstr "Eseguito"
+
+#: ../src/gmameui-gamelist-view.c:45
+msgid "Game"
+msgstr "Gioco "
+
+#: ../src/gmameui-gamelist-view.c:47 ../data/directories.glade.h:23
+msgid "ROMs"
+msgstr ""
+
+#: ../src/gmameui-gamelist-view.c:49 ../src/interface.c:799
+#: ../data/directories.glade.h:24 ../data/gmameui_prefs.glade.h:17
+msgid "Samples"
+msgstr "Campioni"
+
+#: ../src/gmameui-gamelist-view.c:51 ../data/gmameui_prefs.glade.h:9
+msgid "Directory"
+msgstr "Cartella"
+
+#: ../src/gmameui-gamelist-view.c:53 ../src/interface.c:715
+msgid "Played"
+msgstr "Giocato"
+
+#: ../src/gmameui-gamelist-view.c:55 ../data/gmameui_prefs.glade.h:15
+msgid "Manufacturer"
+msgstr "Produttore"
+
+#: ../src/gmameui-gamelist-view.c:57 ../data/gmameui_prefs.glade.h:21
+msgid "Year"
+msgstr "Anno"
+
+#: ../src/gmameui-gamelist-view.c:59 ../data/gmameui_prefs.glade.h:8
+msgid "Clone of"
+msgstr "Clone di"
+
+#: ../src/gmameui-gamelist-view.c:61 ../data/gmameui_prefs.glade.h:10
+msgid "Driver"
+msgstr ""
+
+#. Available / Not Available
+#: ../src/gmameui-gamelist-view.c:63
+msgid "Status"
+msgstr "Stato"
+
+#: ../src/gmameui-gamelist-view.c:65
+msgid "Rom of"
+msgstr "ROM di"
+
+#. Working / Not Working
+#: ../src/gmameui-gamelist-view.c:67
+msgid "Driver Status"
+msgstr "Stato Driver"
+
+#: ../src/gmameui-gamelist-view.c:69
+msgid "Driver Colors"
+msgstr "Colori Driver"
+
+#: ../src/gmameui-gamelist-view.c:71
+msgid "Driver Sound"
+msgstr "Suoni Driver"
+
+#: ../src/gmameui-gamelist-view.c:73
+#, fuzzy
+msgid "Driver Graphics"
+msgstr "Grafica Driver"
+
+#: ../src/gmameui-gamelist-view.c:75
+msgid "Players"
+msgstr "Giocatori"
+
+#: ../src/gmameui-gamelist-view.c:77
+msgid "Buttons"
+msgstr "Bottoni"
+
+#: ../src/gmameui-gamelist-view.c:83
+#, fuzzy
+msgid "Favorite"
+msgstr "Preferito"
+
+#: ../src/gmameui-gamelist-view.c:85
+msgid "Channels"
+msgstr "Canali"
+
+#: ../src/gmameui-gamelist-view.c:87 ../src/interface.c:687
+msgid "BIOS"
+msgstr ""
+
+#: ../src/gmameui-gamelist-view.c:352
+#, c-format
+msgid "Hide \"%s\" Column"
+msgstr "Nascondi la colonna \"%s\""
+
+#: ../src/gmameui-gamelist-view.c:718
+msgid "Wait..."
+msgstr "Aspetta..."
+
+#: ../src/gmameui-gamelist-view.c:779 ../src/gui.c:1395
+msgid "Yes"
+msgstr "Si"
+
+#: ../src/gmameui-gamelist-view.c:779 ../src/gui.c:1395
+msgid "No"
+msgstr "No"
+
+#. Status Bar Message
+#: ../src/gmameui-gamelist-view.c:890
+msgid "games"
+msgstr "giochi"
+
+#: ../src/gmameui-gamelist-view.c:890
+msgid "game"
+msgstr "gioco"
+
+#: ../src/gui.c:488
+#, c-format
+msgid "Found file name %s with CRC: %u, size %i"
+msgstr ""
+
+#: ../src/gui.c:496
+#, c-format
+msgid "Attempting to uncompress %s"
+msgstr ""
+
+#: ../src/gui.c:502
+msgid "Loaded pixbuf"
+msgstr ""
+
+#: ../src/gui.c:504 ../src/gui.c:526
+#, c-format
+msgid "Error while uncompressing %s: %s"
+msgstr ""
+
+#: ../src/gui.c:649
+#, c-format
+msgid "Error - cannot open zip file %s"
+msgstr ""
+
+#: ../src/gui.c:741
+#, c-format
+msgid "Time to initialise icons: %.02f seconds"
+msgstr "Tempo di inizializzazione delle icone: %.02f secondi"
+
+#: ../src/gui.c:746
+#, fuzzy, c-format
+msgid "Time to create main window, filters and gamelist: %.02f seconds"
+msgstr ""
+"Tempo per la creazione della finestra principale e dei filtri: %.02f secondi"
+
+#: ../src/gui.c:772
+#, c-format
+msgid "Time to complete start of UI: %.02f seconds"
+msgstr "Tempo per completare l'avvio della UI: %.02f secondi"
+
+#: ../src/gui.c:793
+#, c-format
+msgid "%s is not a valid executable"
+msgstr "%s non è un eseguibile valido"
+
+#: ../src/gui.c:859
+#, fuzzy
+msgid "No executables"
+msgstr "Nessun eseguibile MAME definito"
+
+#. update statusbar
+#: ../src/gui.c:1358
+msgid "No game selected"
+msgstr "Nessun gioco selezionato"
+
+#: ../src/gui.c:1465
+msgid "Choose inp file to play"
+msgstr "Scegli un file 'inp' da visualizzare"
+
+#: ../src/gui.c:1494
+#, fuzzy
+msgid "File exists"
+msgstr "Lista Cart_elle"
+
+#: ../src/gui.c:1496
+#, fuzzy, c-format
+msgid "A file named '%s' already exists. Do you want to overwrite it?"
+msgstr ""
+"Un file chiamato '%s' esite già.\n"
+"Vuoi sovrascriverlo?"
+
+#. Toplevel
+#: ../src/gui.h:52
+msgid "_File"
+msgstr "_FIle"
+
+#: ../src/gui.h:53
+msgid "_View"
+msgstr "_Visualizza"
+
+#: ../src/gui.h:54
+msgid "_Options"
+msgstr "_Opzioni"
+
+#: ../src/gui.h:55
+msgid "_Help"
+msgstr "_Aiuto"
+
+#. File menu
+#: ../src/gui.h:58
+msgid "_Select Random Game"
+msgstr "_Seleziona un Gioco Casuale"
+
+#: ../src/gui.h:59 ../src/gui.h:86
+msgid "Play currently selected game"
+msgstr "Avvia il gioco attualmente selezionato"
+
+#: ../src/gui.h:60
+msgid "_Quit"
+msgstr "_Esci"
+
+#: ../src/gui.h:61
+msgid "Quit GMAMEUI"
+msgstr "Esci da GMAMEUI"
+
+#. View menu
+#: ../src/gui.h:64
+msgid "Refresh"
+msgstr "Rinfresca"
+
+#: ../src/gui.h:65
+msgid "Refresh game list"
+msgstr "Rinfresca la lista dei giochi"
+
+#. Option menu
+#: ../src/gui.h:68
+msgid "_Directories..."
+msgstr "_Cartella..."
+
+#: ../src/gui.h:69
+msgid "Set directory configuration"
+msgstr "Imposta la configurazione della cartella"
+
+#: ../src/gui.h:70
+msgid "_GMAMEUI Preferences..."
+msgstr ""
+
+#: ../src/gui.h:71
+msgid "Set GMAMEUI preferences"
+msgstr ""
+
+#. Help menu
+#: ../src/gui.h:74
+msgid "_Contents"
+msgstr "_Contenuti"
+
+#: ../src/gui.h:75
+msgid "Open the GMAMEUI manual"
+msgstr "Aprio il manuale di GMAMEUI"
+
+#: ../src/gui.h:77
+msgid "About this application"
+msgstr "A riguardo di questa applicazione"
+
+#. File menu
+#: ../src/gui.h:85
+msgid "Play"
+msgstr "Gioca"
+
+#: ../src/gui.h:87
+msgid "Play and Record Input..."
+msgstr "Gioca e Registra la Partita..."
+
+#: ../src/gui.h:88
+msgid "Record a game for later playback"
+msgstr "Registra un gioco per un replay successivo"
+
+#: ../src/gui.h:89
+msgid "Playback Input..."
+msgstr "Replay Input..."
+
+#: ../src/gui.h:90
+msgid "Playback a recorded game"
+msgstr "Replay di un gioco registrato"
+
+#: ../src/gui.h:91
+msgid "Options"
+msgstr "Opzioni"
+
+#: ../src/gui.h:92
+msgid "Change the options of the selected game"
+msgstr "Cambia le opzioni del gioco selezionato"
+
+#: ../src/gui.h:98
+msgid "_Audit All Games"
+msgstr "_Analizza Tutti i Giochi"
+
+#: ../src/gui.h:99
+msgid "Audit ROM and sample sets"
+msgstr "Analizza le ROM ed i suoni"
+
+#: ../src/gui.h:100
+msgid "_Rebuild Game List"
+msgstr "_Ricostruisci la Lista Giochi"
+
+#: ../src/gui.h:101
+msgid "Rebuild the game list from executable information"
+msgstr "Ricostruisce la lista giochi con le informazioni dell'eseguibile"
+
+#: ../src/gui.h:102
+msgid "Default _Options..."
+msgstr "Impostazioni _Predefinite"
+
+#: ../src/gui.h:103
+msgid "Set default game options"
+msgstr "Imposta le opzioni predefinite del gioco"
+
+#: ../src/gui.h:109
+msgid "Properties"
+msgstr "Proprietà"
+
+#: ../src/gui.h:110
+msgid "Display the properties of the selected game"
+msgstr "Visualizza le proprietà del gioco selezionato"
+
+#: ../src/gui.h:115
+msgid "Add to 'Favorites'"
+msgstr "Aggiungi ai 'Preferiti'"
+
+#: ../src/gui.h:116
+msgid "Add this game to your 'Favorites' game folder"
+msgstr "Aggiungi questo gioco alla cartella dei tuoi 'Preferiti'"
+
+#: ../src/gui.h:117
+msgid "Remove from 'Favorites'"
+msgstr "Rimuovi dai 'Preferiti'"
+
+#: ../src/gui.h:118
+msgid "Remove this game from your 'Favorites' game folder"
+msgstr "Rimuovi questo gioco dalla tua cartella dei 'Preferiti'"
+
+#: ../src/gui.h:124
+msgid "Expand All"
+msgstr "Espandi Tutti"
+
+#: ../src/gui.h:125
+msgid "Expand all rows"
+msgstr "Espandi tutte le righe"
+
+#: ../src/gui.h:126
+msgid "Collapse All"
+msgstr "Comprimi Tutto"
+
+#: ../src/gui.h:127
+msgid "Collapse all rows"
+msgstr "Comprimi tutte le righe"
+
+#: ../src/gui.h:132
+msgid "_Toolbar"
+msgstr "Barra degli S_trumenti"
+
+#: ../src/gui.h:133
+msgid "Show or hide the toolbar"
+msgstr "Mostra o nascondi la barra degli strumenti"
+
+#: ../src/gui.h:135
+msgid "_Status Bar"
+msgstr "Barra di _Stato"
+
+#: ../src/gui.h:136
+msgid "Show or hide the status bar"
+msgstr "Mostra o nascondi la barra di stato"
+
+#: ../src/gui.h:138
+#, fuzzy
+msgid "Fold_er List"
+msgstr "Lista Cart_elle"
+
+#: ../src/gui.h:139
+msgid "Show or hide the folder list"
+msgstr "Mostra o nascondi la lista delle cartelle"
+
+#: ../src/gui.h:141
+msgid "Scree_nshot Panel"
+msgstr "Pannello Scree_nshot"
+
+#: ../src/gui.h:142
+msgid "Show or hide the screenshot panel"
+msgstr "Mostra o nascondi il pannello degli screenshot"
+
+#: ../src/gui.h:148
+msgid "_List"
+msgstr "_Elenco"
+
+#: ../src/gui.h:149
+#, fuzzy
+msgid "Displays items in a list"
+msgstr "Visualizza gli oggetti in una vista ad albero con i cloni indentati"
+
+#: ../src/gui.h:150
+msgid "List _Tree"
+msgstr "Elenco ad _Albero"
+
+#: ../src/gui.h:151
+msgid "Displays items in a tree list with clones indented"
+msgstr "Visualizza gli oggetti in una vista ad albero con i cloni indentati"
+
+#: ../src/gui.h:152
+msgid "_Details"
+msgstr "_Dettagli"
+
+#: ../src/gui.h:153
+msgid "Displays detailed information about each item"
+msgstr "Visualizza informazioni dettagliate per ogni oggetto"
+
+#: ../src/gui.h:154
+msgid "Detai_ls Tree"
+msgstr "Dettag_li ad albero"
+
+#: ../src/gui.h:155
+msgid "Displays detailed information about each item with clones indented"
+msgstr ""
+"Visualizza informazioni dettagliate per ogni oggetto con i cloni indentati"
+
+#: ../src/gui.h:160 ../src/gui.h:161
+msgid "Hide Column"
+msgstr "Nascondi colonna"
+
+#: ../src/gui_prefs.c:951
+#, c-format
+msgid "Retrieving default boolean value for %s: %i"
+msgstr ""
+
+#: ../src/gui_prefs.c:980
+#, c-format
+msgid "Retrieving default integer value for %s: %i"
+msgstr ""
+
+#: ../src/gui_prefs.c:1009
+#, c-format
+msgid "Retrieving default string value for %s: %s"
+msgstr ""
+
 #: ../src/interface.c:359
 msgid "GMAMEUI Arcade Machine Emulator"
 msgstr ""
@@ -356,11 +789,6 @@ msgstr ""
 #: ../src/interface.c:531
 msgid "All ROMs"
 msgstr ""
-
-#: ../src/interface.c:545
-#, fuzzy
-msgid "Available"
-msgstr "Non disponibile"
 
 #: ../src/interface.c:563
 #, fuzzy
@@ -399,18 +827,10 @@ msgstr ""
 msgid "Namco System 22"
 msgstr ""
 
-#: ../src/interface.c:687
-msgid "BIOS"
-msgstr ""
-
 #: ../src/interface.c:701
 #, fuzzy
 msgid "Favorites"
 msgstr "Preferito"
-
-#: ../src/interface.c:715
-msgid "Played"
-msgstr "Giocato"
 
 #: ../src/interface.c:730
 #, fuzzy
@@ -434,11 +854,6 @@ msgstr ""
 #, fuzzy
 msgid "Clones"
 msgstr "Clone di"
-
-#: ../src/interface.c:799 ../data/directories.glade.h:24
-#: ../data/gmameui_prefs.glade.h:17
-msgid "Samples"
-msgstr "Campioni"
 
 #: ../src/interface.c:813
 msgid "Stereo"
@@ -507,6 +922,31 @@ msgstr "MAME non trovato"
 msgid "I don't know how to generate a gamelist for this version of xmame!"
 msgstr "Non so come generare la lista dei giochi per questa versione di MAME!"
 
+#. Check that the selected version of MAME supports this option
+#: ../src/mame_options.c:168
+#, c-format
+msgid "Checking that MAME supports the option %s..."
+msgstr ""
+
+#: ../src/mame_options.c:170
+#, fuzzy
+msgid "...it does"
+msgstr "Analisi eseguita"
+
+#: ../src/mame_options.c:174
+#, c-format
+msgid "Error retrieving options value for key %s in category %s: %s"
+msgstr ""
+
+#: ../src/mame_options.c:204
+msgid "...it doesn't"
+msgstr ""
+
+#. FIXME: Make the debugging page last
+#: ../src/mame_options_dialog.c:130 ../src/mame_options_dialog.c:133
+msgid "Debugging"
+msgstr ""
+
 #: ../src/network_game.c:275
 msgid "Network game options"
 msgstr "Opzioni per gioco in Rete"
@@ -565,47 +1005,47 @@ msgstr "Europa, 4 Slot"
 
 #: ../src/options.c:266
 msgid "US, 2 Slot"
-msgstr ""
+msgstr "US, 2 Slot"
 
 #: ../src/options.c:267
 msgid "US, 6 Slot (V5?)"
-msgstr ""
+msgstr "US, 6 Slot (V5?)"
 
 #: ../src/options.c:268
 msgid "Asia S3 Ver 6"
-msgstr ""
+msgstr "Asia S3 Ver 6"
 
 #: ../src/options.c:269
 msgid "Japan, Ver 6 VS Bios"
-msgstr ""
+msgstr "Giappone, Ver 6 VS Bios"
 
 #: ../src/options.c:270
 msgid "Japan, Older"
-msgstr ""
+msgstr "Giappone, Vecchio"
 
 #: ../src/options.c:271
 msgid "Universe Bios v1.0 (hack)"
-msgstr ""
+msgstr "Universe Bios v1.0 (hack)"
 
 #: ../src/options.c:272
 msgid "Universe Bios v1.1 (hack)"
-msgstr ""
+msgstr "Universe Bios v1.1 (hack)"
 
 #: ../src/options.c:273
 msgid "Debug (Development) Bios"
-msgstr ""
+msgstr "Debug (Sviluppo) Bios"
 
 #: ../src/options.c:274
 msgid "AES Console (Asia?) Bios"
-msgstr ""
+msgstr "AES Console (Asia?) Bios"
 
 #: ../src/options.c:275
 msgid "Universe Bios v1.2 (hack)"
-msgstr ""
+msgstr "Universe Bios v1.2 (hack)"
 
 #: ../src/options.c:778 ../data/properties.glade.h:75
 msgid "Display"
-msgstr "Visuale"
+msgstr "Video"
 
 #: ../src/options.c:869
 msgid "Draw every frame"
@@ -618,23 +1058,23 @@ msgstr "Salta %i di 12 frame"
 
 #: ../src/options.c:919 ../src/options.c:2435
 msgid "Auto"
-msgstr ""
+msgstr "Auto"
 
 #: ../src/options.c:920
 msgid "8 bits"
-msgstr ""
+msgstr "8 bits"
 
 #: ../src/options.c:921
 msgid "15 bits"
-msgstr ""
+msgstr "15 bits"
 
 #: ../src/options.c:922
 msgid "16 bits"
-msgstr ""
+msgstr "16 bits"
 
 #: ../src/options.c:923
 msgid "32 bits"
-msgstr ""
+msgstr "32 bits"
 
 #: ../src/options.c:946
 msgid "None"
@@ -642,15 +1082,15 @@ msgstr "Nessuno"
 
 #: ../src/options.c:947
 msgid "Clockwise"
-msgstr ""
+msgstr "In senso orario"
 
 #: ../src/options.c:948
 msgid "Anti-clockwise"
-msgstr ""
+msgstr "In senso anti orario"
 
 #: ../src/options.c:1438
 msgid "GGI options"
-msgstr ""
+msgstr "Opzioni GGI"
 
 #: ../src/options.c:1447 ../src/options.c:1542
 msgid "linear framebuffer (fast)"
@@ -666,7 +1106,7 @@ msgstr "Opzioni SVGA"
 
 #: ../src/options.c:1538
 msgid "planar (modeX) modes"
-msgstr ""
+msgstr "modi planari (modeX)"
 
 #: ../src/options.c:1546
 msgid "Use tweaked VGA modes"
@@ -755,24 +1195,24 @@ msgstr "Migliore disponibile"
 msgid "Not available"
 msgstr "Non disponibile"
 
-#: ../src/properties.c:424
+#: ../src/properties.c:426
 #, c-format
 msgid "Properties for %s"
 msgstr "Proprietà per %s"
 
-#: ../src/properties.c:426
+#: ../src/properties.c:428
 msgid "Default Properties"
 msgstr "Proprietà Predefinite"
 
-#: ../src/properties.c:441
+#: ../src/properties.c:443
 msgid "Reset to Defaults"
 msgstr "Resetta ai Predefiniti"
 
-#: ../src/properties.c:466
+#: ../src/properties.c:468
 msgid "Global game options"
 msgstr "Opzioni globali di gioco"
 
-#: ../src/properties.c:466
+#: ../src/properties.c:468
 msgid "Default options used by all games"
 msgstr "Opzioni predefinite usate da tutti i giochi"
 
@@ -821,14 +1261,6 @@ msgstr ""
 #: ../data/audit_window.glade.h:4
 msgid "<b>Samples</b>"
 msgstr "<b>Campioni</b>"
-
-#: ../data/audit_window.glade.h:5
-msgid "Auditing MAME ROMs"
-msgstr ""
-
-#: ../data/audit_window.glade.h:6
-msgid "Auditing ROMs"
-msgstr ""
 
 #: ../data/audit_window.glade.h:7
 msgid "Best available:"
@@ -963,10 +1395,6 @@ msgstr ""
 msgid "Marquees:"
 msgstr ""
 
-#: ../data/directories.glade.h:23
-msgid "ROMs"
-msgstr ""
-
 #: ../data/directories.glade.h:25
 msgid "Snapshots:"
 msgstr ""
@@ -1012,26 +1440,10 @@ msgstr ""
 msgid "Allow game selection with a joystick"
 msgstr ""
 
-#: ../data/gmameui_prefs.glade.h:6
-msgid "Category"
-msgstr "Categoria"
-
 #: ../data/gmameui_prefs.glade.h:7
 #, fuzzy
 msgid "Clone Colour"
 msgstr "Clona Colore..."
-
-#: ../data/gmameui_prefs.glade.h:8
-msgid "Clone of"
-msgstr "Clone di"
-
-#: ../data/gmameui_prefs.glade.h:9
-msgid "Directory"
-msgstr "Cartella"
-
-#: ../data/gmameui_prefs.glade.h:10
-msgid "Driver"
-msgstr ""
 
 #: ../data/gmameui_prefs.glade.h:11
 msgid "Enable version mismatch warning"
@@ -1049,10 +1461,6 @@ msgstr "Nome Gioco"
 msgid "Joystick device:"
 msgstr "Dispositivo Joystick:"
 
-#: ../data/gmameui_prefs.glade.h:15
-msgid "Manufacturer"
-msgstr "Produttore"
-
 #: ../data/gmameui_prefs.glade.h:16
 msgid "Playcount"
 msgstr "Contatore giocati"
@@ -1064,14 +1472,6 @@ msgstr "Ricerca per nuovi giochi"
 #: ../data/gmameui_prefs.glade.h:19
 msgid "Use MAME default options"
 msgstr "Usa le impostazioni predefinite di MAME"
-
-#: ../data/gmameui_prefs.glade.h:20
-msgid "Version"
-msgstr "Versione"
-
-#: ../data/gmameui_prefs.glade.h:21
-msgid "Year"
-msgstr "Anno"
 
 #: ../data/gmameui_prefs.glade.h:22
 msgid "clone_label"
@@ -1461,30 +1861,37 @@ msgid ""
 "/dev/audio\n"
 "/dev/null"
 msgstr ""
+"/dev/dsp\n"
+"/dev/dsp0\n"
+"/dev/dsp1\n"
+"/dev/dsp2\n"
+"/dev/dsp3\n"
+"/dev/audio\n"
+"/dev/null"
 
 #: ../data/properties.glade.h:8
 msgid "/dev/mixer"
-msgstr ""
+msgstr "/dev/mixer"
 
 #: ../data/properties.glade.h:9
 msgid "1:"
-msgstr ""
+msgstr "1:"
 
 #: ../data/properties.glade.h:10
 msgid "2:"
-msgstr ""
+msgstr "2:"
 
 #: ../data/properties.glade.h:11
 msgid "3:"
-msgstr ""
+msgstr "3:"
 
 #: ../data/properties.glade.h:12
 msgid "4:"
-msgstr ""
+msgstr "4:"
 
 #: ../data/properties.glade.h:13
 msgid "<b>Advanced options</b>"
-msgstr ""
+msgstr "<b>Opzioni avanzate</b>"
 
 #: ../data/properties.glade.h:14
 msgid "<b>Alsa sound system options</b>"
@@ -1496,7 +1903,7 @@ msgstr "<b>Dimensione buffer</b>"
 
 #: ../data/properties.glade.h:17
 msgid "<b>CPU:</b>"
-msgstr ""
+msgstr "<b>CPU:</b>"
 
 #: ../data/properties.glade.h:18
 msgid "<b>Clone of:</b>"
@@ -1520,31 +1927,31 @@ msgstr "<b>Opzioni di Visualizzazione</b>"
 
 #: ../data/properties.glade.h:23
 msgid "<b>Effects</b>"
-msgstr ""
+msgstr "<b>Effetti</b>"
 
 #: ../data/properties.glade.h:24
 msgid "<b>FX (Glide) options</b>"
-msgstr ""
+msgstr "<b>Opzioni FX (Glide)</b>"
 
 #: ../data/properties.glade.h:25
 msgid "<b>Frame skipping</b>"
-msgstr ""
+msgstr "<b>Salto frame</b>"
 
 #: ../data/properties.glade.h:26
 msgid "<b>General sound options</b>"
-msgstr ""
+msgstr "<b>Opzioni suono generali</b>"
 
 #: ../data/properties.glade.h:27
 msgid "<b>Joystick</b>"
-msgstr ""
+msgstr "<b>Joystick</b>"
 
 #: ../data/properties.glade.h:28
 msgid "<b>Key mapping</b>"
-msgstr ""
+msgstr "<b>Mappa tasti</b>"
 
 #: ../data/properties.glade.h:29
 msgid "<b>Keyboard</b>"
-msgstr ""
+msgstr "<b>Tastiera</b>"
 
 #: ../data/properties.glade.h:30
 msgid "<b>Manufacturer:</b>"
@@ -1552,31 +1959,31 @@ msgstr "<b>Produttore:</b>"
 
 #: ../data/properties.glade.h:31
 msgid "<b>Mouse / Trackball</b>"
-msgstr ""
+msgstr "<b>Mouse / Trackball</b>"
 
 #: ../data/properties.glade.h:32
 msgid "<b>OpenGL options</b>"
-msgstr ""
+msgstr "<b>Opzioni OpenGL</b>"
 
 #: ../data/properties.glade.h:33
 msgid "<b>Other options</b>"
-msgstr ""
+msgstr "<b>Altre opzioni</b>"
 
 #: ../data/properties.glade.h:34
 msgid "<b>Photon options</b>"
-msgstr ""
+msgstr "<b>Opzioni photon</b>"
 
 #: ../data/properties.glade.h:35
 msgid "<b>QNX options</b>"
-msgstr ""
+msgstr "<b>Opzioni QNX</b>"
 
 #: ../data/properties.glade.h:36
 msgid "<b>Resolution</b>"
-msgstr ""
+msgstr "<b>Risoluzione</b>"
 
 #: ../data/properties.glade.h:37
 msgid "<b>Rom check:</b>"
-msgstr ""
+msgstr "<b>Verifica ROM:</b>"
 
 #: ../data/properties.glade.h:39
 msgid "<b>SDL options</b>"
@@ -1584,59 +1991,59 @@ msgstr "<b>Opzioni SDL</b>"
 
 #: ../data/properties.glade.h:40
 msgid "<b>Sample Check:</b>"
-msgstr ""
+msgstr "<b>Verifica campione sonoro:</b>"
 
 #: ../data/properties.glade.h:41
 msgid "<b>Screen:</b>"
-msgstr ""
+msgstr "<b>Schermo:</b>"
 
 #: ../data/properties.glade.h:42
 msgid "<b>Sound:</b>"
-msgstr ""
+msgstr "<b>Sonoro:</b>"
 
 #: ../data/properties.glade.h:43
 msgid "<b>Vector options</b>"
-msgstr ""
+msgstr "<b>Opzioni vettoriali:</b>"
 
 #: ../data/properties.glade.h:44
 msgid "<b>Video mode</b>"
-msgstr ""
+msgstr "<b>Modalità video</b>"
 
 #: ../data/properties.glade.h:45
 msgid "<b>Volume attenuation</b>"
-msgstr ""
+msgstr "<b>Attenuazione volume:</b>"
 
 #: ../data/properties.glade.h:46
 msgid "<b>X11 options</b>"
-msgstr ""
+msgstr "<b>Opzioni X11</b>"
 
 #: ../data/properties.glade.h:47
 msgid "<b>Xinput joystick</b>"
-msgstr ""
+msgstr "<b>Joystick Xinput</b>"
 
 #: ../data/properties.glade.h:48
 msgid "<b>Xinput trackball</b>"
-msgstr ""
+msgstr "<b>Trackball Xinput</b>"
 
 #: ../data/properties.glade.h:49
 msgid "<b>Year:</b>"
-msgstr ""
+msgstr "<b>Anno:</b>"
 
 #: ../data/properties.glade.h:50
 msgid "<b>aRts options</b>"
-msgstr ""
+msgstr "<b>Opzioni aRts</b>"
 
 #: ../data/properties.glade.h:51
 msgid "Alphablending"
-msgstr ""
+msgstr "Alphablending"
 
 #: ../data/properties.glade.h:52
 msgid "Analog joystick"
-msgstr ""
+msgstr "Joystick analogico"
 
 #: ../data/properties.glade.h:53
 msgid "Antialiasing"
-msgstr ""
+msgstr "Antialiasing"
 
 #: ../data/properties.glade.h:54
 msgid "Artwork resolution:"
@@ -1668,31 +2075,31 @@ msgstr "Dimensioni del fascio"
 
 #: ../data/properties.glade.h:61
 msgid "Bezels"
-msgstr ""
+msgstr "Bezels"
 
 #: ../data/properties.glade.h:62
 msgid "Bilinear filtering"
-msgstr ""
+msgstr "Filtro bilineare"
 
 #: ../data/properties.glade.h:63
 msgid "Bit per pixels:"
-msgstr ""
+msgstr "Bit per pixels:"
 
 #: ../data/properties.glade.h:64
 msgid "Brightness correction"
-msgstr ""
+msgstr "Correzione luminosità"
 
 #: ../data/properties.glade.h:65
 msgid "Cabinet model:"
-msgstr ""
+msgstr "Modello cabinato:"
 
 #: ../data/properties.glade.h:66
 msgid "Card ID:"
-msgstr ""
+msgstr "ID Carta:"
 
 #: ../data/properties.glade.h:67
 msgid "Color modulation"
-msgstr ""
+msgstr "Modulazione colore"
 
 #: ../data/properties.glade.h:68
 msgid "Controller:"
@@ -1700,19 +2107,19 @@ msgstr "Periferica:"
 
 #: ../data/properties.glade.h:70
 msgid "DSP Plugin:"
-msgstr ""
+msgstr "DSP Plugin:"
 
 #: ../data/properties.glade.h:71
 msgid "Debug windows (for developers)"
-msgstr ""
+msgstr "Finestra di debug (per sviluppatori)"
 
 #: ../data/properties.glade.h:73
 msgid "Device #:"
-msgstr ""
+msgstr "Dispositivo #:"
 
 #: ../data/properties.glade.h:74
 msgid "Disable mode:"
-msgstr ""
+msgstr "Disattiva modo:"
 
 #: ../data/properties.glade.h:76
 msgid "Do not apply rotation"
@@ -1720,39 +2127,39 @@ msgstr "Non applicare la rotazione"
 
 #: ../data/properties.glade.h:77
 msgid "Double Buffering"
-msgstr ""
+msgstr "Double Buffering"
 
 #: ../data/properties.glade.h:78
 msgid "Double buffering"
-msgstr ""
+msgstr "Double buffering"
 
 #: ../data/properties.glade.h:79
 msgid "Draw antialiased vectors"
-msgstr ""
+msgstr "Disegna vettori con antialias"
 
 #: ../data/properties.glade.h:80
 msgid "Draw bitmap"
-msgstr ""
+msgstr "Disegna bitmap"
 
 #: ../data/properties.glade.h:81
 msgid "Draw only changes"
-msgstr ""
+msgstr "Disegna solo i cambiamenti"
 
 #: ../data/properties.glade.h:82
 msgid "Draw translucent vectors"
-msgstr ""
+msgstr "Disegna vettori translucenti"
 
 #: ../data/properties.glade.h:83
 msgid "Effect to use:"
-msgstr ""
+msgstr "Effetto da usare:"
 
 #: ../data/properties.glade.h:84
 msgid "Enable Windows keys"
-msgstr ""
+msgstr "Abilita Tasti Finestre"
 
 #: ../data/properties.glade.h:85
 msgid "Enable game cheats"
-msgstr ""
+msgstr "Abilita trucchi nel giochi"
 
 #: ../data/properties.glade.h:87
 msgid "Fake sound"
@@ -1768,125 +2175,127 @@ msgstr "Sfarfallio"
 
 #: ../data/properties.glade.h:90
 msgid "Flip screen left-right"
-msgstr ""
+msgstr "Inverti schermo sinistra-destra"
 
 #: ../data/properties.glade.h:91
 msgid "Flip screen upside-down"
-msgstr ""
+msgstr "Inverti schermo su-giù"
 
 #: ../data/properties.glade.h:92
 msgid "Force YUV mode:"
-msgstr ""
+msgstr "Forza il modo YUV:"
 
 #: ../data/properties.glade.h:94
 msgid "Full Screen"
-msgstr ""
+msgstr "Schermo Intero"
 
 #: ../data/properties.glade.h:95
 msgid "Fullscreen"
-msgstr ""
+msgstr "Schermo intero"
 
 #: ../data/properties.glade.h:96
 msgid "GL extension #78"
-msgstr ""
+msgstr "Estenzioni GL #78"
 
 #: ../data/properties.glade.h:97
 msgid "GLU library:"
-msgstr ""
+msgstr "Libreria GLU:"
 
 #: ../data/properties.glade.h:98
 msgid "Gamma correction"
-msgstr ""
+msgstr "Correzione gamma"
 
 #: ../data/properties.glade.h:99
 msgid "General"
-msgstr ""
+msgstr "Generale"
 
 #: ../data/properties.glade.h:100
 msgid "Geometry:"
-msgstr ""
+msgstr "Geometria:"
 
 #: ../data/properties.glade.h:101
 msgid "Grab keyboard"
-msgstr ""
+msgstr "Cattura tastiera"
 
 #: ../data/properties.glade.h:102
 msgid "Grab mouse"
-msgstr ""
+msgstr "Cattura mouse"
 
 #: ../data/properties.glade.h:103
 msgid "Height scale:"
-msgstr ""
+msgstr "Scala altezza:"
 
 #: ../data/properties.glade.h:104
 msgid "HotRod SE support"
-msgstr ""
+msgstr "Suppoto HotRod SE"
 
 #: ../data/properties.glade.h:105
 msgid "HotRod support"
-msgstr ""
+msgstr "Supporto HotRod"
 
 #: ../data/properties.glade.h:106
 msgid "Intensity"
-msgstr ""
+msgstr "Intensità"
 
 #: ../data/properties.glade.h:107
 msgid "Joystick device prefix:"
-msgstr ""
+msgstr "Prefisso del dispositivo Joystick:"
 
 #: ../data/properties.glade.h:108
 msgid "Joystick type:"
-msgstr ""
+msgstr "Tipo Joystick"
 
 #: ../data/properties.glade.h:110
 msgid "Keep aspect ratio:"
-msgstr ""
+msgstr "Mantieni proporzioni"
 
 #: ../data/properties.glade.h:111
 msgid "Keyboard Layout type:"
-msgstr ""
+msgstr "Tipo layout tastiera"
 
 #: ../data/properties.glade.h:112
 msgid "Log debug info"
-msgstr ""
+msgstr "Registra le informazioni di debug"
 
 #: ../data/properties.glade.h:113
 msgid "Max frameskip:"
-msgstr ""
+msgstr "Massimo salto frame"
 
 #: ../data/properties.glade.h:114
 msgid "Method:"
-msgstr ""
+msgstr "Metodo:"
 
 #: ../data/properties.glade.h:116
 msgid "Mixer device:"
-msgstr ""
+msgstr "Dispositivo mixer:"
 
 #: ../data/properties.glade.h:117
 msgid "Mixer plugin:"
-msgstr ""
+msgstr "Plugin mixer:"
 
 #: ../data/properties.glade.h:118
 msgid ""
 "Name of pad device:\n"
 "(FM townpad)"
 msgstr ""
+"Nome del dispositivo pdf:\n"
+"(FM townpad)"
 
 #: ../data/properties.glade.h:120
 msgid "Neo-Geo Bios:"
-msgstr ""
+msgstr "Bios Neo-Geo:"
 
 #: ../data/properties.glade.h:121
 msgid "OpenGL library:"
-msgstr ""
+msgstr "Libreria OpenGL"
 
 #: ../data/properties.glade.h:122
 msgid "Overlays"
-msgstr ""
+msgstr "Overlay"
 
 #: ../data/properties.glade.h:123
 msgid "PCM:"
-msgstr ""
+msgstr "PCM:"
 
 #: ../data/properties.glade.h:124
 msgid "Private colormap"
@@ -1894,7 +2303,7 @@ msgstr "Mappa colori privata"
 
 #: ../data/properties.glade.h:125
 msgid "Rapid-fire"
-msgstr ""
+msgstr "Fuoco rapido"
 
 #: ../data/properties.glade.h:127
 msgid "Resolution"
@@ -1906,7 +2315,7 @@ msgstr "Risoluzione:"
 
 #: ../data/properties.glade.h:129
 msgid "SDL modes:"
-msgstr ""
+msgstr "Modi SDL:"
 
 #: ../data/properties.glade.h:130
 msgid "Sample rate:"
@@ -1914,7 +2323,7 @@ msgstr "Frequenza di campionamento:"
 
 #: ../data/properties.glade.h:131
 msgid "Scale video to height:"
-msgstr ""
+msgstr "Scala video all'altezza:"
 
 #: ../data/properties.glade.h:132
 msgid "Show cursor"
@@ -1922,59 +2331,59 @@ msgstr "Mostra cursore"
 
 #: ../data/properties.glade.h:133
 msgid "Skip disclaimer info"
-msgstr ""
+msgstr "Salta le informazioni di responsabilità"
 
 #: ../data/properties.glade.h:134
 msgid "Skip game info"
-msgstr ""
+msgstr "Salta le informazioni del gioco"
 
 #: ../data/properties.glade.h:135
 msgid "Sleep when idle"
-msgstr ""
+msgstr "Dormi quando non fai nulla"
 
 #: ../data/properties.glade.h:137
 msgid "Sound file name:"
-msgstr ""
+msgstr "Nome file suono:"
 
 #: ../data/properties.glade.h:138
 msgid "Texture size:"
-msgstr ""
+msgstr "Dimensione della texture:"
 
 #: ../data/properties.glade.h:140
 msgid "Timer based audio"
-msgstr ""
+msgstr "Audio basato su timer:"
 
 #: ../data/properties.glade.h:141
 msgid "True color blitter"
-msgstr ""
+msgstr "True color blitter"
 
 #: ../data/properties.glade.h:142
 msgid "UGCI (tm) Coin/Play support"
-msgstr ""
+msgstr "Supporo UGCI (tm) Coin/Play"
 
 #: ../data/properties.glade.h:143
 msgid "USB PS Game Pads"
-msgstr ""
+msgstr "USB PS Game Pads"
 
 #: ../data/properties.glade.h:144
 msgid "Use MIT shared memory"
-msgstr ""
+msgstr "Usa MIT shared memory"
 
 #: ../data/properties.glade.h:145
 msgid "Use Scanlines"
-msgstr ""
+msgstr "Usa Scanlines"
 
 #: ../data/properties.glade.h:146
 msgid "Use additional game artwork:"
-msgstr ""
+msgstr "Usa artwork gioco addizionale:"
 
 #: ../data/properties.glade.h:147
 msgid "Use additional options:"
-msgstr ""
+msgstr "Usa opzioni aggiuntive"
 
 #: ../data/properties.glade.h:148
 msgid "Use config name:"
-msgstr ""
+msgstr "Usa nome di configurazione:"
 
 #: ../data/properties.glade.h:149
 msgid "Use fixed resolution:"
@@ -1982,47 +2391,47 @@ msgstr "Usa risoluzione fissa"
 
 #: ../data/properties.glade.h:150
 msgid "Use keyboard LEDs as game indicators"
-msgstr ""
+msgstr "Usa i LED della tastiera come indicazioni nel giochi"
 
 #: ../data/properties.glade.h:151
 msgid "Use mouse"
-msgstr ""
+msgstr "Usa il mouse"
 
 #: ../data/properties.glade.h:152
 msgid "Use preferred device"
-msgstr ""
+msgstr "Usa dispositivo preferito"
 
 #: ../data/properties.glade.h:153
 msgid "Use samples"
-msgstr "Usa campioni"
+msgstr "Usa suoni campionati"
 
 #: ../data/properties.glade.h:156
 msgid "Width scale:"
-msgstr ""
+msgstr "Scala larghezza:"
 
 #: ../data/properties.glade.h:157
 msgid "Window size:"
-msgstr ""
+msgstr "Dimensione finestra:"
 
 #: ../data/properties.glade.h:158
 msgid "X Synch"
-msgstr ""
+msgstr "X Synch"
 
 #: ../data/properties.glade.h:159
 msgid "X-based device:"
-msgstr ""
+msgstr "Dispositivo basato su X11:"
 
 #: ../data/properties.glade.h:160
 msgid "XIL multi-threading"
-msgstr ""
+msgstr "XIL multi-threading"
 
 #: ../data/properties.glade.h:161
 msgid "XIL scaling"
-msgstr ""
+msgstr "XIL scaling"
 
 #: ../data/properties.glade.h:162
 msgid "aRts buffer delay time:"
-msgstr ""
+msgstr "Ritardo buffer aRts:"
 
 #: ../data/properties.glade.h:164
 msgid "frames"
@@ -2030,23 +2439,23 @@ msgstr "fotogrammi"
 
 #: ../data/rom_info.glade.h:1
 msgid "<b>About this ROM</b>"
-msgstr ""
+msgstr "<b>A riguardo di questa ROM</b>"
 
 #: ../data/rom_info.glade.h:2
 msgid "<b>Audit Details</b>"
-msgstr ""
+msgstr "<b>Dettagli Analisi</b>"
 
 #: ../data/rom_info.glade.h:3
 msgid "<b>Screen Details</b>"
-msgstr ""
+msgstr "<b>Dettagli Schermo</b>"
 
 #: ../data/rom_info.glade.h:4
 msgid "<b>Technical Details</b>"
-msgstr ""
+msgstr "<b>Dettagli Tecnici</b>"
 
 #: ../data/rom_info.glade.h:5
 msgid "CPU:"
-msgstr ""
+msgstr "CPU:"
 
 #: ../data/rom_info.glade.h:6
 msgid "Clone of:"
@@ -2066,7 +2475,7 @@ msgstr "Verifica ROM:"
 
 #: ../data/rom_info.glade.h:11
 msgid "Sample Check:"
-msgstr "Verfifica Suoni:"
+msgstr "Verifica Suoni:"
 
 #: ../data/rom_info.glade.h:12
 msgid "Screen:"
@@ -2086,7 +2495,7 @@ msgstr "Cabinato"
 
 #: ../data/sidebar.glade.h:2
 msgid "Control Panel"
-msgstr "Pannello di Controllo"
+msgstr "Controlli"
 
 #: ../data/sidebar.glade.h:3
 msgid "Flyer"
@@ -2094,7 +2503,7 @@ msgstr "Copertina"
 
 #: ../data/sidebar.glade.h:4
 msgid "Marquee"
-msgstr "Tendone"
+msgstr "Marquee"
 
 #: ../data/sidebar.glade.h:5
 msgid "Snapshot"
@@ -2116,23 +2525,8 @@ msgstr "GMAMEUI (M.A.M.E. Frontend)"
 msgid "Play and browse classic arcade games"
 msgstr "Gioca ai classici giochi arcade"
 
-#~ msgid "Audit Stopped"
-#~ msgstr "Analisi interrotta"
-
-#~ msgid "Stopped"
-#~ msgstr "Interrotta"
-
-#~ msgid "Audit done"
-#~ msgstr "Analisi eseguita"
-
-#~ msgid "Done"
-#~ msgstr "Eseguito"
-
 #~ msgid "Clone color selection"
 #~ msgstr "Clona la selezione del colore"
-
-#~ msgid "Hide \"%s\" Column"
-#~ msgstr "Nascondi la colonna \"%s\""
 
 #~ msgid ""
 #~ "Current Folder may not exist after loading the new catver file.\n"
@@ -2148,15 +2542,6 @@ msgstr "Gioca ai classici giochi arcade"
 #~ msgid "Time to create gamelist content: %.02f seconds"
 #~ msgstr ""
 #~ "Tempo per la creazione del contenuto della lista dei giochi: %.02f secondi"
-
-#~ msgid "Wait..."
-#~ msgstr "Aspetta..."
-
-#~ msgid "games"
-#~ msgstr "giochi"
-
-#~ msgid "game"
-#~ msgstr "gioco"
 
 #~ msgid "Game search %i%% complete"
 #~ msgstr "Ricerca gioco %i%% completa"
@@ -2175,33 +2560,6 @@ msgstr "Gioca ai classici giochi arcade"
 
 #~ msgid "unable to load gmameui.ini, using default values"
 #~ msgstr "file 'gmameui.ini' non trovato, userò i valori predefiniti"
-
-#~ msgid "Game"
-#~ msgstr "Gioco "
-
-#~ msgid "Status"
-#~ msgstr "Stato"
-
-#~ msgid "Rom of"
-#~ msgstr "ROM di"
-
-#~ msgid "Driver Status"
-#~ msgstr "Stato Driver"
-
-#~ msgid "Driver Colors"
-#~ msgstr "Colori Driver"
-
-#~ msgid "Driver Sound"
-#~ msgstr "Suoni Driver"
-
-#~ msgid "Players"
-#~ msgstr "Giocatori"
-
-#~ msgid "Buttons"
-#~ msgstr "Bottoni"
-
-#~ msgid "Channels"
-#~ msgstr "Canali"
 
 #~ msgid "Play Game"
 #~ msgstr "Lancia Gioco"
@@ -2224,155 +2582,20 @@ msgstr "Gioca ai classici giochi arcade"
 #~ msgid "Not found"
 #~ msgstr "Non trovato"
 
-#~ msgid "_File"
-#~ msgstr "_FIle"
-
-#~ msgid "_View"
-#~ msgstr "_Visualizza"
-
-#~ msgid "_Options"
-#~ msgstr "_Opzioni"
-
-#~ msgid "_Help"
-#~ msgstr "_Aiuto"
-
-#~ msgid "_Audit All Games"
-#~ msgstr "_Analizza Tutti i Giochi"
-
-#~ msgid "Audit ROM and sample sets"
-#~ msgstr "Analizza le ROM ed i suoni"
-
-#~ msgid "_Select Random Game"
-#~ msgstr "_Seleziona un Gioco Casuale"
-
-#~ msgid "Play currently selected game"
-#~ msgstr "Avvia il gioco attualmente selezionato"
-
-#~ msgid "_Quit"
-#~ msgstr "_Esci"
-
-#~ msgid "Quit GMAMEUI"
-#~ msgstr "Esci da GMAMEUI"
-
 #~ msgid "_Column Layout..."
 #~ msgstr "Layout _Colonna"
 
 #~ msgid "Set column layout"
 #~ msgstr "Imposta il layout della colonna"
 
-#~ msgid "Refresh"
-#~ msgstr "Rinfresca"
-
-#~ msgid "Refresh game list"
-#~ msgstr "Rinfresca la lista dei giochi"
-
 #~ msgid "Set clones color in gamelist"
 #~ msgstr "Imposta il colore dei cloni nella lista giochi"
-
-#~ msgid "_Rebuild Game List"
-#~ msgstr "_Ricostruisci la Lista Giochi"
-
-#~ msgid "Rebuild the game list from executable information"
-#~ msgstr "Ricostruisce la lista giochi con le informazioni dell'eseguibile"
-
-#~ msgid "_Directories..."
-#~ msgstr "_Cartella..."
-
-#~ msgid "Set directory configuration"
-#~ msgstr "Imposta la configurazione della cartella"
-
-#~ msgid "Default _Options..."
-#~ msgstr "Impostazioni _Predefinite"
-
-#~ msgid "Set default game options"
-#~ msgstr "Imposta le opzioni predefinite del gioco"
 
 #~ msgid "_Startup Options..."
 #~ msgstr "Impostazioni di avvio..."
 
 #~ msgid "Set startup options"
 #~ msgstr "Imposta le opzioni di avvio"
-
-#~ msgid "_Contents"
-#~ msgstr "_Contenuti"
-
-#~ msgid "Open the GMAMEUI manual"
-#~ msgstr "Aprio il manuale di GMAMEUI"
-
-#~ msgid "About this application"
-#~ msgstr "A riguardo di questa applicazione"
-
-#~ msgid "Play"
-#~ msgstr "Gioca"
-
-#~ msgid "Play and Record Input..."
-#~ msgstr "Gioca e Registra la Partita..."
-
-#~ msgid "Record a game for later playback"
-#~ msgstr "Registra un gioco per un replay successivo"
-
-#~ msgid "Playback Input..."
-#~ msgstr "Replay Input..."
-
-#~ msgid "Playback a recorded game"
-#~ msgstr "Replay di un gioco registrato"
-
-#~ msgid "Options"
-#~ msgstr "Opzioni"
-
-#~ msgid "Change the options of the selected game"
-#~ msgstr "Cambia le opzioni del gioco selezionato"
-
-#~ msgid "Properties"
-#~ msgstr "Proprietà"
-
-#~ msgid "Display the properties of the selected game"
-#~ msgstr "Visualizza le proprietà del gioco selezionato"
-
-#~ msgid "Add to 'Favorites'"
-#~ msgstr "Aggiungi ai 'Preferiti'"
-
-#~ msgid "Add this game to your 'Favorites' game folder"
-#~ msgstr "Aggiungi questo gioco alla cartella dei tuoi 'Preferiti'"
-
-#~ msgid "Remove from 'Favorites'"
-#~ msgstr "Rimuovi dai 'Preferiti'"
-
-#~ msgid "Remove this game from your 'Favorites' game folder"
-#~ msgstr "Rimuovi questo gioco dalla tua cartella dei 'Preferiti'"
-
-#~ msgid "Expand All"
-#~ msgstr "Espandi Tutti"
-
-#~ msgid "Expand all rows"
-#~ msgstr "Espandi tutte le righe"
-
-#~ msgid "Collapse All"
-#~ msgstr "Comprimi Tutto"
-
-#~ msgid "Collapse all rows"
-#~ msgstr "Comprimi tutte le righe"
-
-#~ msgid "_Toolbar"
-#~ msgstr "Barra degli S_trumenti"
-
-#~ msgid "Show or hide the toolbar"
-#~ msgstr "Mostra o nascondi la barra degli strumenti"
-
-#~ msgid "_Status Bar"
-#~ msgstr "Barra di _Stato"
-
-#~ msgid "Show or hide the status bar"
-#~ msgstr "Mostra o nascondi la barra di stato"
-
-#~ msgid "Show or hide the folder list"
-#~ msgstr "Mostra o nascondi la lista delle cartelle"
-
-#~ msgid "Scree_nshot Panel"
-#~ msgstr "Pannello Scree_nshot"
-
-#~ msgid "Show or hide the screenshot panel"
-#~ msgstr "Mostra o nascondi il pannello degli screenshot"
 
 #~ msgid "Scree_nshot Panel Tab"
 #~ msgstr "Scheda Pannello Scree_nshot "
@@ -2382,31 +2605,6 @@ msgstr "Gioca ai classici giochi arcade"
 
 #~ msgid "Show \"The\" at the end."
 #~ msgstr "Mostra \"The\" alla fine."
-
-#~ msgid "_List"
-#~ msgstr "_Elenco"
-
-#~ msgid "List _Tree"
-#~ msgstr "Elenco ad _Albero"
-
-#~ msgid "Displays items in a tree list with clones indented"
-#~ msgstr "Visualizza gli oggetti in una vista ad albero con i cloni indentati"
-
-#~ msgid "_Details"
-#~ msgstr "_Dettagli"
-
-#~ msgid "Displays detailed information about each item"
-#~ msgstr "Visualizza informazioni dettagliate per ogni oggetto"
-
-#~ msgid "Detai_ls Tree"
-#~ msgstr "Dettag_li ad albero"
-
-#~ msgid "Displays detailed information about each item with clones indented"
-#~ msgstr ""
-#~ "Visualizza informazioni dettagliate per ogni oggetto con i cloni indentati"
-
-#~ msgid "Hide Column"
-#~ msgstr "Nascondi colonna"
 
 #~ msgid "Column Layout..."
 #~ msgstr "Layout Colonna..."

@@ -199,13 +199,13 @@ GMAMEUI_DEBUG ("Creating filters list");
 	gtk_tree_view_append_column (GTK_TREE_VIEW (fl), col);
 	
 	/* Now add the categories */
-	fl->priv->groups = g_list_append (fl->priv->groups, "Available");
-	fl->priv->groups = g_list_append (fl->priv->groups, "Architecture");
-	fl->priv->groups = g_list_append (fl->priv->groups, "Imperfect");
-	fl->priv->groups = g_list_append (fl->priv->groups, "Game Details");
-	fl->priv->groups = g_list_append (fl->priv->groups, "Custom");
-	fl->priv->groups = g_list_append (fl->priv->groups, "Category");
-	fl->priv->groups = g_list_append (fl->priv->groups, "Version");
+	fl->priv->groups = g_list_append (fl->priv->groups, _("Available"));
+	fl->priv->groups = g_list_append (fl->priv->groups, _("Architecture"));
+	fl->priv->groups = g_list_append (fl->priv->groups, _("Imperfect"));
+	fl->priv->groups = g_list_append (fl->priv->groups, _("Game Details"));
+	fl->priv->groups = g_list_append (fl->priv->groups, _("Custom"));
+	fl->priv->groups = g_list_append (fl->priv->groups, _("Category"));
+	fl->priv->groups = g_list_append (fl->priv->groups, _("Version"));
 
 	fl->priv->selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (fl));
 	

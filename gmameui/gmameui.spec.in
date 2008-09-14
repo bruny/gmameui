@@ -61,13 +61,18 @@ It contains a number of enhancements over GXMame:
 %{_datadir}/locale
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/pixmaps/%{name}.png
+%{_datadir}/gnome/help/%{name}/C
+%{_datadir}/omf/%{name}
 %{_mandir}/man6/%{name}.6*
 %doc AUTHORS BUGS COPYING ChangeLog NEWS README TODO
 
 %changelog
+* Sun Jun 8 2008 Ugo Viti <ugo.viti@initzero.it> - 0.2.3-1
+- new release
+
 * Thu May 15 2008 Ugo Viti <ugo.viti@initzero.it> - 0.2.2-1
 - update to upstream release
-- some spec clean ups
+- some spec cleanups
 - add translation support
 - add 'it' translation
 
