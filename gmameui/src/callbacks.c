@@ -136,20 +136,20 @@ show_properties_dialog (gchar *rom_name)
 		/* SDLMAME */
 		GtkWidget *options_dialog = mame_options_get_dialog (main_gui.options);
 
-		GladeXML *xml = glade_xml_new (GLADEDIR "options.glade", NULL, NULL);
-		mame_options_add_page (main_gui.options, xml, "Display", "Display",
+		GladeXML *xml = glade_xml_new (GLADEDIR "options.glade", NULL, GETTEXT_PACKAGE);
+		mame_options_add_page (main_gui.options, xml, "Display", _("Display"),
 		                       "gmameui-display-toolbar");
-		mame_options_add_page (main_gui.options, xml, "OpenGL", "OpenGL",
+		mame_options_add_page (main_gui.options, xml, "OpenGL", _("OpenGL"),
 		                       "gmameui-display-toolbar");
-		mame_options_add_page (main_gui.options, xml, "Sound", "Sound",
+		mame_options_add_page (main_gui.options, xml, "Sound", _("Sound"),
 		                       "gmameui-sound-toolbar");
-		mame_options_add_page (main_gui.options, xml, "Input", "Input",
+		mame_options_add_page (main_gui.options, xml, "Input", _("Input"),
 		                       "gmameui-joystick-toolbar");
-		mame_options_add_page (main_gui.options, xml, "performance_vbox", "Performance",
+		mame_options_add_page (main_gui.options, xml, "performance_vbox", _("Performance"),
 		                       "gmameui-general-toolbar");
-		mame_options_add_page (main_gui.options, xml, "misc_vbox", "Miscellaneous",
+		mame_options_add_page (main_gui.options, xml, "misc_vbox", _("Miscellaneous"),
 		                       "gmameui-general-toolbar");
-		mame_options_add_page (main_gui.options, xml, "debugging_vbox", "Debugging",
+		mame_options_add_page (main_gui.options, xml, "debugging_vbox", _("Debugging"),
 		                       "gmameui-rom");
 
 		

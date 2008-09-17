@@ -203,7 +203,7 @@ create_directories_selection (void)
 		      "sample-paths", &va_sample_paths,
 		      NULL);
 
-	xml = glade_xml_new (GLADEDIR "directories.glade", NULL, NULL);
+	xml = glade_xml_new (GLADEDIR "directories.glade", NULL, GETTEXT_PACKAGE);
 	GtkWidget *directories_selection = glade_xml_get_widget (xml, "directories_selection");
 	gtk_widget_show (GTK_WIDGET (directories_selection));
 

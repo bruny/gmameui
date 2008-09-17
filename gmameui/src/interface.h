@@ -63,6 +63,8 @@ struct _toolbar_item {
 	gchar *label;		/* Label name e.g. N_("Show Folders") */
 };
 
+/* Note - where these are used (particularly .label), need to prefix the use
+   with a _(XXX) to enable gettext translation */
 static const toolbar_item toolbar_items [] = {
 	{ TOOLBAR_PLAYGAME, "/ToolBar/FilePlayGame", NULL, GTK_STOCK_NEW, N_("Play Game") },
 	{ TOOLBAR_VIEWFOLDERLIST, "/ToolBar/ViewFolderList", "gmameui-view-folders", 0, N_("Show Folders") },

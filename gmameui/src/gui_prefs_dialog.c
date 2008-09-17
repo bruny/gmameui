@@ -255,7 +255,7 @@ GtkWidget *
 mame_gui_prefs_dialog_new (void)
 {
 	return g_object_new (MAME_TYPE_GUI_PREFS_DIALOG,
-			     "title", "GMAMEUI Preferences",
+			     "title", _("GMAMEUI Preferences"),
 			     NULL);
 }
 

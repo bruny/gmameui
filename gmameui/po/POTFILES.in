@@ -16,6 +16,7 @@ src/gui.h
 src/gui_prefs.c
 src/gui_prefs_dialog.c
 src/interface.c
+src/interface.h
 src/io.c
 src/keyboard.c
 src/mameio.c

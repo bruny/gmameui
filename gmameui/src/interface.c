@@ -488,7 +488,7 @@ create_MainWindow (void)
 			gtk_widget_show (toolbar_icon);
 			gtk_tool_button_set_icon_widget (GTK_TOOL_BUTTON (toolbar_widget), GTK_WIDGET (toolbar_icon));
 		}
-		gtk_tool_button_set_label (GTK_TOOL_BUTTON (toolbar_widget), toolbar_items[z].label);
+		gtk_tool_button_set_label (GTK_TOOL_BUTTON (toolbar_widget), _(toolbar_items[z].label));
 	}
 	
 	main_gui.hpanedLeft = glade_xml_get_widget (xml, "hpanedLeft");
@@ -537,7 +537,7 @@ create_MainWindow (void)
 		      "update_list", TRUE,
 		      NULL);
 		      
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Available");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Available"));
 	g_object_unref (folder_filter);
 	
 	folder_filter = gmameui_filter_new ();
@@ -552,7 +552,7 @@ create_MainWindow (void)
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-correct"),
 		      NULL);
 		      
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Available");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Available"));
 	/* Select the Available filter as the default upon startup */
 	gmameui_filters_list_select (main_gui.filters_list, folder_filter);
 
@@ -570,7 +570,7 @@ create_MainWindow (void)
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-unavailable"),
 		      NULL);
 		      
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Available");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Available"));
 	g_object_unref (folder_filter);
 	
 	folder_filter = gmameui_filter_new ();
@@ -585,7 +585,7 @@ create_MainWindow (void)
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-incorrect"),
 		      NULL);
 		      
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Available");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Available"));
 	g_object_unref (folder_filter);
 
 	
@@ -601,7 +601,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Architecture"));
 	g_object_unref (folder_filter);
 
 		folder_filter = gmameui_filter_new ();
@@ -614,7 +614,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Architecture"));
 	g_object_unref (folder_filter);
 	
 	folder_filter = gmameui_filter_new ();
@@ -627,7 +627,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Architecture"));
 	g_object_unref (folder_filter);
 
 	folder_filter = gmameui_filter_new ();
@@ -640,7 +640,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Architecture"));
 	g_object_unref (folder_filter);
 
 	folder_filter = gmameui_filter_new ();
@@ -653,7 +653,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Architecture"));
 	g_object_unref (folder_filter);
 
 	folder_filter = gmameui_filter_new ();
@@ -666,7 +666,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Architecture"));
 	g_object_unref (folder_filter);
 	
 	folder_filter = gmameui_filter_new ();
@@ -679,7 +679,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Architecture"));
 	g_object_unref (folder_filter);
 
 	folder_filter = gmameui_filter_new ();
@@ -692,7 +692,7 @@ create_MainWindow (void)
 		      "int_value", TRUE,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Architecture");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Architecture"));
 	g_object_unref (folder_filter);
 	
 	/* Custom filters */
@@ -707,7 +707,7 @@ create_MainWindow (void)
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-favorite"),
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Custom");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Custom"));
 	g_object_unref (folder_filter);
 	
 		folder_filter = gmameui_filter_new ();
@@ -720,7 +720,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Custom");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Custom"));
 	g_object_unref (folder_filter);
 	
 	
@@ -736,7 +736,7 @@ create_MainWindow (void)
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-not-working"),
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Imperfect");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Imperfect"));
 	g_object_unref (folder_filter);
 
 	folder_filter = gmameui_filter_new ();
@@ -750,7 +750,7 @@ create_MainWindow (void)
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-not-working"),
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Imperfect");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Imperfect"));
 	g_object_unref (folder_filter);
 
 	folder_filter = gmameui_filter_new ();
@@ -764,7 +764,7 @@ create_MainWindow (void)
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-not-working"),
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Imperfect");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Imperfect"));
 	g_object_unref (folder_filter);
 
 	/* Game information filters */
@@ -778,7 +778,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Game Details"));
 	g_object_unref (folder_filter);
 
 	folder_filter = gmameui_filter_new ();
@@ -791,7 +791,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Game Details"));
 	g_object_unref (folder_filter);
 	
 	folder_filter = gmameui_filter_new ();
@@ -805,7 +805,7 @@ create_MainWindow (void)
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-sound"),
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Game Details"));
 	g_object_unref (folder_filter);
 	
 	folder_filter = gmameui_filter_new ();
@@ -819,7 +819,7 @@ create_MainWindow (void)
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-emblem-sound"),
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Game Details"));
 	g_object_unref (folder_filter);
 	
 	folder_filter = gmameui_filter_new ();
@@ -832,7 +832,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Game Details"));
 	g_object_unref (folder_filter);	
 	
 	folder_filter = gmameui_filter_new ();
@@ -845,7 +845,7 @@ create_MainWindow (void)
 		      "int_value", 0,
 		      "update_list", TRUE,
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Game Details"));
 	g_object_unref (folder_filter);
 
 	/* FIXME TODO
@@ -886,7 +886,7 @@ create_MainWindow (void)
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-joystick"),
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Game Details"));
 	g_object_unref (folder_filter);	
 
 	folder_filter = gmameui_filter_new ();
@@ -900,7 +900,7 @@ create_MainWindow (void)
 		      "update_list", TRUE,
 		      "pixbuf", gmameui_get_icon_from_stock ("gmameui-joystick"),
 		      NULL);
-	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, "Game Details");
+	gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, _("Game Details"));
 	g_object_unref (folder_filter);	
 	
 	/* Catver.ini filters - Category and Version */
@@ -925,7 +925,7 @@ create_MainWindow (void)
 					   NULL);
 			     gmameui_filters_list_add_filter (main_gui.filters_list,
 							      folder_filter,
-							      "Category");
+							      _("Category"));
 			     g_object_unref (folder_filter);
 		}
 		
@@ -946,7 +946,7 @@ create_MainWindow (void)
 					   NULL);
 			     gmameui_filters_list_add_filter (main_gui.filters_list,
 							      folder_filter,
-							      "Version");
+							      _("Version"));
 			     g_object_unref (folder_filter);
 		}
 	}

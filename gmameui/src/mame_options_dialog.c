@@ -223,7 +223,7 @@ GtkWidget *
 mame_options_dialog_new (void)
 {
 	return g_object_new (MAME_TYPE_OPTIONS_DIALOG, 
-				 "title", "MAME Options",
+				 "title", _("MAME Options"),
 				 NULL);
 }
 
@@ -246,7 +246,7 @@ mame_options_dialog_add_page (MameOptionsDialog *dlg,
 	
 	gtk_list_store_set (dlg->priv->store, &iter,
 			    COL_NAME, name,
-			    COL_TITLE, title,
+			    COL_TITLE, _(title),
 			    COL_PIXBUF, icon,
 			    COL_WIDGET, page,
 			    -1);

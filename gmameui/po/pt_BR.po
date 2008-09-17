@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GMAMEUI 0.2.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-09-14 15:38+1000\n"
+"POT-Creation-Date: 2008-09-17 21:59+1000\n"
 "PO-Revision-Date: 2008-05-28 13:56-0300\n"
 "Last-Translator: Alfredo Jr. <junix@linuxinabox.org>\n"
 "Language-Team: none\n"
@@ -76,6 +76,38 @@ msgstr "GMAMEUI"
 msgid "Don't know how to verify roms with this version of xmame."
 msgstr "Não foi possível verificar as roms com esta versão do xmame."
 
+#: ../src/callbacks.c:140 ../src/options.c:778 ../data/properties.glade.h:75
+msgid "Display"
+msgstr "Exibir"
+
+#: ../src/callbacks.c:142
+msgid "OpenGL"
+msgstr ""
+
+#: ../src/callbacks.c:144 ../src/interface.c:744 ../src/options.c:1755
+#: ../data/properties.glade.h:136
+msgid "Sound"
+msgstr "Som"
+
+#: ../src/callbacks.c:146
+msgid "Input"
+msgstr ""
+
+#: ../src/callbacks.c:148
+msgid "Performance"
+msgstr ""
+
+#: ../src/callbacks.c:150 ../src/options.c:2418 ../data/properties.glade.h:115
+msgid "Miscellaneous"
+msgstr "Diversos"
+
+#. FIXME: Make the debugging page last
+#: ../src/callbacks.c:152 ../src/mame_options_dialog.c:130
+#: ../src/mame_options_dialog.c:133
+#, fuzzy
+msgid "Debugging"
+msgstr "Debugando"
+
 #: ../src/callbacks.c:208
 msgid "No xmame executables defined"
 msgstr "Nenhum executável do xmame foi definido"
@@ -107,36 +139,43 @@ msgid "No valid xmame executables found"
 msgstr "Nenhum executável válido do xmame foi encontrado"
 
 #. Now add the categories
-#: ../src/filters_list.c:202 ../src/interface.c:545
+#: ../src/filters_list.c:202 ../src/interface.c:540 ../src/interface.c:545
+#: ../src/interface.c:555 ../src/interface.c:573 ../src/interface.c:588
 #, fuzzy
 msgid "Available"
 msgstr "Não disponível"
 
-#: ../src/filters_list.c:203
+#: ../src/filters_list.c:203 ../src/interface.c:604 ../src/interface.c:617
+#: ../src/interface.c:630 ../src/interface.c:643 ../src/interface.c:656
+#: ../src/interface.c:669 ../src/interface.c:682 ../src/interface.c:695
 msgid "Architecture"
 msgstr ""
 
-#: ../src/filters_list.c:204
+#: ../src/filters_list.c:204 ../src/interface.c:739 ../src/interface.c:753
+#: ../src/interface.c:767
 msgid "Imperfect"
 msgstr ""
 
-#: ../src/filters_list.c:205
+#: ../src/filters_list.c:205 ../src/interface.c:781 ../src/interface.c:794
+#: ../src/interface.c:808 ../src/interface.c:822 ../src/interface.c:835
+#: ../src/interface.c:848 ../src/interface.c:889 ../src/interface.c:903
 #, fuzzy
 msgid "Game Details"
 msgstr "Detalhes"
 
-#: ../src/filters_list.c:206
+#: ../src/filters_list.c:206 ../src/interface.c:710 ../src/interface.c:723
 #, fuzzy
 msgid "Custom"
 msgstr "Auto"
 
 #: ../src/filters_list.c:207 ../src/gmameui-gamelist-view.c:81
-#: ../src/mame_options_dialog.c:81 ../data/gmameui_prefs.glade.h:6
+#: ../src/interface.c:928 ../src/mame_options_dialog.c:81
+#: ../data/gmameui_prefs.glade.h:6
 msgid "Category"
 msgstr "Categoria"
 
 #: ../src/filters_list.c:208 ../src/gmameui-gamelist-view.c:79
-#: ../data/gmameui_prefs.glade.h:20
+#: ../src/interface.c:949 ../data/gmameui_prefs.glade.h:20
 msgid "Version"
 msgstr "Versão"
 
@@ -454,11 +493,11 @@ msgstr "Esconder \"%s\" Coluna"
 msgid "Wait..."
 msgstr "Espere..."
 
-#: ../src/gmameui-gamelist-view.c:779 ../src/gui.c:1395
+#: ../src/gmameui-gamelist-view.c:779 ../src/gui.c:1396
 msgid "Yes"
 msgstr "Sim"
 
-#: ../src/gmameui-gamelist-view.c:779 ../src/gui.c:1395
+#: ../src/gmameui-gamelist-view.c:779 ../src/gui.c:1396
 msgid "No"
 msgstr "Não"
 
@@ -472,69 +511,69 @@ msgstr "jogo"
 msgid "game"
 msgstr "jogo"
 
-#: ../src/gui.c:488
+#: ../src/gui.c:489
 #, c-format
 msgid "Found file name %s with CRC: %u, size %i"
 msgstr ""
 
-#: ../src/gui.c:496
+#: ../src/gui.c:497
 #, c-format
 msgid "Attempting to uncompress %s"
 msgstr ""
 
-#: ../src/gui.c:502
+#: ../src/gui.c:503
 msgid "Loaded pixbuf"
 msgstr ""
 
-#: ../src/gui.c:504 ../src/gui.c:526
+#: ../src/gui.c:505 ../src/gui.c:527
 #, c-format
 msgid "Error while uncompressing %s: %s"
 msgstr ""
 
-#: ../src/gui.c:649
+#: ../src/gui.c:650
 #, c-format
 msgid "Error - cannot open zip file %s"
 msgstr ""
 
-#: ../src/gui.c:741
+#: ../src/gui.c:742
 #, c-format
 msgid "Time to initialise icons: %.02f seconds"
 msgstr "Tempo para inicializar ícones: %.02f segundos"
 
-#: ../src/gui.c:746
+#: ../src/gui.c:747
 #, fuzzy, c-format
 msgid "Time to create main window, filters and gamelist: %.02f seconds"
 msgstr "Tempo para criar janela principal e filtros: %.02f segundos"
 
-#: ../src/gui.c:772
+#: ../src/gui.c:773
 #, c-format
 msgid "Time to complete start of UI: %.02f seconds"
 msgstr "Tempo para completar a inicialização da UI: %.02f segundos"
 
-#: ../src/gui.c:793
+#: ../src/gui.c:794
 #, c-format
 msgid "%s is not a valid executable"
 msgstr "%s não é um executável válido"
 
-#: ../src/gui.c:859
+#: ../src/gui.c:860
 #, fuzzy
 msgid "No executables"
 msgstr "Nenhum executável do xmame foi definido"
 
 #. update statusbar
-#: ../src/gui.c:1358
+#: ../src/gui.c:1359
 msgid "No game selected"
 msgstr "Nenhum jogo selecionado"
 
-#: ../src/gui.c:1465
+#: ../src/gui.c:1466
 msgid "Choose inp file to play"
 msgstr "Escolha um arquivo inp para tocar"
 
-#: ../src/gui.c:1494
+#: ../src/gui.c:1495
 msgid "File exists"
 msgstr ""
 
-#: ../src/gui.c:1496
+#: ../src/gui.c:1497
 #, fuzzy, c-format
 msgid "A file named '%s' already exists. Do you want to overwrite it?"
 msgstr ""
@@ -811,6 +850,10 @@ msgstr ""
 msgid "Retrieving default string value for %s: %s"
 msgstr ""
 
+#: ../src/gui_prefs_dialog.c:258 ../data/gmameui_prefs.glade.h:12
+msgid "GMAMEUI Preferences"
+msgstr ""
+
 #: ../src/interface.c:359
 msgid "GMAMEUI Arcade Machine Emulator"
 msgstr "GMAMEUI Interface Gráfica para Emulador de Filperama"
@@ -867,10 +910,6 @@ msgstr "Favorito"
 msgid "Colors"
 msgstr "%i cores"
 
-#: ../src/interface.c:744 ../src/options.c:1755 ../data/properties.glade.h:136
-msgid "Sound"
-msgstr "Som"
-
 #: ../src/interface.c:758
 #, fuzzy
 msgid "Graphics"
@@ -906,6 +945,40 @@ msgstr ""
 #: ../src/interface.c:894
 msgid "Lightgun"
 msgstr ""
+
+#: ../src/interface.h:69
+msgid "Play Game"
+msgstr "Iniciar Jogo"
+
+#: ../src/interface.h:70
+#, fuzzy
+msgid "Show Folders"
+msgstr "Navegar para a Pasta"
+
+#: ../src/interface.h:71
+#, fuzzy
+msgid "Show Sidebar"
+msgstr "Mostrar Barra Lateral"
+
+#: ../src/interface.h:72
+#, fuzzy
+msgid "List"
+msgstr "Lista"
+
+#: ../src/interface.h:73
+#, fuzzy
+msgid "List Tree"
+msgstr "Lista de Árvore"
+
+#: ../src/interface.h:74 ../data/audit_window.glade.h:10
+#: ../data/properties.glade.h:72 ../data/rom_info.glade.h:8
+msgid "Details"
+msgstr "Detalhes"
+
+#: ../src/interface.h:75
+#, fuzzy
+msgid "Details Tree"
+msgstr "Detalhes Árvore"
 
 #: ../src/io.c:363
 msgid "Performing quick check, please wait:"
@@ -972,11 +1045,10 @@ msgstr ""
 msgid "...it doesn't"
 msgstr ""
 
-#. FIXME: Make the debugging page last
-#: ../src/mame_options_dialog.c:130 ../src/mame_options_dialog.c:133
+#: ../src/mame_options_dialog.c:226
 #, fuzzy
-msgid "Debugging"
-msgstr "Debugando"
+msgid "MAME Options"
+msgstr "Opções GGI"
 
 #: ../src/network_game.c:275
 msgid "Network game options"
@@ -1074,10 +1146,6 @@ msgstr "AES Console (Asia?) Bios"
 msgid "Universe Bios v1.2 (hack)"
 msgstr "Universal Bios v1.2 (hack)"
 
-#: ../src/options.c:778 ../data/properties.glade.h:75
-msgid "Display"
-msgstr "Exibir"
-
 #: ../src/options.c:869
 msgid "Draw every frame"
 msgstr "Desenhar todos os frame"
@@ -1168,10 +1236,6 @@ msgstr "Controles"
 #: ../src/options.c:2115
 msgid "Default Layout"
 msgstr "Layout Padrão"
-
-#: ../src/options.c:2418 ../data/properties.glade.h:115
-msgid "Miscellaneous"
-msgstr "Diversos"
 
 #: ../src/options.c:2436
 msgid "Standard"
@@ -1309,11 +1373,6 @@ msgstr "Checando..."
 #, fuzzy
 msgid "Correct:"
 msgstr "Incorreto"
-
-#: ../data/audit_window.glade.h:10 ../data/properties.glade.h:72
-#: ../data/rom_info.glade.h:8
-msgid "Details"
-msgstr "Detalhes"
 
 #: ../data/audit_window.glade.h:11
 msgid ""
@@ -1490,10 +1549,6 @@ msgstr "Clone de"
 
 #: ../data/gmameui_prefs.glade.h:11
 msgid "Enable version mismatch warning"
-msgstr ""
-
-#: ../data/gmameui_prefs.glade.h:12
-msgid "GMAMEUI Preferences"
 msgstr ""
 
 #: ../data/gmameui_prefs.glade.h:13
@@ -2669,6 +2724,3 @@ msgstr "Jogar e escolher jogos clássicos de fliperama"
 
 #~ msgid "Choose inp file to record"
 #~ msgstr "Escolha um arquivo inp para gravar"
-
-#~ msgid "Play Game"
-#~ msgstr "Iniciar Jogo"
