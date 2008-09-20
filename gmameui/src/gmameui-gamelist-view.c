@@ -696,7 +696,6 @@ create_gamelist_content (void)
 	gboolean is_root;
 	gint j = 0;
 	gchar *message;
-	RomEntry *selected_game;
 	ListMode current_mode;
 	gchar *current_rom_name;
 	gchar *clone_color;
@@ -710,8 +709,6 @@ g_timer_start (timer);
 		      "current-rom", &current_rom_name,
 		      "clone-color", &clone_color,
 		      NULL);
-	
-	selected_game = gui_prefs.current_game;
 
 	/* Status Bar Message */
 	gtk_statusbar_pop (main_gui.statusbar3, 1);
@@ -902,7 +899,8 @@ g_timer_start (timer);
 	if (visible_games == 0)
 		select_game (NULL);
 	else
-		select_game (selected_game);
+		select_game (gui_prefs.current_game);
+
 	GMAMEUI_DEBUG ("Time taken to create_gamelist_content is %.2f", g_timer_elapsed (timer, NULL));
 	g_timer_destroy (timer);
 }

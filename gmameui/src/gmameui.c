@@ -183,8 +183,11 @@ gmameui_init (void)
 g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
 
-		/* Create a new audit object */
-		gui_prefs.audit = gmameui_audit_new ();
+	/* Create a new audit object */
+	gui_prefs.audit = gmameui_audit_new ();
+	
+	/* Initialise the current game */
+	gui_prefs.current_game = NULL;
 	
 	gui_prefs.gl = mame_gamelist_new ();
 	if (!mame_gamelist_load (gui_prefs.gl)) {

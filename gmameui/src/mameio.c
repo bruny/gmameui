@@ -967,7 +967,7 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 gboolean gamelist_parse(XmameExecutable *exec)
 {
 	gboolean ret;
-
+	
 	if (!exec)
 	{
 		gmameui_message(ERROR, NULL, _("xmame not found"));
@@ -988,6 +988,15 @@ gboolean gamelist_parse(XmameExecutable *exec)
 		gmameui_message(ERROR, NULL, _("I don't know how to generate a gamelist for this version of xmame!"));
 		ret = FALSE;
 	}
+	
+	/* Hack - create_gamelist_xmlinfo and _listinfo unref the gui_prefs.gl
+	   object, which also destroys the current_game object. This is a short
+	   term hack to reset it */
+	gchar *current_rom;
+	g_object_get (main_gui.gui_prefs, "current-rom", &current_rom, NULL);
+	gui_prefs.current_game = get_rom_from_gamelist_by_name (gui_prefs.gl, current_rom);
+	/* End hack - once we push the gui_prefs as a g_object, we should be
+	   able to delete the hack */
 	
 	return ret;
 }
