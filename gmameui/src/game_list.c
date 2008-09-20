@@ -811,6 +811,7 @@ RomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname) {
 	RomEntry *tmprom = NULL;
 	
 	g_return_val_if_fail ((gl != NULL), NULL);
+	g_return_val_if_fail ((romname != NULL), NULL);
 	
 	for (listpointer = g_list_first (gl->priv->roms);
 	     (listpointer != NULL);
