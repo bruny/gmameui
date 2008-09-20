@@ -1,3 +1,32 @@
+Overview of changes in GMAMEUI 0.2.5
+====================================
+
+* GMAMEUI now supports MAME 0.127. Fixed SF bug 2076562  (unknown option: -yuvmode) by validating supported MAME options prior to launching ROM
+
+* Modified handling of MAME audit processing to catch ROM errors and properly display invalid ROMs. Samples now shows Not Available samplesets
+
+* Italian translation 100% (thanks Ugo Viti)
+
+* Missing/invalid ROMs now reported properly upon launch
+
+* Main window remembers settings on disabling/enabling filter list, sidebar, toolbar and statusbar on startup
+
+* If no preferences file is available, or values are missing, use default values for the UI
+
+* Load and set joystick value in GUI Prefs dialog
+
+* Mark new source files as translateable, mark new strings as translateable, modify Makefile for better RPM support (SF patch 2035285 - thanks Ugo Viti). Italian translation is now at 100%.
+
+* Set default button on the dialogs to be the Close button
+
+* Added support to launch the GMAMEUI Help manual. This will use gtk_show_uri (if GTK > 2.13 is installed), or revert to libgnome's gnome_url_show. Users who do not wish to compile in libgnome (e.g. XFCE or KDE users) will need to explicitly disable it by compiling with --disable-libgnome, but will not be able to access the manual from within GTK
+
+* Apply patch to allow RPM build (thanks Ugo Viti)
+
+* Code changes
+  - Consolidated code to retrieve images from zip files
+  - Fix many compilation warnings
+
 Overview of changes in GMAMEUI 0.2.4
 ====================================
 
