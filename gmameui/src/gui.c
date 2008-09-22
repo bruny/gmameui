@@ -28,35 +28,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <gdk/gdkkeysyms.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#include <gdk-pixbuf/gdk-pixbuf-loader.h>
-
-#include <gtk/gtkcellrendererpixbuf.h>
-#include <gtk/gtkcellrenderertext.h>
-#include <gtk/gtkcombo.h>
-#include <gtk/gtkeditable.h>
-#include <gtk/gtkentry.h>
-#include <gtk/gtkeventbox.h>
-#include <gtk/gtkfilesel.h>
-#include <gtk/gtkimagemenuitem.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtkliststore.h>
-#include <gtk/gtkmain.h>
-#include <gtk/gtknotebook.h>
-#include <gtk/gtkradiomenuitem.h>
-#include <gtk/gtkscrolledwindow.h>
-#include <gtk/gtkstock.h>
-#include <gtk/gtktextview.h>
-#include <gtk/gtktreestore.h>
-#include <gtk/gtkvbox.h>
 #include <glade/glade.h>
 
-#include "callbacks.h"
-#include "interface.h"
 #include "gmameui.h"
 #include "gui.h"
-#include "progression_window.h"
 #include "unzip.h"
 #include "io.h"
 
@@ -65,32 +40,34 @@ const int ROM_ICON_SIZE = 16;
 static guint timeout_icon;
 
 /**** Sidebar functionality ****/
+
+typedef struct {
+	GdkPixbuf *orig_pixbuf; /* Originally-loaded pixbuf from disk;
+				   scaling should be applied against this */
+	GtkWidget *image_box;   /* Container box widget */
+	GtkWidget *image;	/* GtkImage widget */
+	gboolean resize;	/* Only resize when this is TRUE to prevent
+				   callback from re-triggering repeatedly */
+} _gmameui_picture_type;
+
+
+
 struct _GMAMEUISidebarPrivate {
 
-	GtkBox   *screenshot_hist_vbox;
+	GtkWidget *screenshot_hist_vbox;
 	GtkWidget *screenshot_event_box;
 
 	GtkWidget *main_screenshot;
 	
+	/* Structure to maintain the ROM images (snapshot, flyer, etc) */
+	_gmameui_picture_type gmameui_picture_type[NUM_GMAMEUI_PICTURE_TYPES];
+	
 	GtkWidget *screenshot_notebook;
-	GtkWidget *screenshot_box1;
-	GtkWidget *screenshot_box2;
-	GtkWidget *screenshot_box3;
-	GtkWidget *screenshot_box4;
-	GtkWidget *screenshot_box5;
-	GtkWidget *screenshot_box6;
-	GtkWidget *screenshot1;
-	GtkWidget *screenshot2;
-	GtkWidget *screenshot3;
-	GtkWidget *screenshot4;
-	GtkWidget *screenshot5;
-	GtkWidget *screenshot6;
 
+	/* Widgets for the ROM history */
 	GtkWidget *history_scrollwin;
 	GtkWidget *history_box;
-	GtkTextBuffer *history_buffer;
-
-	
+	GtkTextBuffer *history_buffer;	
 };
 
 static void
@@ -973,14 +950,17 @@ gamelist_popupmenu_show (GdkEventButton *event)
 			event->button, event->time);
 }
 
-/* get an icon for a rom, if not found, try the original game if the game is a clone */
+/* Gets the pixbuf representing a ROM's icon (if the icon directory is
+   specified). Search first for the .ico file for the ROM, then for the parent
+   ROM, then for the icon zipfile */
 GdkPixbuf *
 get_icon_for_rom (RomEntry *rom,
 		  guint     size,
 		  ZIP      *zip)
 {
 	GdkPixbuf *pixbuf, *scaled_pixbuf = NULL;
-	gchar *filename2;
+	gchar *icon_filename;
+	gchar *icon_path;
 	gchar *icon_dir;
 	GError **error = NULL;
 
@@ -989,23 +969,27 @@ get_icon_for_rom (RomEntry *rom,
 
 	GMAMEUI_DEBUG ("Attempting to get icon for ROM %s", rom->romname);
 	
-	g_object_get (main_gui.gui_prefs,
-		      "dir-icons", &icon_dir,
-		      NULL);
+	g_object_get (main_gui.gui_prefs, "dir-icons", &icon_dir, NULL);
 	
-	filename2 = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.ico", icon_dir, rom->romname);
-	pixbuf = gdk_pixbuf_new_from_file (filename2, error);
-	g_free (filename2);
+	icon_filename = g_strdup_printf ("%s.ico", rom->romname);
+	icon_path = g_build_filename (icon_dir, icon_filename, NULL);
+	pixbuf = gdk_pixbuf_new_from_file (icon_path, error);
+	
+	g_free (icon_filename);
+	g_free (icon_path);
 
-	/* no picture found try parent game if any*/
+	/* If icon not found, try looking for parent's icon */
 	if ((pixbuf == NULL) && strcmp (rom->cloneof, "-")) {
 		GMAMEUI_DEBUG ("Attempting to get icon for ROM %s from parent %s", rom->romname, rom->cloneof);
-		filename2 = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.ico", icon_dir, rom->cloneof);
-		pixbuf = gdk_pixbuf_new_from_file (filename2, error);
-		g_free (filename2);
+		icon_filename = g_strdup_printf ("%s.ico", rom->cloneof);
+		icon_path = g_build_filename (icon_dir, icon_filename, NULL);
+		pixbuf = gdk_pixbuf_new_from_file (icon_path, error);
+
+		g_free (icon_filename);
+		g_free (icon_path);
 	}
 
-	/* we havent found the picture in the directory, maybe we could try in a zipfile */
+	/* If icon not found, look in a zipfile */
 	if (pixbuf == NULL) {
 		if (zip != 0) {
 			GMAMEUI_DEBUG ("Attempting to get icon for ROM %s from icon zipfile", rom->romname);
@@ -1026,6 +1010,8 @@ get_icon_for_rom (RomEntry *rom,
 	return scaled_pixbuf;
 }
 
+/* Returns a pixbuf from the current GNOME theme for a
+   specified stock ID */
 static GdkPixbuf *
 gmameui_get_icon_from_theme (const char *id,
 			    GtkIconSize size)
@@ -1042,16 +1028,20 @@ gmameui_get_icon_from_theme (const char *id,
 	return pixbuf;
 }
 
+/* Returns a pixbuf from the GMAMEUI install directory for a
+   specified filename */
 static GdkPixbuf *
 gmameui_get_pixbuf_from_gmameui_install (const char *filename)
 {
 	GdkPixbuf *pixbuf;
-	char *path, *fn;
+	gchar *path, *fn;
 
 	fn = g_strconcat (filename, ".png", NULL);
+	
 	path = g_build_filename (DATADIR, "gmameui", fn, NULL);
-	g_free (fn);
 	pixbuf = gdk_pixbuf_new_from_file (path, NULL);
+	
+	g_free (fn);
 	g_free (path);
 
 	return pixbuf;
@@ -1341,10 +1331,10 @@ select_game (RomEntry *rom)
 {
 	gui_prefs.current_game = rom;
 
-	if (rom) {
+	if (rom != NULL) {
 		/* update statusbar */
 		set_status_bar (rom_entry_get_list_name (rom),
-				rom_status_string_value [rom->has_roms]);
+				_(rom_status_string_value [rom->has_roms]));
 
 		/* update screenshot panel */
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
@@ -1523,9 +1513,13 @@ G_DEFINE_TYPE (GMAMEUISidebar, gmameui_sidebar,
 static void
 gmameui_sidebar_finalize (GObject *obj)
 {
+	int i;
 GMAMEUI_DEBUG ("Freeing sidebar");
 	GMAMEUISidebar *dlg = GMAMEUI_SIDEBAR (obj);	
 
+	for (i = 0; i < NUM_GMAMEUI_PICTURE_TYPES; i++)
+		g_object_unref (G_OBJECT (dlg->priv->gmameui_picture_type[i].orig_pixbuf));
+	
 	g_free (dlg->priv);
 	
 	((GObjectClass *) gmameui_sidebar_parent_class)->finalize (obj);
@@ -1540,11 +1534,94 @@ gmameui_sidebar_class_init (GMAMEUISidebarClass *class)
 	object_class->finalize = gmameui_sidebar_finalize;
 }
 
+/* This callback is invoked whenever the space allocated to the currently-displayed
+   ROM image is changed, allowing the image to be resized to fit the allocated space */
+static void
+on_image_container_resized (GtkWidget *widget, GtkAllocation *allocation, gpointer user_data)
+{
+	_gmameui_picture_type *picture_type;	
+	GdkPixbuf *pixbuf;		/* Image's current pixbuf */
+	GdkPixbuf *scaled_pixbuf;       /* Copied, scaled pixbuf */
+	int wwidth, wheight;		/* Allocated (available) container dimensions */
+	int img_curr_w, img_curr_h;     /* Current dimensions of image */
+	int h_width, w_height;
+	int h_width_diff, w_height_diff;
+	int width, height;		/* Target dimensions of image */
+
+	picture_type = (_gmameui_picture_type *) user_data;
+	
+	g_return_if_fail (picture_type != NULL);
+	g_return_if_fail (picture_type->orig_pixbuf != NULL);
+
+	/* Resize only every second time (prevents scaling/setting triggering another call) */
+	if (picture_type->resize) {
+		wwidth = wheight = 0;
+
+		/* Find out how much space we have to play with */
+		wwidth = allocation->width;
+		wheight = allocation->height;
+	
+		/* Use a copy of the original pixbuf, so that we are not working with
+		   a gradually distorting pixbuf */
+		pixbuf = gdk_pixbuf_copy (picture_type->orig_pixbuf);
+	
+		g_return_if_fail (pixbuf != NULL);
+
+		img_curr_w = gdk_pixbuf_get_width (pixbuf);
+		img_curr_h = gdk_pixbuf_get_height (pixbuf);
+	
+		w_height = (wwidth * img_curr_h) / img_curr_w;
+		h_width = (wheight * img_curr_w) / img_curr_h;
+		w_height_diff = wheight - w_height;
+		h_width_diff = wwidth - h_width;
+	
+		if ((w_height_diff >= 0) && (h_width_diff >= 0)) {
+		    /* Both are would be smaller than the window pick the bigger one */
+		    if (w_height_diff < h_width_diff) {
+		        width = wwidth;
+		        height = w_height;
+		    } else {
+		        height = wheight;
+		        width = h_width;
+		    }
+		        
+		} else if (w_height_diff < 0) {
+		    /* height is going to touch the window edge sooner
+		     size based on height */
+		    height = wheight;
+		    width = h_width;
+		} else {
+		    /* width is going to touch the window edge sooner
+		       size based on width */
+		    width = wwidth;
+		    height = w_height;
+		}
+
+		/*GMAMEUI_DEBUG ("Available size is %dx%d", wwidth, wheight);
+		GMAMEUI_DEBUG ("Image size is %dx%d", gdk_pixbuf_get_width (pixbuf), gdk_pixbuf_get_height (pixbuf));
+		GMAMEUI_DEBUG ("Setting image with ratio of %f", ((float) gdk_pixbuf_get_width (pixbuf) / (float) gdk_pixbuf_get_height (pixbuf)));*/
+	
+		scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf, width, height,
+							 GDK_INTERP_BILINEAR);
+
+		gtk_image_set_from_pixbuf (GTK_IMAGE (picture_type->image),
+					   scaled_pixbuf);
+	
+		g_object_unref (G_OBJECT (scaled_pixbuf));
+		g_object_unref (G_OBJECT (pixbuf));
+	}
+
+	/* The next time we enter this callback, we want to resize (if we
+	   didn't this time) */
+	picture_type->resize = !(picture_type->resize);
+}
+
 /* Creates a hbox containing a treeview (the sidebar) and a notebook */
 static void
 gmameui_sidebar_init (GMAMEUISidebar *sidebar)
 {
 	GladeXML *xml;
+	int i;
 	
 GMAMEUI_DEBUG ("Creating sidebar");
 
@@ -1570,46 +1647,34 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	gtk_widget_show (GTK_WIDGET (sidebar->priv->screenshot_hist_vbox));
 	
 	sidebar->priv->screenshot_notebook = glade_xml_get_widget (xml, "screenshot_notebook");
-	gtk_box_pack_start (sidebar->priv->screenshot_hist_vbox,
+	gtk_box_pack_start (GTK_BOX (sidebar->priv->screenshot_hist_vbox),
 			    sidebar->priv->screenshot_notebook,
 			    TRUE, TRUE, 0);
 	
-	/* Snap */
-	sidebar->priv->screenshot1 = gmameui_get_image_from_stock ("gmameui-screen");
-	sidebar->priv->screenshot_box1 = glade_xml_get_widget (xml, "screenshot_box1");
-	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box1),
-			   GTK_WIDGET (sidebar->priv->screenshot1));
+	/* Create the structure containing each of the ROM images */
+	for (i = 0; i < NUM_GMAMEUI_PICTURE_TYPES; i++) {
+		gchar *widget_name;
+		
+		widget_name = g_strdup_printf("screenshot_box%d", i);
 
-	/* Flyer */
-	sidebar->priv->screenshot2 = gmameui_get_image_from_stock ("gmameui-screen");
-	sidebar->priv->screenshot_box2 = glade_xml_get_widget (xml, "screenshot_box2");
-	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box2),
-			   GTK_WIDGET (sidebar->priv->screenshot2));
-
-	/* Cab */
-	sidebar->priv->screenshot3 = gmameui_get_image_from_stock ("gmameui-screen");
-	sidebar->priv->screenshot_box3 = glade_xml_get_widget (xml, "screenshot_box3");
-	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box3),
-			   GTK_WIDGET (sidebar->priv->screenshot3));
-
-	/* Marquee */
-	sidebar->priv->screenshot4 = gmameui_get_image_from_stock ("gmameui-screen");
-	sidebar->priv->screenshot_box4 = glade_xml_get_widget (xml, "screenshot_box4");
-	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box4),
-			   GTK_WIDGET (sidebar->priv->screenshot4));
-
-	/* Title */
-	sidebar->priv->screenshot5 = gmameui_get_image_from_stock ("gmameui-screen");
-	sidebar->priv->screenshot_box5 = glade_xml_get_widget (xml, "screenshot_box5");
-	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box5),
-			   GTK_WIDGET (sidebar->priv->screenshot5));
-
-	/* Control Panels */
-	sidebar->priv->screenshot6 = gmameui_get_image_from_stock ("gmameui-screen");
-	sidebar->priv->screenshot_box6 = glade_xml_get_widget (xml, "screenshot_box6");
-	gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box6),
-			   GTK_WIDGET (sidebar->priv->screenshot6));
-
+		/* Set a default picture */
+		sidebar->priv->gmameui_picture_type[i].image = gmameui_get_image_from_stock ("gmameui-screen");
+		sidebar->priv->gmameui_picture_type[i].image_box = glade_xml_get_widget (xml, widget_name);
+		
+		/* Add the GtkImage to the GtkBox container */
+		GMAMEUI_DEBUG ("Adding image to container %s", widget_name);
+		gtk_container_add (GTK_CONTAINER (sidebar->priv->gmameui_picture_type[i].image_box),
+				   sidebar->priv->gmameui_picture_type[i].image);
+		
+		/* When the area available to the GtkImage changes, trigger re-sizing */
+		g_signal_connect (GTK_WIDGET (sidebar->priv->gmameui_picture_type[i].image_box),
+				  "size-allocate",
+				  G_CALLBACK (on_image_container_resized),
+				  &sidebar->priv->gmameui_picture_type[i]);
+		
+		g_free (widget_name);
+	}
+	
 	g_signal_connect (G_OBJECT (sidebar->priv->screenshot_notebook), "switch-page",
 			    G_CALLBACK (on_screenshot_notebook_switch_page),
 			    NULL);
@@ -1618,7 +1683,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	
 	/* here we create the history box that will be filled later */
 	sidebar->priv->history_scrollwin = glade_xml_get_widget (xml, "history_scrollwin");
-	gtk_box_pack_end (sidebar->priv->screenshot_hist_vbox,
+	gtk_box_pack_end (GTK_BOX (sidebar->priv->screenshot_hist_vbox),
 			  sidebar->priv->history_scrollwin,
 			  TRUE, TRUE, 5);
 
@@ -1644,13 +1709,6 @@ gmameui_sidebar_new (void)
 
 }
 
-struct _sidebar_screenshot {
-	GtkWidget *screenshot_box;
-	GtkWidget *screenshot;
-};
-
-typedef struct _sidebar_screenshot sidebar_screenshot;
-
 static void
 gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom)
 {
@@ -1659,12 +1717,9 @@ gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom)
 	GMAMEUI_DEBUG ("Setting page");
 	
 	screenshot_type show_flyer;
-	int wwidth, wheight;
 	GtkWidget *pict = NULL;
 	
 	gboolean had_history;
-
-	wwidth = 0; wheight = 0;
 	
 	g_object_get (main_gui.gui_prefs,
 		      "show-flyer", &show_flyer,
@@ -1674,67 +1729,27 @@ gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom)
 		UPDATE_GUI;
 
 		GtkRequisition requisition;
-		gtk_widget_size_request (sidebar->priv->screenshot_box1,
+
+		/* Get the size available; the size will be the same for all
+		   images, so get the requisition for SNAPSHOTS as representative */
+		gtk_widget_size_request (sidebar->priv->gmameui_picture_type[SNAPSHOTS].image_box,
 					 &requisition);
-		wwidth = requisition.width;
-		wheight = requisition.height;
 
 		had_history = FALSE;
 		had_history = gmameui_sidebar_set_history (sidebar, rom);
 
-			pict = get_pixbuf (rom, show_flyer, wwidth, wheight);
-			/* Remove the elements from the container and then re-add.
-			   This is necessary to refresh the image */
-			switch (show_flyer) {
-			case (SNAPSHOTS):
-				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box1),
-						      sidebar->priv->screenshot1);
-				sidebar->priv->screenshot1 = pict;					
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box1),
-						   GTK_WIDGET (sidebar->priv->screenshot1));
-				gtk_widget_show_all (sidebar->priv->screenshot_box1);
-				break;
-			case (FLYERS):
-				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box2),
-						      sidebar->priv->screenshot2);
-				sidebar->priv->screenshot2 = pict;
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box2),
-						   GTK_WIDGET (sidebar->priv->screenshot2));
-				gtk_widget_show_all (sidebar->priv->screenshot_box2);
-				break;
-			case (CABINETS):
-				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box3),
-						      sidebar->priv->screenshot3);
-				sidebar->priv->screenshot3 = pict;
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box3),
-						   GTK_WIDGET (sidebar->priv->screenshot3));
-				gtk_widget_show_all (sidebar->priv->screenshot_box3);
-				break;
-			case (MARQUEES):
-				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box4),
-						      sidebar->priv->screenshot4);
-				sidebar->priv->screenshot4 = pict;
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box4),
-						   GTK_WIDGET (sidebar->priv->screenshot4));
-				gtk_widget_show_all (sidebar->priv->screenshot_box4);
-				break;
-			case (TITLES):
-				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box5),
-						      sidebar->priv->screenshot5);
-				sidebar->priv->screenshot5 = pict;
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box5),
-						   GTK_WIDGET (sidebar->priv->screenshot5));
-				gtk_widget_show_all (sidebar->priv->screenshot_box5);
-				break;
-			case (CONTROL_PANELS):
-				gtk_container_remove (GTK_CONTAINER (sidebar->priv->screenshot_box6),
-						      sidebar->priv->screenshot6);
-				sidebar->priv->screenshot6 = pict;
-				gtk_container_add (GTK_CONTAINER (sidebar->priv->screenshot_box6),
-						   GTK_WIDGET (sidebar->priv->screenshot6));
-				gtk_widget_show_all (sidebar->priv->screenshot_box6);
-				break;	
-			}
+		pict = get_pixbuf (rom, show_flyer, requisition.width, requisition.height);
+		
+		/* Set the original pixbuf; when resizing, we will use this */
+		sidebar->priv->gmameui_picture_type[show_flyer].orig_pixbuf = gdk_pixbuf_copy (gtk_image_get_pixbuf (GTK_IMAGE (pict)));
+		
+		/* Remove and add the image, necessary to refresh the image */
+		gtk_container_remove (GTK_CONTAINER (sidebar->priv->gmameui_picture_type[show_flyer].image_box),
+				      sidebar->priv->gmameui_picture_type[show_flyer].image);
+		sidebar->priv->gmameui_picture_type[show_flyer].image = pict;
+		gtk_container_add (GTK_CONTAINER (sidebar->priv->gmameui_picture_type[show_flyer].image_box),
+				   sidebar->priv->gmameui_picture_type[show_flyer].image);
+		gtk_widget_show_all (sidebar->priv->gmameui_picture_type[show_flyer].image_box);
 		
 		if (had_history) {
 			gtk_widget_show (GTK_WIDGET (sidebar->priv->history_scrollwin));

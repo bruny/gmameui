@@ -195,6 +195,10 @@ mame_audit_dialog_init (MameAuditDialog *dialog)
 	/* Add our dialog contents to the vbox of the dialog class */
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox),
 						audit_vbox, TRUE, TRUE, 0);
+	
+	/* Set resizable to FALSE so that closing the expander shrinks the dialog */
+	gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
+	
 	gtk_widget_show_all (GTK_WIDGET (audit_vbox));
 	
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);

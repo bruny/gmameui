@@ -89,7 +89,8 @@ typedef enum  {
 	CABINETS,
 	MARQUEES,
 	TITLES,
-	CONTROL_PANELS
+	CONTROL_PANELS,
+	NUM_GMAMEUI_PICTURE_TYPES
 } screenshot_type;
 
 typedef enum  {
