@@ -827,13 +827,13 @@ RomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname) {
 	return tmprom;
 }
 
-void mame_gamelist_add_driver (MameGamelist *gl, gchar *driver) {
+void mame_gamelist_add_driver (MameGamelist *gl, const gchar *driver) {
 	g_return_if_fail (gl != NULL);
 	
 	glist_insert_unique (&gl->priv->drivers, driver);
 }
 
-void mame_gamelist_add_year (MameGamelist *gl, gchar *year) {
+void mame_gamelist_add_year (MameGamelist *gl, const gchar *year) {
 	g_return_if_fail (gl != NULL);
 	
 	glist_insert_unique (&gl->priv->years, year);

@@ -700,6 +700,8 @@ create_gamelist_content (void)
 	gchar *current_rom_name;
 	gchar *clone_color;
 
+	g_return_if_fail (gui_prefs.gl != NULL);
+
 	GMAMEUI_DEBUG ("POPULATE GAME LIST");
 GTimer *timer = g_timer_new ();
 g_timer_start (timer);

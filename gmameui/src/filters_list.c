@@ -25,7 +25,7 @@
 
 #include "filters_list.h"
 #include "filter.h"
-#include "gui.h"	// Only needed for create_gamelist_content
+#include "gui.h"	/* Only needed for create_gamelist_content */
 
 struct _GMAMEUIFiltersListPrivate
 {
@@ -496,17 +496,17 @@ filters_list_get_group (GMAMEUIFiltersList *fl,
 {
 	GtkTreeModel          *model;
 	GtkTreeIter            iter_group, iter_separator;
-	FindGroup              fg;
+	FindGroup             *fg;
 	
-	memset (&fg, 0, sizeof (fg));
-	fg.name = name;
+	fg = g_new0 (FindGroup, 1);
+	fg->name = name;
 	
 	model = GTK_TREE_MODEL (fl->priv->store);
 	gtk_tree_model_foreach (model,
 				(GtkTreeModelForeachFunc) filters_list_get_group_foreach,
-				&fg);
+				fg);
 
-	if (!fg.found) {
+	if (!fg->found) {
 		/*GMAMEUI_DEBUG (" Adding group %s to model", name);*/
 
 		if (created) {
@@ -548,10 +548,10 @@ filters_list_get_group (GMAMEUIFiltersList *fl,
 		}
 
 		if (iter_group_to_set) {
-			*iter_group_to_set = fg.iter;
+			*iter_group_to_set = fg->iter;
 		}
 
-		iter_separator = fg.iter;
+		iter_separator = fg->iter;
 
 		if (gtk_tree_model_iter_next (model, &iter_separator)) {
 			gboolean is_separator;

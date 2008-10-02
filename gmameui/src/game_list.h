@@ -77,8 +77,8 @@ GList* mame_gamelist_get_roms_glist (MameGamelist *gl);
 GList* mame_gamelist_get_categories_glist (MameGamelist *gl);
 GList* mame_gamelist_get_versions_glist (MameGamelist *gl);
 
-void mame_gamelist_add_driver (MameGamelist *gl, gchar *driver);
-void mame_gamelist_add_year (MameGamelist *gl, gchar *year);
+void mame_gamelist_add_driver (MameGamelist *gl, const gchar *driver);
+void mame_gamelist_add_year (MameGamelist *gl, const gchar *year);
 void mame_gamelist_add_version (MameGamelist *gl, gchar *version);
 void mame_gamelist_add_category (MameGamelist *gl, gchar *category);
 void mame_gamelist_add_manufacturer (MameGamelist *gl, gchar *manufacturer);

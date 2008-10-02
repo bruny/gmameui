@@ -257,11 +257,13 @@ load_catver_ini (void)
 		category = g_key_file_get_string (catver_file, "Category", tmprom->romname, &error);
 		if (error) {
 			/*GMAMEUI_DEBUG ("Error parsing catver - %s", error->message);*/
+			g_error_free (error);
 			error = NULL;
 		}
 		version = g_key_file_get_string (catver_file, "VerAdded", tmprom->romname, &error);
 		if (error) {
 			/*GMAMEUI_DEBUG ("Error parsing catver - %s", error->message);*/
+			g_error_free (error);
 			error = NULL;
 		}
 		tmprom->category = category;

@@ -22,6 +22,8 @@
  *
  */
 
+#include <string.h>
+
 #include "rom_entry.h"
 #include "gui.h"	/* For main_gui.gui_prefs */
 

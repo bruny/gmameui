@@ -1,3 +1,22 @@
+Reporting Bugs
+--------------
+
+Please report any bugs found at http://sourceforge.net/tracker/?group_id=217857&atid=1041607
+
+To help with diagnosing the problem, please add the following details to any bug reports:
+
+1. The contents of $HOME/.gmameui/gmameui.ini
+2. A backtrace of any crash/segfault encountered. To generate a backtrace, compile GMAMEUI as follows:
+   ./configure --enable-debug
+   make
+   make install (as root)
+
+   And then run GMAMEUI with the following command:
+   gdb src/gmameui
+
+Known Bugs
+----------
+
 * If the Stop button is clicked during auditing, the auditing doesn't stop immediately. It seems to continue until the pipe has finished processing.
 * SDLMAME uses a different process to perform the audit, so counting of the total available ROMs can't be performed prior to execution.
   - We could have a lookup table that provides this information.
