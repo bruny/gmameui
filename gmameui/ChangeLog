@@ -1,3 +1,29 @@
+2008-10-04 09:46  adburton
+
+	* NEWS, configure.ac: Change version number prior to new release
+
+2008-10-02 20:32  adburton
+
+	* BUGS, src/filters_list.c, src/game_list.c, src/game_list.h,
+	  src/gmameui-gamelist-view.c, src/io.c, src/rom_entry.c: Replace
+	  use of memset in filters_list, fix compilation errors, add
+	  details for reporting bugs in BUGS
+
+2008-09-22 11:56  adburton
+
+	* src/gmameui-audit-dlg.c, src/gmameui.h, src/gui.c,
+	  data/sidebar.glade: Resize sidebar images to fit available width,
+	  resize audit window when expander closes
+
+2008-09-20 16:35  adburton
+
+	* src/game_list.c: Check romname before trying to retrieve ROM from
+	  gamelist
+
+2008-09-20 16:06  adburton
+
+	* ChangeLog, NEWS, configure.ac: Changes prior to 0.2.5 release
+
 2008-09-20 15:48  adburton
 
 	* po/it.po, src/gmameui-gamelist-view.c, src/gmameui.c,
