@@ -632,15 +632,21 @@ directories_selection_save_changes (GtkWidget *widget)
 
 	/* Get executable paths from tree model */
 	current_exec = NULL;
-	xmame_table_free ();
-	xmame_table_init ();
+
+	g_object_unref (main_gui.exec_list);
+	main_gui.exec_list = NULL;
+	main_gui.exec_list = mame_exec_list_new ();
+	
 	gtk_tree_model_foreach (GTK_TREE_MODEL (xmame_execs_tree_model), path_tree_model_foreach, NULL);
 	g_object_set (main_gui.gui_prefs,
 		      "executable-paths", va_paths,
 		      NULL);
 	if (va_paths) {
-		for (i = 0; i < va_paths->n_values; i++)
-			xmame_table_add (g_value_get_string (g_value_array_get_nth (va_paths, i)));
+		for (i = 0; i < va_paths->n_values; i++) {
+			XmameExecutable *exec = xmame_executable_new (g_value_get_string (g_value_array_get_nth (va_paths, i)));
+			xmame_executable_set_version (exec);
+			mame_exec_list_add (main_gui.exec_list, exec);
+		}
 		g_value_array_free (va_paths);
 		va_paths = NULL;
 	}

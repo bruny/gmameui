@@ -93,7 +93,7 @@ main (int argc, char *argv[])
 			NULL);
 		gtk_file_chooser_set_select_multiple (GTK_FILE_CHOOSER (dialog), FALSE);
 		if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
-			xmame_table_add (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog)));
+			xmame_table_add (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog)));    FIXME TODO DELETE
 			add_exec_menu ();
 		}
 		gtk_widget_destroy (GTK_WIDGET (dialog));*/
@@ -147,9 +147,11 @@ gmameui_init (void)
 
 	GMAMEUI_DEBUG (_("Initialising list of possible MAME executable options"));
 	xmame_options_init ();
+	
+	
 
 	GMAMEUI_DEBUG (_("Initialising MAME executables"));
-	xmame_table_init ();
+	main_gui.exec_list = mame_exec_list_new ();
 	
 	if (!current_exec)
 		GMAMEUI_DEBUG ("No executable!");
@@ -168,17 +170,20 @@ gmameui_init (void)
 	for (i = 0; i < va_exec_paths->n_values; i++) {
 		GMAMEUI_DEBUG (_("Adding executable from preferences file: %s"),
 			       g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
-		xmame_table_add (g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
+		
+		XmameExecutable *exec = xmame_executable_new (g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
+		xmame_executable_set_version (exec);    /* To get the name and version */
+		mame_exec_list_add (main_gui.exec_list, exec);
 	}
 	g_value_array_free (va_exec_paths);
 	
 	if (mame_executable) {
-		current_exec = xmame_table_get (mame_executable);
+		current_exec = mame_exec_list_get_exec_by_path (main_gui.exec_list, mame_executable);
 		GMAMEUI_DEBUG (_("Current exec set to %s"), current_exec->path);
 		g_free (mame_executable);
-	} else {
-		current_exec = xmame_table_get_by_index (0);
-	}
+	} else
+		current_exec = mame_exec_list_nth (main_gui.exec_list, 0);	
+
 #ifdef ENABLE_DEBUG
 g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
@@ -792,7 +797,8 @@ exit_gmameui (void)
 	g_object_unref (gui_prefs.audit);
 	gui_prefs.audit = NULL;
 
-	xmame_table_free ();
+	g_object_unref (main_gui.exec_list);
+	main_gui.exec_list = NULL;
 	xmame_options_free ();
 
 	g_object_unref (main_gui.options);

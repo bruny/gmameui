@@ -44,6 +44,7 @@
 #include "gui_prefs.h"
 #include "interface.h"
 #include "gmameui-gamelist-view.h"
+#include "mame-exec-list.h"
 
 /* The following menu entries are always enabled */
 static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
@@ -246,6 +247,8 @@ struct main_gui_struct {
 	MameOptions *options;
 	
 	MameGuiPrefs *gui_prefs;
+	
+	MameExecList *exec_list;
 };
 
 struct main_gui_struct main_gui;

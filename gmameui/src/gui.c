@@ -787,7 +787,7 @@ on_executable_selected (GtkRadioAction *action,
 
 	XmameExecutable *exec;
 
-	exec = xmame_table_get_by_index (index);
+	exec = mame_exec_list_nth (main_gui.exec_list, index);
 
 	GMAMEUI_DEBUG ("Picking executable %d - %s", index, exec->name);
 	set_current_executable (exec);
@@ -823,7 +823,7 @@ add_exec_menu (void)
 	exec_radio_action_group = gtk_action_group_new ("GmameuiWindowRadioExecActions");
 	gtk_ui_manager_insert_action_group (main_gui.manager, exec_radio_action_group, 0);
 	
-	num_execs = xmame_table_size ();
+	num_execs = mame_exec_list_size (main_gui.exec_list);
 
 	main_gui.gmameui_exec_merge_id = gtk_ui_manager_new_merge_id (main_gui.manager);
 	 
@@ -848,7 +848,7 @@ add_exec_menu (void)
 				       FALSE);
 	} else {
 		for (i = 0; i < num_execs; i++) {
-			exec = xmame_table_get_by_index (i);
+			exec = mame_exec_list_nth (main_gui.exec_list, i);
 			gchar *exec_name = g_strdup_printf ("%s (%s) %s", exec->name, exec->target, exec->version);
 		
 			/* Create a new radio action for the executable */
@@ -916,12 +916,12 @@ void gmameui_ui_set_favourites_sensitive (gboolean rom_is_favourite)
 void gmameui_ui_set_items_sensitive () {
 
 	gboolean rom_and_exec;  /* TRUE if both an executable exists and a ROM is selected */
-	rom_and_exec = (gui_prefs.current_game) && (xmame_table_size () > 0);
+	rom_and_exec = (gui_prefs.current_game) && (mame_exec_list_size (main_gui.exec_list) > 0);
 
 	gtk_action_group_set_sensitive (main_gui.gmameui_rom_exec_action_group,
 					rom_and_exec);
 	gtk_action_group_set_sensitive (main_gui.gmameui_exec_action_group,
-					xmame_table_size () > 0);
+					mame_exec_list_size (main_gui.exec_list));
 
 	/* Disable ROM and Favourites UI items if no current game */
 	gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,

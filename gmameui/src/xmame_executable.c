@@ -40,77 +40,6 @@ const gchar *showusage_option_name [] = {
 };
 
 #define BUFFER_SIZE 1000
-#define MAX_EXECUTABLES (10)
-
-static XmameExecutable *xmame_table [MAX_EXECUTABLES + 1];
-
-void
-xmame_table_init (void)
-{
-	memset (xmame_table, 0, sizeof (XmameExecutable*) * MAX_EXECUTABLES);
-}
-
-#define foreach_exec(i, exec) for (i = 0; (exec = xmame_table[i]); i++)
-
-gint
-xmame_table_size (void)
-{
-	XmameExecutable *exec;
-	int i;
-
-	foreach_exec (i, exec);
-		
-	return i;
-}
-
-XmameExecutable *
-xmame_table_get (const gchar *path)
-{
-	XmameExecutable *exec;
-	int i;
-
-	if (!path)
-		return NULL;
-
-	foreach_exec (i, exec) {
-		if (!strcmp (exec->path, path)) {
-			return exec;
-		}
-	}
-
-	return NULL;
-}
-
-XmameExecutable *
-xmame_table_get_by_index (int index)
-{
-
-	if (index < 0 || index >= MAX_EXECUTABLES)
-		return NULL;
-
-	return xmame_table[index];
-}
-
-gchar **
-xmame_table_get_all (void)
-{
-	int size;
-	int i;
-	gchar **all_paths;
-	XmameExecutable *ptr;
-
-	size = xmame_table_size () + 1;
-
-	all_paths = g_malloc0 (size * sizeof (gchar *));
-	if (size == 1)
-		return all_paths;
-
-	foreach_exec (i, ptr) {
-		all_paths[i] = ptr->path;
-	}
-
-	return all_paths;
-}
 
 /** Creates a new executable.
  * Path will be set to the absolute path for the executable.
@@ -118,7 +47,7 @@ xmame_table_get_all (void)
  *
  * If the executable is not valid it returns NULL.
 */
-static XmameExecutable *
+/*static*/ XmameExecutable *
 xmame_executable_new (const gchar *path)
 {
 	XmameExecutable *xmame_exec;
@@ -164,65 +93,6 @@ xmame_executable_free (XmameExecutable *exec)
 	xmame_executable_free_options (exec);
 
 	g_free (exec);
-}
-
-XmameExecutable *
-xmame_table_add (const gchar *path)
-{
-	XmameExecutable * new_exec;
-	XmameExecutable * exec;
-	int i;
-
-	if (!path)
-		return NULL;
-
-	new_exec = xmame_executable_new (path);
-
-	if (!new_exec)
-		return NULL;
-
-	/* check if the executable is already in the list */
-	foreach_exec (i,exec) {
-		if (!strcmp (exec->path, new_exec->path)) {
-			xmame_executable_free (new_exec);
-			return exec;
-		}
-	}
-	
-	if (xmame_executable_set_version (new_exec))
-	{
-		int i;
-
-		for (i = 0; i < MAX_EXECUTABLES; i++) {
-
-			if (!xmame_table[i]) {
-				xmame_table[i] = new_exec;
-				return new_exec;
-			}
-		}
-		
-		xmame_executable_free (new_exec);
-		gmameui_message (ERROR, NULL, _("This version of GMAMEUI supports up to %i xmame executables."), MAX_EXECUTABLES);
-		return NULL;
-	}
-	else
-	{
-		xmame_executable_free (new_exec);
-		return NULL;
-	}
-}
-
-void
-xmame_table_free (void)
-{
-	XmameExecutable *exec;
-	int i;
-
-	foreach_exec (i, exec) {
-		xmame_executable_free (exec);
-	}
-
-	memset (xmame_table, 0, sizeof (XmameExecutable*) * MAX_EXECUTABLES);
 }
 
 #ifdef ENABLE_XMAME_SVGALIB_SUPPORT

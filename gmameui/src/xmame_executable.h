@@ -58,41 +58,6 @@ typedef struct {
 	GHashTable *options;
 } XmameExecutable;
 
-/** Initializes the xmame executables table */
-void xmame_table_init (void);
-
-/** Destroys the table and all executables inside 
-*
-*/
-void              xmame_table_free (void);
-
-gint              xmame_table_size (void);
-
-/** Adds the executable with the given path to the table
-* and returns the executable.
-* Guarantees: 
-* - only one executable in the table with the same path.
-* - only valid executables are added.
-* - version information is in the struct.
-*/
-XmameExecutable * xmame_table_add (const gchar *path);
-
-/**
-* Gets the executable with the given path 
-*/
-XmameExecutable * xmame_table_get (const gchar *path);
-
-/**
-* Gets the executable with the given index.
-*/
-XmameExecutable * xmame_table_get_by_index (int index);
-
-/** Returns a NULL terminated list
-* with all the paths in the table.
-* Free the list with g_free.
-*/
-gchar **          xmame_table_get_all (void);
-
 gboolean          xmame_executable_set_version (XmameExecutable *exec);
 
 
