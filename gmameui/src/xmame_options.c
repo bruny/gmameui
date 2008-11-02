@@ -42,7 +42,7 @@ void
 xmame_options_init (void)
 {
 	option_map = g_hash_table_new (g_str_hash, g_str_equal);
-
+	
 	/* Core search path options */
 	ADD_OPTION ("rompath");
 	ADD_OPTION ("samplepath");
@@ -63,6 +63,13 @@ xmame_options_init (void)
 	
 	/* Core filename options */
 	ADD_OPTION ("cheat_file");
+	
+	/* Core state/playback options */
+	ADD_OPTION ("autosave");
+	ADD_OPTION ("mngwrite");
+	ADD_OPTION ("aviwrite");
+	ADD_OPTION ("wavwrite");
+	/* FIXME TODO - Others */
 	
 	/* Core performance options */
 	ADD_OPTION ("autoframeskip");
@@ -105,7 +112,18 @@ xmame_options_init (void)
 	ADD_OPTION ("samples");
 	ADD_OPTION ("volume");
 	
-	/* Core input options TODO */
+	/* Core input options */
+	ADD_OPTION ("coin_lockout");
+	ADD_OPTION ("mouse");
+	ADD_OPTION ("joystick");
+	ADD_OPTION ("lightgun");
+	ADD_OPTION ("multikeyboard");
+	ADD_OPTION ("multimouse");
+	ADD_OPTION ("steadykey");
+	ADD_OPTION ("offscreen_reload");
+	ADD_OPTION ("joystick_map");
+	ADD_OPTION ("joystick_deadzone");
+	ADD_OPTION ("joystick_saturation");
 	
 	/* Core input automatic enable options TODO */
 	
@@ -138,7 +156,17 @@ xmame_options_init (void)
 	ADD_OPTION ("waitvsync");
 	ADD_OPTION ("yuvmode");
 	
-	/* OpenGL-specific options TODO */
+	/* OpenGL-specific options */
+	ADD_OPTION ("filter");
+	ADD_OPTION ("prescale");
+	ADD_OPTION ("gl_forcepow2texture");
+	ADD_OPTION ("gl_notexturerect");
+	ADD_OPTION ("gl_vbo");
+	ADD_OPTION ("gl_pbo");
+	ADD_OPTION ("gl_glsl");
+	ADD_OPTION ("gl_glsl_filter");
+	/* A number of other OpenGL options FIXME TODO */
+	ADD_OPTION ("gl_glsl_vid_attr");
 	
 	/* Per-window video options TODO */
 	
@@ -237,7 +265,7 @@ xmame_options_init (void)
 	ADD_OPTION ("mitshm");
 	ADD_OPTION ("mixerdevice");
 	ADD_OPTION ("modenumber");
-	ADD_OPTION ("mouse");
+	
 	ADD_OPTION ("mtxil");
 	ADD_OPTION ("netmapkey");
 	ADD_OPTION ("norotate");

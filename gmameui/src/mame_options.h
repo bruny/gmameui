@@ -30,23 +30,45 @@
 
 G_BEGIN_DECLS
 
+/* Structure defining the format of the Glade widget name, e.g.
+   preferences_toggle:bool:1:0:Playback.autosave
+   where 0 = preferences_<gtk widget type>, i.e. object type
+         1 = value's data type
+         2 = default value
+         3 = flags (not used)
+         4 = key
+   key is of the format Category.Key, e.g. Playback.autosave
+*/
 typedef enum
 {
-	GMAMEUI_PROPERTY_OBJECT_TYPE_TOGGLE,
+	GMAMEUI_WIDGETNAME_OBJ_TYPE,
+	GMAMEUI_WIDGETNAME_DATA_TYPE,
+	GMAMEUI_WIDGETNAME_DEFAULT_VALUE,
+	GMAMEUI_WIDGETNAME_FLAGS,
+	GMAMEUI_WIDGETNAME_KEY,
+	NUM_GMAMEUI_WIDGETNAME_PROPS
+} WidgetNameProperties;
+
+/* The GTK widget type, first property in the Glade widget name */
+typedef enum
+{
+	GMAMEUI_PROPERTY_OBJECT_TYPE_TOGGLE,	/* GtkToggleButton */
 	GMAMEUI_PROPERTY_OBJECT_TYPE_SPIN,
 	GMAMEUI_PROPERTY_OBJECT_TYPE_HSCALE,
-	GMAMEUI_PROPERTY_OBJECT_TYPE_ENTRY,
-	GMAMEUI_PROPERTY_OBJECT_TYPE_COMBO,
-	GMAMEUI_PROPERTY_OBJECT_TYPE_TEXT,
+	GMAMEUI_PROPERTY_OBJECT_TYPE_ENTRY, /* GtkTextEntry */
+	GMAMEUI_PROPERTY_OBJECT_TYPE_COMBO, /* GtkCombo */
+	GMAMEUI_PROPERTY_OBJECT_TYPE_TEXT,  /* GtkTextView */
 	GMAMEUI_PROPERTY_OBJECT_TYPE_FOLDER
 } GmameuiPropertyObjectType;
 
+/* The GMAMEUI property type, second property in the Glade widget name */
 typedef enum
 {
 	GMAMEUI_PROPERTY_DATA_TYPE_BOOL,
 	GMAMEUI_PROPERTY_DATA_TYPE_INT,
 	GMAMEUI_PROPERTY_DATA_TYPE_DOUBLE,
 	GMAMEUI_PROPERTY_DATA_TYPE_TEXT,
+	GMAMEUI_PROPERTY_DATA_TYPE_TOGGLETEXT,  /* A text entry controlled by an associated toggle button */
 	GMAMEUI_PROPERTY_DATA_TYPE_COLOR,
 	GMAMEUI_PROPERTY_DATA_TYPE_FONT
 } GmameuiPropertyDataType;

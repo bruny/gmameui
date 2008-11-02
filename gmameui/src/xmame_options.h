@@ -26,11 +26,12 @@
 #ifndef __XMAME_OPTIONS_H__
 #define __XMAME_OPTIONS_H__
 
+/* MameOption is the result of parsing the command-line MAME options */
 typedef struct {
-	gchar *name;
-	gboolean no_option;
-	gchar *description;
-	gchar *type;
+	gchar *name;		/* Name of the option */
+	gboolean no_option; /* XMAME only: Is this option toggled by passing -no at the front */
+	gchar *description; /* Description */
+	gchar *type;		/* XMAME only: MAME argument type, contained in <> in output from help, e.g. string, float, int, arg */
 	gchar **keys;
 	gchar **possible_values;
 } MameOption;

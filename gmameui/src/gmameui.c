@@ -616,6 +616,7 @@ play_game (RomEntry *rom)
 	}
 
 	if (current_exec->type == XMAME_EXEC_WIN32) {
+		gchar *sdlmame_options_string_playback;
 		gchar *sdlmame_options_string_perf;
 		gchar *sdlmame_options_string_video;
 		gchar *sdlmame_options_string_opengl;
@@ -627,6 +628,7 @@ play_game (RomEntry *rom)
 		gchar *sdlmame_options_string_input;
 		gchar *sdlmame_options_string_vector;
 		
+		sdlmame_options_string_playback = mame_options_get_option_string (main_gui.options, "Playback");
 		sdlmame_options_string_perf = mame_options_get_option_string (main_gui.options, "Performance");
 		sdlmame_options_string_video = mame_options_get_option_string (main_gui.options, "Video");
 		sdlmame_options_string_opengl = mame_options_get_option_string (main_gui.options, "OpenGL");
@@ -641,10 +643,11 @@ play_game (RomEntry *rom)
 		else
 			sdlmame_options_string_vector = g_strdup ("");
 		
-		opt = g_strdup_printf ("%s %s %s %s %s %s %s %s %s %s %s %s %s -%s %s 2>&1",
+		opt = g_strdup_printf ("%s %s %s %s %s %s %s %s %s %s %s %s %s %s -%s %s 2>&1",
 				       current_exec->path,
 				       create_rompath_options_string (current_exec),
 				       create_io_options_string (current_exec),
+				       sdlmame_options_string_playback,
 				       sdlmame_options_string_perf,
 				       sdlmame_options_string_video,
 				       sdlmame_options_string_opengl,
@@ -658,6 +661,7 @@ play_game (RomEntry *rom)
 				       current_exec->noloadconfig_option,
 				       rom->romname);
 		
+		g_free (sdlmame_options_string_playback);
 		g_free (sdlmame_options_string_perf);
 		g_free (sdlmame_options_string_video);
 		g_free (sdlmame_options_string_opengl);
