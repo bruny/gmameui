@@ -215,7 +215,14 @@ mame_exec_list_set_current_executable (MameExecList *list, XmameExecutable *exec
 	g_return_if_fail (exec != NULL);
 
 	list->priv->current_exec = exec;
+	GMAMEUI_DEBUG ("Setting current executable to %s", exec->path);
 	/*GMAMEUI_DEBUG ("Setting current executable to %s", mame_exec_get_path (list->priv->current_exec));*/
+}
+
+gboolean
+mame_exec_list_has_current_executable (MameExecList *list)
+{
+	return (list->priv->current_exec != NULL);
 }
 
 int
@@ -236,6 +243,9 @@ mame_exec_list_finalize (GObject *obj)
 	/* FIXME TODO
 	g_list_foreach (li->priv->list, g_object_unref, NULL);
 	g_list_free (li->priv->list);*/
+	
+	/* Reset the current executable */
+	li->priv->current_exec = NULL;
 	
 // FIXME TODO	g_free (li->priv);
 	

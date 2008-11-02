@@ -458,6 +458,20 @@ mame_opt_free (gpointer opt)
 	xmame_option_free (opt_opt);
 }
 
+/*
+ SDLMAME options are generally:
+ -<option>      <description>
+# (i.e. a header or comment)
+ 
+ XMAME options are more complicated, and can be either:
+ -<option>/-<alternative>       <description> (where description is multiple aligned lines)
+ -[no]<option>  <description>  
+ -<option> <string>     <description>
+ First char will be -, space or *
+ 
+ *** (i.e. a header or comment)
+ 
+ */
 static MameOption *
 parse_option (gchar *line,
 	      FILE  *xmame_pipe,
@@ -473,6 +487,7 @@ parse_option (gchar *line,
 	gboolean option_is_alternative = FALSE;
 	GSList *values = NULL;
 	
+	/* This line is a comment or part of the previous line */
 	if (line[0] != '-')
 	{
 		*more_input = (fgets (line, BUFFER_SIZE, xmame_pipe) != NULL);
@@ -559,12 +574,7 @@ parse_option (gchar *line,
 	for (p = start_p; *p && *p != '\n'; p++);
 	*p = '\0';
 
-	/* Strip space at the end */
-	p--;
-	while (*p == ' ') {
-		*p = '\0';
-		p--;
-	}
+	start_p = g_strchomp (start_p); /* Strip space at the end */
 
 	opt->description = g_strdup (start_p);
 	list_mode = FALSE;
@@ -603,20 +613,13 @@ parse_option (gchar *line,
 			while (*start_p == ' ')
 				start_p++;
 		} 
-		/* Skip spaces */
-		while (*start_p == ' ' || *start_p == '\t')
-			start_p++;
-	
+		start_p = g_strchug (start_p); /* Skip spaces */
+
 		/* Strip newline */
 		for (p = start_p; *p && *p != '\n'; p++);
 		*p = '\0';
 
-		/* Strip space at the end */
-		p--;
-		while (*p == ' ') {
-			*p = '\0';
-			p--;
-		}
+		start_p = g_strchomp (start_p); /* Strip space at the end */
 
 		/* If the line starts with the number then it's a list item */
 		if (g_ascii_isdigit (start_p[0]) && can_have_list) {

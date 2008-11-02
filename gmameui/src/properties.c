@@ -68,7 +68,7 @@ audit_game (RomEntry *localrom)
 {	
 	while (gtk_events_pending ()) gtk_main_iteration ();
 
-	if (!current_exec) {
+	if (!mame_exec_list_has_current_executable (main_gui.exec_list)) {
 		gtk_label_set_text (GTK_LABEL (rom_check_result), _("Can't audit game"));
 		if (localrom->nb_samples > 0) {
 			gtk_label_set_text (GTK_LABEL (sample_check_result), _("Can't audit game"));
@@ -428,6 +428,8 @@ create_properties_windows (RomEntry *rom)
 		title = g_strdup (_("Default Properties"));
 	}
 
+	current_exec = mame_exec_list_get_current_executable (main_gui.exec_list);
+	
 	properties_windows = gtk_dialog_new ();
 	gtk_dialog_set_has_separator (GTK_DIALOG (properties_windows), FALSE);
 	gtk_window_set_title (GTK_WINDOW (properties_windows), title);

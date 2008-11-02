@@ -517,9 +517,11 @@ create_MainWindow (void)
 	/* Populate the filters list - this should be done in filters_list.c */
 	
 	/* Recent versions of MAME use neodrvr */
+	XmameExecutable *exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	static char *neogeo_value;
 	GList *listpointer;
-	if (xmame_compare_raw_version (current_exec, "0.116") >= 0)
+
+	if (xmame_compare_raw_version (exec, "0.116") >= 0)
 		neogeo_value = "neodrvr";
 	else
 		neogeo_value = "neogeo"; 

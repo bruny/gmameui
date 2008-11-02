@@ -67,6 +67,7 @@ XmameExecutable* mame_exec_list_get_exec_by_path (MameExecList *list, gchar *pat
 XmameExecutable* mame_exec_list_get_current_executable (MameExecList *list);
 //void mame_exec_list_set_current_executable (MameExecList *list, MameExec *exec);
 void mame_exec_list_set_current_executable (MameExecList *list, XmameExecutable *exec);
+gboolean mame_exec_list_has_current_executable (MameExecList *list);
 int mame_exec_list_size (MameExecList *list);
 
 G_END_DECLS

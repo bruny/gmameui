@@ -630,13 +630,12 @@ directories_selection_save_changes (GtkWidget *widget)
 		load_options (NULL);
 	}*/
 
-	/* Get executable paths from tree model */
-	current_exec = NULL;
 
 	g_object_unref (main_gui.exec_list);
 	main_gui.exec_list = NULL;
 	main_gui.exec_list = mame_exec_list_new ();
-	
+
+	/* Get executable paths from tree model */
 	gtk_tree_model_foreach (GTK_TREE_MODEL (xmame_execs_tree_model), path_tree_model_foreach, NULL);
 	g_object_set (main_gui.gui_prefs,
 		      "executable-paths", va_paths,
@@ -699,7 +698,8 @@ directories_selection_save_changes (GtkWidget *widget)
 	add_exec_menu ();
 
 	/* here we should already have a valid executable except if mame is not present in path */
-	if (!current_exec) {
+	//if (!current_exec) {
+	if (!mame_exec_list_has_current_executable (main_gui.exec_list)) {
 		gmameui_message (ERROR, GTK_WINDOW (directories_selection), _("No valid xmame executables found"));
 	}
 	

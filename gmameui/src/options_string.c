@@ -385,7 +385,7 @@ static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *
 				if (!(target->sdl_auto_mode)) {
 					if (xmame_has_option(exec, "vidmode_h") && xmame_has_option(exec, "vidmode_w")) {
 					
-						sdl_mode_string = xmame_get_option_value(current_exec, "modenumber", target->modenumber);
+						sdl_mode_string = xmame_get_option_value(exec, "modenumber", target->modenumber);
 														
 						if (sdl_mode_string) {
 							modenumber_tokens = g_strsplit(sdl_mode_string, "x", 0);

@@ -57,8 +57,6 @@ void
 on_play_activate (GtkAction *action,
 		  gpointer  user_data)
 {
-	g_return_if_fail (current_exec != NULL);
-
 	play_game (gui_prefs.current_game);
 }
 
@@ -128,11 +126,15 @@ on_remove_from_favorites_activate      (GtkMenuItem     *menuitem,
 static void
 show_properties_dialog (gchar *rom_name)
 {
-	g_return_if_fail (current_exec != NULL);
+	XmameExecutable *exec;
+	
+	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
+	
+	g_return_if_fail (exec != NULL);
 	
 	/* SDLMAME uses a different set of options to XMAME. If we are running
 	   XMAME, then use the legacy GXMAME method of maintaining the options */
-	if (current_exec->type == XMAME_EXEC_WIN32) {
+	if (exec->type == XMAME_EXEC_WIN32) {
 		/* SDLMAME */
 		GtkWidget *options_dialog = mame_options_get_dialog (main_gui.options);
 
@@ -202,16 +204,19 @@ void
 on_audit_all_games_activate (GtkMenuItem     *menuitem,
 			     gpointer         user_data)
 {
+	XmameExecutable *exec;
 	GtkWidget *audit_dlg;
 	
-	if (!current_exec) {
+	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
+	
+	if (!exec) {
 		gmameui_message (ERROR, NULL, _("No xmame executables defined"));
 		/* reenable joystick */
 		joy_focus_on ();
 		return;
 	}
 
-	gamelist_check (current_exec);
+	gamelist_check (exec);
 
 	audit_dlg = mame_audit_dialog_new (NULL);
 	gtk_widget_show (audit_dlg);	
@@ -279,7 +284,7 @@ on_rebuild_game_list_menu_activate     (GtkMenuItem     *menuitem,
 	UPDATE_GUI;
 	
 	GMAMEUI_DEBUG ("recreate game list");
-	gamelist_parse (current_exec);
+	gamelist_parse (mame_exec_list_get_current_executable (main_gui.exec_list));
 	GMAMEUI_DEBUG ("reload everything");
 
 	mame_gamelist_save (gui_prefs.gl);

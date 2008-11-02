@@ -760,7 +760,7 @@ set_current_executable (XmameExecutable *new_exec)
 		GMAMEUI_DEBUG ("Executable changed to %s", new_exec->path);
 	}
 
-	current_exec = new_exec;
+	mame_exec_list_set_current_executable (main_gui.exec_list, new_exec);
 	
 	valid = xmame_executable_is_valid (new_exec);
 
@@ -942,8 +942,10 @@ gamelist_popupmenu_show (GdkEventButton *event)
 	popup_menu = gtk_ui_manager_get_widget (main_gui.manager, "/GameListPopup");
 	g_return_if_fail (popup_menu != NULL);
 
-	if (current_exec)
-		xmame_get_options (current_exec);
+	XmameExecutable *exec = mame_exec_list_get_current_executable (main_gui.exec_list);
+	if (exec)
+		xmame_get_options (exec);
+	
 
 	gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,
 			NULL, NULL,
@@ -1439,8 +1441,8 @@ select_inp (gboolean play_record)
 	gchar *current_rom_name;
 
 	RomEntry *rom;
-	
-	g_return_if_fail (current_exec != NULL);
+
+	g_return_if_fail (mame_exec_list_has_current_executable (main_gui.exec_list));
 	
 	joy_focus_off ();
 	
