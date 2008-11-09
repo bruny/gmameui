@@ -31,7 +31,7 @@ gmameui_SOURCES = \
 	unzip.c unzip.h \
 	keyboard.c keyboard.h \
 	xmame_options.h xmame_options.c \
-	xmame_executable.h xmame_executable.c \
+	mame-exec.h mame-exec.c \
 	mame-exec-list.h mame-exec-list.c \
 	mame_options.c mame_options.h \
 	mame_options_dialog.c mame_options_dialog.h \

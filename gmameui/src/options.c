@@ -232,7 +232,6 @@ static GtkWidget *debug_size_combo;
 static GtkWidget *bios_label;
 static GtkWidget *bios_combo;
 static GtkWidget *artwork_resolution_combo;
-// ADB TO DELETE static GtkWidget *artwork_frame;
 
 static GtkWidget *use_backdrops_checkbutton;
 static GtkWidget *use_bezels_checkbutton;
@@ -495,8 +494,8 @@ combo_new_from_glade(GtkWidget *combo, const gchar *option, GType key_type) {
 	is_int_option = (key_type == G_TYPE_INT);
 
 	if (option) {
-		values = xmame_get_option_values (current_exec, option);
-		keys = xmame_get_option_keys (current_exec, option);
+		values = mame_get_option_values (current_exec, option);
+		keys = mame_get_option_keys (current_exec, option);
 	} else {
 		values = NULL;
 		keys = NULL;
@@ -532,7 +531,7 @@ combo_new_from_glade(GtkWidget *combo, const gchar *option, GType key_type) {
                                 NULL);
 
 
-	gtk_widget_set_sensitive(combo, xmame_has_option(current_exec, option));
+	gtk_widget_set_sensitive(combo, mame_has_option(current_exec, option));
 	return combo;
 }
 
@@ -767,7 +766,7 @@ add_display_options_tab (GtkWidget    *properties_windows,
 	gchar title[BUFFER_SIZE];
 	int i;
 
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 
 	dirty_options_flag = FALSE;
 
@@ -792,7 +791,7 @@ GMAMEUI_DEBUG ("Adding display options tab");
 	   stored in the artwork directory. */
 	effect_combo = glade_xml_get_widget (xml, "effect_combo");
 	effect_vbox = glade_xml_get_widget (xml, "effect_vbox");
-	if (xmame_get_option_value_count (current_exec, "effect") == -1) {
+	if (mame_get_option_value_count (current_exec, "effect") == -1) {
 		gtk_widget_hide (effect_combo);
 		/* FIXME Use a combo consisting of elements in overlay_effects */
 		effect_name = glade_xml_get_widget (xml, "effect_name");
@@ -806,7 +805,7 @@ GMAMEUI_DEBUG ("Adding display options tab");
 
 	/* -scanlines option has been removed since version XXX */
 	scanlines_checkbutton = glade_xml_get_widget (xml, "scanlines_checkbutton");
-	if (xmame_has_option (current_exec, "scanlines")) {
+	if (mame_has_option (current_exec, "scanlines")) {
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (scanlines_checkbutton),
 					      target->scanlines);
 	} else {
@@ -880,11 +879,11 @@ GMAMEUI_DEBUG ("Adding display options tab");
 	/* Frameskip method -frameskipper option unavailable since XXX */
 	fs_method_label = glade_xml_get_widget (xml, "fs_method_label");
 	frameskipper_combo = glade_xml_get_widget (xml, "frameskipper_combo");
-	if (xmame_has_option (current_exec, "frameskipper")) {
+	if (mame_has_option (current_exec, "frameskipper")) {
 		frameskipper_combo = combo_new_from_glade (frameskipper_combo, "frameskipper", G_TYPE_INT);
 		combo_set_index(frameskipper_combo, target->frameskipper);
 		gtk_widget_set_sensitive (GTK_WIDGET (frameskipper_combo), target->autoframeskip
-			  && xmame_has_option (current_exec, "frameskipper"));
+			  && mame_has_option (current_exec, "frameskipper"));
 	} else {
 		gtk_widget_hide (frameskipper_combo);
 		gtk_widget_hide (fs_method_label);
@@ -963,7 +962,7 @@ GMAMEUI_DEBUG ("Adding display options tab");
 	flipy_checkbutton = glade_xml_get_widget (xml, "flipx_checkbutton");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (flipy_checkbutton), target->flipy);
 			
-	gtk_widget_set_sensitive ( GTK_WIDGET (dirty_checkbutton), xmame_has_option (current_exec, "dirty"));
+	gtk_widget_set_sensitive ( GTK_WIDGET (dirty_checkbutton), mame_has_option (current_exec, "dirty"));
 	gtk_widget_set_sensitive (fs_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
 	gtk_widget_set_sensitive (fs_method_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
 	gtk_widget_set_sensitive (maxfs_label, !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (autoframeskip_checkbutton)));
@@ -1134,7 +1133,7 @@ get_x11_rendering_frame (GameOptions *target,
 	GtkWidget *x11_frame_parent;
 	int i;
 
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 
 	/* X11 */
 	x11_frame_parent = glade_xml_get_widget (xml, "x11_rendering_frame");
@@ -1165,12 +1164,12 @@ get_x11_rendering_frame (GameOptions *target,
 	mtxil_checkbutton = glade_xml_get_widget (xml, "mtxil_checkbutton");
 	
 	/* x11 frame */
-	gtk_widget_set_sensitive (GTK_WIDGET (mitshm_checkbutton), xmame_has_option (current_exec, "mitshm"));
-	gtk_widget_set_sensitive (GTK_WIDGET (xvfullscreen_checkbutton), xmame_has_option (current_exec, "fullscreen"));
-	gtk_widget_set_sensitive (GTK_WIDGET (cursor_checkbutton), xmame_has_option (current_exec, "cursor"));
-	gtk_widget_set_sensitive (GTK_WIDGET (xsync_checkbutton), xmame_has_option (current_exec, "xsync"));
-	gtk_widget_set_sensitive (GTK_WIDGET (xil_checkbutton), xmame_has_option (current_exec, "xil"));
-	gtk_widget_set_sensitive (GTK_WIDGET (mtxil_checkbutton), xmame_has_option (current_exec, "mtxil") && target->xil);
+	gtk_widget_set_sensitive (GTK_WIDGET (mitshm_checkbutton), mame_has_option (current_exec, "mitshm"));
+	gtk_widget_set_sensitive (GTK_WIDGET (xvfullscreen_checkbutton), mame_has_option (current_exec, "fullscreen"));
+	gtk_widget_set_sensitive (GTK_WIDGET (cursor_checkbutton), mame_has_option (current_exec, "cursor"));
+	gtk_widget_set_sensitive (GTK_WIDGET (xsync_checkbutton), mame_has_option (current_exec, "xsync"));
+	gtk_widget_set_sensitive (GTK_WIDGET (xil_checkbutton), mame_has_option (current_exec, "xil"));
+	gtk_widget_set_sensitive (GTK_WIDGET (mtxil_checkbutton), mame_has_option (current_exec, "mtxil") && target->xil);
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cursor_checkbutton), target->cursor);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mitshm_checkbutton), target->mitshm);
@@ -1214,7 +1213,7 @@ get_xgl_rendering_frame (GameOptions *target,
 
 	int i;
 
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 	gl_frame_parent = glade_xml_get_widget (xml, "opengl_rendering_frame");
 
 	gltexture_size_spinbutton = glade_xml_get_widget (xml, "gltexture_size_spinbutton");
@@ -1247,14 +1246,14 @@ get_xgl_rendering_frame (GameOptions *target,
 	gtk_entry_set_text (GTK_ENTRY (glulib_entry), "libGLU.so.1");
 
 	/* set sensitivity */
-	gtk_widget_set_sensitive (gllib_entry, xmame_has_option (current_exec, "gllibname"));
-	gtk_widget_set_sensitive (glulib_entry, xmame_has_option (current_exec, "glulibname"));
-	gtk_widget_set_sensitive (glext78_checkbutton, xmame_has_option (current_exec, "glext78"));
-	gtk_widget_set_sensitive (gldrawbitmap_checkbutton, xmame_has_option (current_exec, "gldrawbitmap"));
-	gtk_widget_set_sensitive (glcolormod_checkbutton, xmame_has_option (current_exec, "glcolormod"));
-	gtk_widget_set_sensitive (glforceblitmode_checkbutton, xmame_has_option (current_exec, "glforceblitmode"));
+	gtk_widget_set_sensitive (gllib_entry, mame_has_option (current_exec, "gllibname"));
+	gtk_widget_set_sensitive (glulib_entry, mame_has_option (current_exec, "glulibname"));
+	gtk_widget_set_sensitive (glext78_checkbutton, mame_has_option (current_exec, "glext78"));
+	gtk_widget_set_sensitive (gldrawbitmap_checkbutton, mame_has_option (current_exec, "gldrawbitmap"));
+	gtk_widget_set_sensitive (glcolormod_checkbutton, mame_has_option (current_exec, "glcolormod"));
+	gtk_widget_set_sensitive (glforceblitmode_checkbutton, mame_has_option (current_exec, "glforceblitmode"));
 	gtk_widget_set_sensitive (GTK_WIDGET (cabinet_entry), target->cabview && 
-	                                                    xmame_has_option (current_exec, "cabview"));
+	                                                    mame_has_option (current_exec, "cabview"));
 
 	/* Open GL frame */
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gldblbuffer_checkbutton), target->gldblbuffer);
@@ -1293,7 +1292,7 @@ get_sdl_rendering_frame (GameOptions *target,
 {
 	GtkWidget *sdl_frame_parent;
 	
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 	sdl_frame_parent = glade_xml_get_widget (xml, "sdl_rendering_frame");
 
 	/* Full screen */
@@ -1321,7 +1320,7 @@ get_sdl_rendering_frame (GameOptions *target,
 				  sdl_modes_label);
 
 	/* only show the combobox if sdl_modes exist */
-	if (xmame_get_option_value_count (current_exec, "") > 0) {
+	if (mame_get_option_value_count (current_exec, "") > 0) {
 		gtk_widget_set_sensitive (GTK_WIDGET (sdl_modes_combo), !(target->sdl_auto_mode));
 		gtk_widget_show (sdl_modes_combo);
 
@@ -1351,7 +1350,7 @@ get_fx_rendering_frame (GameOptions *target,
 	GtkWidget *xfx_frame_parent;
 	int i;
 
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 
 	xfx_frame_parent = glade_xml_get_widget (xml, "fxglide_rendering_frame");
 	
@@ -1394,7 +1393,7 @@ get_photon_rendering_frame (GameOptions *target,
 {
 	GtkWidget *photon_frame_parent;
 	
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 
 	photon_frame_parent = glade_xml_get_widget (xml, "photon_rendering_frame");
 	
@@ -1433,7 +1432,7 @@ get_ggi_rendering_frame (GameOptions *target,
 	GtkWidget *ggix_label;
 	GtkWidget *ggiy_label;
 
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 
 	ggi_frame_parent = options_frame_new (_("GGI options"));
 	ggi_frame = options_frame_create_child (ggi_frame_parent);
@@ -1524,7 +1523,7 @@ get_svga_rendering_frame (GameOptions *target,
 	GtkWidget *centery_label;
 	GtkWidget *centerx_label;
 	
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 
 	svga_frame_parent = options_frame_new (_("SVGA options"));
 	svga_frame = options_frame_create_child (svga_frame_parent);
@@ -1635,7 +1634,7 @@ add_rendering_options_tab (GtkWidget    *properties_windows,
 	
 	GladeXML *xml = glade_xml_new (GLADEDIR "properties.glade", "rendering_vbox", NULL);
 	
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 	dirty_options_flag = FALSE;
 
 	rendering_table = gtk_table_new (4, 1, FALSE);
@@ -1646,42 +1645,42 @@ add_rendering_options_tab (GtkWidget    *properties_windows,
 
 	rendering_frame2 = NULL;
 
-	switch (current_exec->type) {
-	case XMAME_EXEC_X11:
-		rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
-		break;
-	case XMAME_EXEC_XGL:
-		/* X11 with OpenGL */
-		rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
-		rendering_frame2 = get_xgl_rendering_frame (target, apply_button, reset_button, xml);
-		break;
-	case XMAME_EXEC_SDL:
-		/* SDL */
-		rendering_frame = get_sdl_rendering_frame (target, apply_button, reset_button, xml);
-		break;
-	case XMAME_EXEC_XFX:
-		/* X11 with Glide */
-		rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
-		rendering_frame2 = get_fx_rendering_frame (target, apply_button, reset_button, xml);
-		break;
-	case XMAME_EXEC_SVGAFX:
-		/* Glide in Console mode */
-		rendering_frame = get_fx_rendering_frame (target, apply_button, reset_button, xml);
-		break;
-	case XMAME_EXEC_PHOTON2:
-		rendering_frame = get_photon_rendering_frame (target, apply_button, reset_button, xml);
-		break;
-	case XMAME_EXEC_GGI:
-		rendering_frame = get_ggi_rendering_frame (target, apply_button, reset_button);
-		break;
-#ifdef ENABLE_XMAME_SVGALIB_SUPPORT
-	case XMAME_EXEC_SVGALIB:
-		rendering_frame = get_svga_rendering_frame (target, apply_button, reset_button);
-		break;
-#endif
-	default:
-		rendering_frame = NULL;
-		break;
+	switch (mame_exec_get_exectype (current_exec)) {
+		case XMAME_EXEC_X11:
+			rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
+			break;
+		case XMAME_EXEC_XGL:
+			/* X11 with OpenGL */
+			rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
+			rendering_frame2 = get_xgl_rendering_frame (target, apply_button, reset_button, xml);
+			break;
+		case XMAME_EXEC_SDL:
+			/* SDL */
+			rendering_frame = get_sdl_rendering_frame (target, apply_button, reset_button, xml);
+			break;
+		case XMAME_EXEC_XFX:
+			/* X11 with Glide */
+			rendering_frame = get_x11_rendering_frame (target, apply_button, reset_button, xml);
+			rendering_frame2 = get_fx_rendering_frame (target, apply_button, reset_button, xml);
+			break;
+		case XMAME_EXEC_SVGAFX:
+			/* Glide in Console mode */
+			rendering_frame = get_fx_rendering_frame (target, apply_button, reset_button, xml);
+			break;
+		case XMAME_EXEC_PHOTON2:
+			rendering_frame = get_photon_rendering_frame (target, apply_button, reset_button, xml);
+			break;
+		case XMAME_EXEC_GGI:
+			rendering_frame = get_ggi_rendering_frame (target, apply_button, reset_button);
+			break;
+	#ifdef ENABLE_XMAME_SVGALIB_SUPPORT
+		case XMAME_EXEC_SVGALIB:
+			rendering_frame = get_svga_rendering_frame (target, apply_button, reset_button);
+			break;
+	#endif
+		default:
+			rendering_frame = NULL;
+			break;
 	}
 
 	if (rendering_frame)
@@ -1745,7 +1744,7 @@ add_sound_options_tab (GtkWidget    *properties_windows,
 /*	GtkWidget *soundfile_button;*/
 	gchar *used_text;
 
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 	dirty_options_flag = FALSE;
 
 	image = gmameui_get_image_from_stock ("gmameui-sound-toolbar");
@@ -1912,36 +1911,36 @@ GMAMEUI_DEBUG ("Adding sound options tab");
 	gtk_entry_set_text (GTK_ENTRY (pcm_entry), target->alsa_pcm);
 
 	gtk_widget_set_sensitive (GTK_WIDGET (audio_preferred_checkbutton),
-				  xmame_has_option (current_exec, "audio_preferred"));
+				  mame_has_option (current_exec, "audio_preferred"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (alsa_frame),
-				  xmame_get_option_key_value (current_exec, "dsp-plugin", "alsa") != NULL);
+				  mame_get_option_key_value (current_exec, "dsp-plugin", "alsa") != NULL);
 	
 	gtk_widget_set_sensitive (GTK_WIDGET (arts_spinbutton),
-				  xmame_has_option (current_exec, "artsBufferTime"));
+				  mame_has_option (current_exec, "artsBufferTime"));
 	gtk_widget_set_sensitive (GTK_WIDGET (alsacard_label),
-				  xmame_has_option (current_exec, "alsacard"));
+				  mame_has_option (current_exec, "alsacard"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (alsacard_spinbutton),
-				  xmame_has_option (current_exec, "alsacard"));
+				  mame_has_option (current_exec, "alsacard"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (alsadevice_label),
-				  xmame_has_option (current_exec, "alsadevice"));
+				  mame_has_option (current_exec, "alsadevice"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (alsadevice_spinbutton),
-				  xmame_has_option (current_exec, "alsadevice"));
+				  mame_has_option (current_exec, "alsadevice"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (alsa_buffer_label),
-				  xmame_has_option (current_exec, "alsa-buffer"));
+				  mame_has_option (current_exec, "alsa-buffer"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (alsa_buffer_spinbutton),
-				  xmame_has_option (current_exec, "alsa-buffer"));
+				  mame_has_option (current_exec, "alsa-buffer"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (PCM_label),
-				  xmame_has_option (current_exec, "alsa-pcm"));
+				  mame_has_option (current_exec, "alsa-pcm"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (pcm_entry),
-				  xmame_has_option (current_exec, "alsa-pcm"));
+				  mame_has_option (current_exec, "alsa-pcm"));
 
 	g_signal_connect_after (G_OBJECT (sound_checkbutton), "toggled",
 				  G_CALLBACK (button_toggled),
@@ -2007,7 +2006,7 @@ GtkWidget *controllers_vbox;
 	int i;
 
 
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 	dirty_options_flag = FALSE;
 
 	image = gmameui_get_image_from_stock ("gmameui-joystick-toolbar");
@@ -2188,30 +2187,30 @@ GtkWidget *controllers_vbox;
 	gtk_entry_set_text (GTK_ENTRY (config_name_entry), target->cfgname);
 
 	gtk_widget_set_sensitive (GTK_WIDGET (ctrlr_combo), 
-				  xmame_has_option (current_exec, "ctrlr"));
+				  mame_has_option (current_exec, "ctrlr"));
 
 	gtk_widget_set_sensitive (hotrod_checkbutton,
-				  xmame_has_option (current_exec, "hotrod"));
+				  mame_has_option (current_exec, "hotrod"));
 
 	gtk_widget_set_sensitive (hotrodse_checkbutton,
-				  xmame_has_option (current_exec, "hotrodse"));
+				  mame_has_option (current_exec, "hotrodse"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (xinput_joy_table), FALSE);
 
 	gtk_widget_set_sensitive (GTK_WIDGET (grabmouse_checkbutton),
-				  target->mouse && xmame_has_option (current_exec, "grabmouse"));
+				  target->mouse && mame_has_option (current_exec, "grabmouse"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (grabkeyboard_checkbutton),
-				  xmame_has_option (current_exec, "grabkeyboard"));
+				  mame_has_option (current_exec, "grabkeyboard"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (config_name_checkbutton),
-				  (xmame_has_option (current_exec, "cfgname") ||
-				   xmame_has_option (current_exec, "cfg_directory")));
+				  (mame_has_option (current_exec, "cfgname") ||
+				   mame_has_option (current_exec, "cfg_directory")));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (config_name_entry), 
 				  target->cfgname_flag && 
-				  (xmame_has_option (current_exec, "cfgname") ||
-				   xmame_has_option (current_exec, "cfg_directory")));
+				  (mame_has_option (current_exec, "cfgname") ||
+				   mame_has_option (current_exec, "cfg_directory")));
 /*
 
 	
@@ -2310,7 +2309,7 @@ GtkWidget *controllers_vbox;
 			    G_CALLBACK (on_dirty_option),
 			    reset_button);
 			    */
-	if (xmame_has_option (current_exec, "grabmouse"))
+	if (mame_has_option (current_exec, "grabmouse"))
 		g_signal_connect_after (G_OBJECT (mouse_checkbutton), "toggled",
 				          G_CALLBACK (button_toggled),
 				          grabmouse_checkbutton);
@@ -2364,7 +2363,7 @@ GtkWidget *controllers_vbox;
  			    G_CALLBACK (on_dirty_option),
  			    reset_button);
 */
-	if (xmame_has_option (current_exec, "cfgname") || xmame_has_option (current_exec, "cfg_directory"))
+	if (mame_has_option (current_exec, "cfgname") || mame_has_option (current_exec, "cfg_directory"))
 	{
 /*		g_signal_connect (G_OBJECT (config_name_checkbutton), "toggled",
 				    G_CALLBACK (on_dirty_option),
@@ -2408,7 +2407,7 @@ add_misc_options_tab (GtkWidget *properties_windows,
 /*	GtkWidget *label;*/
 	int i;
 	
-	xmame_get_options (current_exec);	
+	mame_get_options (current_exec);	
 	dirty_options_flag = FALSE;
 
 	image = gmameui_get_image_from_stock ("gmameui-general-toolbar");
@@ -2435,7 +2434,7 @@ add_misc_options_tab (GtkWidget *properties_windows,
 	combo_append_int_value(artwork_resolution_combo, 0, _("Auto"));
 	combo_append_int_value(artwork_resolution_combo, 1, _("Standard"));
 	combo_append_int_value(artwork_resolution_combo, 2, _("High"));
-	gtk_widget_set_sensitive(artwork_resolution_combo, xmame_has_option(current_exec, "artwork_resolution"));
+	gtk_widget_set_sensitive(artwork_resolution_combo, mame_has_option(current_exec, "artwork_resolution"));
 	
 	/* Artwork Crop */
 	artcrop_checkbutton = glade_xml_get_widget (xml, "artcrop_checkbutton");
@@ -2499,39 +2498,39 @@ add_misc_options_tab (GtkWidget *properties_windows,
 	gtk_entry_set_text (GTK_ENTRY (log_entry), target->log);
 	
 	gtk_widget_set_sensitive (GTK_WIDGET (artwork_resolution_combo),
-				  xmame_has_option (current_exec, "artwork_resolution") && target->artwork);
+				  mame_has_option (current_exec, "artwork_resolution") && target->artwork);
 	gtk_widget_set_sensitive (GTK_WIDGET (use_backdrops_checkbutton),
-				  xmame_has_option (current_exec, "use_backdrops") && target->artwork);
+				  mame_has_option (current_exec, "use_backdrops") && target->artwork);
 	gtk_widget_set_sensitive (GTK_WIDGET (use_bezels_checkbutton),
-				  xmame_has_option (current_exec, "use_backdrops") && target->artwork);
+				  mame_has_option (current_exec, "use_backdrops") && target->artwork);
 	gtk_widget_set_sensitive (GTK_WIDGET (use_overlays_checkbutton),
-				  xmame_has_option (current_exec, "use_backdrops") && target->artwork);
+				  mame_has_option (current_exec, "use_backdrops") && target->artwork);
 
 	gtk_widget_set_sensitive (GTK_WIDGET (artcrop_checkbutton),
-				  xmame_has_option (current_exec, "artwork_crop") && target->artwork);
+				  mame_has_option (current_exec, "artwork_crop") && target->artwork);
 
 	gtk_widget_set_sensitive (GTK_WIDGET (keyboard_leds_checkbutton),
-				  xmame_has_option (current_exec, "keyboard_leds"));
+				  mame_has_option (current_exec, "keyboard_leds"));
 	
 	gtk_widget_set_sensitive (GTK_WIDGET (disclaimer_checkbutton),
-				  xmame_has_option (current_exec, "skip_disclaimer"));
+				  mame_has_option (current_exec, "skip_disclaimer"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (gameinfo_checkbutton),
-				  xmame_has_option (current_exec, "skip_gameinfo"));
+				  mame_has_option (current_exec, "skip_gameinfo"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (bios_label),
-				  xmame_has_option (current_exec, "bios"));
+				  mame_has_option (current_exec, "bios"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (bios_combo),
-				  xmame_has_option (current_exec, "bios"));
+				  mame_has_option (current_exec, "bios"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (debug_checkbutton), 
-				  xmame_has_option (current_exec, "debug"));
+				  mame_has_option (current_exec, "debug"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (debug_size_label), 
-				  xmame_has_option (current_exec, "debug") && target->debug);
+				  mame_has_option (current_exec, "debug") && target->debug);
 	gtk_widget_set_sensitive (GTK_WIDGET (debug_size_combo),
-				  xmame_has_option (current_exec, "debug") && target->debug);
+				  mame_has_option (current_exec, "debug") && target->debug);
 
 	gtk_widget_set_sensitive (GTK_WIDGET (additional_options_entry), target->use_additional_options);
 	gtk_widget_set_sensitive (GTK_WIDGET (log_label), target->log_flag);
@@ -2543,7 +2542,7 @@ add_misc_options_tab (GtkWidget *properties_windows,
 	g_signal_connect (G_OBJECT (artwork_checkbutton), "toggled",
 			  G_CALLBACK (on_dirty_option),
 			  reset_button);
-	if (xmame_has_option (current_exec, "use_backdrops")) {
+	if (mame_has_option (current_exec, "use_backdrops")) {
 		g_signal_connect_after (G_OBJECT (artwork_checkbutton), "toggled",
 					G_CALLBACK (button_toggled),
 					use_backdrops_checkbutton);
@@ -2554,16 +2553,16 @@ add_misc_options_tab (GtkWidget *properties_windows,
 					G_CALLBACK (button_toggled),
 					use_overlays_checkbutton);
 	}
-	if (xmame_has_option (current_exec, "artwork_resolution"))
+	if (mame_has_option (current_exec, "artwork_resolution"))
 		g_signal_connect_after (G_OBJECT (artwork_checkbutton), "toggled",
 				    	  G_CALLBACK (button_toggled),
 				    	  artwork_resolution_combo);
-	if (xmame_has_option (current_exec, "artwork_crop"))
+	if (mame_has_option (current_exec, "artwork_crop"))
 		g_signal_connect_after (G_OBJECT (artwork_checkbutton), "toggled",
 					G_CALLBACK (button_toggled),
 					artcrop_checkbutton);
 
-	if (xmame_has_option (current_exec, "debug")) {
+	if (mame_has_option (current_exec, "debug")) {
 		g_signal_connect_after (G_OBJECT (debug_checkbutton), "toggled",
 				    	  G_CALLBACK (button_toggled),
 				    	  debug_size_combo);
@@ -2603,7 +2602,7 @@ add_vector_options_tab (GtkWidget    *properties_windows,
 	GladeXML *xml;
 	xml = glade_xml_new (GLADEDIR "properties.glade", "vector_vbox", NULL);
 	
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 	dirty_options_flag = FALSE;
   
 	image = gmameui_get_image_from_stock ("gmameui-general-toolbar");
@@ -2658,7 +2657,7 @@ add_vector_options_tab (GtkWidget    *properties_windows,
 
 	/* End vector options */
 	/* TODO */
-	if (! (current_exec->type && (XMAME_EXEC_XGL || XMAME_EXEC_X11)))
+	if (! (mame_exec_get_exectype (current_exec) && (XMAME_EXEC_XGL || XMAME_EXEC_X11)))
 		gtk_widget_set_sensitive (GTK_WIDGET (gl_vector_frame), FALSE);
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (antialias_checkbutton), target->antialias);
@@ -2670,10 +2669,10 @@ add_vector_options_tab (GtkWidget    *properties_windows,
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gldrawbitmapvec_checkbutton), target->gldrawbitmapvec);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (glantialiasvec_checkbutton), target->glantialiasvec);
 	gtk_widget_set_sensitive (GTK_WIDGET (intensity_label),
-		xmame_has_option (current_exec, "intensity"));
+		mame_has_option (current_exec, "intensity"));
 
 	gtk_widget_set_sensitive (GTK_WIDGET (intensity_hscale),
-		xmame_has_option (current_exec, "intensity"));
+		mame_has_option (current_exec, "intensity"));
 }
 
 
@@ -2687,7 +2686,7 @@ save_properties_options (RomEntry    *rom,
 	if (!dirty_options_flag)
 		return;
 GMAMEUI_DEBUG ("Getting xmame options");
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 	
 	if (!target)
 		target = &default_options;
@@ -2758,11 +2757,11 @@ GMAMEUI_DEBUG("  Original throttle is %d", default_options.throttle);
 	target->displayaspectratio = atof (gtk_entry_get_text (GTK_ENTRY (displayaspectratio_entry)));
 	target->disablemode = gtk_entry_get_text (GTK_ENTRY (disable_mode_entry));
 	
-	switch (current_exec->type)
+	switch (mame_exec_get_exectype (current_exec))
 	{
 		case XMAME_EXEC_X11:
 		case XMAME_EXEC_XGL:
-			if (xmame_get_option_value_count (current_exec, "video-mode") > 0)
+			if (mame_get_option_value_count (current_exec, "video-mode") > 0)
 			{
 				target->x11_mode = combo_get_index(video_mode_combo);
 			}
@@ -3029,7 +3028,7 @@ load_properties_options (RomEntry  *rom,
 	gchar *used_text;
 	GameOptions *target = NULL;
 	
-	xmame_get_options (current_exec);
+	mame_get_options (current_exec);
 
 	if (rom)
 		target = load_options (rom);
@@ -3100,7 +3099,7 @@ load_properties_options (RomEntry  *rom,
 	/* Rendering */
 	/*************/
 
-	switch (current_exec->type)
+	switch (mame_exec_get_exectype (current_exec))
 	{
 		case XMAME_EXEC_X11: /* X11 */
 		case XMAME_EXEC_XGL: /* Open GL */
@@ -3109,7 +3108,7 @@ load_properties_options (RomEntry  *rom,
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cursor_checkbutton), target->cursor);
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mitshm_checkbutton), target->mitshm);
 			gtk_widget_set_sensitive (GTK_WIDGET (mitshm_checkbutton),
-				xmame_has_option (current_exec, "mitshm"));
+				mame_has_option (current_exec, "mitshm"));
 
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (xvgeom_checkbutton), target->xvgeom_flag);
 
@@ -3127,18 +3126,18 @@ load_properties_options (RomEntry  *rom,
 		
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (xvfullscreen_checkbutton), target->fullscreen);
 			gtk_widget_set_sensitive (GTK_WIDGET (xvfullscreen_checkbutton),
-				xmame_has_option (current_exec, "fullscreen"));
+				mame_has_option (current_exec, "fullscreen"));
 
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (xsync_checkbutton), target->xsync);
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (privatecmap_checkbutton), target->privatecmap);
 
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (xil_checkbutton), target->xil);
 			gtk_widget_set_sensitive (GTK_WIDGET (xil_checkbutton), 
-				xmame_has_option (current_exec, "xil"));
+				mame_has_option (current_exec, "xil"));
 			
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mtxil_checkbutton), target->mtxil);
 			gtk_widget_set_sensitive (GTK_WIDGET (mtxil_checkbutton),
-				xmame_has_option (current_exec, "mtxil"));
+				mame_has_option (current_exec, "mtxil"));
 		
 			/* Open GL */
 			gtk_adjustment_set_value (GTK_ADJUSTMENT (sdl_modes_spinbutton_adj) , target->modenumber);
@@ -3164,7 +3163,7 @@ load_properties_options (RomEntry  *rom,
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (fullscreen_checkbutton), target->fullscreen);
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (doublebuf_checkbutton), target->sdl_doublebuf);
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sdl_modes_checkbutton), (target->sdl_auto_mode));
-			if (xmame_get_option_value_count (current_exec, "modenumber") > 0)
+			if (mame_get_option_value_count (current_exec, "modenumber") > 0)
 			{
 				gtk_widget_set_sensitive (GTK_WIDGET (sdl_modes_combo), ! (target->sdl_auto_mode));
 			}
@@ -3266,27 +3265,27 @@ load_properties_options (RomEntry  *rom,
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (audio_preferred_checkbutton), target->audio_preferred);
 	gtk_entry_set_text (GTK_ENTRY (pcm_entry), target->alsa_pcm);
 
-	gtk_widget_set_sensitive (GTK_WIDGET (qnx_frame), xmame_has_option (current_exec, "audio_preferred"));
-	gtk_widget_set_sensitive (GTK_WIDGET (alsa_frame), xmame_get_option_key_value (current_exec, "dsp-plugin", "alsa") != NULL);
+	gtk_widget_set_sensitive (GTK_WIDGET (qnx_frame), mame_has_option (current_exec, "audio_preferred"));
+	gtk_widget_set_sensitive (GTK_WIDGET (alsa_frame), mame_get_option_key_value (current_exec, "dsp-plugin", "alsa") != NULL);
 
 	{
 		gboolean has_arts;
 
 		has_arts = 
-		 (xmame_get_option_key_value (current_exec, "dsp-plugin", "arts") != NULL) ||
-		 (xmame_get_option_key_value (current_exec, "dsp-plugin", "arts_smotek") != NULL) ||		
-		 (xmame_get_option_key_value (current_exec, "dsp-plugin", "arts_teira") != NULL);
+		 (mame_get_option_key_value (current_exec, "dsp-plugin", "arts") != NULL) ||
+		 (mame_get_option_key_value (current_exec, "dsp-plugin", "arts_smotek") != NULL) ||		
+		 (mame_get_option_key_value (current_exec, "dsp-plugin", "arts_teira") != NULL);
 
 		gtk_widget_set_sensitive (GTK_WIDGET (arts_frame), has_arts);
 	}
-	gtk_widget_set_sensitive (GTK_WIDGET (alsacard_label), xmame_has_option (current_exec, "alsacard"));
-	gtk_widget_set_sensitive (GTK_WIDGET (alsacard_spinbutton), xmame_has_option (current_exec, "alsacard"));
-	gtk_widget_set_sensitive (GTK_WIDGET (alsadevice_label), xmame_has_option (current_exec, "alsadevice"));
-	gtk_widget_set_sensitive (GTK_WIDGET (alsadevice_spinbutton), xmame_has_option (current_exec, "alsadevice"));
-	gtk_widget_set_sensitive (GTK_WIDGET (alsa_buffer_label), xmame_has_option (current_exec, "alsa-buffer"));
-	gtk_widget_set_sensitive (GTK_WIDGET (alsa_buffer_spinbutton), xmame_has_option (current_exec, "alsa-buffer"));
-	gtk_widget_set_sensitive (GTK_WIDGET (PCM_label), xmame_has_option (current_exec, "alsa-pcm"));
-	gtk_widget_set_sensitive (GTK_WIDGET (pcm_entry), xmame_has_option (current_exec, "alsa-pcm"));
+	gtk_widget_set_sensitive (GTK_WIDGET (alsacard_label), mame_has_option (current_exec, "alsacard"));
+	gtk_widget_set_sensitive (GTK_WIDGET (alsacard_spinbutton), mame_has_option (current_exec, "alsacard"));
+	gtk_widget_set_sensitive (GTK_WIDGET (alsadevice_label), mame_has_option (current_exec, "alsadevice"));
+	gtk_widget_set_sensitive (GTK_WIDGET (alsadevice_spinbutton), mame_has_option (current_exec, "alsadevice"));
+	gtk_widget_set_sensitive (GTK_WIDGET (alsa_buffer_label), mame_has_option (current_exec, "alsa-buffer"));
+	gtk_widget_set_sensitive (GTK_WIDGET (alsa_buffer_spinbutton), mame_has_option (current_exec, "alsa-buffer"));
+	gtk_widget_set_sensitive (GTK_WIDGET (PCM_label), mame_has_option (current_exec, "alsa-pcm"));
+	gtk_widget_set_sensitive (GTK_WIDGET (pcm_entry), mame_has_option (current_exec, "alsa-pcm"));
 
 	/**************/
 	/* Controller */
@@ -3336,9 +3335,9 @@ load_properties_options (RomEntry  *rom,
 	
 	combo_set_key(ctrlr_combo, target->ctrlr);
 
-	gtk_widget_set_sensitive (GTK_WIDGET (ctrlr_combo), xmame_has_option (current_exec, "ctrlr"));
-	gtk_widget_set_sensitive (hotrod_checkbutton, xmame_has_option (current_exec, "hotrod"));
-	gtk_widget_set_sensitive (hotrodse_checkbutton, xmame_has_option (current_exec, "hotrodse"));
+	gtk_widget_set_sensitive (GTK_WIDGET (ctrlr_combo), mame_has_option (current_exec, "ctrlr"));
+	gtk_widget_set_sensitive (hotrod_checkbutton, mame_has_option (current_exec, "hotrod"));
+	gtk_widget_set_sensitive (hotrodse_checkbutton, mame_has_option (current_exec, "hotrodse"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (hotrod_checkbutton), target->hotrod);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (hotrodse_checkbutton), target->hotrodse);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (usbpspad_checkbutton), target->usbpspad);
@@ -3354,21 +3353,21 @@ load_properties_options (RomEntry  *rom,
 	gtk_widget_set_sensitive (GTK_WIDGET (Xinput_joy_frame), FALSE);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (mouse_checkbutton), target->mouse);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (grabmouse_checkbutton), target->grabmouse);
-	gtk_widget_set_sensitive (GTK_WIDGET (grabmouse_checkbutton), target->mouse && xmame_has_option (current_exec, "grabmouse"));
+	gtk_widget_set_sensitive (GTK_WIDGET (grabmouse_checkbutton), target->mouse && mame_has_option (current_exec, "grabmouse"));
 	gtk_entry_set_text (GTK_ENTRY (XInput_trackball1_entry), target->XInput_trackball1);
 	gtk_entry_set_text (GTK_ENTRY (XInput_trackball2_entry), target->XInput_trackball2);
 	gtk_entry_set_text (GTK_ENTRY (XInput_trackball3_entry), target->XInput_trackball3);
 	gtk_entry_set_text (GTK_ENTRY (XInput_trackball4_entry), target->XInput_trackball4);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (grabkeyboard_checkbutton), target->grabkeyboard);
-	gtk_widget_set_sensitive (GTK_WIDGET (grabkeyboard_checkbutton), xmame_has_option (current_exec, "grabkeyboard"));
+	gtk_widget_set_sensitive (GTK_WIDGET (grabkeyboard_checkbutton), mame_has_option (current_exec, "grabkeyboard"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (winkeys_checkbutton), target->winkeys);
 	gtk_widget_set_sensitive (GTK_WIDGET (config_name_checkbutton), 
-		xmame_has_option (current_exec, "cfgname") || xmame_has_option (current_exec, "cfg_directory"));
+		mame_has_option (current_exec, "cfgname") || mame_has_option (current_exec, "cfg_directory"));
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (config_name_checkbutton), target->cfgname_flag);
 	gtk_widget_set_sensitive (GTK_WIDGET (config_name_entry), 
 		target->cfgname_flag && 
-			 (xmame_has_option (current_exec, "cfgname") || xmame_has_option (current_exec, "cfg_directory")));
+			 (mame_has_option (current_exec, "cfgname") || mame_has_option (current_exec, "cfg_directory")));
 
 	gtk_entry_set_text (GTK_ENTRY (config_name_entry), target->cfgname);
 
@@ -3381,9 +3380,9 @@ load_properties_options (RomEntry  *rom,
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (artwork_checkbutton), target->artwork);
 	/* the use_backdrops option will be used for all new backdrop option maybe change after */
 
-	gtk_widget_set_sensitive (GTK_WIDGET (use_backdrops_checkbutton), xmame_has_option (current_exec, "use_backdrops") && target->artwork);
-	gtk_widget_set_sensitive (GTK_WIDGET (use_bezels_checkbutton), xmame_has_option (current_exec, "use_backdrops") && target->artwork);
-	gtk_widget_set_sensitive (GTK_WIDGET (use_overlays_checkbutton), xmame_has_option (current_exec, "use_backdrops") && target->artwork);
+	gtk_widget_set_sensitive (GTK_WIDGET (use_backdrops_checkbutton), mame_has_option (current_exec, "use_backdrops") && target->artwork);
+	gtk_widget_set_sensitive (GTK_WIDGET (use_bezels_checkbutton), mame_has_option (current_exec, "use_backdrops") && target->artwork);
+	gtk_widget_set_sensitive (GTK_WIDGET (use_overlays_checkbutton), mame_has_option (current_exec, "use_backdrops") && target->artwork);
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (use_backdrops_checkbutton), target->use_backdrops);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (use_bezels_checkbutton), target->use_bezels);
@@ -3391,27 +3390,27 @@ load_properties_options (RomEntry  *rom,
 	combo_set_int_key(artwork_resolution_combo, target->artwork_resolution);
 	
 	gtk_widget_set_sensitive (GTK_WIDGET (artwork_resolution_combo), 
-				  xmame_has_option (current_exec, "artwork_resolution") && target->artwork);
+				  mame_has_option (current_exec, "artwork_resolution") && target->artwork);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (artcrop_checkbutton), target->artwork_crop);
 
-	gtk_widget_set_sensitive (GTK_WIDGET (artcrop_checkbutton), xmame_has_option (current_exec, "artwork_crop") && target->artwork);
+	gtk_widget_set_sensitive (GTK_WIDGET (artcrop_checkbutton), mame_has_option (current_exec, "artwork_crop") && target->artwork);
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (keyboard_leds_checkbutton), target->keyboard_leds);
-	gtk_widget_set_sensitive (GTK_WIDGET (keyboard_leds_checkbutton), xmame_has_option (current_exec, "keyboard_leds"));
+	gtk_widget_set_sensitive (GTK_WIDGET (keyboard_leds_checkbutton), mame_has_option (current_exec, "keyboard_leds"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (cheat_checkbutton), target->cheat);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (disclaimer_checkbutton), target->skip_disclaimer);
-	gtk_widget_set_sensitive (GTK_WIDGET (disclaimer_checkbutton), xmame_has_option (current_exec, "skip_disclaimer"));
+	gtk_widget_set_sensitive (GTK_WIDGET (disclaimer_checkbutton), mame_has_option (current_exec, "skip_disclaimer"));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (gameinfo_checkbutton), target->skip_gameinfo);
-	gtk_widget_set_sensitive (GTK_WIDGET (gameinfo_checkbutton), xmame_has_option (current_exec, "skip_gameinfo"));
-	gtk_widget_set_sensitive (GTK_WIDGET (bios_label), xmame_has_option (current_exec, "bios"));
-	gtk_widget_set_sensitive (GTK_WIDGET (bios_combo), xmame_has_option (current_exec, "bios"));
+	gtk_widget_set_sensitive (GTK_WIDGET (gameinfo_checkbutton), mame_has_option (current_exec, "skip_gameinfo"));
+	gtk_widget_set_sensitive (GTK_WIDGET (bios_label), mame_has_option (current_exec, "bios"));
+	gtk_widget_set_sensitive (GTK_WIDGET (bios_combo), mame_has_option (current_exec, "bios"));
 	
 	combo_set_int_key(bios_combo, target->bios);
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (debug_checkbutton), target->debug);
-	gtk_widget_set_sensitive (GTK_WIDGET (debug_checkbutton), xmame_has_option (current_exec, "debug"));
-	gtk_widget_set_sensitive (GTK_WIDGET (debug_size_label), xmame_has_option (current_exec, "debug") && target->debug);
-	gtk_widget_set_sensitive (GTK_WIDGET (debug_size_combo), xmame_has_option (current_exec, "debug") && target->debug);
+	gtk_widget_set_sensitive (GTK_WIDGET (debug_checkbutton), mame_has_option (current_exec, "debug"));
+	gtk_widget_set_sensitive (GTK_WIDGET (debug_size_label), mame_has_option (current_exec, "debug") && target->debug);
+	gtk_widget_set_sensitive (GTK_WIDGET (debug_size_combo), mame_has_option (current_exec, "debug") && target->debug);
 
 	combo_set_key(debug_size_combo, target->debug_size);
 	

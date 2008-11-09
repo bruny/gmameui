@@ -642,8 +642,7 @@ directories_selection_save_changes (GtkWidget *widget)
 		      NULL);
 	if (va_paths) {
 		for (i = 0; i < va_paths->n_values; i++) {
-			XmameExecutable *exec = xmame_executable_new (g_value_get_string (g_value_array_get_nth (va_paths, i)));
-			xmame_executable_set_version (exec);
+			MameExec *exec = mame_exec_new_from_path (g_value_get_string (g_value_array_get_nth (va_paths, i)));
 			mame_exec_list_add (main_gui.exec_list, exec);
 		}
 		g_value_array_free (va_paths);

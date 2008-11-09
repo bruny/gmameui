@@ -710,7 +710,7 @@ GMAMEUI_DEBUG ("Saving gamelist... done");
 * - Gamelist does not match the current executable (and VersionCheck = TRUE)
 */
 void
-gamelist_check (XmameExecutable *exec)
+gamelist_check (MameExec *exec)
 {
 	GtkWidget *dialog = NULL;
 
@@ -758,8 +758,8 @@ gamelist_check (XmameExecutable *exec)
 							  "Do you want to rebuild the gamelist?"));
 
 	} else if (versioncheck) {	
-		if (strcmp (exec->name, gl_name) ||
-			strcmp (exec->version, gl_version))
+		if (strcmp (mame_exec_get_name (exec), gl_name) ||
+			strcmp (mame_exec_get_version (exec), gl_version))
 		{
 
 			dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
@@ -773,8 +773,8 @@ gamelist_check (XmameExecutable *exec)
 							  "Do you want to rebuild the gamelist?"),
 							  gl_name,
 							  gl_version,
-							  exec->name,
-							  exec->version);
+							  mame_exec_get_name (exec),
+							  mame_exec_get_version (exec));
 
 		}
 	}

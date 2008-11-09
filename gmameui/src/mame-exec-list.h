@@ -25,7 +25,7 @@
 #define __MAME_EXEC_LIST_H__
 
 #include "common.h"
-#include "xmame_executable.h"
+#include "mame-exec.h"
 
 G_BEGIN_DECLS
 
@@ -56,17 +56,12 @@ struct _MameExecListClass {
 GType mame_exec_list_get_type (void);
 MameExecList* mame_exec_list_new (void);
 
-//void mame_exec_list_add (MameExecList *list, MameExec *exec);
-void mame_exec_list_add (MameExecList *list, XmameExecutable *exec);
+void mame_exec_list_add (MameExecList *list, MameExec *exec);
 GList *mame_exec_list_get_list (MameExecList *list);
-//MameExec* mame_exec_list_nth (MameExecList *list, guint index);
-XmameExecutable* mame_exec_list_nth (MameExecList *list, guint index);
-//MameExec* mame_exec_list_get_exec_by_path (MameExecList *list, gchar *path);
-XmameExecutable* mame_exec_list_get_exec_by_path (MameExecList *list, gchar *path);
-//MameExec* mame_exec_list_get_current_executable (MameExecList *list);
-XmameExecutable* mame_exec_list_get_current_executable (MameExecList *list);
-//void mame_exec_list_set_current_executable (MameExecList *list, MameExec *exec);
-void mame_exec_list_set_current_executable (MameExecList *list, XmameExecutable *exec);
+MameExec* mame_exec_list_nth (MameExecList *list, guint index);
+MameExec* mame_exec_list_get_exec_by_path (MameExecList *list, gchar *path);
+MameExec* mame_exec_list_get_current_executable (MameExecList *list);
+void mame_exec_list_set_current_executable (MameExecList *list, MameExec *exec);
 gboolean mame_exec_list_has_current_executable (MameExecList *list);
 int mame_exec_list_size (MameExecList *list);
 

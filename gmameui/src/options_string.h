@@ -24,18 +24,18 @@
 #ifndef __OPTIONS_STRING_H__
 #define __OPTIONS_STRING_H__
 
-#include "xmame_executable.h"
+#include "mame-exec.h"
 #include "game_options.h"
 
 gchar *
-create_rompath_options_string (XmameExecutable *exec);
+create_rompath_options_string (MameExec *exec);
 gchar *
-create_io_options_string (XmameExecutable *exec);
+create_io_options_string (MameExec *exec);
 
-char * create_options_string(XmameExecutable *exec, GameOptions *target);
+char * create_options_string(MameExec *exec, GameOptions *target);
 
 /* options string creation */
 char *
-create_vector_options_string (XmameExecutable *exec, GameOptions *target);
+create_vector_options_string (MameExec *exec, GameOptions *target);
 
 #endif /* __OPTIONS_STRING_H__ */

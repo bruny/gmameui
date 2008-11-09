@@ -171,7 +171,7 @@ get_widget_with_suffix (GladeXML *gxml, gchar *suffix)
 gchar *
 mame_options_get_option_string (MameOptions *pr, gchar *category)
 {
-	XmameExecutable *exec;
+	MameExec *exec;
 	gchar *options_string;
 	gchar **keylist;
 	gsize category_len;
@@ -218,7 +218,7 @@ mame_options_get_option_string (MameOptions *pr, gchar *category)
 			
 			/* Check that the selected version of MAME supports this option */
 			GMAMEUI_DEBUG (_("Checking that MAME supports the option %s..."), keylist[i]);
-			if (xmame_has_option (exec, keylist[i])) {
+			if (mame_has_option (exec, keylist[i])) {
 				GMAMEUI_DEBUG (_("...it does"));
 				
 				value = g_key_file_get_value (pr->priv->options_file, category, keylist[i], &error);
@@ -1132,14 +1132,14 @@ mame_options_register_property_from_string (MameOptions *pr,
 	gchar *default_value;
 	gint flags;
 	
-	XmameExecutable *exec;
+	MameExec *exec;
 	
 	g_return_val_if_fail (MAME_IS_OPTIONS(pr), FALSE);
 	g_return_val_if_fail ((GTK_IS_WIDGET (widget)), FALSE);
 	g_return_val_if_fail (property_desc != NULL, FALSE);
 	
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
-	g_return_if_fail (exec != NULL);
+	g_return_val_if_fail (exec != NULL, FALSE);
 	
 	fields = g_strsplit (property_desc, ":", NUM_GMAMEUI_WIDGETNAME_PROPS);
 	g_return_val_if_fail (fields, FALSE);
@@ -1173,14 +1173,14 @@ mame_options_register_property_from_string (MameOptions *pr,
 		gchar *key_field;
 		key_field = get_key_field (key);
 
-		if (!xmame_has_option (exec, key_field)) {
+		if (!mame_has_option (exec, key_field)) {
 			gchar *text;
 			
 			GMAMEUI_DEBUG ("Option %s not supported by this version of MAME", key);
 		
 			gtk_widget_set_sensitive (widget, FALSE);
 			text = g_strdup_printf (_("The option %s is not supported by MAME %s"),
-						key, exec->version);
+						key, mame_exec_get_version (exec));
 			gtk_widget_set_tooltip_text (widget, text);
 			g_free (text);
 		}

@@ -2,9 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
- * based on GXMame code
- * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
+ * Copyright 2008 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +23,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>      /* For isdigit */
-#include "xmame_executable.h"
-#include "xmame_options.h"
-#include "io.h"
+
+#include "mame-exec.h"
+#include "common.h"
+#include "io.h"		/* For my_dtostr */
+
+#define BUFFER_SIZE 1000
 
 const gchar *noloadconfig_option_name [] = {
 	"noloadconfig",
@@ -39,61 +40,59 @@ const gchar *showusage_option_name [] = {
 	"showusage"
 };
 
-#define BUFFER_SIZE 1000
+G_DEFINE_TYPE (MameExec, mame_exec, G_TYPE_OBJECT)
 
-/** Creates a new executable.
- * Path will be set to the absolute path for the executable.
- * Accepts absolute pathnames and program names in the PATH.
- *
- * If the executable is not valid it returns NULL.
+struct _MameExecPrivate {
+	gchar *path;	/* Full path to the executable */
+	gchar *name;
+	gchar *target;
+	gchar *version;
+
+	ExecutableType type;
+
+	const gchar *noloadconfig_option;
+	const gchar *showusage_option;
+
+	GHashTable *supported_options;	/* Hash table of command-line options supported by this version */
+};
+
+static void mame_exec_class_init (MameExecClass *klass);
+static void mame_exec_init (MameExec *exec);
+static void mame_exec_finalize (GObject *obj);
+static void mame_exec_set_property (GObject *object,
+					 guint prop_id,
+					 const GValue *value,
+					 GParamSpec *pspec);
+static void mame_exec_get_property (GObject *object,
+					 guint prop_id,
+					 GValue *value,
+					 GParamSpec *pspec);
+
+static void
+mame_exec_set_exectype (MameExec *exec, ExecutableType type);
+
+static gboolean
+mame_exec_set_version (MameExec *exec);
+
+static void
+mame_opt_free (gpointer opt);
+
+/**
+* Compares the version of this executable with the given one.
+*
+* Returns:
+*	 <0 this executable < version
+*	  0 this executable == version
+*	 >0 this executable > version
 */
-/*static*/ XmameExecutable *
-xmame_executable_new (const gchar *path)
-{
-	XmameExecutable *xmame_exec;
+static int
+mame_compare_version (const MameExec *exec, const gchar *version);
 
-	if (!path)
-		return NULL;
-
-	xmame_exec = g_malloc0 (sizeof (XmameExecutable));
-	xmame_exec->path = g_find_program_in_path (path);
-
-	if (!xmame_exec->path)
-	{
-		gmameui_message (WARNING, NULL, _("%s is not a valid xmame executable"), path);
-		g_free (xmame_exec);
-		xmame_exec= NULL;
-	}
-
-	return xmame_exec;
-}
-
-static void
-xmame_executable_free_options (XmameExecutable *exec)
-{
-	if (exec->options) {
-		g_hash_table_destroy (exec->options);
-		exec->options = NULL;
-	}
-}
-
-static void
-xmame_executable_free (XmameExecutable *exec)
-{
-	if (!exec)
-		return;
-
-	if (exec->name)
-		g_free (exec->name);
-	if (exec->version)
-		g_free (exec->version);
-	if (exec->path)
-		g_free (exec->path);
-	
-	xmame_executable_free_options (exec);
-
-	g_free (exec);
-}
+/* Counts the number of possible values for this option. 
+* On error it returns -1.
+*/
+int 
+mame_get_option_value_count (const MameExec *exec, const gchar *option_name);
 
 #ifdef ENABLE_XMAME_SVGALIB_SUPPORT
 /* version detection for xmame.svgalib */
@@ -199,7 +198,7 @@ exit_with_error:
 *
 */
 static gboolean
-winmame_executable_set_version (XmameExecutable *exec)
+winmame_executable_set_version (MameExec *exec)
 {
 	FILE *xmame_pipe;
 	gchar *opt, *p;
@@ -207,10 +206,10 @@ winmame_executable_set_version (XmameExecutable *exec)
 	gchar *tmp_xmame_version;
 	gboolean xmame_ok = FALSE;
 
-	exec->noloadconfig_option = noloadconfig_option_name[1];
-	exec->showusage_option = showusage_option_name[1];
+	exec->priv->noloadconfig_option = noloadconfig_option_name[1];
+	exec->priv->showusage_option = showusage_option_name[1];
 
-	opt = g_strdup_printf ("%s -help -noreadconfig 2>/dev/null", exec->path);
+	opt = g_strdup_printf ("%s -help -noreadconfig 2>/dev/null", mame_exec_get_path (exec));
 	GMAMEUI_DEBUG ("Trying %s", opt);
 	xmame_pipe = popen (opt, "r");
 	g_free (opt);
@@ -245,10 +244,12 @@ winmame_executable_set_version (XmameExecutable *exec)
 			* (p+1) = '\0';
 						
 		GMAMEUI_DEBUG ("checking xmame version: %s (Win32) %s", line, tmp_xmame_version);
-			
-		exec->name = g_strdup (line);
-		exec->target = g_strdup ("Win32");
-		exec->version = g_strdup (tmp_xmame_version);
+		
+		g_object_set (exec,
+			      "exec-name", line,
+			      "exec-target", "Win32",
+			      "exec-version", tmp_xmame_version,
+			      NULL);
 
 		xmame_ok = TRUE;
 	}
@@ -256,7 +257,7 @@ winmame_executable_set_version (XmameExecutable *exec)
 	pclose (xmame_pipe);
 		
 	if (xmame_ok)
-		exec->type = XMAME_EXEC_WIN32;
+		mame_exec_set_exectype (exec, XMAME_EXEC_WIN32);
 
 	return xmame_ok;
 }
@@ -270,8 +271,8 @@ winmame_executable_set_version (XmameExecutable *exec)
 * so we cannot use
 */
 /* FIXME: Possible memory leak... */
-gboolean
-xmame_executable_set_version (XmameExecutable *exec)
+static gboolean
+mame_exec_set_version (MameExec *exec)
 {
 	FILE *xmame_pipe;
 	gchar *opt, *p;
@@ -281,33 +282,30 @@ xmame_executable_set_version (XmameExecutable *exec)
 	gchar *version_str;
 	gboolean xmame_ok = FALSE;
 
-	if (!exec || !exec->path)
-		return FALSE;
+	g_return_val_if_fail ((exec != NULL) || (exec->priv->path != NULL), FALSE);
+	g_return_val_if_fail ((g_file_test (exec->priv->path, G_FILE_TEST_IS_EXECUTABLE)), FALSE);
 
-	if (g_file_test (exec->path, G_FILE_TEST_IS_EXECUTABLE) == FALSE)
-		return FALSE;
-
-	if (exec->version)
+	if (exec->priv->version)
 	{
-		g_free (exec->version);
-		exec->version = NULL;
+		g_free (exec->priv->version);
+		exec->priv->version = NULL;
 	}
-	if (exec->target)
+	if (exec->priv->target)
 	{
-		g_free (exec->target);
-		exec->target = NULL;
+		g_free (exec->priv->target);
+		exec->priv->target = NULL;
 	}
-	if (exec->name)
+	if (exec->priv->name)
 	{
-		g_free (exec->name);
-		exec->name = NULL;
+		g_free (exec->priv->name);
+		exec->priv->name = NULL;
 	}
 
-	exec->noloadconfig_option = noloadconfig_option_name[0];
-	exec->showusage_option = showusage_option_name[0];
-	exec->type = XMAME_EXEC_UNKNOWN;
+	exec->priv->noloadconfig_option = noloadconfig_option_name[0];
+	exec->priv->showusage_option = showusage_option_name[0];
+	exec->priv->type = XMAME_EXEC_UNKNOWN;
 
-	opt = g_strdup_printf ("%s -version 2>&1", exec->path);	/* Note use 2>&1 rather than 2>/dev/null so if call fails the error is captured */
+	opt = g_strdup_printf ("%s -version 2>&1", exec->priv->path);	/* Note use 2>&1 rather than 2>/dev/null so if call fails the error is captured */
 	GMAMEUI_DEBUG ("Trying %s", opt);
 	xmame_pipe = popen (opt, "r");
 	g_free (opt);
@@ -325,7 +323,7 @@ xmame_executable_set_version (XmameExecutable *exec)
 		if (!strncmp (line, "[svgalib:", 9))
 		{
 			pclose (xmame_pipe);
-			return xmamesvga_executable_set_version (exec);
+			return mamesvga_executable_set_version (exec);
 		}
 #endif
 
@@ -363,9 +361,9 @@ xmame_executable_set_version (XmameExecutable *exec)
 			
 		GMAMEUI_DEBUG ("checking xmame version: %s (%s) %s", line, tmp_xmame_target, tmp_xmame_version);
 			
-		exec->name = g_strdup (line);
-		exec->target = g_strdup (tmp_xmame_target);
-		exec->version = g_strdup (tmp_xmame_version);
+		exec->priv->name = g_strdup (line);
+		exec->priv->target = g_strdup (tmp_xmame_target);
+		exec->priv->version = g_strdup (tmp_xmame_version);
 
 		xmame_ok = TRUE;
 	}
@@ -375,35 +373,35 @@ xmame_executable_set_version (XmameExecutable *exec)
 	if (xmame_ok)
 	{
 		GMAMEUI_DEBUG ("name=%s. target=%s. version=%s.",
-			      exec->name,
-			      exec->target,
-			      exec->version);
+			      exec->priv->name,
+			      exec->priv->target,
+			      exec->priv->version);
 
-		if (!strcmp (exec->target, "x11"))
-			exec->type = XMAME_EXEC_X11;
+		if (!strcmp (exec->priv->target, "x11"))
+			exec->priv->type = XMAME_EXEC_X11;
 #ifdef ENABLE_XMAME_SVGALIB_SUPPORT
-		else if (!strcmp (exec->target, "svgalib"))
-			exec->type = XMAME_EXEC_SVGALIB;
+		else if (!strcmp (exec->priv->target, "svgalib"))
+			exec->priv->type = XMAME_EXEC_SVGALIB;
 #endif
-		else if (!strcmp (exec->target, "ggi"))
-			exec->type = XMAME_EXEC_GGI;
-		else if (!strcmp (exec->target, "xgl"))
-			exec->type = XMAME_EXEC_XGL;
-		else if (!strcmp (exec->target, "xfx"))
-			exec->type = XMAME_EXEC_XFX;
-		else if (!strcmp (exec->target, "svgafx"))
-			exec->type = XMAME_EXEC_SVGAFX;
-		else if (!strcmp (exec->target, "SDL"))
-			exec->type = XMAME_EXEC_SDL;
-		else if (!strcmp (exec->target, "photon2"))
-			exec->type = XMAME_EXEC_PHOTON2;
+		else if (!strcmp (exec->priv->target, "ggi"))
+			exec->priv->type = XMAME_EXEC_GGI;
+		else if (!strcmp (exec->priv->target, "xgl"))
+			exec->priv->type = XMAME_EXEC_XGL;
+		else if (!strcmp (exec->priv->target, "xfx"))
+			exec->priv->type = XMAME_EXEC_XFX;
+		else if (!strcmp (exec->priv->target, "svgafx"))
+			exec->priv->type = XMAME_EXEC_SVGAFX;
+		else if (!strcmp (exec->priv->target, "SDL"))
+			exec->priv->type = XMAME_EXEC_SDL;
+		else if (!strcmp (exec->priv->target, "photon2"))
+			exec->priv->type = XMAME_EXEC_PHOTON2;
 		else
-			exec->type = XMAME_EXEC_UNKNOWN;
+			exec->priv->type = XMAME_EXEC_UNKNOWN;
 	}
 
 	/* first get the version number to compare it to check SDL modes */
-	if (exec->version) {
-		version_str = exec->version;
+	if (exec->priv->version) {
+		version_str = exec->priv->version;
 
 		while (*version_str && !isdigit (*version_str))
 			version_str++;
@@ -411,18 +409,11 @@ xmame_executable_set_version (XmameExecutable *exec)
 		version = g_ascii_strtod (version_str, NULL);
 
 		if (version == 0.68)
-			exec->showusage_option = showusage_option_name[1];
+			exec->priv->showusage_option = showusage_option_name[1];
 	} else {
-		exec->version = g_strdup ("Unknown");
+		exec->priv->version = g_strdup ("Unknown");
 	}
 	return xmame_ok;	
-}
-
-int
-xmame_compare_version (const XmameExecutable *exec,
-		       const gchar           *version)
-{
-	return strcmp (exec->version, version);
 }
 
 /* This function compares the raw version (i.e. the 0.xxx number)
@@ -431,13 +422,18 @@ xmame_compare_version (const XmameExecutable *exec,
    to 0.121u2. This is compared against the string-format version
    number supplied */
 int
-xmame_compare_raw_version (const XmameExecutable *exec,
+mame_compare_version (const MameExec *exec, const gchar *version)
+{
+	return strcmp (exec->priv->version, version);
+}
+
+int
+mame_compare_raw_version (const MameExec *exec,
 		       const gchar           *version)
 {
-	if (!exec)
-		return FALSE;
+	g_return_val_if_fail (exec != NULL, FALSE);
 	
-	gchar *rawversion = g_strdup (exec->version);
+	gchar *rawversion = g_strdup (exec->priv->version);
 
 	rawversion = strstr (rawversion, "0");
 	gchar *p = strstr (rawversion, " ");
@@ -449,13 +445,6 @@ xmame_compare_raw_version (const XmameExecutable *exec,
 		GMAMEUI_DEBUG ("Version is greater than 0.110");
 	else GMAMEUI_DEBUG ("Version is lower than 0.110");*/
 	return strcmp (rawversion, version);
-}
-
-static void
-mame_opt_free (gpointer opt)
-{
-	MameOption *opt_opt =  opt;
-	xmame_option_free (opt_opt);
 }
 
 /*
@@ -701,70 +690,22 @@ parse_option (gchar *line,
 	return opt;
 }
 
-gboolean
-xmame_has_option (XmameExecutable *exec, const gchar *option_name)
-{
-	g_return_val_if_fail (exec != NULL, FALSE);
-	
-	return xmame_get_option (exec, option_name) != NULL;
-}
-
-const MameOption *
-xmame_get_option (XmameExecutable *exec, const gchar *option_name)
-{
-	g_return_val_if_fail (exec != NULL, NULL);
-
-	/* If the Executable has no options hash table,
-	   then implicitly create it */
-	if (!exec->options)
-		exec->options = xmame_get_options (exec);
-
-#ifdef ENABLE_DEBUG
-	if (!xmame_option_get_gmameui_name (option_name))
-		GMAMEUI_DEBUG ("Invalid option: %s", option_name);
-#endif
-	return g_hash_table_lookup (exec->options, option_name);
-
-}
-
 const gchar *
-xmame_get_option_name (const XmameExecutable *exec,
+mame_get_option_name (const MameExec *exec,
 		       const gchar           *option_name)
 {
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
+	const MameOption *opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
 	if (!opt)
 		return NULL;
 
 	return opt->name;
 }
 
-const gchar *
-xmame_get_option_type (const XmameExecutable *exec,
-		       const gchar           *option_name)
-{
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt)
-		return NULL;
-
-	return opt->type;
-}
-
-const gchar *
-xmame_get_option_description (const XmameExecutable *exec,
-			      const gchar           *option_name)
-{
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt)
-		return NULL;
-
-	return opt->description;
-}
-
 const gchar **
-xmame_get_option_keys (const XmameExecutable *exec,
+mame_get_option_keys (const MameExec *exec,
 		       const gchar           *option_name)
 {
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
+	const MameOption *opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
 	if (!opt)
 		return NULL;
 
@@ -772,39 +713,7 @@ xmame_get_option_keys (const XmameExecutable *exec,
 }
 
 const gchar *
-xmame_get_option_key (const XmameExecutable *exec,
-		      const gchar           *option_name,
-		      const gchar           *value)
-{
-	gchar **values;
-	gchar **keys;
-	int count;
-	int key_count;
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt || !value)
-		return NULL;
-
-	keys = opt->keys;
-	values = opt->possible_values;
-	if (!values || ! keys)
-		return NULL;
-
-	for (count = 0; values[count]; count++) {
-		if (!strcmp (values[count], value))
-			break;
-	}
-
-	if (values[count]) {
-		for (key_count = 0; keys[key_count] && key_count < count; key_count++);
-		
-		return keys[key_count];
-	}
-
-	return NULL;
-}
-
-const gchar *
-xmame_get_option_key_value (const XmameExecutable *exec,
+mame_get_option_key_value (const MameExec *exec,
 			    const gchar           *option_name,
 			    const gchar           *key)
 {
@@ -812,9 +721,11 @@ xmame_get_option_key_value (const XmameExecutable *exec,
 	gchar **values;
 	int count;
 	int key_count;
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt || !key)
-		return NULL;
+	
+	g_return_val_if_fail (key != NULL, NULL);
+	
+	const MameOption *opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
+	g_return_val_if_fail (opt != NULL, NULL);
 
 	keys = opt->keys;
 	values = opt->possible_values;
@@ -836,30 +747,27 @@ xmame_get_option_key_value (const XmameExecutable *exec,
 }
 
 const gchar **
-xmame_get_option_values (const XmameExecutable *exec,
+mame_get_option_values (const MameExec *exec,
 			 const gchar           *option_name)
 {
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt)
-		return NULL;
+	const MameOption *opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
+	g_return_val_if_fail (opt != NULL, NULL);
 
 	return (const gchar **)opt->possible_values;
 }
 
 const gchar *
-xmame_get_option_value (const XmameExecutable *exec,
+mame_get_option_value (const MameExec *exec,
 			const gchar           *option_name,
 			int                    index)
 {
 	gchar **values;
 	int count;
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt)
-		return NULL;
+	const MameOption *opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
+	g_return_val_if_fail (opt != NULL, NULL);
 
 	values = opt->possible_values;
-	if (!values)
-		return NULL;
+	g_return_val_if_fail (values != NULL, NULL);
 
 	for (count = 0; values[count] && count < index; count++);
 
@@ -867,41 +775,16 @@ xmame_get_option_value (const XmameExecutable *exec,
 }
 
 int
-xmame_get_option_value_index (const XmameExecutable *exec,
-			      const gchar           *option_name,
-			      const gchar           *value)
-{
-	gchar **values;
-	int count;
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt)
-		return -1;
-
-	values = opt->possible_values;
-	if (!values)
-		return -1;
-
-	for (count = 0; values[count]; count++) {
-		if (!strcmp (values[count], value))
-			return count;
-	}
-
-	return -1;
-}
-
-int
-xmame_get_option_value_count (const XmameExecutable *exec,
+mame_get_option_value_count (const MameExec *exec,
 			      const gchar           *option_name)
 {
 	gchar **values;
 	int count;
-	const MameOption *opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt)
-		return -1;
+	const MameOption *opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
+	g_return_val_if_fail (opt != NULL, -1);
 
 	values = opt->possible_values;
-	if (!values)
-		return -1;
+	g_return_val_if_fail (values != NULL, -1);
 
 	for (count = 0; values[count]; count++);
 
@@ -909,7 +792,7 @@ xmame_get_option_value_count (const XmameExecutable *exec,
 }
 
 gchar *
-xmame_get_option_string (const XmameExecutable *exec,
+mame_get_option_string (const MameExec *exec,
 			 const gchar           *option_name,
 			 const gchar           *arguments)
 {
@@ -918,13 +801,10 @@ xmame_get_option_string (const XmameExecutable *exec,
 	gchar *escaped_args;
 	gchar *opt_string;
 
-	g_return_val_if_fail (exec->options != NULL, NULL);
+	g_return_val_if_fail (exec->priv->supported_options != NULL, NULL);
 
-	opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt) {
-		GMAMEUI_DEBUG ("xmame_get_option_string: Option %s not found", option_name);
-		return NULL;
-	}
+	opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
+	g_return_val_if_fail (opt != NULL, NULL);
 
 	/* FIXME Newer versions (i.e. SDLMame no longer use <int> to designate option types.
 	   Temporarily commenting this out */
@@ -948,7 +828,7 @@ xmame_get_option_string (const XmameExecutable *exec,
 }
 
 gchar *
-xmame_get_float_option_string (const XmameExecutable *exec,
+mame_get_float_option_string (const MameExec *exec,
 			       const gchar           *option_name,
 			       float                  argument,
 			       char                  *float_buf)
@@ -957,10 +837,10 @@ xmame_get_float_option_string (const XmameExecutable *exec,
 	gchar *opt_string;
 	const gchar *opt_value_string;
 
-	if (!exec->options)
-		return NULL;
+	g_return_val_if_fail (exec->priv->supported_options != NULL, NULL);
 
-	opt = g_hash_table_lookup (exec->options, option_name);
+	opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
+
 	if (!opt || !opt->type)
 		return NULL;
 	
@@ -968,13 +848,13 @@ xmame_get_float_option_string (const XmameExecutable *exec,
 		return NULL;
 	
 	opt_value_string = my_dtostr (float_buf, argument);
-	opt_string = xmame_get_option_string (exec, option_name, opt_value_string);
+	opt_string = mame_get_option_string (exec, option_name, opt_value_string);
 
 	return opt_string;
 }
 
 gchar *
-xmame_get_int_option_string (const XmameExecutable *exec,
+mame_get_int_option_string (const MameExec *exec,
 			     const gchar           *option_name,
 			     int                    argument)
 {
@@ -982,39 +862,34 @@ xmame_get_int_option_string (const XmameExecutable *exec,
 	gchar *opt_string;
 	gchar *opt_value_string;
 
+	g_return_val_if_fail (exec->priv->supported_options != NULL, NULL);
 
-	if (!exec->options)
-		return NULL;
-
-	opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt)
-		return NULL;
+	opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
+	g_return_val_if_fail (opt != NULL, NULL);
 	
 	if (!opt->type || strcmp (opt->type, "int"))
 		return NULL;
 	
 	opt_value_string = g_strdup_printf (" %i", argument);
 	
-	opt_string = xmame_get_option_string (exec, option_name, opt_value_string);
+	opt_string = mame_get_option_string (exec, option_name, opt_value_string);
 	g_free (opt_value_string);
 
 	return opt_string;
 }
 
 gchar *
-xmame_get_boolean_option_string (const XmameExecutable *exec,
-				 const gchar           *option_name,
-				 gboolean               is_enabled)
+mame_get_boolean_option_string (const MameExec *exec,
+				const gchar *option_name,
+				gboolean is_enabled)
 {
 	MameOption *opt;
 	gchar *opt_string;
+	
+	g_return_val_if_fail (exec->priv->supported_options != NULL, NULL);
 
-	if (!exec->options)
-		return NULL;
-
-	opt = g_hash_table_lookup (exec->options, option_name);
-	if (!opt)
-		return NULL;
+	opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
+	g_return_val_if_fail (opt != NULL, NULL);
 
 	/* boolean options have no type */
 	if (opt->type)
@@ -1031,32 +906,32 @@ xmame_get_boolean_option_string (const XmameExecutable *exec,
 }
 
 FILE *
-xmame_open_pipe (const XmameExecutable *exec,
-		 const gchar           *format,
-		 ...)
+mame_open_pipe (const MameExec *exec, const gchar *format, ...)
 {
 	va_list args;
 	gchar *my_args;
 	gchar *opt;
-	FILE *xmame_pipe;
+	FILE *mame_pipe;
 	
 	va_start (args, format);
 	my_args = g_strdup_vprintf (format, args);
 	va_end (args);
 
-	opt = g_strdup_printf ("%s -%s %s 2>/dev/null", exec->path, exec->noloadconfig_option, my_args);
+	opt = g_strdup_printf ("%s -%s %s 2>/dev/null",
+			       exec->priv->path,
+			       exec->priv->noloadconfig_option,
+			       my_args);
 	GMAMEUI_DEBUG ("Running: %s", opt);
-	xmame_pipe = popen (opt, "r");
+	mame_pipe = popen (opt, "r");
 
 	g_free (opt);
 	g_free (my_args);
 
-	return xmame_pipe;
+	return mame_pipe;
 }
 
 void
-xmame_close_pipe (const XmameExecutable *exec,
-		  FILE                  *pipe)
+mame_close_pipe (const MameExec *exec, FILE *pipe)
 {
 	pclose (pipe);
 }
@@ -1068,9 +943,8 @@ slist_to_array (GSList *list)
 	GSList *tmp_list;
 	gchar **array;
 	guint list_size;
-
-	if (!list)
-		return NULL;
+	
+	g_return_val_if_fail (list != NULL, NULL);
 			
 	list_size = g_slist_length (list);
 	tmp_list = list;
@@ -1087,7 +961,7 @@ slist_to_array (GSList *list)
 }
 
 static void
-parse_list_option (XmameExecutable *exec,
+parse_list_option (MameExec *exec,
 		   const gchar     *option_name,
 		   const gchar     *list_option)
 {
@@ -1100,13 +974,13 @@ parse_list_option (XmameExecutable *exec,
 	FILE *xmame_pipe;
 	int i;
 
-	if (!xmame_has_option (exec, list_option) || !xmame_has_option (exec, option_name))
+	if (!mame_has_option (exec, list_option) || !mame_has_option (exec, option_name))
 		return;
 
-	option = (MameOption*)xmame_get_option (exec, option_name);
-	xmame_pipe = xmame_open_pipe (exec, "-%s", xmame_get_option_name (exec, list_option));
-	if (!xmame_pipe)
-		return;
+	option = (MameOption*)mame_get_option (exec, option_name);
+
+	xmame_pipe = mame_open_pipe (exec, "-%s", mame_get_option_name (exec, list_option));
+	g_return_if_fail (xmame_pipe != NULL);
 	
 	/* header : Digital sound plugins: */
 	fgets (line, BUFFER_SIZE, xmame_pipe);
@@ -1135,7 +1009,8 @@ parse_list_option (XmameExecutable *exec,
 			value_value = g_slist_append (value_value, value);
 		}
 	}
-	xmame_close_pipe (exec, xmame_pipe);
+
+	mame_close_pipe (exec, xmame_pipe);
 
 	if (value_key) {
 		if (option->keys)
@@ -1149,7 +1024,7 @@ parse_list_option (XmameExecutable *exec,
 }
 
 static void
-parse_listmodes_option (XmameExecutable *exec,
+parse_listmodes_option (MameExec *exec,
 			const gchar     *option_name,
 			const gchar     *list_option)
 {
@@ -1161,14 +1036,13 @@ parse_listmodes_option (XmameExecutable *exec,
 	FILE *xmame_pipe;
 	int i;
 	
-	option = (MameOption*)xmame_get_option (exec, option_name);
+	option = (MameOption*) mame_get_option (exec, option_name);
 	
-	if (!option || !xmame_has_option (exec, list_option))
+	if (!option || !mame_has_option (exec, list_option))
 		return;
 		
-	xmame_pipe = xmame_open_pipe (exec, "-%s", xmame_get_option_name (exec, list_option));
-	if (!xmame_pipe)
-		return;
+	xmame_pipe = mame_open_pipe (exec, "-%s", mame_get_option_name (exec, list_option));
+	g_return_if_fail (xmame_pipe != NULL);
 
 	GMAMEUI_DEBUG ("getting xmame SDL mode");
 	while (fgets (line, BUFFER_SIZE, xmame_pipe))
@@ -1201,7 +1075,8 @@ parse_listmodes_option (XmameExecutable *exec,
 				}
 		}
 	}
-	xmame_close_pipe (exec, xmame_pipe);
+
+	mame_close_pipe (exec, xmame_pipe);
 	
 	if (value_key) {
 		if (option->keys)
@@ -1212,73 +1087,6 @@ parse_listmodes_option (XmameExecutable *exec,
 		option->keys = slist_to_array (value_key);
 		option->possible_values = slist_to_array (value_value);
 	}
-}
-
-const GHashTable *
-xmame_get_options (XmameExecutable *exec)
-{
-	FILE *xmame_pipe;
-	gchar line[BUFFER_SIZE];
-	GHashTable *option_hash;
-
-	g_return_val_if_fail (exec != NULL, NULL);
-
-	if (exec->options)
-		return exec->options;
-
-	GMAMEUI_DEBUG (_("Getting list of valid MAME options using parameter %s"), exec->showusage_option);
-	
-	xmame_pipe = xmame_open_pipe (exec, "-%s", exec->showusage_option);
-	g_return_val_if_fail (xmame_pipe != NULL, NULL);
-
-	if (fgets (line, BUFFER_SIZE, xmame_pipe))
-	{
-		int more_input = 0;
-		option_hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, mame_opt_free);
-		
-		do {
-			MameOption *my_opt;
-			const gchar *gmameui_name;
-			my_opt = parse_option (line, xmame_pipe, &more_input);
-
-			if (my_opt) {
-				gmameui_name = xmame_option_get_gmameui_name (my_opt->name);
-
-				/* Note: Newer versions of MAME do not report the type */
-				GMAMEUI_DEBUG (_("Found option: %s %s%s (%s)"),
-					my_opt->type ? my_opt->type : "",
-					my_opt->no_option ? "[no]" : "",
-					my_opt->name,
-					gmameui_name);
-				GMAMEUI_DEBUG (_("Description: \"%s\""), my_opt->description);
-
-				if (my_opt->possible_values) {
-					int i;
-					GMAMEUI_DEBUG (_("Possible values: "));
-					for (i = 0; my_opt->possible_values[i]; i++) {
-						GMAMEUI_DEBUG ("%i %s", i, my_opt->possible_values[i]);
-					}
-				}
-
-				if (gmameui_name)
-					g_hash_table_insert (option_hash, (gpointer)gmameui_name, my_opt);
-			}
-		} while (more_input);
-
-		/* Delete existing options hash table */
-		if (exec->options)
-			g_hash_table_destroy (exec->options);
-
-		exec->options = option_hash;
-	}
-
-	xmame_close_pipe (exec, xmame_pipe);
-
-	parse_list_option (exec, "dsp-plugin", "list-dsp-plugins");
-	parse_list_option (exec, "sound-mixer-plugin", "list-mixer-plugins");
-	parse_listmodes_option (exec, "modenumber", "listmodes");
-	
-	return exec->options;
 }
 
 /* Sets up an IO channel that calls func whenever data is available */
@@ -1357,4 +1165,397 @@ mame_exec_launch_command (gchar *command, pid_t *pid, int *stdout, int *stderr) 
 
 	g_strfreev (argv);
 	argv = NULL;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+static void
+mame_opt_free (gpointer opt)
+{
+	MameOption *opt_opt =  opt;
+	xmame_option_free (opt_opt);
+}
+
+const GHashTable *
+mame_get_options (MameExec *exec)
+{
+	FILE *xmame_pipe;
+	gchar line[BUFFER_SIZE];
+	GHashTable *option_hash;
+
+	g_return_val_if_fail (exec != NULL, NULL);
+
+	if (exec->priv->supported_options)
+		return exec->priv->supported_options;
+
+	GMAMEUI_DEBUG (_("Getting list of valid MAME options using parameter %s"), exec->priv->showusage_option);
+	
+	xmame_pipe = mame_open_pipe (exec, "-%s", exec->priv->showusage_option);
+	g_return_val_if_fail (xmame_pipe != NULL, NULL);
+
+	if (fgets (line, BUFFER_SIZE, xmame_pipe))
+	{
+		int more_input = 0;
+		option_hash = g_hash_table_new_full (g_str_hash, g_str_equal, NULL, mame_opt_free);
+		
+		do {
+			MameOption *my_opt;
+			const gchar *gmameui_name;
+			my_opt = parse_option (line, xmame_pipe, &more_input);
+
+			if (my_opt) {
+				gmameui_name = xmame_option_get_gmameui_name (my_opt->name);
+
+				/* Note: Newer versions of MAME do not report the type */
+				GMAMEUI_DEBUG (_("Found option: %s %s%s (%s)"),
+					my_opt->type ? my_opt->type : "",
+					my_opt->no_option ? "[no]" : "",
+					my_opt->name,
+					gmameui_name);
+				GMAMEUI_DEBUG (_("Description: \"%s\""), my_opt->description);
+
+				if (my_opt->possible_values) {
+					int i;
+					GMAMEUI_DEBUG (_("Possible values: "));
+					for (i = 0; my_opt->possible_values[i]; i++) {
+						GMAMEUI_DEBUG ("%i %s", i, my_opt->possible_values[i]);
+					}
+				}
+
+				if (gmameui_name)
+					g_hash_table_insert (option_hash, (gpointer)gmameui_name, my_opt);
+			}
+		} while (more_input);
+
+		/* Delete existing options hash table */
+		if (exec->priv->supported_options)
+			g_hash_table_destroy (exec->priv->supported_options);
+
+		exec->priv->supported_options = option_hash;
+	}
+
+	mame_close_pipe (exec, xmame_pipe);
+
+	parse_list_option (exec, "dsp-plugin", "list-dsp-plugins");
+	parse_list_option (exec, "sound-mixer-plugin", "list-mixer-plugins");
+	parse_listmodes_option (exec, "modenumber", "listmodes");
+	
+	return exec->priv->supported_options;
+}
+
+gboolean
+mame_has_option (MameExec *exec, const gchar *option_name)
+{
+	g_return_val_if_fail (exec != NULL, FALSE);
+	
+	return mame_get_option (exec, option_name) != NULL;
+}
+
+const MameOption *
+mame_get_option (MameExec *exec, const gchar *option_name)
+{
+	g_return_val_if_fail (exec != NULL, NULL);
+
+	/* If the Executable has no options hash table,
+	   then implicitly create it */
+	if (!exec->priv->supported_options)
+		exec->priv->supported_options = mame_get_options (exec);
+
+#ifdef ENABLE_DEBUG
+	if (!mame_option_get_gmameui_name (option_name))
+		GMAMEUI_DEBUG ("Invalid option: %s", option_name);
+#endif
+	return g_hash_table_lookup (exec->priv->supported_options, option_name);
+
+}
+
+
+
+/*
+
+static gboolean
+winmame_exec_set_version (MameExec *exec)
+{
+TODO
+}*/
+
+
+/* Gets the name for the MameExec. Name should not be free'd */
+gchar*
+mame_exec_get_name (MameExec *exec)
+{
+	g_return_val_if_fail (exec != NULL, NULL);
+	g_return_val_if_fail (exec->priv != NULL, NULL);
+	g_return_val_if_fail (exec->priv->name != NULL, NULL);
+
+	return exec->priv->name;
+}
+
+/* Gets the path for the MameExec. Path should not be free'd */
+gchar*
+mame_exec_get_path (MameExec *exec)
+{
+	g_return_val_if_fail (exec != NULL, NULL);
+	g_return_val_if_fail (exec->priv != NULL, NULL);
+	g_return_val_if_fail (exec->priv->path != NULL, NULL);
+
+	return exec->priv->path;
+}
+
+/* Gets the version for the MameExec. Version should not be free'd */
+gchar*
+mame_exec_get_version (MameExec *exec)
+{
+	g_return_val_if_fail (exec != NULL, NULL);
+	g_return_val_if_fail (exec->priv != NULL, NULL);
+	g_return_val_if_fail (exec->priv->version != NULL, NULL);
+
+	return exec->priv->version;
+}
+
+gchar*
+mame_exec_get_noloadconfig_option (MameExec *exec)
+{
+	g_return_val_if_fail (exec != NULL, NULL);
+	g_return_val_if_fail (exec->priv != NULL, NULL);
+	g_return_val_if_fail (exec->priv->noloadconfig_option != NULL, NULL);
+
+	return exec->priv->noloadconfig_option;
+}
+
+/* Gets the target for the MameExec. Target should not be free'd */
+gchar*
+mame_exec_get_target (MameExec *exec)
+{
+	g_return_val_if_fail (exec != NULL, NULL);
+	g_return_val_if_fail (exec->priv != NULL, NULL);
+	g_return_val_if_fail (exec->priv->target != NULL, NULL);
+
+	return exec->priv->target;
+}
+
+ExecutableType
+mame_exec_get_exectype (MameExec *exec)
+{
+	g_return_val_if_fail (exec != NULL, XMAME_EXEC_UNKNOWN);
+
+	return exec->priv->type;
+}
+
+void
+mame_exec_set_exectype (MameExec *exec, ExecutableType type)
+{
+	g_return_if_fail (exec != NULL);
+	
+	exec->priv->type = type;
+}
+
+static void
+mame_exec_finalize (GObject *obj)
+{
+	GMAMEUI_DEBUG ("Finalising mame_exec object");
+	
+	MameExec *exec = MAME_EXEC (obj);
+	
+	g_free (exec->priv->path);
+	g_free (exec->priv->name);
+	g_free (exec->priv->target);
+	g_free (exec->priv->version);
+	
+// FIXME TODO	g_free (exec->priv);
+	
+	GMAMEUI_DEBUG ("Finalising mame_exec object... done");
+	
+	/* FIXME TODO Unref all the strings and destroy the object */
+}
+
+static void
+mame_exec_class_init (MameExecClass *klass)
+{
+	
+	
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	
+	object_class->set_property = mame_exec_set_property;
+	object_class->get_property = mame_exec_get_property;
+	object_class->finalize = mame_exec_finalize;
+
+    g_object_class_install_property (object_class,
+					 PROP_EXEC_PATH,
+					 g_param_spec_string ("exec-path", "Executable path", "", NULL, G_PARAM_READWRITE));
+    g_object_class_install_property (object_class,
+					 PROP_EXEC_NAME,
+					 g_param_spec_string ("exec-name", "Executable name", "", NULL, G_PARAM_READWRITE));
+    g_object_class_install_property (object_class,
+					 PROP_EXEC_TARGET,
+					 g_param_spec_string ("exec-target", "Executable target", "", NULL, G_PARAM_READWRITE));
+    g_object_class_install_property (object_class,
+					 PROP_EXEC_VERSION,
+					 g_param_spec_string ("exec-version", "Executable version", "", NULL, G_PARAM_READWRITE));
+}
+
+static void
+mame_exec_init (MameExec *exec)
+{
+	
+	GMAMEUI_DEBUG ("Creating mame_exec object");
+	exec->priv = g_new0 (MameExecPrivate, 1);
+
+	exec->priv->name = NULL;
+	exec->priv->version = NULL;
+	exec->priv->target = NULL;
+	exec->priv->target = NULL;
+
+	exec->priv->noloadconfig_option = noloadconfig_option_name[0];
+	exec->priv->showusage_option = showusage_option_name[0];
+	exec->priv->type = XMAME_EXEC_UNKNOWN;
+
+}
+
+MameExec* mame_exec_new (void)
+{
+	return g_object_new (MAME_TYPE_EXEC, NULL);
+}
+
+static void
+mame_exec_set_property (GObject *object,
+			     guint prop_id,
+			     const GValue *value,
+			     GParamSpec *pspec)
+{
+	MameExec *exec;
+	
+	exec = MAME_EXEC (object);
+
+	switch (prop_id) {
+		case PROP_EXEC_PATH:
+			exec->priv->path = g_strdup (g_value_get_string (value));
+			break;
+		case PROP_EXEC_NAME:
+			exec->priv->name = g_strdup (g_value_get_string (value));
+			break;
+		case PROP_EXEC_TARGET:
+			exec->priv->target = g_strdup (g_value_get_string (value));
+			break;
+		case PROP_EXEC_VERSION:
+			exec->priv->version = g_strdup (g_value_get_string (value));
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
+static void
+mame_exec_get_property (GObject *object,
+			     guint prop_id,
+			     GValue *value,
+			     GParamSpec *pspec)
+{
+	MameExec *exec;
+
+	exec = MAME_EXEC (object);
+
+	switch (prop_id) {
+		case PROP_EXEC_PATH:
+			g_value_set_string (value, exec->priv->path);
+			break;
+		case PROP_EXEC_NAME:
+			g_value_set_string (value, exec->priv->name);
+			break;
+		case PROP_EXEC_TARGET:
+			g_value_set_string (value, exec->priv->target);
+			break;
+		case PROP_EXEC_VERSION:
+			g_value_set_string (value, exec->priv->version);
+			break;
+		default:
+			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+			break;
+	}
+}
+
+MameExec* mame_exec_new_from_path (gchar *path)
+{
+	MameExec *exec;
+
+	g_return_val_if_fail (path != NULL, NULL);
+
+	GMAMEUI_DEBUG ("Creating new executable from path %s", path);
+
+	/* Check that the path exists and is a valid executable; if not
+	   return NULL */
+	if (!g_file_test (path, G_FILE_TEST_EXISTS))
+		return NULL;
+
+	if (!g_file_test (path, G_FILE_TEST_IS_EXECUTABLE))
+		return NULL;
+
+	exec = g_object_new (MAME_TYPE_EXEC, NULL);
+
+	exec->priv->path = g_strdup (path);
+
+	if (mame_exec_set_version (exec) == FALSE)
+		return NULL;
+
+	return exec;
+}
+
+int mame_exec_get_game_count(MameExec *exec)
+{
+	FILE *handle;
+	char buffer[1024];
+	gchar *option;
+	int ret = 0;
+	int count = 0;
+
+	if (!exec)
+		return 0;
+
+	mame_get_options (exec);
+
+	option = g_strdup (mame_get_option_name (exec, "listfull"));
+	GMAMEUI_DEBUG ("Retrieving full game list using %s.", option);
+
+	handle = mame_open_pipe(exec, "-%s", option);
+
+	GMAMEUI_DEBUG ("Game list retrieved... parsing.");
+	
+	while(fgets(buffer, 1024, handle))
+	{
+		/* Skip the header row */
+		if (!strncmp(buffer, "Name:     Description:", 22))
+			continue;
+
+		static char keywork[] = "Total Supported: ";
+		if(!strncmp(buffer, keywork, sizeof(keywork) -1))
+		{
+			ret = atoi(buffer + sizeof(keywork) -1);
+			break;
+		}
+		
+		count++;
+	}
+	pclose(handle);
+
+	/* If there was no line stating Total Supported:, then we have
+	   to get a list of all rows returned (subtracting the header)
+	   to get the final count */
+	if (ret == 0) ret = count;
+	
+	GMAMEUI_DEBUG ("Game count obtained - %d", ret);
+	
+	g_free (option);
+
+	return ret;
 }

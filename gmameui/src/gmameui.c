@@ -45,6 +45,7 @@
 #include "options_string.h"
 #include "progression_window.h"
 #include "gtkjoy.h"
+#include "mame-exec.h"
 
 #define BUFFER_SIZE 1000
 
@@ -166,8 +167,7 @@ gmameui_init (void)
 		GMAMEUI_DEBUG (_("Adding executable from preferences file: %s"),
 			       g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
 		
-		XmameExecutable *exec = xmame_executable_new (g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
-		xmame_executable_set_version (exec);    /* To get the name and version */
+		MameExec *exec = mame_exec_new_from_path (g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
 		mame_exec_list_add (main_gui.exec_list, exec);
 	}
 	g_value_array_free (va_exec_paths);
@@ -589,7 +589,7 @@ launch_emulation (RomEntry    *rom,
 void
 play_game (RomEntry *rom)
 {
-	XmameExecutable *exec;
+	MameExec *exec;
 	gchar *current_rom_name;
 	gchar *opt;
 	gchar *general_options;
@@ -609,13 +609,13 @@ play_game (RomEntry *rom)
 	
 	if (use_xmame_options) {
 		GMAMEUI_DEBUG ("Using MAME options, ignoring GMAMEUI-specified options");
-		opt = g_strdup_printf ("%s %s 2>&1", exec->path, rom->romname);
+		opt = g_strdup_printf ("%s %s 2>&1", mame_exec_get_path (exec), rom->romname);
 		launch_emulation (rom, opt);
 		g_free (opt);
 		return;
 	}
 
-	if (exec->type == XMAME_EXEC_WIN32) {
+	if (mame_exec_get_exectype (exec) == XMAME_EXEC_WIN32) {
 		gchar *sdlmame_options_string_playback;
 		gchar *sdlmame_options_string_perf;
 		gchar *sdlmame_options_string_video;
@@ -644,7 +644,7 @@ play_game (RomEntry *rom)
 			sdlmame_options_string_vector = g_strdup ("");
 		
 		opt = g_strdup_printf ("%s %s %s %s %s %s %s %s %s %s %s %s %s %s -%s %s 2>&1",
-				       exec->path,
+				       mame_exec_get_path (exec),
 				       create_rompath_options_string (exec),
 				       create_io_options_string (exec),
 				       sdlmame_options_string_playback,
@@ -658,7 +658,7 @@ play_game (RomEntry *rom)
 				       sdlmame_options_string_debug,
 				       sdlmame_options_string_artwork,
 				       sdlmame_options_string_input,
-				       exec->noloadconfig_option,
+				       mame_exec_get_noloadconfig_option (exec),
 				       rom->romname);
 		
 		g_free (sdlmame_options_string_playback);
@@ -687,10 +687,10 @@ play_game (RomEntry *rom)
 			Vector_Related_options = g_strdup ("");				
 		/* create the command */
 		opt = g_strdup_printf ("%s %s %s -%s %s 2>&1",
-				       exec->path,
+				       mame_exec_get_path (exec),
 				       general_options,
 				       Vector_Related_options,
-				       exec->noloadconfig_option,
+				       mame_exec_get_noloadconfig_option (exec),
 				       rom->romname);
 
 		/*free options*/
@@ -706,7 +706,7 @@ play_game (RomEntry *rom)
 
 void process_inp_function (RomEntry *rom, gchar *file, int action)
 {
-	XmameExecutable *exec;
+	MameExec *exec;
 	char *filename;
 	gchar *opt;
 	gchar *general_options;
@@ -751,7 +751,7 @@ void process_inp_function (RomEntry *rom, gchar *file, int action)
 	}
 	
 	opt = g_strdup_printf ("%s %s %s ",
-			       exec->path,
+			       mame_exec_get_path (exec),
 			       general_options,
 			       vector_options);
 	
@@ -762,7 +762,7 @@ void process_inp_function (RomEntry *rom, gchar *file, int action)
 		splitname = g_strsplit (g_path_get_basename (filename), ".", 0);
 		opt = g_strconcat (opt, "-playback ",
 				   filename, " ",
-				   "-", exec->noloadconfig_option, " ",
+				   "-", mame_exec_get_noloadconfig_option (exec), " ",
 				   splitname[0], " 2>&1", NULL);
 		
 		g_strfreev (splitname);
@@ -771,7 +771,7 @@ void process_inp_function (RomEntry *rom, gchar *file, int action)
 		g_object_get (main_gui.gui_prefs, "current-rom", &romname, NULL);
 		opt = g_strconcat (opt, "-record ",
 				   filename, " ",
-				   "-", exec->noloadconfig_option, " ",
+				   "-", mame_exec_get_noloadconfig_option (exec), " ",
 				   romname, " 2>&1", NULL);
 		g_free (romname);
 	}

@@ -31,7 +31,6 @@
 #include <ctype.h>
 #include <expat.h>
 #include <stdarg.h>
-#include <gtk/gtkmain.h>
 
 #include "gui.h"
 #include "progression_window.h"
@@ -39,55 +38,6 @@
 
 #define BUFFER_SIZE 1000
 #define MAX_ELEMENT_NAME 32
-
-int xmame_exec_get_game_count(XmameExecutable *exec)
-{
-	FILE *handle;
-	char buffer[1024];
-	gchar *option;
-	int ret = 0;
-	int count = 0;
-
-	if (!exec)
-		return 0;
-
-	xmame_get_options(exec);
-
-	option = g_strdup (xmame_get_option_name(exec, "listfull"));
-	GMAMEUI_DEBUG ("Retrieving full game list using %s.", option);
-
-	handle = xmame_open_pipe(exec, "-%s", option);
-
-	GMAMEUI_DEBUG ("Game list retrieved... parsing.");
-	
-	while(fgets(buffer, 1024, handle))
-	{
-		/* Skip the header row */
-		if (!strncmp(buffer, "Name:     Description:", 22))
-			continue;
-
-		static char keywork[] = "Total Supported: ";
-		if(!strncmp(buffer, keywork, sizeof(keywork) -1))
-		{
-			ret = atoi(buffer + sizeof(keywork) -1);
-			break;
-		}
-		
-		count++;
-	}
-	pclose(handle);
-
-	/* If there was no line stating Total Supported:, then we have
-	   to get a list of all rows returned (subtracting the header)
-	   to get the final count */
-	if (ret == 0) ret = count;
-	
-	GMAMEUI_DEBUG ("Game count obtained - %d", ret);
-	
-	g_free (option);
-
-	return ret;
-}
 
 typedef struct 
 {
@@ -527,7 +477,7 @@ static gboolean CreateGameListRun(TCreateGameList *_this)
 	return TRUE;
 }
  
-static gboolean create_gamelist_xmlinfo(XmameExecutable *exec)
+static gboolean create_gamelist_xmlinfo(MameExec *exec)
 {
 	gboolean res;
 	TCreateGameList _this;
@@ -548,15 +498,18 @@ static gboolean create_gamelist_xmlinfo(XmameExecutable *exec)
 		gui_prefs.gl = mame_gamelist_new ();
 	}
 
-	g_object_set (gui_prefs.gl, "name", exec->name, "version", exec->version, NULL);
+	g_object_set (gui_prefs.gl,
+		      "name", mame_exec_get_name (exec),
+		      "version", mame_exec_get_version (exec),
+		      NULL);
 
-	_this.total_games = xmame_exec_get_game_count(exec);
+	_this.total_games = mame_exec_get_game_count(exec);
 	if (!_this.total_games) {
 		progress_window_destroy(_this.progress_window);
 		return FALSE;
 	}
 	
-	_this.xmameHandle = xmame_open_pipe(exec, "-%s", xmame_get_option_name(exec,"listxml"));
+	_this.xmameHandle = mame_open_pipe(exec, "-%s", mame_get_option_name(exec,"listxml"));
 	if (!_this.xmameHandle)
 		return FALSE;
 
@@ -589,7 +542,7 @@ static gboolean create_gamelist_xmlinfo(XmameExecutable *exec)
 * Gets a hash table with all supported drivers
 * Updates game count;
 */
-static GHashTable *get_driver_table(XmameExecutable *exec, int *total_games) {
+static GHashTable *get_driver_table(MameExec *exec, int *total_games) {
 	FILE *xmame_pipe;
 	gchar line[BUFFER_SIZE];
 	GHashTable *driver_htable;
@@ -602,16 +555,12 @@ static GHashTable *get_driver_table(XmameExecutable *exec, int *total_games) {
 
 	/* Generate the table for drivers */
 	/* without including neither history nor mameinfo to have less to parse after*/
-	xmame_pipe = xmame_open_pipe(exec, "-%s -%s /dev/null -%s /dev/null",
-		xmame_get_option_name(exec, "listsourcefile"), 
-		xmame_get_option_name(exec, "mameinfo_file"),
-		xmame_get_option_name(exec, "history_file"));
+	xmame_pipe = mame_open_pipe(exec, "-%s -%s /dev/null -%s /dev/null",
+				     mame_get_option_name(exec, "listsourcefile"), 
+				     mame_get_option_name(exec, "mameinfo_file"),
+				     mame_get_option_name(exec, "history_file"));
 
-	if (!xmame_pipe)
-	{
-		gmameui_message(ERROR, NULL, _("Error executing %s"), exec->path);
-		return NULL;
-	}
+	g_return_val_if_fail (xmame_pipe != NULL, NULL);
 
 	driver_htable = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
@@ -658,13 +607,13 @@ static GHashTable *get_driver_table(XmameExecutable *exec, int *total_games) {
 		while (gtk_events_pending()) gtk_main_iteration();
 	}
 
-	xmame_close_pipe(exec, xmame_pipe);
+	mame_close_pipe(exec, xmame_pipe);
 	GMAMEUI_DEBUG("drivers list loaded");
 
 	return driver_htable;
 }
 
-static gboolean create_gamelist_listinfo(XmameExecutable *exec)
+static gboolean create_gamelist_listinfo(MameExec *exec)
 {
 	FILE *xmame_pipe;
 	gchar line[BUFFER_SIZE];
@@ -710,7 +659,10 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 		gui_prefs.gl = mame_gamelist_new ();
 	}
 
-	g_object_set (gui_prefs.gl, "name", exec->name, "version", exec->version, NULL);
+	g_object_set (gui_prefs.gl,
+		      "name", mame_exec_get_name (exec),
+		      "version", mame_exec_get_version (exec),
+		      NULL);
 	
 	g_message(_("creating game list, Please wait:"));
 
@@ -719,10 +671,10 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 		
 	/* Generate the list */
 	/* without including neither history nor mameinfo to have less to parse after*/
-	xmame_pipe = xmame_open_pipe(exec, "-%s -%s /dev/null -%s /dev/null",
-		xmame_get_option_name(exec, "listinfo"),
-		xmame_get_option_name(exec, "mameinfo_file"),
-		xmame_get_option_name(exec, "history_file"));
+	xmame_pipe = mame_open_pipe(exec, "-%s -%s /dev/null -%s /dev/null",
+				     mame_get_option_name(exec, "listinfo"),
+				     mame_get_option_name(exec, "mameinfo_file"),
+				     mame_get_option_name(exec, "history_file"));
 	
 	while (fgets(line, BUFFER_SIZE, xmame_pipe))
 	{
@@ -964,7 +916,7 @@ static gboolean create_gamelist_listinfo(XmameExecutable *exec)
 	return TRUE;
 }
 
-gboolean gamelist_parse(XmameExecutable *exec)
+gboolean gamelist_parse(MameExec *exec)
 {
 	gboolean ret;
 	
@@ -974,14 +926,13 @@ gboolean gamelist_parse(XmameExecutable *exec)
 		return FALSE;
 	}
 	
-	xmame_get_options(exec);
+	mame_get_options(exec);
 
 	/* Check if we will use listinfo or listxml */
-	if (xmame_has_option(exec, "listinfo")) {
+	if (mame_has_option(exec, "listinfo")) {
 		GMAMEUI_DEBUG("Recreating gamelist using -listinfo\n");
 		ret = create_gamelist_listinfo(exec);
-	}
-	else if (xmame_has_option(exec, "listxml")) {
+	} else if (mame_has_option(exec, "listxml")) {
 		GMAMEUI_DEBUG("Recreating gamelist using -listxml\n");
 		ret = create_gamelist_xmlinfo(exec);
 	} else {

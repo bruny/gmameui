@@ -41,5 +41,6 @@ void          xmame_options_free (void);
 
 void          xmame_option_free (MameOption *opt);
 const gchar * xmame_option_get_gmameui_name (const gchar *alias);
+const gchar * mame_option_get_gmameui_name (const gchar *alias);
 
 #endif

@@ -32,13 +32,9 @@ G_DEFINE_TYPE (MameExecList, mame_exec_list, G_TYPE_OBJECT)
 
 struct _MameExecListPrivate {
 	GList *list;
-	/*TODOMameExec *current_exec;*/
-	XmameExecutable *current_exec;
+	MameExec *current_exec;
 };
 
-/* TODO Replace XmameExecutable with new MameExec class */
-
-/*TODO
 void
 mame_exec_list_add (MameExecList *list, MameExec *exec)
 {
@@ -50,11 +46,11 @@ mame_exec_list_add (MameExecList *list, MameExec *exec)
 	g_return_if_fail (exec != NULL);
 
 	exist = FALSE;
-
+	
 	g_object_get (exec, "exec-path", &exec_path, NULL);
 	GMAMEUI_DEBUG ("Adding executable %s to exec list", exec_path);
 
-	* Check if the executable is already in the list *
+	/* Check if the executable is already in the list */
 	for (list_ptr = g_list_first (list->priv->list); list_ptr != NULL; list_ptr = g_list_next (list_ptr)) {
 		MameExec *exist_exec;
 		gchar *exist_path;
@@ -78,39 +74,6 @@ mame_exec_list_add (MameExecList *list, MameExec *exec)
 	else
 		GMAMEUI_DEBUG ("%s already in the executable list - skipping", exec_path);
 
-}*/
-void
-mame_exec_list_add (MameExecList *list, XmameExecutable *exec)
-{
-	GList *list_ptr;
-	gboolean exist;
-
-	g_return_if_fail (list != NULL);
-	g_return_if_fail (exec != NULL);
-
-	exist = FALSE;
-
-	GMAMEUI_DEBUG ("Adding executable %s to exec list", exec->path);
-
-	/* Check if the executable is already in the list */
-	for (list_ptr = g_list_first (list->priv->list); list_ptr != NULL; list_ptr = g_list_next (list_ptr)) {
-		XmameExecutable *exist_exec;
-		gchar *exist_path;
-
-		exist_exec = (XmameExecutable *) list_ptr->data;
-
-		if (g_ascii_strcasecmp (exec->path, exist_exec->path) == 0)
-			exist = TRUE;
-		else
-			exist = FALSE;
-
-	}
-
-	if (!exist)
-		list->priv->list = g_list_append (list->priv->list, exec);
-	else
-		GMAMEUI_DEBUG ("%s already in the executable list - skipping", exec->path);
-
 }
 
 GList *
@@ -119,7 +82,7 @@ mame_exec_list_get_list (MameExecList *list)
 	return list->priv->list;
 }
 
-/*TODOMameExec *
+MameExec *
 mame_exec_list_nth (MameExecList *list, guint index)
 {
 	MameExec *exec;
@@ -129,23 +92,9 @@ mame_exec_list_nth (MameExecList *list, guint index)
 	exec = (MameExec *) list_ptr->data;
 
 	return exec;
-}*/
-XmameExecutable *
-mame_exec_list_nth (MameExecList *list, guint index)
-{
-	XmameExecutable *exec;
-	GList *list_ptr;
-
-	list_ptr = g_list_nth (list->priv->list, index);
-	
-	g_return_val_if_fail (list_ptr != NULL, NULL);
-	
-	exec = (XmameExecutable *) list_ptr->data;
-	
-	return exec;
 }
 
-/*TODOMameExec *
+MameExec *
 mame_exec_list_get_exec_by_path (MameExecList *list, gchar *path)
 {
 	GList *list_ptr;
@@ -163,35 +112,9 @@ mame_exec_list_get_exec_by_path (MameExecList *list, gchar *path)
 	}
 
 	return NULL;
-}*/
-XmameExecutable *
-mame_exec_list_get_exec_by_path (MameExecList *list, gchar *path)
-{
-	GList *list_ptr;
-
-	g_return_val_if_fail (list != NULL, NULL);
-	g_return_val_if_fail (path != NULL, NULL);
-
-	for (list_ptr = g_list_first (list->priv->list); list_ptr != NULL; list_ptr = g_list_next (list_ptr)) {
-		XmameExecutable *curr_exec;
-
-		curr_exec = (XmameExecutable *) list_ptr->data;
-
-		if (g_ascii_strcasecmp (curr_exec->path, path) == 0)
-			return curr_exec;
-	}
-
-	return NULL;
 }
 
-/*TODOMameExec *
-mame_exec_list_get_current_executable (MameExecList *list)
-{
-	g_return_val_if_fail (list != NULL, NULL);
-
-	return list->priv->current_exec;
-}*/
-XmameExecutable *
+MameExec *
 mame_exec_list_get_current_executable (MameExecList *list)
 {
 	g_return_val_if_fail (list != NULL, NULL);
@@ -199,7 +122,7 @@ mame_exec_list_get_current_executable (MameExecList *list)
 	return list->priv->current_exec;
 }
 
-/*TODOvoid
+void
 mame_exec_list_set_current_executable (MameExecList *list, MameExec *exec)
 {
 	g_return_if_fail (list != NULL);
@@ -207,16 +130,6 @@ mame_exec_list_set_current_executable (MameExecList *list, MameExec *exec)
 
 	list->priv->current_exec = exec;
 	GMAMEUI_DEBUG ("Setting current executable to %s", mame_exec_get_path (list->priv->current_exec));
-}*/
-void
-mame_exec_list_set_current_executable (MameExecList *list, XmameExecutable *exec)
-{
-	g_return_if_fail (list != NULL);
-	g_return_if_fail (exec != NULL);
-
-	list->priv->current_exec = exec;
-	GMAMEUI_DEBUG ("Setting current executable to %s", exec->path);
-	/*GMAMEUI_DEBUG ("Setting current executable to %s", mame_exec_get_path (list->priv->current_exec));*/
 }
 
 gboolean

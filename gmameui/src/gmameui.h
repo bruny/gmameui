@@ -30,7 +30,7 @@
 #include <gtk/gtktreemodel.h>
 
 #include "gtkjoy.h"
-#include "xmame_executable.h"
+#include "mame-exec.h"
 #include "game_list.h"
 #include "filter.h"
 #include "audit.h"
@@ -151,7 +151,7 @@ struct gui_prefs_struct {
 struct gui_prefs_struct gui_prefs;
 
 /* global variables */
-XmameExecutable *current_exec; /* pointer in the xmame_table */
+MameExec *current_exec;
 
 GMAMEUIFilter *selected_filter;
 

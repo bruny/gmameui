@@ -331,6 +331,12 @@ xmame_option_get_gmameui_name (const gchar *alias)
 	return (const gchar*)g_hash_table_lookup (option_map, alias);
 }
 
+const gchar *
+mame_option_get_gmameui_name (const gchar *alias)
+{
+	return (const gchar*)g_hash_table_lookup (option_map, alias);
+}
+
 void
 xmame_option_free (MameOption *opt)
 {

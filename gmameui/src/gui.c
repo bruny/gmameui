@@ -752,30 +752,22 @@ g_message (_("Time to create main window, filters and gamelist: %.02f seconds"),
 }
 
 static void
-set_current_executable (XmameExecutable *new_exec)
+set_current_executable (MameExec *new_exec)
 {
 	gboolean valid;
 	
 	if (new_exec) {
-		GMAMEUI_DEBUG ("Executable changed to %s", new_exec->path);
+		GMAMEUI_DEBUG ("Executable changed to %s", mame_exec_get_path (new_exec));
+		mame_exec_list_set_current_executable (main_gui.exec_list, new_exec);
+		g_object_set (main_gui.gui_prefs, "current-executable", mame_exec_get_path (new_exec), NULL);
+	} else {
+		gmameui_message (ERROR, NULL, _("Executable is not valid MAME executable... skipping"));
+		/* FIXME TODO Remove the executable from the list */
 	}
 
-	mame_exec_list_set_current_executable (main_gui.exec_list, new_exec);
-	
-	valid = xmame_executable_is_valid (new_exec);
-
-	/* check if the executable is still valid */
-	if (!valid) {
-		if (new_exec) {
-			gmameui_message (ERROR, NULL, _("%s is not a valid executable"), new_exec->path);
-			/* FIXME TODO Remove the executable from the list */
-		}
-	} else
-		g_object_set (main_gui.gui_prefs, "current-executable", new_exec->path, NULL);
-
 	/* Set sensitive the UI elements that require an executable to be set */
-	gtk_action_group_set_sensitive (main_gui.gmameui_rom_exec_action_group, valid);
-	gtk_action_group_set_sensitive (main_gui.gmameui_exec_action_group, valid);
+	gtk_action_group_set_sensitive (main_gui.gmameui_rom_exec_action_group, new_exec != NULL);
+	gtk_action_group_set_sensitive (main_gui.gmameui_exec_action_group, new_exec != NULL);
 }
 
 /* executable selected from the menu */
@@ -785,11 +777,11 @@ on_executable_selected (GtkRadioAction *action,
 {
 	gint index = GPOINTER_TO_INT (user_data);
 
-	XmameExecutable *exec;
+	MameExec *exec;
 
 	exec = mame_exec_list_nth (main_gui.exec_list, index);
 
-	GMAMEUI_DEBUG ("Picking executable %d - %s", index, exec->name);
+	GMAMEUI_DEBUG ("Picking executable %d - %s", index, mame_exec_get_name (exec));
 	set_current_executable (exec);
 }
 
@@ -800,7 +792,7 @@ add_exec_menu (void)
 	gchar *current_exec;
 	int num_execs;
 	int i;
-	XmameExecutable *exec;
+	MameExec *exec;
 
 	g_object_get (main_gui.gui_prefs, "current-executable", &current_exec, NULL);
 	
@@ -849,7 +841,10 @@ add_exec_menu (void)
 	} else {
 		for (i = 0; i < num_execs; i++) {
 			exec = mame_exec_list_nth (main_gui.exec_list, i);
-			gchar *exec_name = g_strdup_printf ("%s (%s) %s", exec->name, exec->target, exec->version);
+			gchar *exec_name = g_strdup_printf ("%s (%s) %s",
+							    mame_exec_get_name (exec),
+							    mame_exec_get_target (exec),
+							    mame_exec_get_version (exec));
 		
 			/* Create a new radio action for the executable */
 			gchar *name = g_strdup_printf ("exec-%d", i);
@@ -878,8 +873,8 @@ add_exec_menu (void)
 			GMAMEUI_DEBUG ("Adding action '%s'", action_name);
 			
 			if (current_exec) {
-				if (g_ascii_strcasecmp (exec->path, current_exec) == 0) {
-					GMAMEUI_DEBUG ("Setting %s as current executable", exec->path);
+				if (g_ascii_strcasecmp (mame_exec_get_path (exec), current_exec) == 0) {
+					GMAMEUI_DEBUG ("Setting %s as current executable", mame_exec_get_path (exec));
 					gtk_radio_action_set_current_value (action, i);
 				}
 			}
@@ -942,9 +937,9 @@ gamelist_popupmenu_show (GdkEventButton *event)
 	popup_menu = gtk_ui_manager_get_widget (main_gui.manager, "/GameListPopup");
 	g_return_if_fail (popup_menu != NULL);
 
-	XmameExecutable *exec = mame_exec_list_get_current_executable (main_gui.exec_list);
+	MameExec *exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	if (exec)
-		xmame_get_options (exec);
+		mame_get_options (exec);
 	
 
 	gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,

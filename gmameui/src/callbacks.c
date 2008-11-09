@@ -126,7 +126,7 @@ on_remove_from_favorites_activate      (GtkMenuItem     *menuitem,
 static void
 show_properties_dialog (gchar *rom_name)
 {
-	XmameExecutable *exec;
+	MameExec *exec;
 	
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	
@@ -134,7 +134,7 @@ show_properties_dialog (gchar *rom_name)
 	
 	/* SDLMAME uses a different set of options to XMAME. If we are running
 	   XMAME, then use the legacy GXMAME method of maintaining the options */
-	if (exec->type == XMAME_EXEC_WIN32) {
+	if (mame_exec_get_exectype (exec) == XMAME_EXEC_WIN32) {
 		/* SDLMAME */
 		GtkWidget *options_dialog = mame_options_get_dialog (main_gui.options);
 
@@ -204,7 +204,7 @@ void
 on_audit_all_games_activate (GtkMenuItem     *menuitem,
 			     gpointer         user_data)
 {
-	XmameExecutable *exec;
+	MameExec *exec;
 	GtkWidget *audit_dlg;
 	
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);

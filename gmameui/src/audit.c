@@ -37,7 +37,7 @@
 #include "gui.h"
 #include "audit.h"
 #include "options_string.h"
-#include "xmame_executable.h"
+#include "mame-exec.h"
 #include "gmameui-marshaller.h"
 
 #define BUFFER_SIZE 1000
@@ -303,11 +303,6 @@ handle_audit_command_stdout_io (GIOChannel * ioc,
 					broken_pipe = TRUE;
 				} else if (status == G_IO_STATUS_AGAIN) {
 					/* G_IO_STATUS_AGAIN = Resource temporarily unavailable */
-/*DELETE					if (gtk_events_pending ()) {
-						while (gtk_events_pending ()) {
-							gtk_main_iteration ();
-						}
-					}*/
 				} 
 			} while (status == G_IO_STATUS_AGAIN && broken_pipe == FALSE);
 
@@ -379,14 +374,7 @@ handle_audit_command_stderr_io (GIOChannel * ioc,
 					broken_pipe = TRUE;
 				} else if (status == G_IO_STATUS_AGAIN) {
 					/* G_IO_STATUS_AGAIN = Resource temporarily unavailable */
-/*DELETE					if (gtk_events_pending ()) {
-						while (gtk_events_pending ()) {
-							gtk_main_iteration ();
-						}
-					}*/
-				} /*else if (string->len != 0) {
-					GMAMEUI_DEBUG ("Line from IO err channel is %s", string->str);
-				}*/
+				}
 			} while (status == G_IO_STATUS_AGAIN && broken_pipe == FALSE);
 
 			if (broken_pipe == TRUE) {
@@ -487,7 +475,7 @@ process_audit_romset (gchar *line, gint settype) {
 /* Start the audit for a single ROM */
 void mame_audit_start_single (gchar *romname)
 {
-	XmameExecutable *exec;
+	MameExec *exec;
 	gchar *command;
 	gchar *rompath_option;
 	const gchar *option_name;
@@ -497,10 +485,11 @@ void mame_audit_start_single (gchar *romname)
 	g_return_if_fail (exec != NULL);
 	
 	rompath_option = create_rompath_options_string (exec);
-	option_name = xmame_get_option_name (exec, "verifyroms");
+
+	option_name = mame_get_option_name (exec, "verifyroms");
 	
 	command = g_strdup_printf ("%s -%s %s %s",
-				   exec->path,
+				   mame_exec_get_path (exec),
 				   option_name,
 				   rompath_option,
 				   romname);
@@ -519,9 +508,9 @@ void mame_audit_start_single (gchar *romname)
 	g_free (command);
 
 	/* Samples */
-	option_name = xmame_get_option_name (exec, "verifysamples");
+	option_name = mame_get_option_name (exec, "verifysamples");
 	command = g_strdup_printf("%s -%s %s %s",
-				  exec->path,
+				  mame_exec_get_path (exec),
 				  option_name,
 				  rompath_option,
 				  romname);
@@ -550,7 +539,7 @@ void mame_audit_start_single (gchar *romname)
 void
 mame_audit_start_full (void)
 {
-	XmameExecutable *exec;
+	MameExec *exec;
 	gchar *rompath_option;
 	GList *listpointer;
 	RomEntry *tmprom = NULL;
@@ -561,9 +550,9 @@ mame_audit_start_full (void)
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	
 	g_return_if_fail (exec != NULL);
-	g_return_if_fail (!xmame_get_options (exec));
+	g_return_if_fail (!mame_get_options (exec));
 
-	option_name = xmame_get_option_name (exec, "verifyroms");
+	option_name = mame_get_option_name (exec, "verifyroms");
 
 	if (!option_name) {
 		gmameui_message (ERROR, NULL, _("Don't know how to verify roms with this version of xmame."));
@@ -585,7 +574,7 @@ mame_audit_start_full (void)
 	rompath_option = create_rompath_options_string (exec);
 
 	/* FIXME TODO  2>/dev/null will send stderr to /dev/null, so we won't need to add g_io_watch to it */
-	command = g_strdup_printf("%s -%s %s", exec->path, option_name, rompath_option);
+	command = g_strdup_printf("%s -%s %s", mame_exec_get_path (exec), option_name, rompath_option);
 
 	mame_exec_launch_command (command, &command_pid, &child_stdout, &child_stderr);
 
@@ -609,7 +598,7 @@ mame_audit_start_full (void)
 	g_free (command);
 
 	/* Samples now */
-	command = g_strdup_printf("%s -%s %s", exec->path, xmame_get_option_name (exec, "verifysamples"), rompath_option);
+	command = g_strdup_printf("%s -%s %s", mame_exec_get_path (exec), mame_get_option_name (exec, "verifysamples"), rompath_option);
 
 	mame_exec_launch_command (command, &command_sample_pid, &child_sample_stdout, &child_sample_stderr);
 	

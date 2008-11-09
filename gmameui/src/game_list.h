@@ -24,7 +24,7 @@
 #ifndef __GAME_LIST_H__
 #define __GAME_LIST_H__
 
-#include "xmame_executable.h"
+#include "mame-exec.h"
 #include "rom_entry.h"
 
 G_BEGIN_DECLS
@@ -67,10 +67,7 @@ enum
 GType mame_gamelist_get_type (void);
 MameGamelist* mame_gamelist_new (void);
 
-
-void gamelist_check (XmameExecutable *exec);
-
-int xmame_exec_get_game_count(XmameExecutable *exec);
+void gamelist_check (MameExec *exec);
 
 RomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname);
 GList* mame_gamelist_get_roms_glist (MameGamelist *gl);
@@ -88,7 +85,7 @@ void mame_gamelist_set_not_checked_list (MameGamelist *gl, GList *source);
 * Creates a new gamelist using current_exec
 * Code in mameio.c
 */
-gboolean gamelist_parse (XmameExecutable *exec);
+gboolean gamelist_parse (MameExec *exec);
 
 /**
 * Loads the game list from the gamelist file.

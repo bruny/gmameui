@@ -34,7 +34,7 @@
 #include "keyboard.h"
 
 /* all options string are created here */
-static char *create_video_options_string(XmameExecutable *exec, GameOptions *target)
+static char *create_video_options_string(MameExec *exec, GameOptions *target)
 {
 	char *option_string;
 	char float_buf[FLOAT_BUF_SIZE];
@@ -60,38 +60,38 @@ static char *create_video_options_string(XmameExecutable *exec, GameOptions *tar
 	gchar *keepaspect;
 	gchar *displayaspectratio;
 
-	xmame_get_options(exec);
+	mame_get_options(exec);
 	
-	dirty = xmame_get_boolean_option_string(exec, "dirty", target->dirty);
-	brightness = xmame_get_float_option_string(exec, "brightness", target->brightness, float_buf);
+	dirty = mame_get_boolean_option_string(exec, "dirty", target->dirty);
+	brightness = mame_get_float_option_string(exec, "brightness", target->brightness, float_buf);
 
 	/* FIXME: Brightness for older xmame used percent
-	brightness = xmame_get_int_option_string(exec, "brightness", (int)(((target->brightness)-0.5)*(100/1.5)));
+	brightness = mame_get_int_option_string(exec, "brightness", (int)(((target->brightness)-0.5)*(100/1.5)));
 	*/
 		
-	bpp = xmame_get_int_option_string(exec, "bpp", target->bpp);
-	arbheight = xmame_get_int_option_string(exec, "arbheight", target->arbheight);
-	heightscale = xmame_get_int_option_string(exec, "heightscale", target->heightscale);	
-	widthscale = xmame_get_int_option_string(exec, "widthscale", target->widthscale);
-	gamma_correction = xmame_get_float_option_string(exec, "gamma-correction", target->gamma_correction, float_buf);
-	effect = xmame_get_int_option_string(exec, "effect", target->effect);
-	effect_name = xmame_get_option_string(exec, "effect", target->effect_name);
-	autodouble = xmame_get_boolean_option_string(exec, "autodouble", target->autodouble);
-	scanlines = xmame_get_boolean_option_string(exec, "scanlines", target->scanlines);
-	frameskipper = xmame_get_int_option_string(exec, "frameskipper", target->frameskipper);
-	throttle = xmame_get_boolean_option_string(exec, "throttle", target->throttle);
-	sleepidle = xmame_get_boolean_option_string(exec, "sleepidle", target->sleepidle);
-	autoframeskip = xmame_get_boolean_option_string(exec, "autoframeskip", target->autoframeskip);
-	maxautoframeskip = xmame_get_int_option_string(exec, "maxautoframeskip", target->maxautoframeskip);
-	frameskip = xmame_get_int_option_string(exec, "frameskip", target->frameskip);
-	norotate = xmame_get_boolean_option_string(exec, "norotate", target->norotate);
-	ror = xmame_get_boolean_option_string(exec, "ror", target->ror);
-	rol = xmame_get_boolean_option_string(exec, "rol", target->rol);
-	flipx = xmame_get_boolean_option_string(exec, "flipx", target->flipx);
-	flipy = xmame_get_boolean_option_string(exec, "flipy", target->flipy);
-	fullscreen = xmame_get_boolean_option_string(exec, "fullscreen", target->fullscreen);
-	keepaspect = xmame_get_boolean_option_string(exec, "keepaspect", target->keepaspect);
-	displayaspectratio = xmame_get_float_option_string(exec, "displayaspectratio", target->displayaspectratio, float_buf);
+	bpp = mame_get_int_option_string(exec, "bpp", target->bpp);
+	arbheight = mame_get_int_option_string(exec, "arbheight", target->arbheight);
+	heightscale = mame_get_int_option_string(exec, "heightscale", target->heightscale);	
+	widthscale = mame_get_int_option_string(exec, "widthscale", target->widthscale);
+	gamma_correction = mame_get_float_option_string(exec, "gamma-correction", target->gamma_correction, float_buf);
+	effect = mame_get_int_option_string(exec, "effect", target->effect);
+	effect_name = mame_get_option_string(exec, "effect", target->effect_name);
+	autodouble = mame_get_boolean_option_string(exec, "autodouble", target->autodouble);
+	scanlines = mame_get_boolean_option_string(exec, "scanlines", target->scanlines);
+	frameskipper = mame_get_int_option_string(exec, "frameskipper", target->frameskipper);
+	throttle = mame_get_boolean_option_string(exec, "throttle", target->throttle);
+	sleepidle = mame_get_boolean_option_string(exec, "sleepidle", target->sleepidle);
+	autoframeskip = mame_get_boolean_option_string(exec, "autoframeskip", target->autoframeskip);
+	maxautoframeskip = mame_get_int_option_string(exec, "maxautoframeskip", target->maxautoframeskip);
+	frameskip = mame_get_int_option_string(exec, "frameskip", target->frameskip);
+	norotate = mame_get_boolean_option_string(exec, "norotate", target->norotate);
+	ror = mame_get_boolean_option_string(exec, "ror", target->ror);
+	rol = mame_get_boolean_option_string(exec, "rol", target->rol);
+	flipx = mame_get_boolean_option_string(exec, "flipx", target->flipx);
+	flipy = mame_get_boolean_option_string(exec, "flipy", target->flipy);
+	fullscreen = mame_get_boolean_option_string(exec, "fullscreen", target->fullscreen);
+	keepaspect = mame_get_boolean_option_string(exec, "keepaspect", target->keepaspect);
+	displayaspectratio = mame_get_float_option_string(exec, "displayaspectratio", target->displayaspectratio, float_buf);
 
 	option_string = g_strjoin (" ",
 				fullscreen?fullscreen:"",
@@ -152,7 +152,8 @@ static char *create_video_options_string(XmameExecutable *exec, GameOptions *tar
 }
 
 
-static char *create_sound_options_string(XmameExecutable *exec, GameOptions *target)
+//FIXME TODO static char *create_sound_options_string(XmameExecutable *exec, GameOptions *target)
+static char *create_sound_options_string(MameExec *exec, GameOptions *target)
 {
 	char *option_string,
 	     *alsacard=NULL,
@@ -174,31 +175,31 @@ static char *create_sound_options_string(XmameExecutable *exec, GameOptions *tar
 
 	char float_buf[FLOAT_BUF_SIZE];
 	
-	xmame_get_options(exec);
+	mame_get_options(exec);
 	
 	if(!g_ascii_strcasecmp(target->dsp_plugin,"waveout"))
-		audiodevice = xmame_get_option_string(exec, "audiodevice", target->soundfile);
+		audiodevice = mame_get_option_string(exec, "audiodevice", target->soundfile);
 	else
-		audiodevice = xmame_get_option_string(exec, "audiodevice", target->audiodevice);
+		audiodevice = mame_get_option_string(exec, "audiodevice", target->audiodevice);
 	
-	mixerdevice = xmame_get_option_string(exec, "mixerdevice", target->mixerdevice);
+	mixerdevice = mame_get_option_string(exec, "mixerdevice", target->mixerdevice);
 	
 
-	alsacard = xmame_get_int_option_string(exec, "alsacard", target->alsacard);
-	alsadevice = xmame_get_int_option_string(exec, "alsadevice", target->alsadevice);
-	alsa_pcm = xmame_get_option_string(exec, "alsa-pcm", target->alsa_pcm);
-	alsa_buffer = xmame_get_int_option_string(exec, "alsa-buffer", target->alsa_buffer);
+	alsacard = mame_get_int_option_string(exec, "alsacard", target->alsacard);
+	alsadevice = mame_get_int_option_string(exec, "alsadevice", target->alsadevice);
+	alsa_pcm = mame_get_option_string(exec, "alsa-pcm", target->alsa_pcm);
+	alsa_buffer = mame_get_int_option_string(exec, "alsa-buffer", target->alsa_buffer);
 	
-	audio_preferred = xmame_get_boolean_option_string(exec, "audio_preferred", target->audio_preferred);
-	artsBufferTime = xmame_get_int_option_string(exec, "artsBufferTime", target->artsBufferTime);
-	dsp_plugin = xmame_get_option_string(exec, "dsp-plugin", target->dsp_plugin);	
-	sound_mixer_plugin = xmame_get_option_string(exec, "sound-mixer-plugin", target->sound_mixer_plugin);
-	sound = xmame_get_boolean_option_string(exec, "sound", target->sound);
-	samples = xmame_get_boolean_option_string(exec, "samples", target->samples);
-	fakesound = xmame_get_boolean_option_string(exec, "fakesound", target->fakesound);
-	samplefreq = xmame_get_int_option_string(exec, "samplefreq", target->samplefre);
-	bufsize = xmame_get_float_option_string(exec, "bufsize", target->bufsize, float_buf);
-	volume = xmame_get_int_option_string(exec, "volume", target->volume);
+	audio_preferred = mame_get_boolean_option_string(exec, "audio_preferred", target->audio_preferred);
+	artsBufferTime = mame_get_int_option_string(exec, "artsBufferTime", target->artsBufferTime);
+	dsp_plugin = mame_get_option_string(exec, "dsp-plugin", target->dsp_plugin);	
+	sound_mixer_plugin = mame_get_option_string(exec, "sound-mixer-plugin", target->sound_mixer_plugin);
+	sound = mame_get_boolean_option_string(exec, "sound", target->sound);
+	samples = mame_get_boolean_option_string(exec, "samples", target->samples);
+	fakesound = mame_get_boolean_option_string(exec, "fakesound", target->fakesound);
+	samplefreq = mame_get_int_option_string(exec, "samplefreq", target->samplefre);
+	bufsize = mame_get_float_option_string(exec, "bufsize", target->bufsize, float_buf);
+	volume = mame_get_int_option_string(exec, "volume", target->volume);
 
 	option_string = g_strjoin (" ",
 				sound?sound:"",
@@ -240,13 +241,13 @@ static char *create_sound_options_string(XmameExecutable *exec, GameOptions *tar
 	return option_string;
 }
 
-static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *target)
+static char *create_renderer_options_string(MameExec *exec, GameOptions *target)
 {
 	char *option_string=NULL;
 	
-	xmame_get_options(exec);
+	mame_get_options(exec);
 	
-	switch(exec->type)
+	switch (mame_exec_get_exectype (exec))
 	{
 		case XMAME_EXEC_X11:
 		case XMAME_EXEC_XGL:
@@ -279,41 +280,41 @@ static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *
 				gchar *glantialias;
 				gchar *cabview;
 
-				mitshm = xmame_get_boolean_option_string(exec, "mitshm", target->mitshm);
-				xil = xmame_get_boolean_option_string(exec, "xil", target->xil);
-				mtxil = xmame_get_boolean_option_string(exec, "mtxil", target->mtxil);
-				cursor = xmame_get_boolean_option_string(exec, "cursor", target->cursor);
-				xsync = xmame_get_boolean_option_string(exec, "xsync", target->xsync);
-				privatecmap = xmame_get_boolean_option_string(exec, "privatecmap", target->privatecmap);
+				mitshm = mame_get_boolean_option_string(exec, "mitshm", target->mitshm);
+				xil = mame_get_boolean_option_string(exec, "xil", target->xil);
+				mtxil = mame_get_boolean_option_string(exec, "mtxil", target->mtxil);
+				cursor = mame_get_boolean_option_string(exec, "cursor", target->cursor);
+				xsync = mame_get_boolean_option_string(exec, "xsync", target->xsync);
+				privatecmap = mame_get_boolean_option_string(exec, "privatecmap", target->privatecmap);
 
 				/* we should not try to xvext if mitshm is not used */
-				xvext = xmame_get_boolean_option_string(exec, "xvext", target->xvext && !target->mitshm);
-				vidix = xmame_get_boolean_option_string(exec, "vidix", target->vidix);
-				yuv = xmame_get_int_option_string(exec, "force-yuv", target->force_yuv);
+				xvext = mame_get_boolean_option_string(exec, "xvext", target->xvext && !target->mitshm);
+				vidix = mame_get_boolean_option_string(exec, "vidix", target->vidix);
+				yuv = mame_get_int_option_string(exec, "force-yuv", target->force_yuv);
 				
-				x11_mode = xmame_get_int_option_string(exec, "video-mode", target->x11_mode);
+				x11_mode = mame_get_int_option_string(exec, "video-mode", target->x11_mode);
 
 				if (target->xvgeom_flag)
-					geometry = xmame_get_option_string(exec, "geometry", target->geometry);
+					geometry = mame_get_option_string(exec, "geometry", target->geometry);
 				else
 					geometry = NULL;
 
-				forceblitmode = xmame_get_boolean_option_string(exec, "glforceblitmode", target->glforceblitmode);
-				glext78 = xmame_get_boolean_option_string(exec, "glext78", target->glext78);
-				gldrawbitmap = xmame_get_boolean_option_string(exec, "gldrawbitmap", target->gldrawbitmap);
-				glcolormod = xmame_get_boolean_option_string(exec,	"glcolormod", target->glcolormod);
-				gllibname = xmame_get_option_string(exec, "gllibname", target->gllibname);				
-				glulibname = xmame_get_option_string(exec, "glulibname", target->glulibname);
-				cabinet = xmame_get_option_string(exec, "cabinet", target->cabinet);
-				gldblbuffer = xmame_get_boolean_option_string(exec, "gldblbuffer", target->gldblbuffer);
-				gltexture_size = xmame_get_int_option_string(exec, "gltexture_size", target->gltexture_size);
-				glbilinear = xmame_get_boolean_option_string(exec, "glbilinear", target->glbilinear);
-				glalphablending = xmame_get_boolean_option_string(exec, "glalphablending", target->glalphablending);
-				glantialias = xmame_get_boolean_option_string(exec, "glantialias", target->glantialias);
-				cabview = xmame_get_boolean_option_string(exec, "cabview", target->cabview);
+				forceblitmode = mame_get_boolean_option_string(exec, "glforceblitmode", target->glforceblitmode);
+				glext78 = mame_get_boolean_option_string(exec, "glext78", target->glext78);
+				gldrawbitmap = mame_get_boolean_option_string(exec, "gldrawbitmap", target->gldrawbitmap);
+				glcolormod = mame_get_boolean_option_string(exec,	"glcolormod", target->glcolormod);
+				gllibname = mame_get_option_string(exec, "gllibname", target->gllibname);				
+				glulibname = mame_get_option_string(exec, "glulibname", target->glulibname);
+				cabinet = mame_get_option_string(exec, "cabinet", target->cabinet);
+				gldblbuffer = mame_get_boolean_option_string(exec, "gldblbuffer", target->gldblbuffer);
+				gltexture_size = mame_get_int_option_string(exec, "gltexture_size", target->gltexture_size);
+				glbilinear = mame_get_boolean_option_string(exec, "glbilinear", target->glbilinear);
+				glalphablending = mame_get_boolean_option_string(exec, "glalphablending", target->glalphablending);
+				glantialias = mame_get_boolean_option_string(exec, "glantialias", target->glantialias);
+				cabview = mame_get_boolean_option_string(exec, "cabview", target->cabview);
 
 				if (target->glres_flag)
-					glres = xmame_get_option_string(exec, "glres", target->glres);
+					glres = mame_get_option_string(exec, "glres", target->glres);
 				else
 					glres = NULL;
 
@@ -383,9 +384,9 @@ static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *
 				int i;
 
 				if (!(target->sdl_auto_mode)) {
-					if (xmame_has_option(exec, "vidmode_h") && xmame_has_option(exec, "vidmode_w")) {
+					if (mame_has_option(exec, "vidmode_h") && mame_has_option(exec, "vidmode_w")) {
 					
-						sdl_mode_string = xmame_get_option_value(exec, "modenumber", target->modenumber);
+						sdl_mode_string = mame_get_option_value(exec, "modenumber", target->modenumber);
 														
 						if (sdl_mode_string) {
 							modenumber_tokens = g_strsplit(sdl_mode_string, "x", 0);
@@ -397,11 +398,11 @@ static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *
 						}	
 
 					} else {
-						SDL_mode = xmame_get_int_option_string(exec, "modenumber", target->modenumber);
+						SDL_mode = mame_get_int_option_string(exec, "modenumber", target->modenumber);
 					}
 				}
 
-				doublebuf_opt = xmame_get_boolean_option_string(exec, "doublebuf", target->sdl_doublebuf);
+				doublebuf_opt = mame_get_boolean_option_string(exec, "doublebuf", target->sdl_doublebuf);
 				
 				option_string = g_strjoin (" ",
 					doublebuf_opt?doublebuf_opt:"",
@@ -423,11 +424,11 @@ static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *
 				gchar *planar;
 				gchar *linear;
 
-				centerx = xmame_get_int_option_string(exec, "centerx", target->centerx);
-				centery = xmame_get_int_option_string(exec, "centery", target->centery);
-				tweak = xmame_get_boolean_option_string(exec, "tweak", target->tweak);
-				planar = xmame_get_boolean_option_string(exec, "planar", target->planar);
-				linear = xmame_get_boolean_option_string(exec, "linear", target->linear);
+				centerx = mame_get_int_option_string(exec, "centerx", target->centerx);
+				centery = mame_get_int_option_string(exec, "centery", target->centery);
+				tweak = mame_get_boolean_option_string(exec, "tweak", target->tweak);
+				planar = mame_get_boolean_option_string(exec, "planar", target->planar);
+				linear = mame_get_boolean_option_string(exec, "linear", target->linear);
 	
 				option_string = g_strjoin (" ",
 						tweak?tweak:"",
@@ -452,8 +453,8 @@ static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *
 				gchar *resolution;
 				gchar *keepaspect;
 
-				resolution = xmame_get_option_string(exec, "resolution", target->resolution);
-				keepaspect = xmame_get_boolean_option_string(exec, "keepaspect", target->fxgkeepaspect);
+				resolution = mame_get_option_string(exec, "resolution", target->resolution);
+				keepaspect = mame_get_boolean_option_string(exec, "keepaspect", target->fxgkeepaspect);
 
 				option_string = g_strjoin (" ",
 						resolution?resolution:"",
@@ -470,14 +471,14 @@ static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *
 				gchar *linear;
 				gchar *resolution=NULL;
 
-				linear = xmame_get_boolean_option_string(exec, "linear", target->ggilinear);
+				linear = mame_get_boolean_option_string(exec, "linear", target->ggilinear);
 
-				if(target->ggi_force_resolution && xmame_has_option(exec, "xres"))
+				if(target->ggi_force_resolution && mame_has_option(exec, "xres"))
 				{
 					resolution = g_strdup_printf("-%s %i -%s %i",
-					                             xmame_get_option_name(exec, "xres"),
+					                             mame_get_option_name(exec, "xres"),
 					                             target->xres,
-					                             xmame_get_option_name(exec, "yres"),
+					                             mame_get_option_name(exec, "yres"),
                                                  target->yres);
 				}
 				option_string = g_strjoin (" ",
@@ -495,8 +496,8 @@ static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *
 				gchar *render_mode;
 				gchar *phcursor;
 
-				render_mode = xmame_get_int_option_string(exec, "render-mode", target->render_mode);
-				phcursor = xmame_get_boolean_option_string(exec, "phcursor", target->phcursor);
+				render_mode = mame_get_int_option_string(exec, "render-mode", target->render_mode);
+				phcursor = mame_get_boolean_option_string(exec, "phcursor", target->phcursor);
 
 				option_string = g_strjoin (" ",
 					render_mode?render_mode:"",
@@ -515,7 +516,7 @@ static char *create_renderer_options_string(XmameExecutable *exec, GameOptions *
 	return option_string;
 }
 
-static char *create_input_options_string(XmameExecutable *exec, GameOptions *target)
+static char *create_input_options_string(MameExec *exec, GameOptions *target)
 {
 	char *option_string, *joy=NULL,
 			*keymap=NULL,
@@ -536,17 +537,17 @@ static char *create_input_options_string(XmameExecutable *exec, GameOptions *tar
 	gchar *grabmouse;
 	gchar *winkeys;
 
-	xmame_get_options(exec);
+	mame_get_options(exec);
 
 	switch(target->joytype) {
 		case 1:
 		case 4:
-			joy = xmame_get_option_string(exec, "joydevname", target->joydevname);
+			joy = mame_get_option_string(exec, "joydevname", target->joydevname);
 			break;
 		case 2:
-			joy = xmame_get_option_string(exec, "paddevname", target->paddevname);
+			joy = mame_get_option_string(exec, "paddevname", target->paddevname);
 		case 3:
-			joy = xmame_get_option_string(exec, "x11joyname", target->x11joyname);
+			joy = mame_get_option_string(exec, "x11joyname", target->x11joyname);
 	}
 	
 	/*
@@ -575,7 +576,7 @@ static char *create_input_options_string(XmameExecutable *exec, GameOptions *tar
 	}
 	*/
 
-	if (xmame_has_option(exec, "mapkey")) {
+	if (mame_has_option(exec, "mapkey")) {
 		int i;
 		
 		/* Find keymap */
@@ -590,7 +591,7 @@ static char *create_input_options_string(XmameExecutable *exec, GameOptions *tar
 				struct x11_keymap_layout *keys;
 
 				keys = x11_keymaps_layout[i].keys;
-				mapkey_option = g_strdup_printf("-%s", xmame_get_option_name(exec, "mapkey"));
+				mapkey_option = g_strdup_printf("-%s", mame_get_option_name(exec, "mapkey"));
 
 				while (keys->from)
 				{
@@ -610,21 +611,21 @@ static char *create_input_options_string(XmameExecutable *exec, GameOptions *tar
 	}
 
 	if (strcmp(target->ctrlr,"None"))
-		ctrlr = xmame_get_option_string(exec, "ctrlr", target->ctrlr);
+		ctrlr = mame_get_option_string(exec, "ctrlr", target->ctrlr);
 	else
 		ctrlr = NULL;
 
-	grabmouse = xmame_get_boolean_option_string(exec, "grabmouse", target->grabmouse);
-	winkeys = xmame_get_boolean_option_string(exec, "winkeys", target->winkeys);
-	hotrod = xmame_get_boolean_option_string(exec, "hotrod", target->hotrod);
-	hotrodse = xmame_get_boolean_option_string(exec, "hotrodse", target->hotrodse);
-	joytype = xmame_get_int_option_string(exec, "joytype", target->joytype);
-	analogstick = xmame_get_boolean_option_string(exec, "analogstick", target->analogstick);
-	mouse = xmame_get_boolean_option_string(exec, "mouse", target->mouse);
-	usbpspad = xmame_get_boolean_option_string(exec, "usbpspad", target->usbpspad);
-	grabkeyboard = xmame_get_boolean_option_string(exec, "grabkeyboard", target->grabkeyboard);
-	rapidfire = xmame_get_boolean_option_string(exec, "rapidfire", target->rapidfire);
-	ugcicoin = xmame_get_boolean_option_string(exec, "ugcicoin", target->ugcicoin);	
+	grabmouse = mame_get_boolean_option_string(exec, "grabmouse", target->grabmouse);
+	winkeys = mame_get_boolean_option_string(exec, "winkeys", target->winkeys);
+	hotrod = mame_get_boolean_option_string(exec, "hotrod", target->hotrod);
+	hotrodse = mame_get_boolean_option_string(exec, "hotrodse", target->hotrodse);
+	joytype = mame_get_int_option_string(exec, "joytype", target->joytype);
+	analogstick = mame_get_boolean_option_string(exec, "analogstick", target->analogstick);
+	mouse = mame_get_boolean_option_string(exec, "mouse", target->mouse);
+	usbpspad = mame_get_boolean_option_string(exec, "usbpspad", target->usbpspad);
+	grabkeyboard = mame_get_boolean_option_string(exec, "grabkeyboard", target->grabkeyboard);
+	rapidfire = mame_get_boolean_option_string(exec, "rapidfire", target->rapidfire);
+	ugcicoin = mame_get_boolean_option_string(exec, "ugcicoin", target->ugcicoin);	
 
 	option_string = g_strjoin (" ",
 				joytype?joytype:"",
@@ -668,7 +669,7 @@ static char *create_input_options_string(XmameExecutable *exec, GameOptions *tar
 	return option_string;
 }
 
-static char *create_misc_options_string(XmameExecutable *exec, GameOptions *target)
+static char *create_misc_options_string(MameExec *exec, GameOptions *target)
 {
 	char *option_string, *artwork=NULL,
 			*keyboard_leds=NULL,
@@ -685,7 +686,7 @@ static char *create_misc_options_string(XmameExecutable *exec, GameOptions *targ
 	gchar *cheat;
 	gchar *cfg_dir;
 
-	xmame_get_options(exec);
+	mame_get_options(exec);
 
 	if (target->artwork) {
 		gchar *use_backdrops;
@@ -695,12 +696,12 @@ static char *create_misc_options_string(XmameExecutable *exec, GameOptions *targ
 		gchar *artwork_resolution;
 		gchar *use_artwork;
 
-		use_artwork = xmame_get_boolean_option_string(exec, "artwork", target->artwork);
-		use_backdrops = xmame_get_boolean_option_string(exec, "use_backdrops", target->use_backdrops);	
-		use_overlays = xmame_get_boolean_option_string(exec, "use_overlays", target->use_overlays);	
-		use_bezels = xmame_get_boolean_option_string(exec, "use_bezels", target->use_bezels);
-		artwork_crop = xmame_get_boolean_option_string(exec, "artwork_crop", target->artwork_crop);		
-		artwork_resolution = xmame_get_int_option_string(exec, "artwork_resolution", target->artwork_resolution);
+		use_artwork = mame_get_boolean_option_string(exec, "artwork", target->artwork);
+		use_backdrops = mame_get_boolean_option_string(exec, "use_backdrops", target->use_backdrops);	
+		use_overlays = mame_get_boolean_option_string(exec, "use_overlays", target->use_overlays);	
+		use_bezels = mame_get_boolean_option_string(exec, "use_bezels", target->use_bezels);
+		artwork_crop = mame_get_boolean_option_string(exec, "artwork_crop", target->artwork_crop);		
+		artwork_resolution = mame_get_int_option_string(exec, "artwork_resolution", target->artwork_resolution);
 
 		artwork = g_strjoin (" ",
 					use_artwork?use_artwork:"",
@@ -720,18 +721,18 @@ static char *create_misc_options_string(XmameExecutable *exec, GameOptions *targ
 		g_free(use_artwork);
 	} 
 
-	keyboard_leds = xmame_get_boolean_option_string(exec, "keyboard_leds", target->keyboard_leds);
-	skip_disclaimer = xmame_get_boolean_option_string(exec, "skip_disclaimer", target->skip_disclaimer);
-	skip_gameinfo = xmame_get_boolean_option_string(exec, "skip_gameinfo", target->skip_gameinfo);
-	debug = xmame_get_boolean_option_string(exec, "debug", target->debug);
-	debug_size = xmame_get_option_string(exec, "debug-size", target->debug_size);
+	keyboard_leds = mame_get_boolean_option_string(exec, "keyboard_leds", target->keyboard_leds);
+	skip_disclaimer = mame_get_boolean_option_string(exec, "skip_disclaimer", target->skip_disclaimer);
+	skip_gameinfo = mame_get_boolean_option_string(exec, "skip_gameinfo", target->skip_gameinfo);
+	debug = mame_get_boolean_option_string(exec, "debug", target->debug);
+	debug_size = mame_get_option_string(exec, "debug-size", target->debug_size);
 
 	if(target->log_flag)
 	{
 		if(strcmp(g_strstrip(target->log),""))
-			log = xmame_get_option_string(exec, "log", target->log);
+			log = mame_get_option_string(exec, "log", target->log);
 		else
-			log = xmame_get_option_string(exec, "log", "xmame.log");
+			log = mame_get_option_string(exec, "log", "xmame.log");
 	}
 
 	/* for the cfg_directory option, if available, see in io options */
@@ -740,17 +741,17 @@ static char *create_misc_options_string(XmameExecutable *exec, GameOptions *targ
 		      NULL);
 	if (target->cfgname_flag)
 	{
-		cfgname = xmame_get_option_string(exec, "cfgname", target->cfgname);
+		cfgname = mame_get_option_string(exec, "cfgname", target->cfgname);
 		if (!cfgname && strcmp(g_strstrip(target->cfgname),"")) {
 			gchar *full_path = g_build_filename (cfg_dir,
 							     target->cfgname,
 							     NULL);
-			cfgname = xmame_get_option_string(exec, "cfg_directory", full_path);
+			cfgname = mame_get_option_string(exec, "cfg_directory", full_path);
 
 			g_free(full_path);
 		}
 	} else {
-		cfgname = xmame_get_option_string(exec, "cfg_directory", cfg_dir);
+		cfgname = mame_get_option_string(exec, "cfg_directory", cfg_dir);
 	}
 
 	
@@ -760,8 +761,8 @@ static char *create_misc_options_string(XmameExecutable *exec, GameOptions *targ
 			additional_options = g_strdup_printf ("%s",target->additional_options);
 	} 
 	
-	bios = xmame_get_int_option_string(exec, "bios", target->bios);
-	cheat = xmame_get_boolean_option_string(exec, "cheat", target->cheat);
+	bios = mame_get_int_option_string(exec, "bios", target->bios);
+	cheat = mame_get_boolean_option_string(exec, "cheat", target->cheat);
 
 	option_string = g_strjoin (" ",
 				artwork?artwork:"",
@@ -794,7 +795,7 @@ static char *create_misc_options_string(XmameExecutable *exec, GameOptions *targ
 	return option_string;
 }
 
-char *create_vector_options_string(XmameExecutable *exec, GameOptions *target)
+char *create_vector_options_string(MameExec *exec, GameOptions *target)
 {
 	gchar *option_string;
 	gchar *vectorres;
@@ -808,22 +809,22 @@ char *create_vector_options_string(XmameExecutable *exec, GameOptions *target)
 	gchar *glantialiasvec;
 	gchar *glbeam;
 
-	xmame_get_options(exec);
+	mame_get_options(exec);
 		
 	if(target->vectorres_flag)
-		vectorres = xmame_get_option_string(exec, "vectorres", target->vectorres);
+		vectorres = mame_get_option_string(exec, "vectorres", target->vectorres);
 	else
 		vectorres = NULL;
 
-	intensity = xmame_get_float_option_string(exec, "intensity", target->intensity, float_buf);
-	flicker = xmame_get_float_option_string(exec, "flicker", target->flicker, float_buf);
-	beam = xmame_get_float_option_string(exec, "beam", target->beam, float_buf);
-	antialias = xmame_get_boolean_option_string(exec, "antialias", target->antialias);
-	translucency = xmame_get_boolean_option_string(exec, "translucency", target->translucency);
+	intensity = mame_get_float_option_string(exec, "intensity", target->intensity, float_buf);
+	flicker = mame_get_float_option_string(exec, "flicker", target->flicker, float_buf);
+	beam = mame_get_float_option_string(exec, "beam", target->beam, float_buf);
+	antialias = mame_get_boolean_option_string(exec, "antialias", target->antialias);
+	translucency = mame_get_boolean_option_string(exec, "translucency", target->translucency);
 
-	gldrawbitmapvec = xmame_get_boolean_option_string(exec, "gldrawbitmapvec", target->gldrawbitmapvec);
-	glantialiasvec = xmame_get_boolean_option_string(exec, "glantialiasvec", target->glantialiasvec);
-	glbeam = xmame_get_float_option_string(exec, "glbeam", target->beam, float_buf);
+	gldrawbitmapvec = mame_get_boolean_option_string(exec, "gldrawbitmapvec", target->gldrawbitmapvec);
+	glantialiasvec = mame_get_boolean_option_string(exec, "glantialiasvec", target->glantialiasvec);
+	glbeam = mame_get_float_option_string(exec, "glbeam", target->beam, float_buf);
 
 	option_string = g_strjoin (" ",
 				antialias?antialias:"",
@@ -851,7 +852,7 @@ char *create_vector_options_string(XmameExecutable *exec, GameOptions *target)
 	return option_string;
 }
 
-gchar *create_io_options_string(XmameExecutable *exec)
+gchar *create_io_options_string(MameExec *exec)
 {
 	char *option_string;
 	
@@ -874,7 +875,7 @@ gchar *create_io_options_string(XmameExecutable *exec)
 			*input_directory_option,
 			*state_directory_option;
 
-	xmame_get_options(exec);
+	mame_get_options(exec);
 	
 	/* FIXME TODO Free the strings */
 	g_object_get (main_gui.gui_prefs,
@@ -895,22 +896,22 @@ gchar *create_io_options_string(XmameExecutable *exec)
 		      "dir-ini", &ini_dir,
 		      NULL);
 	
-	artworkpath_option = xmame_get_option_string(exec, "artwork_directory", artwork_dir);
-	screenshotdir_option = xmame_get_option_string(exec, "snapshot_directory", snapshot_dir);
- 	hiscoredir_option = xmame_get_option_string(exec, "hiscore_directory", hiscore_dir);
-	cheatfile_option = xmame_get_option_string(exec, "cheat_file", cheat_file);
-	hiscorefile_option = xmame_get_option_string(exec, "hiscore_file", hiscore_file);	
-	historyfile_option = xmame_get_option_string(exec, "history_file", history_file);
-	mameinfofile_option = xmame_get_option_string(exec, "mameinfo_file", mameinfo_file);
-	diffdir_option = xmame_get_option_string(exec, "diff_directory", diff_dir);
+	artworkpath_option = mame_get_option_string(exec, "artwork_directory", artwork_dir);
+	screenshotdir_option = mame_get_option_string(exec, "snapshot_directory", snapshot_dir);
+ 	hiscoredir_option = mame_get_option_string(exec, "hiscore_directory", hiscore_dir);
+	cheatfile_option = mame_get_option_string(exec, "cheat_file", cheat_file);
+	hiscorefile_option = mame_get_option_string(exec, "hiscore_file", hiscore_file);	
+	historyfile_option = mame_get_option_string(exec, "history_file", history_file);
+	mameinfofile_option = mame_get_option_string(exec, "mameinfo_file", mameinfo_file);
+	diffdir_option = mame_get_option_string(exec, "diff_directory", diff_dir);
 
-	inipath_option = xmame_get_option_string(exec, "inipath", ini_dir);
-	cfg_directory_option = xmame_get_option_string(exec, "cfg_directory", cfg_dir);
-	nvram_directory_option = xmame_get_option_string(exec, "nvram_directory", nvram_dir);
-	ctrlr_directory_option = xmame_get_option_string(exec, "ctrlr_directory", ctrlr_dir);
-	state_directory_option = xmame_get_option_string(exec, "state_directory", state_dir);
-	input_directory_option = xmame_get_option_string(exec, "input_directory", inp_dir);
-	memcard_directory_option = xmame_get_option_string(exec, "memcard_directory", memcard_dir);
+	inipath_option = mame_get_option_string(exec, "inipath", ini_dir);
+	cfg_directory_option = mame_get_option_string(exec, "cfg_directory", cfg_dir);
+	nvram_directory_option = mame_get_option_string(exec, "nvram_directory", nvram_dir);
+	ctrlr_directory_option = mame_get_option_string(exec, "ctrlr_directory", ctrlr_dir);
+	state_directory_option = mame_get_option_string(exec, "state_directory", state_dir);
+	input_directory_option = mame_get_option_string(exec, "input_directory", inp_dir);
+	memcard_directory_option = mame_get_option_string(exec, "memcard_directory", memcard_dir);
 
 	option_string = g_strdup_printf("%s "	/* artworkpath_option*/
 			"%s "			/* screenshotdir_option */
@@ -979,7 +980,7 @@ gchar *create_io_options_string(XmameExecutable *exec)
 	return option_string;
 }
 
-gchar *create_rompath_options_string(XmameExecutable *exec)
+gchar *create_rompath_options_string(MameExec *exec)
 {
 	GValueArray *va_rom_paths;
 	GValueArray *va_sample_paths;
@@ -995,7 +996,7 @@ gchar *create_rompath_options_string(XmameExecutable *exec)
 		      "rom-paths", &va_rom_paths,
 		      NULL);
 	
-	xmame_get_options(exec);
+	mame_get_options(exec);
 
 	/* G_SEARCHPATH_SEPARATOR_S returns ":" on Unix, but newer versions,
 	   particularly for sdlmame, require ";" */
@@ -1006,7 +1007,7 @@ gchar *create_rompath_options_string(XmameExecutable *exec)
 			if (!rompath)
 				rompath = g_strdup (g_value_get_string (g_value_array_get_nth (va_rom_paths, i)));
 			else
-				rompath = g_strjoin ((g_strcasecmp (exec->name, "xmame") == 0) ? G_SEARCHPATH_SEPARATOR_S : ";",
+				rompath = g_strjoin ((g_strcasecmp (mame_exec_get_name (exec), "xmame") == 0) ? G_SEARCHPATH_SEPARATOR_S : ";",
 							rompath,
 							g_value_get_string (g_value_array_get_nth (va_rom_paths, i)),
 							NULL);
@@ -1020,7 +1021,7 @@ gchar *create_rompath_options_string(XmameExecutable *exec)
 			if (!samplepath)
 				samplepath = g_strdup (g_value_get_string (g_value_array_get_nth (va_sample_paths, i)));
 			else
-				samplepath = g_strjoin ((g_strcasecmp (exec->name, "xmame") == 0) ? G_SEARCHPATH_SEPARATOR_S : ";",
+				samplepath = g_strjoin ((g_strcasecmp (mame_exec_get_name (exec), "xmame") == 0) ? G_SEARCHPATH_SEPARATOR_S : ";",
 							samplepath,
 							g_value_get_string (g_value_array_get_nth (va_sample_paths, i)),
 							NULL);
@@ -1031,8 +1032,8 @@ gchar *create_rompath_options_string(XmameExecutable *exec)
 	GMAMEUI_DEBUG ("Rompath is %s", rompath);
 	GMAMEUI_DEBUG ("Samplepath is %s", samplepath);
 
-	rompath_option_string = xmame_get_option_string(exec, "rompath", rompath);
-	samplepath_option_string = xmame_get_option_string(exec, "samplepath", samplepath);
+	rompath_option_string = mame_get_option_string(exec, "rompath", rompath);
+	samplepath_option_string = mame_get_option_string(exec, "samplepath", samplepath);
 
 	if (rompath)
 		g_free(rompath);
@@ -1058,7 +1059,7 @@ gchar *create_rompath_options_string(XmameExecutable *exec)
 	return option_string;
 }
 
-char *create_options_string(XmameExecutable *exec, GameOptions *target) {
+char *create_options_string(MameExec *exec, GameOptions *target) {
 	gchar *opt;
 	gchar *rompath_options;
 	gchar *io_options;
@@ -1068,7 +1069,7 @@ char *create_options_string(XmameExecutable *exec, GameOptions *target) {
 	gchar *input_options;
 	gchar *misc_options;
 
-	xmame_get_options(exec);
+	mame_get_options(exec);
 
 	rompath_options = create_rompath_options_string(exec);
 	io_options = create_io_options_string(exec);
