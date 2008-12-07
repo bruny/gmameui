@@ -1232,8 +1232,10 @@ mame_get_options (MameExec *exec)
 					}
 				}
 
-				if (gmameui_name)
+				if (gmameui_name) {
+					GMAMEUI_DEBUG ("Adding supported option %s", my_opt->name);
 					g_hash_table_insert (option_hash, (gpointer)gmameui_name, my_opt);
+				}
 			}
 		} while (more_input);
 

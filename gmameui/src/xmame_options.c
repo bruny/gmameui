@@ -136,6 +136,8 @@ xmame_options_init (void)
 	ADD_OPTION ("log");
 	ADD_OPTION ("verbose");
 	ADD_OPTION ("update_in_pause");
+	ADD_OPTION ("debug");
+	ADD_OPTION ("debugscript");
 	/* Debugging options */
 	ADD_OPTION ("oslog");
 	
@@ -147,7 +149,7 @@ xmame_options_init (void)
 	ADD_OPTION ("video");
 	ADD_OPTION ("numscreens");
 	ADD_OPTION ("window");
-	ADD_OPTION ("maximise");
+	ADD_OPTION ("maximize");
 	ADD_OPTION ("keepaspect");
 	ADD_OPTION ("unevenstretch");
 	ADD_OPTION ("effect");
@@ -204,7 +206,7 @@ xmame_options_init (void)
 	ADD_OPTION ("cfgname");
 	ADD_OPTION ("ctrlr");
 	ADD_OPTION ("cursor");
-	ADD_OPTION ("debug");
+	
 	ADD_OPTION ("debug-size");
 	ADD_OPTION ("dirty");
 	ADD_OPTION ("displayaspectratio");
@@ -323,6 +325,7 @@ xmame_options_init (void)
 	ADD_OPTION_ALIAS ("mapkey",             "sdlmapkey");
 	ADD_OPTION_ALIAS ("snapshot_directory", "screenshotdir");
 	ADD_OPTION_ALIAS ("video-mode",         "x11-mode");
+	ADD_OPTION_ALIAS ("yuvmode",         "scalemode");      /* Between 124u1 and 127u2 */
 }
 
 const gchar *

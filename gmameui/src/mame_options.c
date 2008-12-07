@@ -72,8 +72,26 @@ struct _MameOptionsPriv
 	gboolean             is_showing;
 };
 
-#define PREFERENCE_PROPERTY_PREFIX "preferences_"
+typedef struct {
+	gchar *parent;		/* Widget that, when changed, causes state of dependent widget to change */
+	gchar *dependent;       /* Dependent widget */
+	gchar *relationship;    /* Value that parent needs to be for child to be enabled */
+} WidgetRelationship;
 
+static const WidgetRelationship widget_relationships[] =
+{
+	{ "Video.video", "Video.scalemode", "soft" },
+	{ "Sound.sound", "Sound.samples", "1" },
+	{ "Sound.sound", "Sound.samplerate", "1" },
+	{ "Sound.sound", "Sound.volume", "1" },
+	{ "Sound.sound", "Sound.audio_latency", "1" },
+	{ "Performance.autoframeskip", "Performance.frameskip", "0" },
+	{ "Debugging.log", "Debugging.verbose", "1" },
+	{ "Debugging.debug", "Debugging.debugscript", "1" },
+	{ "Debugging.debug", "Debugging.oslog", "1" },
+};
+
+#define PREFERENCE_PROPERTY_PREFIX "preferences_"
 
 /*
  * Registers all properties defined for widgets below the 'parent' widget
@@ -413,8 +431,7 @@ mame_options_generate_custom_settings (MameOptions *pr)
 }
 
 static void 
-on_preferences_dialog_destroyed (GtkWidget *preferencess_dialog,
-							     MameOptions *pr)
+on_preferences_dialog_destroyed (GtkWidget *preferencess_dialog, MameOptions *pr)
 {
 	g_object_unref (pr->priv->prefs_dialog);
 	
@@ -661,7 +678,7 @@ update_property_on_change_double (GtkWidget *widget, gpointer user_data)
 /* This event does two things - updates the MameProperty object (which triggers
    the key file to be updated) and sets the state of the associated
    text entry field. */
-static void
+ static void
 update_property_on_change_int_toggle (GtkWidget *widget, gpointer user_data)
 {
 	MameOptions *pr;
@@ -771,9 +788,14 @@ set_property_value_as_string (MameProperty *prop, const gchar *value)
 				int_value = atoi (value);
 			else
 				int_value = 0;
-
+// AAA FIXME TODO HACK HACK HACK
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (prop->object),
 				                      int_value);
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (prop->object),
+				                      !int_value);
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (prop->object),
+				                      int_value);
+
 			break;
 		
 		case GMAMEUI_PROPERTY_OBJECT_TYPE_SPIN:
@@ -794,6 +816,7 @@ set_property_value_as_string (MameProperty *prop, const gchar *value)
 		case GMAMEUI_PROPERTY_OBJECT_TYPE_COMBO:
 	/* FIXME TODO This is where we add the strings to the combo */
 			values = g_object_get_data(G_OBJECT(prop->object), "untranslated");
+			g_return_if_fail (values != NULL);
 			if (value != NULL)
 			{
 				for (i=0; values[i] != NULL; i++)
@@ -839,11 +862,46 @@ set_property_value_as_string (MameProperty *prop, const gchar *value)
 		}
 }
 
+/* When a widget changes value, check to see whether there are any dependent
+   widgets that need to have their state set correspondingly */
+static void
+parent_widget_clicked (GtkWidget *widget, gpointer user_data)
+{
+	GtkWidget *child;
+	guint i;
+	
+	MameOptions *pr;
+	MameProperty *p;
+	
+	pr = MAME_OPTIONS (g_object_get_data (G_OBJECT (widget), "MameOptions"));
+	p = (MameProperty *) user_data;
+		
+	/* Process each of the widget relationships for the parent */
+	for (i = 0; i < G_N_ELEMENTS (widget_relationships); i++) {
+
+		if (strcmp (p->key, widget_relationships[i].parent) == 0) {
+			child = get_widget_with_suffix (pr->priv->xml, widget_relationships[i].dependent);
+			
+			/* Set the state of the children based on the value of the parent */
+			gchar *parent_val = get_property_value_as_string (p);
+
+			if (strcmp (parent_val, widget_relationships[i].relationship) == 0)
+				gtk_widget_set_sensitive (child, TRUE);
+			else
+				gtk_widget_set_sensitive (child, FALSE);
+		}
+	}
+}
+
+
 static void
 register_callbacks (MameOptions *pr, MameProperty *p)
 {
 	g_object_set_data (G_OBJECT (p->object), "MameOptions", pr);
 	
+	/* Whenever an object value is changed, we not only set the default callback
+	   to retrieve the value and update the key file, we also call on_parent_widget_changed ()
+	   to process any other widgets based on the value */
 	switch (p->object_type) {
 		case GMAMEUI_PROPERTY_OBJECT_TYPE_ENTRY:
 			g_signal_connect (G_OBJECT(p->object), "changed",
@@ -866,6 +924,8 @@ register_callbacks (MameOptions *pr, MameProperty *p)
 		case GMAMEUI_PROPERTY_OBJECT_TYPE_COMBO:
 			g_signal_connect (G_OBJECT(p->object), "changed",
 							  G_CALLBACK (update_property_on_change_str), p);
+			g_signal_connect (G_OBJECT(p->object), "changed",
+					  G_CALLBACK (parent_widget_clicked), p);
 			break;
 		case GMAMEUI_PROPERTY_OBJECT_TYPE_TOGGLE:
 			/* If this is a toggle controlling a toggletext (i.e. has
@@ -877,6 +937,11 @@ register_callbacks (MameOptions *pr, MameProperty *p)
 			else
 				g_signal_connect (G_OBJECT(p->object), "toggled",
 							  G_CALLBACK (update_property_on_change_int), p);
+
+			g_signal_connect (G_OBJECT(p->object), "toggled",
+					  G_CALLBACK (parent_widget_clicked), p);
+
+
 			break;
 		case GMAMEUI_PROPERTY_OBJECT_TYPE_HSCALE:
 			g_signal_connect (G_OBJECT(p->object), "value-changed",
@@ -1075,9 +1140,10 @@ mame_options_register_property_raw (MameOptions *pr,
 
 	g_hash_table_insert (pr->priv->properties, g_strdup (key), p);
 
-	connect_prop_to_object (pr, p);
+//	connect_prop_to_object (pr, p);
 	register_callbacks (pr, p);
 
+connect_prop_to_object (pr, p);
 	return TRUE;
 }
 
@@ -1176,11 +1242,11 @@ mame_options_register_property_from_string (MameOptions *pr,
 		if (!mame_has_option (exec, key_field)) {
 			gchar *text;
 			
-			GMAMEUI_DEBUG ("Option %s not supported by this version of MAME", key);
+			GMAMEUI_DEBUG ("Option %s not supported by this version of MAME", key_field);
 		
 			gtk_widget_set_sensitive (widget, FALSE);
 			text = g_strdup_printf (_("The option %s is not supported by MAME %s"),
-						key, mame_exec_get_version (exec));
+						key_field, mame_exec_get_version (exec));
 			gtk_widget_set_tooltip_text (widget, text);
 			g_free (text);
 		}
