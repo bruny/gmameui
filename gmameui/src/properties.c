@@ -51,47 +51,6 @@
 
 #define BUFFER_SIZE 1000
 
-static GtkWidget     *details_audit_result;
-static GtkTextBuffer *details_audit_result_buffer;
-static GtkWidget     *sample_check_result;
-static GtkWidget     *rom_check_result;
-
-static RomEntry *rom;
-
-static gint romset_sigid;
-
-static void
-on_romset_audited (GmameuiAudit *audit, gchar *audit_line, gint type, gint auditresult, gpointer user_data);
-
-static void
-audit_game (RomEntry *localrom) 
-{	
-	while (gtk_events_pending ()) gtk_main_iteration ();
-
-	if (!mame_exec_list_has_current_executable (main_gui.exec_list)) {
-		gtk_label_set_text (GTK_LABEL (rom_check_result), _("Can't audit game"));
-		if (localrom->nb_samples > 0) {
-			gtk_label_set_text (GTK_LABEL (sample_check_result), _("Can't audit game"));
-		} else {
-			gtk_label_set_text (GTK_LABEL (sample_check_result), _("None required"));
-		}
-		return;
-	}
-
-	mame_audit_start_single (localrom->romname);
-	
-	rom = localrom;
-	
-}
-
-static gboolean
-audit_idle (gpointer data)
-{
-	audit_game ((RomEntry *)data);
-
-	return FALSE;
-}
-
 static void
 exit_properties_window (GtkWidget *window, gpointer user_data)
 {
@@ -150,190 +109,6 @@ properties_save (GtkWidget *properties_window)
 	save_options (rom, opts);
 }
 
-static char *
-get_rom_clone_name (RomEntry *rom)
-{
-	char    *value = NULL;
-
-	/* find the clone name if there is a clone */
-	if (strcmp (rom->cloneof, "-")) {
-		RomEntry *tmprom;
-
-		tmprom = get_rom_from_gamelist_by_name (gui_prefs.gl, rom->cloneof);
-		if (tmprom) {
-			value = g_strdup_printf ("%s - \"%s\"", rom_entry_get_list_name (tmprom), rom->cloneof);
-		} else {
-			value = g_strdup_printf (" - \"%s\"", rom->cloneof);
-		}
-	}
-
-	return value;
-}
-
-static char *
-get_rom_cpu_value (RomEntry *rom)
-{
-	char *value = NULL;
-	char *values [NB_CPU + 1];
-	gint  i, j;
-
-	j = 0;
-	values[j] = NULL;
-	for (i = 0; i < NB_CPU; i++) {
-		if (strcmp (rom->cpu_info[i].name, "-")
-		    && rom->cpu_info[i].name[0] != '\0') {
-			values[j++] = g_strdup_printf ("%s %f MHz%s",
-						       rom->cpu_info[i].name,
-						       rom->cpu_info[i].clock / 1000000.0,
-						       rom->cpu_info[i].sound_flag ? _(" (sound)") : " ");
-		}
-	}
-	values[j++] = NULL;
-
-	value = g_strjoinv ("\n", values);
-
-	for (i = 0; i < j; i++)
-		g_free (values[i]);
-
-	return value;
-}
-
-static char *
-get_rom_sound_value (RomEntry *rom)
-{
-	char *value = NULL;
-	char *values [NB_CPU + 1];
-	gint  i, j;
-
-	j = 0;
-	values[j] = NULL;
-	for (i = 0; i < NB_CPU; i++) {
-		if (strcmp (rom->sound_info[i].name, "-")
-		    && rom->sound_info[i].name[0]) {
-			if (rom->sound_info[i].clock == 0)
-				values[j++] = g_strdup_printf ("%s", rom->sound_info[i].name);
-			else
-				values[j++] = g_strdup_printf ("%s %f MHz",
-							      rom->sound_info[i].name,
-							      rom->sound_info[i].clock / 1000000.0);
-		}
-	}
-	values[j++] = NULL;
-
-	value = g_strjoinv ("\n", values);
-
-	for (i = 0; i < j; i++)
-		g_free (values[i]);
-
-	return value;
-}
-
-/* Entry method for new UI */
-void
-show_rom_properties ()
-{
-	GtkWidget *dialog;
-	GtkWidget *label;
-	GtkWidget *scrolledwindow;
-	gchar *value;
-	char *title;
-	RomEntry *rom;
-	
-	rom = gui_prefs.current_game;
-	
-	GladeXML *xml = glade_xml_new (GLADEDIR "rom_info.glade", "dialog1", GETTEXT_PACKAGE);
-	
-	dialog = glade_xml_get_widget (xml, "dialog1");
-	
-	gtk_window_set_title (GTK_WINDOW (dialog), rom_entry_get_list_name (rom));
-
-	value = g_strdup_printf("<b>%s</b>", rom_entry_get_list_name (rom));
-	label = glade_xml_get_widget (xml, "rom_name_lbl");
-	gtk_label_set_markup (GTK_LABEL (label), value);
-	
-	label = glade_xml_get_widget (xml, "year_result");
-	gtk_label_set_text (GTK_LABEL (label), rom->year);
-
-	label = glade_xml_get_widget (xml, "manufacturer_result");
-	gtk_label_set_text (GTK_LABEL (label), rom->manu);
-	
-	title = get_rom_cpu_value (rom);
-	label = glade_xml_get_widget (xml, "cpu_result");
-	gtk_label_set_text (GTK_LABEL (label), title);
-	g_free (title);
-
-	title = get_rom_sound_value (rom);
-	label = glade_xml_get_widget (xml, "sound_result");
-	gtk_label_set_text (GTK_LABEL (label), title);
-	g_free (title);
-
-	/* Don't display resolution if this is a vector game */
-	if (!rom->vector)
-		value = g_strdup_printf ("%i \303\227 %i ", rom->screen_x, rom->screen_y);
-	else
-		value = g_strdup_printf ("");
-	title = g_strdup_printf ("%s%s %.2f Hz",
-				 value,
-				 rom->horizontal ? "Horizontal" : "Vertical",
-				 rom->screen_freq);
-	g_free (value);
-
-	label = glade_xml_get_widget (xml, "screen_result");
-	gtk_label_set_text (GTK_LABEL (label), title);
-	g_free (title);
-
-	title = g_strdup_printf (_("%i colors"), rom->colors);
-	label = glade_xml_get_widget (xml, "colors_result");
-	gtk_label_set_text (GTK_LABEL (label), title);
-	g_free (title);
-
-	label = glade_xml_get_widget (xml, "clone_result");
-	GtkWidget *clone_label = glade_xml_get_widget (xml, "clone_label");
-	if (strcmp (rom->cloneof, "-")) {
-		/* Get the title of the original ROM */
-		title = get_rom_clone_name (rom);
-		gtk_label_set_text (GTK_LABEL (label), title);
-		g_free (title);
-	} else {
-		gtk_widget_hide (label);
-		gtk_widget_hide (clone_label);
-	}
-	
-	/* Driver details - TODO 
-	label = glade_xml_get_widget (xml, "lbl_emulation_status");
-	gtk_label_set_text (GTK_LABEL (label), rom->driver_status_emulation);
-	label = glade_xml_get_widget (xml, "lbl_color_status");
-	gtk_label_set_text (GTK_LABEL (label), rom->driver_status_color);
-	label = glade_xml_get_widget (xml, "lbl_sound_status");
-	gtk_label_set_text (GTK_LABEL (label), rom->driver_status_sound);
-	label = glade_xml_get_widget (xml, "lbl_graphic_status");
-	gtk_label_set_text (GTK_LABEL (label), rom->driver_status_graphic);*/
-	
-	/* Set default labels for the check result labels - these will be changed */
-	rom_check_result = glade_xml_get_widget (xml, "rom_check_result");
-	gtk_label_set_text (GTK_LABEL (rom_check_result), _("Checking..."));
-	
-	sample_check_result = glade_xml_get_widget (xml, "sample_check_result");
-	gtk_label_set_text (GTK_LABEL (sample_check_result), _("None required"));
-	
-	scrolledwindow = glade_xml_get_widget (xml, "scrolledwindow");
-	
-	details_audit_result_buffer = gtk_text_buffer_new (NULL);
-	details_audit_result = glade_xml_get_widget (xml, "details_audit_result");
-	gtk_text_view_set_buffer (GTK_TEXT_VIEW (details_audit_result), details_audit_result_buffer);
-	
-	romset_sigid = g_signal_connect (gui_prefs.audit, "romset-audited",
-					 G_CALLBACK (on_romset_audited), NULL);
-	
-	g_idle_add (audit_idle, rom);
-	
-	gtk_dialog_run (GTK_DIALOG (dialog));
-	
-	gtk_widget_destroy (dialog);
-	g_signal_handler_disconnect (gui_prefs.audit, romset_sigid);
-	
-}
-
 static void
 properties_response (GtkWidget *dialog,
 		     gint       response_id,
@@ -358,61 +133,19 @@ properties_response (GtkWidget *dialog,
 	}
 }
 
-static void
-on_romset_audited (GmameuiAudit *audit, gchar *audit_line, gint type, gint auditresult, gpointer user_data)
-{
-	const       gchar *title;
-	GtkTextIter text_iter;
-	
-	gchar *rom_status_desc[NUMBER_STATUS] = {
-		_("Incorrect"),
-		_("Passed"),
-		_("Unknown"),
-		"",
-		_("Best available"),
-		_("Not available"),
-		""
-	};
-	
-	/*GMAMEUI_DEBUG ("Properties window - romset audited, result is %d - %s", auditresult, audit_line);*/
-	
-	if (auditresult != NOTROMSET) {
-		title = rom_status_desc[auditresult];
-		if (type == AUDIT_TYPE_ROM) {
-			rom->has_roms = auditresult;
-			gtk_label_set_text (GTK_LABEL (rom_check_result), title);
-		} else {
-			rom->has_samples = auditresult;
-			gtk_label_set_text (GTK_LABEL (sample_check_result), title);
-		}
 
-		update_game_in_list (rom);
-	} else if (g_str_has_prefix (audit_line, rom->romname)) {
-		/* Line relates to a ROM within the ROM set */
-		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_audit_result_buffer), &text_iter);
-		gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_audit_result_buffer), &text_iter, audit_line, -1);
-		
-		/* Append carriage return */
-		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (details_audit_result_buffer), &text_iter);
-		gtk_text_buffer_insert (GTK_TEXT_BUFFER (details_audit_result_buffer), &text_iter, "\n", -1);
-	} else {
-		/* Other output from MAME that we can ignore */
-	}
-}
 
 /* Entry method for old view */
 GtkWidget *
 create_properties_windows (RomEntry *rom)
 {
 	GtkWidget *properties_windows;
-
 	GtkWidget *title_label;
-
 	GtkWidget *properties_apply_button;
 	GtkWidget *properties_reset_button = NULL;
 	GtkAccelGroup *accel_group;
-	
 	GtkWidget *notebook1;
+	MameExec *current_exec;
 
 	gchar *title;
 	GameOptions *opts = NULL;
@@ -548,4 +281,3 @@ create_properties_windows (RomEntry *rom)
 
 	return properties_windows;
 }
-

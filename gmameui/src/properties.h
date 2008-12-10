@@ -27,10 +27,9 @@
 #include "common.h"
 #include "game_list.h"
 
+
 GtkWidget*
 create_properties_windows (RomEntry *rom);
 
-void
-show_rom_properties ();
 
 #endif /* __PROPERTIES_H__ */

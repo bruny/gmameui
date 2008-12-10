@@ -178,7 +178,9 @@ void
 on_properties_activate (GtkAction *action,
 			gpointer  user_data)
 {
-	show_rom_properties ();
+	GtkWidget *rominfo_dialog;
+	rominfo_dialog = mame_rominfo_dialog_new ();
+	gtk_widget_show (rominfo_dialog);
 }
 
 void
