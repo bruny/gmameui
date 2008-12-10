@@ -24,11 +24,33 @@
 #ifndef __DIRECTORIES_H__
 #define __DIRECTORIES_H__
 
+G_BEGIN_DECLS
 
-void
-create_folderselection (gpointer current_entry,gboolean directory_selection_box);
+/* Preferences dialog object */
+#define MAME_TYPE_DIRECTORIES_DIALOG        (mame_directories_dialog_get_type ())
+#define MAME_DIRECTORIES_DIALOG(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), MAME_TYPE_DIRECTORIES_DIALOG, MameDirectoriesDialog))
+#define MAME_DIRECTORIES_DIALOG_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST((k), MAME_TYPE_DIRECTORIES_DIALOG, MameDirectoriesDialogClass))
+#define MAME_IS_DIRECTORIES_DIALOG(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), MAME_TYPE_DIRECTORIES_DIALOG))
+#define MAME_IS_DIRECTORIES_DIALOG_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), MAME_TYPE_DIRECTORIES_DIALOG))
+#define MAME_DIRECTORIES_DIALOG_GET_CLASS(o)	(G_TYPE_INSTANCE_GET_CLASS ((o), MAME_TYPE_DIRECTORIES_DIALOG, MameDirectoriesDialogClass))
 
-GtkWidget*
-create_directories_selection (void);
+typedef struct _MameDirectoriesDialog        MameDirectoriesDialog;
+typedef struct _MameDirectoriesDialogClass   MameDirectoriesDialogClass;
+typedef struct _MameDirectoriesDialogPrivate MameDirectoriesDialogPrivate;
+
+struct _MameDirectoriesDialogClass {
+	GtkDialogClass parent_class;
+};
+
+struct _MameDirectoriesDialog {
+	GtkDialog parent;
+	
+	MameDirectoriesDialogPrivate *priv;
+};
+
+GType mame_directories_dialog_get_type (void);
+GtkWidget *mame_directories_dialog_new (GtkWindow *parent);
+
+G_END_DECLS
 
 #endif /* __DIRECTORIES_H__ */

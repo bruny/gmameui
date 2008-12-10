@@ -198,7 +198,7 @@ mame_gui_prefs_set_property (GObject *object,
 			break;	
 		case PROP_EXECUTABLE_PATHS:
 			va = g_value_get_boxed (value);
-			if (prefs->priv->rom_paths)
+			if (prefs->priv->executable_paths)
 				g_value_array_free (prefs->priv->executable_paths);
 			prefs->priv->executable_paths = va != NULL ? g_value_array_copy (va) : NULL;
 			break;

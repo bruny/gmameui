@@ -300,7 +300,7 @@ on_directories_menu_activate           (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 	GtkWidget *directory_window;
-	directory_window = create_directories_selection ();
+	directory_window = mame_directories_dialog_new (NULL);
 	gtk_widget_show (directory_window);
 }
 

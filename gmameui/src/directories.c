@@ -24,166 +24,95 @@
 
 #include "common.h"
 
-#include <unistd.h>
-#include <string.h>
-#include <stdio.h>
-
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtkcellrenderertext.h>
-#include <gtk/gtkeditable.h>
-#include <gtk/gtkentry.h>
-#include <gtk/gtkfilechooserdialog.h>
-#include <gtk/gtkhseparator.h>
-#include <gtk/gtklabel.h>
-#include <gtk/gtknotebook.h>
-#include <gtk/gtkscrolledwindow.h>
-#include <gtk/gtkstock.h>
-#include <gtk/gtktable.h>
-#include <gtk/gtkvbox.h>
 #include <glade/glade.h>
 
 #include "gui.h"
 #include "directories.h"
-#include "io.h"
-#include "game_options.h"
 
+/* Callbacks */
+static void on_dir_browse_button_clicked (GtkWidget *widget, gpointer user_data);
+static void on_file_browse_button_clicked (GtkWidget *widget, gpointer user_data);
+
+static gboolean rom_path_changed (GValueArray *new_paths, GValueArray *old_paths);
+
+static void add_path_to_tree_view (GtkWidget *button, gpointer user_data);
+static void add_item_to_tree_view (GtkWidget *button, gpointer user_data);
+static void remove_path_from_tree_view (GtkWidget *button, gpointer user_data);
+
+static void mame_directories_dialog_save_changes (MameDirectoriesDialog *dialog);
+
+struct _MameDirectoriesDialogPrivate {
+	GladeXML *xml;
+	
+	GtkTreeView *xmame_execs_tree_view;
+	GtkTreeModel *xmame_execs_tree_model;
+
+	GtkTreeView *roms_path_tree_view;
+	GtkTreeModel *roms_path_tree_model;
+
+	GtkTreeView *samples_path_tree_view;
+	GtkTreeModel *samples_path_tree_model;
+
+	/* Value array containing the ROM paths when the dialog is
+	   first opened. Compared when closing to see whether we
+	   need to refresh the game list */
+	GValueArray *va_orig_rom_paths;
+};
+
+#define MAME_DIRECTORIES_DIALOG_GET_PRIVATE(o)  (MAME_DIRECTORIES_DIALOG (o)->priv)
+
+G_DEFINE_TYPE (MameDirectoriesDialog, mame_directories_dialog, GTK_TYPE_DIALOG)
+
+/* Function prototypes */
 static void
-on_dir_browse_button_clicked (GtkWidget *widget, gpointer user_data);
-
+mame_directories_dialog_response             (GtkDialog *dialog, gint response);
 static void
-on_file_browse_button_clicked (GtkWidget *widget, gpointer user_data);
+mame_directories_dialog_destroy              (GtkObject *object);
 
-void
-set_rom_path (GValueArray *new_paths, GValueArray *old_paths);
-
-void add_path_to_tree_view (GtkWidget *button, gpointer user_data);
-void add_item_to_tree_view (GtkWidget *button, gpointer user_data);
-void remove_path_from_tree_view (GtkWidget *button, gpointer user_data);
-
-static void
-directories_selection_save_changes       (GtkWidget *widget);
-
-gboolean path_tree_model_foreach (GtkTreeModel  *model,
-				  GtkTreePath   *path,
-				  GtkTreeIter   *iter,
-				  gpointer       userdata);
-
-static GtkWidget *directories_selection;
-static GladeXML *xml;
-
-GtkTreeView *xmame_execs_tree_view;
-GtkTreeModel *xmame_execs_tree_model;
-static GtkWidget *xmame_execs_add_button;
-static GtkWidget *xmame_execs_remove_button;
-
-GtkTreeView *roms_path_tree_view;
-GtkTreeModel *roms_path_tree_model;
-static GtkWidget *roms_add_button;
-static GtkWidget *roms_remove_button;
-
-GtkTreeView *samples_path_tree_view;
-GtkTreeModel *samples_path_tree_model;
-static GtkWidget *samples_add_button;
-static GtkWidget *samples_remove_button;
-
-GValueArray *va_paths;  /* Used for processing list stores into gchar* arrays */
-
-static void
-directories_selection_response (GtkWidget *dialog,
-				gint       response_id,
-				gpointer   user_data)
+/* Boilerplate functions */
+static GObject *
+mame_directories_dialog_constructor (GType                  type,
+				guint                  n_construct_properties,
+				GObjectConstructParam *construct_properties)
 {
-	switch (response_id) {
-		case GTK_RESPONSE_OK:
-			directories_selection_save_changes (dialog);
-			break;
-	}
+	GObject          *obj;
+	MameDirectoriesDialog *dialog;
 
-	gtk_list_store_clear (GTK_LIST_STORE (xmame_execs_tree_model));
-	gtk_list_store_clear (GTK_LIST_STORE (roms_path_tree_model));
-	gtk_list_store_clear (GTK_LIST_STORE (samples_path_tree_model));
+	obj = G_OBJECT_CLASS (mame_directories_dialog_parent_class)->constructor (type,
+									     n_construct_properties,
+									     construct_properties);
 
-	gtk_widget_destroy (dialog);
+	dialog = MAME_DIRECTORIES_DIALOG (obj);
+
+	return obj;
 }
 
-void
-on_dir_browse_button_clicked (GtkWidget *widget, gpointer user_data)
+static void
+mame_directories_dialog_class_init (MameDirectoriesDialogClass *class)
 {
-	GtkWidget *path_entry;
-	GtkWidget *filechooser;
-	gchar *name;
-	gchar *widget_name;
-	gchar *entry_text;
-	
-	name = (gchar *) user_data;
-	GMAMEUI_DEBUG ("Browsing for directory for path %s", name);
-	
-	widget_name = g_strdup_printf ("entry_%s", name);
-	
-	path_entry = glade_xml_get_widget (xml, widget_name);
-	
-	filechooser = gtk_file_chooser_dialog_new (_("Browse for Folder"),
-						   GTK_WINDOW (directories_selection),
-						   GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
-						   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-						   GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-						   NULL);
-	entry_text = gtk_editable_get_chars (GTK_EDITABLE (path_entry), 0, -1);      
-	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (filechooser), entry_text);    
-	g_free (entry_text);
-	
-	if (gtk_dialog_run (GTK_DIALOG (filechooser)) == GTK_RESPONSE_ACCEPT) {
-		gtk_entry_set_text (GTK_ENTRY (path_entry),
-				    gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser)));
-		g_object_set (main_gui.gui_prefs,
-			      name, gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser)),
-			      NULL);
-	}
-	gtk_widget_destroy (filechooser);
+	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
+	GtkObjectClass *gtkobject_class = GTK_OBJECT_CLASS (class);
+	GtkDialogClass *gtkdialog_class = GTK_DIALOG_CLASS (class);
 
-	g_free (widget_name);
+	gobject_class->constructor = mame_directories_dialog_constructor;
+/*	gobject_class->get_property = mame_directories_dialog_get_property;
+	gobject_class->set_property = mame_directories_dialog_set_property;*/
+
+	/* Set destroy and response callbacks */
+	gtkobject_class->destroy = mame_directories_dialog_destroy;
+	gtkdialog_class->response = mame_directories_dialog_response;
+
+	g_type_class_add_private (class,
+				  sizeof (MameDirectoriesDialogPrivate));
+
+	/* Signals and properties go here */
+
 }
 
-void on_file_browse_button_clicked (GtkWidget *widget, gpointer user_data)
+static void
+mame_directories_dialog_init (MameDirectoriesDialog *dialog)
 {
-	GtkWidget *path_entry;
-	GtkWidget *filechooser;
-	gchar *name;
-	gchar *widget_name;
-	gchar *entry_text;
-	
-	name = (gchar *) user_data;
-	GMAMEUI_DEBUG ("Browsing for file for file %s", name);
-	
-	widget_name = g_strdup_printf ("entry_%s", name);
-	
-	path_entry = glade_xml_get_widget (xml, widget_name);
-	
-	filechooser = gtk_file_chooser_dialog_new (_("Browse for File"),
-						   GTK_WINDOW (directories_selection),
-						   GTK_FILE_CHOOSER_ACTION_OPEN,
-						   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-						   GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-						   NULL);
-	entry_text = gtk_editable_get_chars (GTK_EDITABLE (path_entry), 0, -1);      
-	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (filechooser), entry_text);    
-	g_free (entry_text);
-	
-	if (gtk_dialog_run (GTK_DIALOG (filechooser)) == GTK_RESPONSE_ACCEPT) {
-		gtk_entry_set_text (GTK_ENTRY (path_entry),
-				    gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser)));
-		g_object_set (main_gui.gui_prefs,
-			      name, gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser)),
-			      NULL);
-	}
-	gtk_widget_destroy (filechooser);
-
-	g_free (widget_name);
-}
-
-GtkWidget *
-create_directories_selection (void)
-{
+	MameDirectoriesDialogPrivate *priv;
 	guint i;
 	GtkAccelGroup *accel_group;
 
@@ -197,17 +126,44 @@ create_directories_selection (void)
 	GValueArray *va_rom_paths;
 	GValueArray *va_sample_paths;
 	
+	GtkWidget *widget;
+
+	priv = G_TYPE_INSTANCE_GET_PRIVATE (dialog,
+					    MAME_TYPE_DIRECTORIES_DIALOG,
+					    MameDirectoriesDialogPrivate);
+
+	dialog->priv = priv;
+GMAMEUI_DEBUG ("Creating new directories dialog...");	
+	/* Build the UI and connect signals here */
+	priv->xml = glade_xml_new (GLADEDIR "directories.glade", "notebook1", GETTEXT_PACKAGE);
+	if (!priv->xml) {
+		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "directories.glade");
+		return;
+	}
+
+	/* Get the dialog contents */
+	widget = glade_xml_get_widget (priv->xml, "notebook1");
+
+	/* Add our dialog contents to the vbox of the dialog class */
+	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox),
+			    widget, TRUE, TRUE, 6);
+		
+	gtk_widget_show_all (GTK_WIDGET (widget));
+	
+	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);
+	
 	g_object_get (main_gui.gui_prefs,
 		      "executable-paths", &va_exec_paths,
 		      "rom-paths", &va_rom_paths,
 		      "sample-paths", &va_sample_paths,
 		      NULL);
 
-	xml = glade_xml_new (GLADEDIR "directories.glade", NULL, GETTEXT_PACKAGE);
-	GtkWidget *directories_selection = glade_xml_get_widget (xml, "directories_selection");
-	gtk_widget_show (GTK_WIDGET (directories_selection));
-
 	accel_group = gtk_accel_group_new ();
+	
+	/* Set the original ROM path list */
+	priv->va_orig_rom_paths = g_value_array_copy (va_rom_paths);
+	/*GMAMEUI_DEBUG ("Storing a copy of the ROM paths value array with %d elements",
+		       priv->va_orig_rom_paths->n_values);*/
 
 	/* XMame Exe List */
 	store = (GtkTreeModel *) gtk_list_store_new (1, G_TYPE_STRING);
@@ -219,15 +175,16 @@ create_directories_selection (void)
 					    -1);
 		}
 	}
-	xmame_execs_tree_model = store;
+	priv->xmame_execs_tree_model = store;
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes (" ", renderer,
 							   "text", 0,
 							   NULL);
 
-	xmame_execs_tree_view = GTK_TREE_VIEW (glade_xml_get_widget (xml, "xmame_execs_tree_view"));
-	gtk_tree_view_append_column (GTK_TREE_VIEW (xmame_execs_tree_view), column);
-	gtk_tree_view_set_model (GTK_TREE_VIEW (xmame_execs_tree_view), GTK_TREE_MODEL (store));
+	priv->xmame_execs_tree_view = GTK_TREE_VIEW (glade_xml_get_widget (priv->xml, "xmame_execs_tree_view"));
+	gtk_tree_view_append_column (GTK_TREE_VIEW (priv->xmame_execs_tree_view), column);
+	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->xmame_execs_tree_view), GTK_TREE_MODEL (store));
+	g_object_set_data (G_OBJECT (priv->xmame_execs_tree_view), "SettingName", "executable-paths");
 
     	/* Roms Path List */
 	store = (GtkTreeModel *) gtk_list_store_new (1, G_TYPE_STRING);
@@ -239,15 +196,16 @@ create_directories_selection (void)
 					    -1);
 		}
 	}
-	roms_path_tree_model = store;
+	priv->roms_path_tree_model = store;
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes (" ", renderer,
 							   "text", 0,
 							   NULL);
 
-	roms_path_tree_view = GTK_TREE_VIEW (glade_xml_get_widget (xml, "roms_path_tree_view"));
-	gtk_tree_view_append_column (GTK_TREE_VIEW (roms_path_tree_view), column);
-	gtk_tree_view_set_model (GTK_TREE_VIEW (roms_path_tree_view), GTK_TREE_MODEL (store));
+	priv->roms_path_tree_view = GTK_TREE_VIEW (glade_xml_get_widget (priv->xml, "roms_path_tree_view"));
+	gtk_tree_view_append_column (GTK_TREE_VIEW (priv->roms_path_tree_view), column);
+	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->roms_path_tree_view), GTK_TREE_MODEL (store));
+	g_object_set_data (G_OBJECT (priv->roms_path_tree_view), "SettingName", "rom-paths");
 
 	/* Samples Path List */
 	store = (GtkTreeModel *) gtk_list_store_new (1, G_TYPE_STRING);
@@ -259,20 +217,21 @@ create_directories_selection (void)
 					    -1);
 		}
 	}
-	samples_path_tree_model = store;
+	priv->samples_path_tree_model = store;
 	renderer = gtk_cell_renderer_text_new ();
 	column = gtk_tree_view_column_new_with_attributes (" ", renderer,
 							   "text", 0,
 							   NULL);
 
-	samples_path_tree_view = GTK_TREE_VIEW (glade_xml_get_widget (xml, "samples_path_treeview"));
-	gtk_tree_view_append_column (GTK_TREE_VIEW (samples_path_tree_view), column);
-	gtk_tree_view_set_model (GTK_TREE_VIEW (samples_path_tree_view), GTK_TREE_MODEL (store));
+	priv->samples_path_tree_view = GTK_TREE_VIEW (glade_xml_get_widget (priv->xml, "samples_path_treeview"));
+	gtk_tree_view_append_column (GTK_TREE_VIEW (priv->samples_path_tree_view), column);
+	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->samples_path_tree_view), GTK_TREE_MODEL (store));
+	g_object_set_data (G_OBJECT (priv->samples_path_tree_view), "SettingName", "sample-paths");
     
 	/* Set the GtkEntry widgets with the parameter values */
 	GList *widgets;
 	GList *node;
-	widgets = glade_xml_get_widget_prefix (xml, "entry_");
+	widgets = glade_xml_get_widget_prefix (priv->xml, "entry_");
 	node = widgets;
 
 	while (node)
@@ -294,7 +253,7 @@ create_directories_selection (void)
 	}
 	
 	/* Set the callbacks for the GtkButtons for each GtkEntry */
-	widgets = glade_xml_get_widget_prefix (xml, "button_");
+	widgets = glade_xml_get_widget_prefix (priv->xml, "button_");
 	node = widgets;
 
 	while (node)
@@ -306,85 +265,248 @@ create_directories_selection (void)
 		name = glade_get_widget_name (widget);
 		/*GMAMEUI_DEBUG ("Now processing widget %s", name);*/
 		name += 7;      /* Skip over button_ */
-		
+			
 		if (g_ascii_strncasecmp (name, "dir-", 4) == 0)
 			g_signal_connect (G_OBJECT (widget), "clicked",
-				    G_CALLBACK (on_dir_browse_button_clicked),
-				    name);
+					  G_CALLBACK (on_dir_browse_button_clicked),
+					  dialog);
 		else
 			g_signal_connect (G_OBJECT (widget), "clicked",
-				    G_CALLBACK (on_file_browse_button_clicked),
-				    name);
+					  G_CALLBACK (on_file_browse_button_clicked),
+					  dialog);
+		
 		node = g_list_next (node);
 	}
 	
 	/* FIXME TODO Hiscore dir */
 	
-	/* Button Clicked */
-	/* Executables */
-	xmame_execs_add_button = glade_xml_get_widget (xml, "xmame_execs_add_button");
-	xmame_execs_remove_button = glade_xml_get_widget (xml, "xmame_execs_remove_button");
-	g_signal_connect (G_OBJECT (xmame_execs_add_button), "clicked",
-			    G_CALLBACK (add_item_to_tree_view), xmame_execs_tree_model);
-	g_signal_connect (G_OBJECT (xmame_execs_remove_button), "clicked",
-			    G_CALLBACK (remove_path_from_tree_view),
-			    xmame_execs_tree_view);
+	/* Callbacks for adding/removing executable */
+	widget = glade_xml_get_widget (priv->xml, "xmame_execs_add_button");
+	g_signal_connect (G_OBJECT (widget), "clicked",
+			  G_CALLBACK (add_item_to_tree_view), priv->xmame_execs_tree_model);
+	widget = glade_xml_get_widget (priv->xml, "xmame_execs_remove_button");
+	g_signal_connect (G_OBJECT (widget), "clicked",
+			  G_CALLBACK (remove_path_from_tree_view), priv->xmame_execs_tree_view);
 
-	/* MAME basic */
-	samples_add_button = glade_xml_get_widget (xml, "samples_add_button");
-	samples_remove_button = glade_xml_get_widget (xml, "samples_remove_button");
-	g_signal_connect (G_OBJECT (samples_add_button), "clicked",
-			    G_CALLBACK (add_path_to_tree_view),
-			    samples_path_tree_model);
-	g_signal_connect (G_OBJECT (samples_remove_button), "clicked",
-			    G_CALLBACK (remove_path_from_tree_view),
-			    samples_path_tree_view);
+	/* Callbacks for adding/removing ROM paths */
+	widget = glade_xml_get_widget (priv->xml, "roms_add_button");
+	g_signal_connect (G_OBJECT (widget), "clicked",
+			  G_CALLBACK (add_path_to_tree_view), priv->roms_path_tree_model);
+	widget = glade_xml_get_widget (priv->xml, "roms_remove_button");
+	g_signal_connect (G_OBJECT (widget), "clicked",
+			  G_CALLBACK (remove_path_from_tree_view), priv->roms_path_tree_view);
 
-	roms_add_button = glade_xml_get_widget (xml, "roms_add_button");
-	roms_remove_button = glade_xml_get_widget (xml, "roms_remove_button");
-	g_signal_connect (G_OBJECT (roms_add_button), "clicked",
-			    G_CALLBACK (add_path_to_tree_view),
-			    roms_path_tree_model);
-	g_signal_connect (G_OBJECT (roms_remove_button), "clicked",
-			    G_CALLBACK (remove_path_from_tree_view),
-			    roms_path_tree_view);
-
-	/* XMame Execs List */
-	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (xmame_execs_tree_view));
+	/* Callbacks for adding/removing sample paths */
+	widget = glade_xml_get_widget (priv->xml, "samples_add_button");
+	g_signal_connect (G_OBJECT (widget), "clicked",
+			  G_CALLBACK (add_path_to_tree_view), priv->samples_path_tree_model);
+	widget = glade_xml_get_widget (priv->xml, "samples_remove_button");
+	g_signal_connect (G_OBJECT (widget), "clicked",
+			  G_CALLBACK (remove_path_from_tree_view), priv->samples_path_tree_view);
+	
+	/* Set the selection mode to be single */
+	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->xmame_execs_tree_view));
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 
-	/* Roms Path List */
-	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (samples_path_tree_view));
+	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->samples_path_tree_view));
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 
-	/* Samples Path List */
-	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (roms_path_tree_view));
+	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (priv->roms_path_tree_view));
 	gtk_tree_selection_set_mode (select, GTK_SELECTION_SINGLE);
 
-	gtk_window_add_accel_group (GTK_WINDOW (directories_selection), accel_group);
-
-	g_signal_connect (G_OBJECT (directories_selection), "response",
-		  G_CALLBACK (directories_selection_response),
-		  NULL);
+	gtk_window_add_accel_group (GTK_WINDOW (dialog), accel_group);
+	
+	widget = gtk_dialog_add_button (GTK_DIALOG (dialog),
+					GTK_STOCK_CLOSE,
+					GTK_RESPONSE_CLOSE);
 
 	g_value_array_free (va_exec_paths);
+	va_exec_paths = NULL;
 	g_value_array_free (va_rom_paths);
+	va_rom_paths = NULL;
 	g_value_array_free (va_sample_paths);
-	
-	return directories_selection;
+	va_sample_paths = NULL;
+GMAMEUI_DEBUG ("Creating new directories dialog... done");
 }
 
-void add_path_to_tree_view (GtkWidget *button,
-			    gpointer user_data)
+GtkWidget *
+mame_directories_dialog_new (GtkWindow *parent)
 {
-	GtkTreeModel *model = (gpointer) user_data;
+	GtkWidget *dialog;
+
+	dialog = g_object_new (MAME_TYPE_DIRECTORIES_DIALOG,
+			       "title", _("Directories Selection"),
+			       NULL);
+
+	if (parent)
+		gtk_window_set_transient_for (GTK_WINDOW (dialog), parent);
+
+	return dialog;
+
+}
+
+static void
+mame_directories_dialog_response (GtkDialog *dialog, gint response)
+{
+	MameDirectoriesDialogPrivate *priv;
+	
+	priv = G_TYPE_INSTANCE_GET_PRIVATE (MAME_DIRECTORIES_DIALOG (dialog),
+					    MAME_TYPE_DIRECTORIES_DIALOG,
+					    MameDirectoriesDialogPrivate);
+
+	switch (response)
+	{
+
+		case GTK_RESPONSE_CLOSE:
+			/* Close button clicked */
+			mame_directories_dialog_save_changes (MAME_DIRECTORIES_DIALOG (dialog));
+			
+			gtk_widget_destroy (GTK_WIDGET (dialog));
+			
+//			create_gamelist_content ();
+			
+			break;
+		case GTK_RESPONSE_DELETE_EVENT:
+			/* Dialog closed */
+			gtk_widget_destroy (GTK_WIDGET (dialog));
+			
+			break;
+		default:
+			g_assert_not_reached ();
+	}
+}
+
+static void
+mame_directories_dialog_destroy (GtkObject *object)
+{
+	MameDirectoriesDialog *dlg;
+	
+GMAMEUI_DEBUG ("Destroying mame directories dialog...");	
+	dlg = MAME_DIRECTORIES_DIALOG (object);
+	
+	if (dlg->priv->xml)
+		g_object_unref (dlg->priv->xml);
+	
+	/* Empty models */
+	gtk_list_store_clear (GTK_LIST_STORE (dlg->priv->xmame_execs_tree_model));
+	gtk_list_store_clear (GTK_LIST_STORE (dlg->priv->roms_path_tree_model));
+	gtk_list_store_clear (GTK_LIST_STORE (dlg->priv->samples_path_tree_model));
+	
+	if (dlg->priv)
+		g_object_unref (dlg->priv);
+	
+/*	GTK_OBJECT_CLASS (mame_directories_dialog_parent_class)->destroy (object);*/
+	
+GMAMEUI_DEBUG ("Destroying mame directories dialog... done");
+}
+
+/* Handle specifying a directory (excluding Exec, ROM or Sample directory).
+   If a directory is chosen, update the associated GtkEntry, and update the
+   associated preferences entry */
+static void
+on_dir_browse_button_clicked (GtkWidget *widget, gpointer user_data)
+{
+	MameDirectoriesDialog *dialog;
+	GtkWidget *path_entry;
+	GtkWidget *filechooser;
+	const gchar *name;
+	gchar *widget_name;
+	gchar *entry_text;
+
+	dialog = (MameDirectoriesDialog *) user_data;
+	
+	name = glade_get_widget_name (widget);
+	name += 7;      /* Skip over button_ */
+	/* GMAMEUI_DEBUG ("Browsing for directory for path %s", name); */
+	
+	widget_name = g_strdup_printf ("entry_%s", name);
+	
+	path_entry = glade_xml_get_widget (dialog->priv->xml, widget_name);
+	
+	filechooser = gtk_file_chooser_dialog_new (_("Browse for Folder"),
+						   GTK_WINDOW (dialog),
+						   GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+						   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+						   GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+						   NULL);
+	entry_text = gtk_editable_get_chars (GTK_EDITABLE (path_entry), 0, -1);      
+	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (filechooser), entry_text);    
+	g_free (entry_text);
+	
+	if (gtk_dialog_run (GTK_DIALOG (filechooser)) == GTK_RESPONSE_ACCEPT) {
+		gchar *filename;
+		
+		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser));
+		gtk_entry_set_text (GTK_ENTRY (path_entry), filename);
+		g_object_set (main_gui.gui_prefs, name, filename, NULL);	
+		
+		g_free (filename);
+	}
+	gtk_widget_destroy (filechooser);
+
+	g_free (widget_name);
+}
+
+/* Handle specifying a file. If a file is chosen, update the associated
+   GtkEntry, and update the associated preferences entry */
+static void
+on_file_browse_button_clicked (GtkWidget *widget, gpointer user_data)
+{
+	MameDirectoriesDialog *dialog;
+	GtkWidget *path_entry;
+	GtkWidget *filechooser;
+	const gchar *name;
+	gchar *widget_name;
+	gchar *entry_text;
+	
+	dialog = (MameDirectoriesDialog *) user_data;
+	
+	name = glade_get_widget_name (widget);
+	name += 7;      /* Skip over button_ */
+	/* GMAMEUI_DEBUG ("Browsing for file for %s", name); */
+	
+	widget_name = g_strdup_printf ("entry_%s", name);
+	
+	path_entry = glade_xml_get_widget (dialog->priv->xml, widget_name);
+	
+	filechooser = gtk_file_chooser_dialog_new (_("Browse for File"),
+						   GTK_WINDOW (dialog),
+						   GTK_FILE_CHOOSER_ACTION_OPEN,
+						   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+						   GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+						   NULL);
+	entry_text = gtk_editable_get_chars (GTK_EDITABLE (path_entry), 0, -1);      
+	gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (filechooser), entry_text);    
+	g_free (entry_text);
+	
+	if (gtk_dialog_run (GTK_DIALOG (filechooser)) == GTK_RESPONSE_ACCEPT) {
+		gchar *path;
+		path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser));
+		
+		gtk_entry_set_text (GTK_ENTRY (path_entry), path);
+		g_object_set (main_gui.gui_prefs, name, path, NULL);
+
+		g_free (path);
+	}
+	gtk_widget_destroy (filechooser);
+
+	g_free (widget_name);
+}
+
+/* Opens a file chooser for a directory and, if a directory is selected, adds it
+   to the corresponding treeview */
+static void
+add_path_to_tree_view (GtkWidget *button, gpointer user_data)
+{
 	GtkTreeIter iter;
 	gchar *temp_text, *text;
 	gint i, size;
 	gboolean already_exist = FALSE;
 	
+	GtkTreeModel *model = (gpointer) user_data;
+	
 	/* Create new directory file chooser */
-	GtkWidget *chooser = gtk_file_chooser_dialog_new ("Select directory",
+	GtkWidget *chooser = gtk_file_chooser_dialog_new (_("Select directory"),
 							  NULL, GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
 							  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 							  GTK_STOCK_OK, GTK_RESPONSE_OK,
@@ -423,8 +545,11 @@ void add_path_to_tree_view (GtkWidget *button,
 	}				    
 }
 
-void add_item_to_tree_view (GtkWidget *button,
-			    gpointer user_data)
+/* Create a new file chooser to select a MAME executable. Once selected, the executable
+   is added to the MameExecList and added to the TreeView widget for the Directories
+   Selection window */
+static void
+add_item_to_tree_view (GtkWidget *button, gpointer user_data)
 {
 	GtkTreeModel *model = (gpointer) user_data;
 	GtkTreeIter iter;
@@ -433,7 +558,7 @@ void add_item_to_tree_view (GtkWidget *button,
 	gboolean already_exist = FALSE;
 	
 	/* Create new directory file chooser */
-	GtkWidget *chooser = gtk_file_chooser_dialog_new ("Select MAME executable",
+	GtkWidget *chooser = gtk_file_chooser_dialog_new (_("Select MAME executable"),
 							  NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
 							  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 							  GTK_STOCK_OK, GTK_RESPONSE_OK,
@@ -452,15 +577,31 @@ void add_item_to_tree_view (GtkWidget *button,
 			for (i = 0; i < size; i++) {
 				gtk_tree_model_iter_nth_child (GTK_TREE_MODEL (model), &iter, NULL, i);
 				gtk_tree_model_get (model, &iter, 0, &text, -1);
-				if (!strcmp (text, temp_text))
+				if (g_ascii_strcasecmp (text, temp_text) == 0)
 					already_exist = TRUE;
 			}
 
 			if (!already_exist) {
-				gtk_list_store_append (GTK_LIST_STORE (model), &iter);  /* Acquire an iterator */
-				gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-						    0, temp_text,
-						    -1);
+				/* Check if executable is valid, and if so, add to mame_exec_list */
+				MameExec *exec;
+				exec = mame_exec_new_from_path (temp_text);
+				if (exec) {
+					/* Add to the MameExecList */
+					mame_exec_list_add (main_gui.exec_list, exec);
+					
+					/* Update the preferences */
+					GValueArray *va_paths = mame_exec_list_get_list_as_value_array (main_gui.exec_list);
+					g_object_set (main_gui.gui_prefs,
+						      "executable-paths", va_paths,
+						      NULL);
+					g_value_array_free (va_paths);
+				
+					/* Add to the tree view in the directories window */
+					gtk_list_store_append (GTK_LIST_STORE (model), &iter);  /* Acquire an iterator */
+					gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+							    0, temp_text,
+							    -1);
+				}
 			}
 
 			g_free (temp_text);
@@ -468,63 +609,56 @@ void add_item_to_tree_view (GtkWidget *button,
 		default:
 			gtk_widget_destroy (chooser);
 			break;
-	}				    
+	}
 }
 
-void
+/* Removes the selected directory from the selected tree view, and trigger an update to the
+   relevant MameGuiPrefs entry; the parameter referencing the Prefs entry is added to the
+   GtkTreeView using g_object_set_data when the dialog is first opened */
+static void
 remove_path_from_tree_view (GtkWidget *button, gpointer user_data)
 {
-	GtkTreeView *view = (gpointer) user_data;
 	GtkTreeModel *model;
 	GtkTreeIter iter;
+	gchar *path;
+	
+	GtkTreeView *view = (gpointer) user_data;
 
 	GtkTreeSelection *select;
 	select = gtk_tree_view_get_selection (GTK_TREE_VIEW (view));
 	model = gtk_tree_view_get_model (GTK_TREE_VIEW (view));
 	if (gtk_tree_selection_get_selected (select, &model, &iter)) {
+		gchar *param_name;
+		
 		gtk_tree_selection_unselect_all (select);
+		
+		/* Get the path of the item to be removed */
+		gtk_tree_model_get (model, &iter, 0, &path, -1);
+		
+		/* Get the associated parameter name */
+		param_name = (gchar *) g_object_get_data (G_OBJECT (view), "SettingName");
+		
+		/* GMAMEUI_DEBUG ("Removing path from list for %s", param_name); */
+		
+		if (g_ascii_strcasecmp (param_name, "executable-paths") == 0) {
+			/* Remove the relevant executable from the list of executables */
+			mame_exec_list_remove_by_path (main_gui.exec_list, path);
+		}
+		
+		/* Update the preferences */
+		GValueArray *va_paths = mame_exec_list_get_list_as_value_array (main_gui.exec_list);
+		g_object_set (main_gui.gui_prefs, param_name, va_paths, NULL);
+		g_value_array_free (va_paths);
+		
+		/* Remove from the tree view */
 		gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
 	}
 }
 
-#if 0
+/* Checks whether the value array when the dialog is closed is different from that
+   when the dialog is first opened */
 static gboolean
-remove_hash_value (gpointer key,
-		   gpointer value,
-		   gpointer user_data)
-{
-	g_free (value);
-	return TRUE;
-}
-#endif
-
-gboolean path_tree_model_foreach (GtkTreeModel  *model,
-				  GtkTreePath   *path,
-				  GtkTreeIter   *iter,
-				  gpointer       userdata)
-{
-	gchar *name;
-	GValue val = { 0, };
-		
-	g_value_init (&val, G_TYPE_STRING);
-
-	gtk_tree_model_get (model, iter, 0, &name, -1);
-
-	g_value_set_string (&val, name);
-			    
-	if (!va_paths)
-		va_paths = g_value_array_new (4);       /* FIXME TODO */
-
-	g_value_array_append (va_paths, &val);
-	
-	g_free (name);
-	  
-	/* Return FALSE to retrieve next row */
-	return FALSE;
-}
-
-void
-set_rom_path (GValueArray *new_paths, GValueArray *old_paths)
+rom_path_changed (GValueArray *new_paths, GValueArray *old_paths)
 {
 	gboolean changed_flag;
 	int i;
@@ -535,15 +669,19 @@ set_rom_path (GValueArray *new_paths, GValueArray *old_paths)
 	num_new_paths = (!new_paths) ? 0 : new_paths->n_values;
 	num_old_paths = (!old_paths) ? 0 : old_paths->n_values;
 	
-	GMAMEUI_DEBUG ("Num of existing paths is %d and new paths is %d", num_old_paths, num_new_paths);
+	/* GMAMEUI_DEBUG ("Num of existing paths is %d and new paths is %d", num_old_paths, num_new_paths); */
 
 	if (num_new_paths != num_old_paths) {
-		GMAMEUI_DEBUG ("Number of rom paths is different - %d to %d", num_new_paths, num_old_paths);
+		GMAMEUI_DEBUG ("Number of paths is different - %d to %d", num_new_paths, num_old_paths);
 		changed_flag = TRUE;
 	} else {
+		/* Sort the paths first */
+		new_paths = g_value_array_sort (new_paths, (GCompareFunc) g_ascii_strcasecmp);
+		old_paths = g_value_array_sort (old_paths, (GCompareFunc) g_ascii_strcasecmp);
+		
 		for (i = 0;
 		     i < (num_new_paths > num_old_paths ? num_new_paths : num_old_paths);
-			  i++) {
+		     i++) {
 			if (g_ascii_strcasecmp (g_value_get_string (g_value_array_get_nth (new_paths, i)),
 						g_value_get_string (g_value_array_get_nth (old_paths, i))) != 0) {
 				GMAMEUI_DEBUG ("Value of directories has changed");
@@ -552,35 +690,59 @@ set_rom_path (GValueArray *new_paths, GValueArray *old_paths)
 		}
 	}
 
-	if (changed_flag) {
-		g_object_set (main_gui.gui_prefs,
-			      "rom-paths", new_paths,
-			      NULL);
-	}
+	return changed_flag;
 }
 
-void
-directories_selection_save_changes (GtkWidget *widget)
+/* Parses a list store and returns the content as a ValueArray */
+static GValueArray *
+get_tree_model_as_value_array (GtkTreeModel *list_store)
 {
-	guint i;
-	gchar *text = NULL;
-	gboolean changed_flag;
-	GValueArray *va_rom_paths;
+	GValueArray *array;
+	GValue val = { 0, };
+	GtkTreeIter iter;
+	gboolean valid;
+	
+	/* Initialise the GValueArray and GValue */
+	array = g_value_array_new (0);
+	g_value_init (&val, G_TYPE_STRING);
+	
+	/* Get the first iter in the list */
+	valid = gtk_tree_model_get_iter_first (list_store, &iter);
+	
+	while (valid) {
+		/* Walk through the list, reading each row */
+		gchar *str;
+		
+		gtk_tree_model_get (list_store, &iter, 0, &str, -1);
+		
+		g_value_set_string (&val, str);
+		
+		array = g_value_array_append (array, &val);
+		
+		g_free (str);
+		
+		valid = gtk_tree_model_iter_next (list_store, &iter);
+	}
+	
+	return array;
+}
+
+
+static void
+mame_directories_dialog_save_changes (MameDirectoriesDialog *dialog)
+{
+	GValueArray *va_paths;  /* Used for processing list stores into gchar* arrays */
 	gchar *ctrlr_dir;
 
 	ListMode current_mode;
 
-	g_return_if_fail (xmame_execs_tree_model != NULL);
-	g_return_if_fail (roms_path_tree_model != NULL);
-	g_return_if_fail (samples_path_tree_model != NULL);
+	g_return_if_fail (dialog->priv->roms_path_tree_model != NULL);
+	g_return_if_fail (dialog->priv->samples_path_tree_model != NULL);
 	
 	g_object_get (main_gui.gui_prefs,
 		      "current-mode", &current_mode,
 		      "dir-ctrlr", &ctrlr_dir,
-		      "rom-paths", &va_rom_paths,
 		      NULL);
-	
-	changed_flag = FALSE;
 	
 	/* GMAMEUI */
 /* FIXME TODO
@@ -629,49 +791,26 @@ directories_selection_save_changes (GtkWidget *widget)
 			      NULL);
 		load_options (NULL);
 	}*/
-
-
-	g_object_unref (main_gui.exec_list);
-	main_gui.exec_list = NULL;
-	main_gui.exec_list = mame_exec_list_new ();
-
-	/* Get executable paths from tree model */
-	gtk_tree_model_foreach (GTK_TREE_MODEL (xmame_execs_tree_model), path_tree_model_foreach, NULL);
-	g_object_set (main_gui.gui_prefs,
-		      "executable-paths", va_paths,
-		      NULL);
-	if (va_paths) {
-		for (i = 0; i < va_paths->n_values; i++) {
-			MameExec *exec = mame_exec_new_from_path (g_value_get_string (g_value_array_get_nth (va_paths, i)));
-			mame_exec_list_add (main_gui.exec_list, exec);
-		}
-		g_value_array_free (va_paths);
-		va_paths = NULL;
-	}
 	
-	/* Get sample paths from tree model */	
-	gtk_tree_model_foreach (GTK_TREE_MODEL (samples_path_tree_model), path_tree_model_foreach, NULL);
-	g_object_set (main_gui.gui_prefs,
-		      "sample-paths", va_paths,
-		      NULL);
+	/* Get sample paths from tree model */
+	va_paths = get_tree_model_as_value_array (GTK_TREE_MODEL (dialog->priv->samples_path_tree_model));
+	g_object_set (main_gui.gui_prefs, "sample-paths", va_paths, NULL);
 	g_value_array_free (va_paths);
 	va_paths = NULL;
 	
 
 	/* Get ROM paths from tree model and determine whether the list is different from that
-	   in the preferences; if so, we have changed and should prompt the user to
-	   update the game list */
-	gtk_tree_model_foreach (GTK_TREE_MODEL (roms_path_tree_model), path_tree_model_foreach, NULL);
-	set_rom_path (va_paths, va_rom_paths);
+	   in the preferences; if so, we should prompt the user to  update the game list */
+	va_paths = get_tree_model_as_value_array (GTK_TREE_MODEL (dialog->priv->roms_path_tree_model));
+	if (rom_path_changed (va_paths, dialog->priv->va_orig_rom_paths))
+		g_object_set (main_gui.gui_prefs, "rom-paths", va_paths, NULL);
 	g_value_array_free (va_paths);
 	va_paths = NULL;
-	g_value_array_free (va_rom_paths);
-	va_rom_paths = NULL;
-	
-	/* FIXME TODO hiscore dir */
+/*	
+	* FIXME TODO hiscore dir *
 	if (changed_flag) {
-		/* Do we perform the quickcheck? */
-		/* FIXME TODO Do this automatically as a background thread, updating the
+		* Do we perform the quickcheck? *
+		* FIXME TODO Do this automatically as a background thread, updating the
 		   progress bar
 		GtkWidget *dialog;
 		gint result;
@@ -690,22 +829,22 @@ directories_selection_save_changes (GtkWidget *widget)
 				break;
 		}
 		gtk_widget_destroy (dialog);
-		*/
-	}
+		*
+	}*/
 
 	/* remove and destroy the submenu */
 	add_exec_menu ();
 
-	/* here we should already have a valid executable except if mame is not present in path */
-	//if (!current_exec) {
+	/* Here we should already have a valid executable except if MAME
+	   is not present in path */
 	if (!mame_exec_list_has_current_executable (main_gui.exec_list)) {
-		gmameui_message (ERROR, GTK_WINDOW (directories_selection), _("No valid xmame executables found"));
+		gmameui_message (ERROR, GTK_WINDOW (dialog),
+				 _("No valid xmame executables found"));
 	}
 	
 	/* Update the state of the menus and toolbars */
 	gmameui_ui_set_items_sensitive ();
 
 	g_free (ctrlr_dir);
-	if (text)
-		g_free (text);
+
 }

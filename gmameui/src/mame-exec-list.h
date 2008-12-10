@@ -58,9 +58,11 @@ MameExecList* mame_exec_list_new (void);
 
 void mame_exec_list_add (MameExecList *list, MameExec *exec);
 GList *mame_exec_list_get_list (MameExecList *list);
+GValueArray *mame_exec_list_get_list_as_value_array (MameExecList *list);
 MameExec* mame_exec_list_nth (MameExecList *list, guint index);
 MameExec* mame_exec_list_get_exec_by_path (MameExecList *list, gchar *path);
 MameExec* mame_exec_list_get_current_executable (MameExecList *list);
+void mame_exec_list_remove_by_path (MameExecList *list, gchar *path);
 void mame_exec_list_set_current_executable (MameExecList *list, MameExec *exec);
 gboolean mame_exec_list_has_current_executable (MameExecList *list);
 int mame_exec_list_size (MameExecList *list);

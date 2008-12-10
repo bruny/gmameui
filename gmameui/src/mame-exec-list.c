@@ -82,6 +82,34 @@ mame_exec_list_get_list (MameExecList *list)
 	return list->priv->list;
 }
 
+GValueArray *
+mame_exec_list_get_list_as_value_array (MameExecList *list)
+{
+	GList *node;
+	GValueArray *va_paths;
+	GValue val = { 0, };
+	
+	va_paths = g_value_array_new (0);
+	g_value_init (&val, G_TYPE_STRING);
+	
+	for (node = g_list_first (list->priv->list); node != NULL; node = g_list_next (node)) {
+		MameExec *exec;
+		gchar *path;
+
+		exec = (MameExec *) node->data;
+		g_object_get (exec, "exec-path", &path, NULL);
+		
+		g_value_set_string (&val, path);
+		
+		va_paths = g_value_array_append (va_paths, &val);
+		/* GMAMEUI_DEBUG ("Adding %s to list of executables", path); */
+		
+		g_free (path);
+	}
+	
+	return va_paths;
+}
+
 MameExec *
 mame_exec_list_nth (MameExecList *list, guint index)
 {
@@ -120,6 +148,21 @@ mame_exec_list_get_current_executable (MameExecList *list)
 	g_return_val_if_fail (list != NULL, NULL);
 
 	return list->priv->current_exec;
+}
+
+void
+mame_exec_list_remove_by_path (MameExecList *list, gchar *path)
+{
+	MameExec *exec;
+	
+	g_return_if_fail (path != NULL);
+	g_return_if_fail (list != NULL);
+	
+	exec = mame_exec_list_get_exec_by_path (list, path);
+
+	g_return_if_fail (exec != NULL);
+	
+	list = g_list_remove (list->priv->list, exec);
 }
 
 void
