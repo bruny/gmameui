@@ -45,7 +45,6 @@
 #include "audit.h"
 #include "gmameui-audit-dlg.h"
 #include "gui.h"
-#include "properties.h"
 #include "progression_window.h"
 #include "io.h"
 #include "gui_prefs_dialog.h"
