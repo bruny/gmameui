@@ -32,10 +32,5 @@ create_rompath_options_string (MameExec *exec);
 gchar *
 create_io_options_string (MameExec *exec);
 
-char * create_options_string(MameExec *exec, GameOptions *target);
-
-/* options string creation */
-char *
-create_vector_options_string (MameExec *exec, GameOptions *target);
 
 #endif /* __OPTIONS_STRING_H__ */

@@ -49,6 +49,7 @@
 #include "progression_window.h"
 #include "io.h"
 #include "gui_prefs_dialog.h"
+#include "mame_options_legacy_dialog.h"
 
 void update_favourites_list (gboolean add);
 
@@ -158,19 +159,10 @@ show_properties_dialog (gchar *rom_name)
 		gtk_dialog_run (GTK_DIALOG (options_dialog));
 		gtk_widget_destroy (GTK_WIDGET (options_dialog));
 
-	} else {
-		/* XMAME options */
-		GtkWidget *properties_window;
-
-		/* have to test if a game is selected or not
-		   then only after launch the properties window */
-		/* joystick focus turned off, will be turned on again in properties.c (exit_properties_window) */
-		joy_focus_off ();
-		if (rom_name)
-			properties_window = create_properties_windows (gui_prefs.current_game);
-		else
-			properties_window = create_properties_windows (NULL);
-		gtk_widget_show (properties_window);
+	} else {		
+		GtkWidget *dlg;
+		dlg = mame_options_legacy_dialog_new ();
+		gtk_widget_show (dlg);
 	}
 }
 

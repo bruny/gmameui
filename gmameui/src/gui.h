@@ -40,6 +40,7 @@
 #include "unzip.h"
 #include "callbacks.h"
 #include "mame_options.h"
+#include "mame_options_legacy.h"
 #include "filters_list.h"
 #include "gui_prefs.h"
 #include "interface.h"
@@ -245,6 +246,7 @@ struct main_gui_struct {
 	gint gmameui_exec_merge_id;
 	
 	MameOptions *options;
+	MameOptionsLegacy *legacy_options;
 	
 	MameGuiPrefs *gui_prefs;
 	

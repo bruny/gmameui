@@ -23,8 +23,6 @@ gmameui_SOURCES = \
 	audit.c audit.h \
 	gmameui-audit-dlg.c gmameui-audit-dlg.h \
 	gmameui-rominfo-dlg.c gmameui-rominfo-dlg.h \
-	properties.c properties.h \
-	options.c options.h \
 	options_string.c options_string.h \
 	gtkjoy.c gtkjoy.h \
 	gui_prefs.c gui_prefs.h \
@@ -36,6 +34,8 @@ gmameui_SOURCES = \
 	mame-exec-list.h mame-exec-list.c \
 	mame_options.c mame_options.h \
 	mame_options_dialog.c mame_options_dialog.h \
+	mame_options_legacy.c mame_options_legacy.h \
+	mame_options_legacy_dialog.c mame_options_legacy_dialog.h \
 	cell-renderer-captioned-image.c cell-renderer-captioned-image.h \
 	filters_list.c filters_list.h \
 	filter.c filter.h \
