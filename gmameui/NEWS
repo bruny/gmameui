@@ -1,3 +1,15 @@
+Overview of changes in GMAMEUI 0.2.7
+====================================
+
+* Disable options not supported by the current MAME version in options dialog
+
+* Add support for additional command-line options up to 0.127
+
+* Use Glade-generated dialog for XMAME, consolidate code for generating
+  command-line
+
+* Various code fixes and cleanups
+
 Overview of changes in GMAMEUI 0.2.6
 ====================================
 

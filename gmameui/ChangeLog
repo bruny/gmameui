@@ -1,3 +1,81 @@
+2009-03-29 16:08  adburton
+
+	* configure.ac, NEWS: Tagged for new release
+
+2009-02-01 17:53  adburton
+
+	* data/options_legacy.glade: Add Glade file for legacy options
+
+2009-02-01 17:46  adburton
+
+	* src/: callbacks.c, options.c, options.h, properties.c,
+	  properties.h: Removed redundant files
+
+2009-02-01 17:40  adburton
+
+	* src/: Makefile.am, callbacks.c, gmameui.c, gui.h,
+	  mame_options_legacy.c, mame_options_legacy.h,
+	  mame_options_legacy_dialog.c, options_string.c, options_string.h,
+	  mame_options_legacy_dialog.h: Replace old XMAME dialog generation
+	  with Glade-generated dialog and code to save options, consolidate
+	  command line string generation
+
+2008-12-11 00:21  adburton
+
+	* data/rom_info.glade, src/Makefile.am, src/callbacks.c,
+	  src/gmameui-rominfo-dlg.c, src/gmameui-rominfo-dlg.h,
+	  src/properties.c, src/properties.h: Convert RomInfo dialog to
+	  GtkObject, move to separate file
+
+2008-12-10 22:16  adburton
+
+	* src/: callbacks.c, directories.c, directories.h, gui_prefs.c,
+	  mame-exec-list.c, mame-exec-list.h: Add new MameExecList
+	  functions, convert Directories dialog to a GtkObject
+
+2008-12-07 16:29  adburton
+
+	* data/options.glade, src/mame-exec.c, src/mame_options.c,
+	  src/xmame_options.c: Add new supported options, add handling to
+	  set dependant widgets based on parents value (e.g. sound and
+	  debug)
+
+2008-11-09 20:11  adburton
+
+	* src/: Makefile.am, audit.c, callbacks.c, directories.c,
+	  game_list.c, game_list.h, gmameui.c, gmameui.h, gui.c,
+	  interface.c, mame-exec-list.c, mame-exec-list.h, mame-exec.c,
+	  mame-exec.h, mame_options.c, mameio.c, options.c,
+	  options_string.c, options_string.h, xmame_executable.c,
+	  xmame_executable.h, xmame_options.c, xmame_options.h: Replaced
+	  XmameExecutable with MameExec GObject
+
+2008-11-02 18:40  adburton
+
+	* src/: audit.c, callbacks.c, directories.c, gmameui.c, gui.c,
+	  interface.c, mame-exec-list.c, mame-exec-list.h, mame_options.c,
+	  options_string.c, properties.c, xmame_executable.c: Move global
+	  variable current_exec to MameExecList
+
+2008-11-02 18:39  adburton
+
+	* data/options.glade: Set tooltips and MAME-suggested default
+	  values
+
+2008-11-02 13:14  adburton
+
+	* src/: callbacks.c, gmameui.c, mame_options.c, mame_options.h,
+	  xmame_options.c, xmame_options.h: Add support for Core Input,
+	  OpenGL and Playback options, use default values for MAME Options
+	  that are set by toggle, Set tooltips and MAME-suggested default
+	  values
+
+2008-10-25 17:08  adburton
+
+	* src/: Makefile.am, directories.c, gmameui.c, gui.c, gui.h,
+	  mame-exec-list.c, mame-exec-list.h, xmame_executable.c,
+	  xmame_executable.h: Replace xmame_table with MameExecList GObject
+
 2008-10-04 09:46  adburton
 
 	* NEWS, configure.ac: Change version number prior to new release
