@@ -1,3 +1,8 @@
+2009-03-31 22:39
+
+	* po/: gmameui.pot, POTFILES.in: Update pot template and list of
+	  source files
+
 2009-03-29 16:08  adburton
 
 	* configure.ac, NEWS: Tagged for new release
