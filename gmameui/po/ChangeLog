@@ -1,3 +1,8 @@
+2009-04-01  adburton <adb@iinet.net.au>
+
+	* LINGUAS, sv.po: New Swedish translation (thanks Daniel
+	  Nylander)
+
 2004-07-31  gettextize  <bug-gnu-gettext@gnu.org>
 
 	* Makefile.in.in: New file, from gettext-0.14.1.
