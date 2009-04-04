@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2008-2009 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -200,6 +200,7 @@ GMAMEUI_DEBUG ("Creating filters list");
 	
 	/* Now add the categories */
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Available"));
+	fl->priv->groups = g_list_append (fl->priv->groups, _("Status"));
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Architecture"));
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Imperfect"));
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Game Details"));
@@ -633,6 +634,7 @@ gmameui_filters_list_select (GMAMEUIFiltersList *fl,
 
 	g_assert (gmameui_filters_list_source_to_iter (fl, filter, &iter));
 	gtk_tree_selection_select_iter (fl->priv->selection, &iter);
+//	selected_filter = filter;!! Added to resolve iter not selected, but doesnt highlught
 }
 
 /* FIXME This callback doesn't do anything useful */

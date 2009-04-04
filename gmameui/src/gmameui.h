@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -94,44 +94,53 @@ typedef enum  {
 } screenshot_type;
 
 typedef enum  {
-	NULL_FOLDER_ID,	/* 0	just for the folderID compliance*/
-	ALL,		/* 1 */
-	AVAILABLE,	/* 2 */
-	UNAVAILABLE,	/* 3 */
+	/* Availability */
+	FILTER_ALL,
+	FILTER_AVAILABLE,
+	FILTER_UNAVAILABLE,
+	/* Status */
+	FILTER_CORRECT,
+	FILTER_BEST_AVAIL,
 	FILTER_INCORRECT,
 	/* Architecture type filters */
-	NEOGEO,
-	CPS1,
-	CPS2,
-	CPS3,
-	NAMCOS22,
-	SEGAS16,
-	SEGAM2,
-	IMPERFECT,
-	IMPERFECT_COLORS,
-	IMPERFECT_SOUND,
-	IMPERFECT_GRAPHIC,
-	MANUFACTURERS, 	/* 5 just for the folderID compliance*/
-	YEARS, 		/* 6 just for the folderID compliance*/
-	WORKING,	/* 7 */
-	NONWORKING,	/* 8 */
-	CUSTOMS, 	/* 9 just for the folderID compliance*/
-	PLAYED,		/* 10 */
-	FAVORITES,	/* 11 */
-	ORIGINALS,	/* 12 */
-	CLONES,		/* 13 */
-	RASTERS,	/* 14 */
-	VECTORS,	/* 15 */
-SAMPLES,
-	FILTER_CONTROL_TRACKBALL,	/* 16 */
+	FILTER_ARCH_NEOGEO,
+	FILTER_ARCH_CPS1,
+	FILTER_ARCH_CPS2,
+	FILTER_ARCH_CPS3,
+	FILTER_ARCH_NAMCOS22,
+	FILTER_ARCH_SEGAS16,
+	FILTER_ARCH_SEGAM2,
+	FILTER_ARCH_BIOS,
+/* TODO	IMPERFECT,  * i.e. imperfect color/sound/graphics */
+	FILTER_IMPERFECT_COLORS,
+	FILTER_IMPERFECT_SOUND,
+	FILTER_IMPERFECT_GRAPHIC,
+
+	FILTER_DETAILS_ORIGINALS,
+	FILTER_DETAILS_CLONES,
+	FILTER_DETAILS_SAMPLES,
+	FILTER_DETAILS_STEREO,
+	FILTER_DETAILS_RASTERS,
+	FILTER_DETAILS_VECTORS,
+
+	FILTER_CONTROL_TRACKBALL,
 	FILTER_CONTROL_LIGHTGUN,
-	ORIENTATION,
-	STEREO,
-	FILTER_BIOS,
-	DRIVERS,
-	CATEGORIES,
-	VERSIONS,
-	NUMBER_FOLDER
+/*TODO	FILTER_ORIENTATION_V,
+	FILTER_ORIENTATION_H,*/
+
+	FILTER_CUSTOM_PLAYED,
+	FILTER_CUSTOM_FAVORITES,
+
+/*TODO	MANUFACTURERS,
+	YEARS,
+	WORKING,
+	NONWORKING,
+	CUSTOMS,
+	
+	DRIVERS,*/
+	FILTER_CATEGORIES,
+	FILTER_VERSIONS,
+	NUM_FILTERS
 } folder_filters_list;
 
 typedef enum {
@@ -169,7 +178,7 @@ column_debug (void);
 
 /* Others Functions */
 gboolean
-game_filtered (RomEntry * rom);
+game_filtered (RomEntry * rom, gint rom_filter_opt);
 
 void
 process_inp_function (RomEntry *rom, gchar *file, int action);

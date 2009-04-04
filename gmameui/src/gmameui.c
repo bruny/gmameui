@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -242,7 +242,7 @@ g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer,
 }
 
 gboolean
-game_filtered (RomEntry * rom)
+game_filtered (RomEntry * rom, gint rom_filter_opt)
 {
 	gchar **manufacturer;
 	
@@ -250,13 +250,12 @@ game_filtered (RomEntry * rom)
 	Columns_type type;
 	gchar *value;
 	gint int_value;
-	
 	gboolean retval;
 
 	g_return_val_if_fail (selected_filter != NULL, FALSE);
 	
 	retval = FALSE;
-	
+
 	g_object_get (selected_filter,
 		      "is", &is,
 		      "type", &type,
@@ -272,108 +271,116 @@ game_filtered (RomEntry * rom)
 		} else
 			retval = FALSE;
 	} else {
-	
-	switch (type) {
-	case DRIVER:
-		retval = ( (is && !g_strcasecmp (rom->driver,value)) ||
-			 (!is && g_strcasecmp (rom->driver,value)));
-		break;
-	case CLONE:
-		retval = ( (is && !g_strcasecmp (rom->cloneof,value)) ||
-			 (!is && g_strcasecmp (rom->cloneof,value)));
-		break;
-	case CONTROL:
-		retval = ( (is && (rom->control == (ControlType)int_value))  ||
-			 (!is && ! (rom->control == (ControlType)int_value)));
-		break;
-	case MAMEVER:
-		if (rom->mame_ver_added)
-			retval = (g_ascii_strcasecmp (rom->mame_ver_added, value) == 0);
-		else
-			retval = 0;
-		break;
-	case CATEGORY:
-		if (rom->category)
-			retval = (g_ascii_strcasecmp (rom->category, value) == 0);
-		else
-			retval = 0;
-		break;
-	case FAVORITE:
-		retval = ( (is && rom->favourite) ||
-			 (!is && !rom->favourite));
-		break;
-	case VECTOR:
-		retval = ( (is && rom->vector) ||
-			 (!is && !rom->vector));
-		break;
-	case STATUS:
-		retval = ( (is && rom->status == (DriverStatus)int_value) ||
-			 (!is && !rom->status == (DriverStatus)int_value));
-		break;
-	case COLOR_STATUS:
-		retval = ( (is && (rom->driver_status_color == (DriverStatus)int_value))  ||
-			 (!is && ! (rom->driver_status_color == (DriverStatus)int_value)));
-		break;
-	case SOUND_STATUS:
-		retval = ( (is && (rom->driver_status_sound == (DriverStatus)int_value))  ||
-			 (!is && ! (rom->driver_status_sound == (DriverStatus)int_value)));
-		break;
-	case GRAPHIC_STATUS:
-		retval = ( (is && (rom->driver_status_graphic == (DriverStatus)int_value))  ||
-			 (!is && ! (rom->driver_status_graphic == (DriverStatus)int_value)));
-		break;
-	case HAS_ROMS:
-		retval = ( (is && (rom->has_roms == (RomStatus)int_value))  ||
-			 (!is && ! (rom->has_roms == (RomStatus)int_value)));
-		break;
-	case HAS_SAMPLES:
-		retval = ( (is && (rom->nb_samples == int_value))  ||
-			 (!is && ! (rom->nb_samples == int_value)));
-		break;
-	case TIMESPLAYED:
-		retval = ( (is && (rom->timesplayed == int_value)) ||
-			 (!is && ! (rom->timesplayed == int_value)));
-		break;
-	case CHANNELS:
-		retval = ( (is && (rom->channels == int_value)) ||
-			 (!is && (rom->channels != int_value)));
-		break;
-		/* Comparing text and int */
-	case YEAR:
-		retval = ( (is && (rom->year == value)) ||
-			 (!is && (rom->year != value)));
-		break;
-		/* comparing parsed text and text */
-	case MANU:
-		manufacturer = rom_entry_get_manufacturers (rom);
-		/* we have now one or two clean manufacturer (s) we still need to differentiates sub companies*/
-		if (manufacturer[1] != NULL) {
-			if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
-			     (!is && g_strncasecmp (manufacturer[0], value, 5)) ||
-			     (is && !g_strncasecmp (manufacturer[1], value, 5)) ||
-			     (!is && g_strncasecmp (manufacturer[1], value, 5))
-			     ) {
-				g_strfreev (manufacturer);
-				retval = TRUE;
+		switch (type) {
+			case DRIVER:
+				retval = ( (is && !g_strcasecmp (rom->driver,value)) ||
+					 (!is && g_strcasecmp (rom->driver,value)));
+				break;
+			case CLONE:
+				retval = ( (is && !g_strcasecmp (rom->cloneof,value)) ||
+					 (!is && g_strcasecmp (rom->cloneof,value)));
+				break;
+			case CONTROL:
+				retval = ( (is && (rom->control == (ControlType)int_value))  ||
+					 (!is && ! (rom->control == (ControlType)int_value)));
+				break;
+			case MAMEVER:
+				if (rom->mame_ver_added)
+					retval = (g_ascii_strcasecmp (rom->mame_ver_added, value) == 0);
+				break;
+			case CATEGORY:
+				if (rom->category)
+					retval = (g_ascii_strcasecmp (rom->category, value) == 0);
+				break;
+			case FAVORITE:
+				retval = ( (is && rom->favourite) ||
+					 (!is && !rom->favourite));
+				break;
+			case VECTOR:
+				retval = ( (is && rom->vector) ||
+					 (!is && !rom->vector));
+				break;
+			case STATUS:
+				retval = ( (is && rom->status == (DriverStatus)int_value) ||
+					 (!is && !rom->status == (DriverStatus)int_value));
+				break;
+			case COLOR_STATUS:
+				retval = ( (is && (rom->driver_status_color == (DriverStatus)int_value))  ||
+					 (!is && ! (rom->driver_status_color == (DriverStatus)int_value)));
+				break;
+			case SOUND_STATUS:
+				retval = ( (is && (rom->driver_status_sound == (DriverStatus)int_value))  ||
+					 (!is && ! (rom->driver_status_sound == (DriverStatus)int_value)));
+				break;
+			case GRAPHIC_STATUS:
+				retval = ( (is && (rom->driver_status_graphic == (DriverStatus)int_value))  ||
+					 (!is && ! (rom->driver_status_graphic == (DriverStatus)int_value)));
+				break;
+			case HAS_ROMS:
+				retval = ( (is && (rom->has_roms == (RomStatus)int_value))  ||
+					 (!is && ! (rom->has_roms == (RomStatus)int_value)));
+				break;
+			case HAS_SAMPLES:
+				retval = ( (is && (rom->nb_samples == int_value))  ||
+					 (!is && ! (rom->nb_samples == int_value)));
+				break;
+			case TIMESPLAYED:
+				retval = ( (is && (rom->timesplayed == int_value)) ||
+					 (!is && ! (rom->timesplayed == int_value)));
+				break;
+			case CHANNELS:
+				retval = ( (is && (rom->channels == int_value)) ||
+					 (!is && (rom->channels != int_value)));
+				break;
+				/* Comparing text and int */
+			case YEAR:
+				retval = ( (is && (rom->year == value)) ||
+					 (!is && (rom->year != value)));
+				break;
+				/* comparing parsed text and text */
+			case MANU:
+				manufacturer = rom_entry_get_manufacturers (rom);
+				/* we have now one or two clean manufacturer (s) we still need to differentiates sub companies*/
+				if (manufacturer[1] != NULL) {
+					if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
+					     (!is && g_strncasecmp (manufacturer[0], value, 5)) ||
+					     (is && !g_strncasecmp (manufacturer[1], value, 5)) ||
+					     (!is && g_strncasecmp (manufacturer[1], value, 5))
+					     ) {
+						g_strfreev (manufacturer);
+						retval = TRUE;
 
-			}
-		} else {
-			if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
-			     (!is && g_strncasecmp (manufacturer[0], value, 5))
-			     ) {
+					}
+				} else {
+					if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
+					     (!is && g_strncasecmp (manufacturer[0], value, 5))
+					     ) {
+						g_strfreev (manufacturer);
+						retval = TRUE;
+					}
+				}
 				g_strfreev (manufacturer);
-				retval = TRUE;
+				break;
+			default:
+				GMAMEUI_DEBUG ("Trying to filter, but filter type %d is not handled", type);
+				retval = FALSE;
 			}
-		}
-		g_strfreev (manufacturer);
-		break;
-	default:
-		GMAMEUI_DEBUG ("Trying to filter, but filter type %d is not handled", type);
-		retval = FALSE;
-	}
 	}
 	g_free (value);
 	
+	/* Final additional check whether the ROM should be displayed based on the ROM
+	   filter settings and whether the ROM is available or unavailable */
+	if (retval) {
+		if (rom_filter_opt == 1) {
+			/* Only show Available */
+			retval = (rom->has_roms != NOT_AVAIL) ? TRUE : FALSE;
+		} else if (rom_filter_opt == 2) {
+			/* Only show Unavailable */
+			retval = (rom->has_roms == NOT_AVAIL) ? TRUE : FALSE;
+		}
+		/* No need to process for All ROMs */
+	}
+
 	return retval;
 }
 

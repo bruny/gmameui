@@ -1,3 +1,11 @@
+2009-04-04 13:10
+
+	* src/: gmameui-gamelist-view.c, interface.c, gmameui.c, gmameui.h
+	  filters_list.c, gui_prefs.c, gui_prefs.h, data/main_gui.glade:
+	  Add new filter group Status and filters Correct and Best
+	  Best Available, add ROM availability filtering buttons
+	  (SF Feature Request 2474989)
+
 2009-03-31 22:39
 
 	* po/: gmameui.pot, POTFILES.in: Update pot template and list of

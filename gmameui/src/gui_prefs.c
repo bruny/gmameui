@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,6 +83,7 @@ struct _MameGuiPrefsPrivate {
 	
 	screenshot_type ShowFlyer;
 	
+	gint current_rom_filter;	/* Whether to show all, available or unavailable ROMs in selected filter */
 	ListMode current_mode;
 	ListMode previous_mode;
 	
@@ -213,6 +214,9 @@ mame_gui_prefs_set_property (GObject *object,
 			if (prefs->priv->sample_paths)
 				g_value_array_free (prefs->priv->sample_paths);
 			prefs->priv->sample_paths = va != NULL ? g_value_array_copy (va) : NULL;
+			break;
+		case PROP_CURRENT_ROMFILTER:
+			prefs->priv->current_rom_filter = g_value_get_int (value);
 			break;
 		case PROP_CURRENT_MODE:
 			prefs->priv->current_mode = g_value_get_int (value);
@@ -347,6 +351,9 @@ mame_gui_prefs_get_property (GObject *object,
 		case PROP_SAMPLE_PATHS:
 			g_value_set_boxed (value, prefs->priv->sample_paths);
 			break;
+		case PROP_CURRENT_ROMFILTER:
+			g_value_set_int (value, prefs->priv->current_rom_filter);
+			break;
 		case PROP_CURRENT_MODE:
 			g_value_set_int (value, prefs->priv->current_mode);
 			break;
@@ -454,6 +461,9 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 	g_object_class_install_property (object_class,
 					 PROP_SHOW_FLYER,
 					 g_param_spec_int ("show-flyer", "Image Type", "Image type to display", 0, 5, 0, G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
+					 PROP_CURRENT_ROMFILTER,
+					 g_param_spec_int ("current-rom-filter", "Current ROM filter", "Current ROM filter", 0, 2, 0, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_CURRENT_MODE,
 					 g_param_spec_int ("current-mode", "Current Mode", "Current Mode", LIST, DETAILS_TREE, DETAILS, G_PARAM_READWRITE));
@@ -573,6 +583,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	pr->priv->show_filterlist = mame_gui_prefs_get_bool_property_from_key_file (pr, "show-filterlist");
 	pr->priv->show_screenshot = mame_gui_prefs_get_bool_property_from_key_file (pr, "show-screenshot");
 	pr->priv->ShowFlyer = mame_gui_prefs_get_int_property_from_key_file (pr, "show-flyer");
+	pr->priv->current_rom_filter = mame_gui_prefs_get_int_property_from_key_file (pr, "current-rom-filter");
 	pr->priv->current_mode = mame_gui_prefs_get_int_property_from_key_file (pr, "current-mode");
 	pr->priv->previous_mode = mame_gui_prefs_get_int_property_from_key_file (pr, "previous-mode");
 	int_array = g_key_file_get_integer_list (pr->priv->prefs_ini_file, "Preferences", "cols-shown", &columnsize, &error);
@@ -686,6 +697,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	g_signal_connect (pr, "notify::show-filterlist", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::show-screenshot", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::show-flyer", (GCallback) mame_gui_prefs_save_int, NULL);
+	g_signal_connect (pr, "notify::current-rom-filter", (GCallback) mame_gui_prefs_save_int, NULL);
 	g_signal_connect (pr, "notify::current-mode", (GCallback) mame_gui_prefs_save_int, NULL);
 	g_signal_connect (pr, "notify::previous-mode", (GCallback) mame_gui_prefs_save_int, NULL);
 	g_signal_connect (pr, "notify::cols-shown", (GCallback) mame_gui_prefs_save_int_arr, NULL);

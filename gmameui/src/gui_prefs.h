@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,6 +70,7 @@ enum
 	PROP_SHOW_FILTERLIST,
 	PROP_SHOW_SCREENSHOT,
 	PROP_SHOW_FLYER,
+	PROP_CURRENT_ROMFILTER,
 	PROP_CURRENT_MODE,
 	PROP_PREVIOUS_MODE,
 	PROP_COLS_SHOWN,

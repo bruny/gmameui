@@ -699,6 +699,7 @@ create_gamelist_content (void)
 	ListMode current_mode;
 	gchar *current_rom_name;
 	gchar *clone_color;
+	gint rom_filter_opt;
 
 	g_return_if_fail (gui_prefs.gl != NULL);
 
@@ -715,12 +716,10 @@ g_timer_start (timer);
 	/* Status Bar Message */
 	gtk_statusbar_pop (main_gui.statusbar3, 1);
 	gtk_statusbar_push (main_gui.statusbar3, 1, _("Wait..."));
+	
+	/* Unset the tree model until it has been filled */
 	if ((main_gui.displayed_list) && (main_gui.tree_model)) {
-		store = NULL;
-		gtk_tree_view_set_model (GTK_TREE_VIEW (main_gui.displayed_list), GTK_TREE_MODEL (store));
-		/* Update UI */
-		/*while (gtk_events_pending ())
-			gtk_main_iteration ();*/
+		gtk_tree_view_set_model (GTK_TREE_VIEW (main_gui.displayed_list), NULL);
 	}
 
 	/* Whether the Tree Model will a tree or a list */
@@ -729,6 +728,10 @@ g_timer_start (timer);
 	/* Get the status icon */
 	get_status_icons ();
 
+	/* Get the current ROM filter setting */
+	g_object_get (main_gui.gui_prefs, "current-rom-filter", &rom_filter_opt, NULL);
+	GMAMEUI_DEBUG ("ROM filter is %d", rom_filter_opt);
+	
 	/* Create a model. */
 	if (tree_store)
 		store = (GtkTreeModel *) gtk_tree_store_new (NUMBER_COLUMN + 3,
@@ -766,7 +769,7 @@ g_timer_start (timer);
 	     (listpointer);
 	     listpointer= g_list_next (listpointer)) {
 		tmprom = (RomEntry *) listpointer->data;
-		if (game_filtered (tmprom)) {
+		if (game_filtered (tmprom, rom_filter_opt)) {
 			GdkPixbuf *pixbuf = NULL;
 
 			rom_entry_get_list_name (tmprom);
