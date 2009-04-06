@@ -904,22 +904,31 @@ static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param,
 	g_object_get (pr, key, &va, NULL);
 	
 	g_return_if_fail (va != NULL);
-	g_return_if_fail (va->n_values > 0);
+
 	GMAMEUI_DEBUG ("Saving string array %s", key);
 	
-	/* Copy all the elements in the value array to an integer array */
-	n_va = va->n_values;
-	value = g_new0 (gchar*, n_va);
-	for (i = 0; i < n_va; i++) {
-		GMAMEUI_DEBUG ("Value at %d is %s", i, g_value_get_string (g_value_array_get_nth (va, i)));
-		value[i] = g_strdup (g_value_get_string (g_value_array_get_nth (va, i)));
-	}
+	if (va->n_values == 0) {
+		/* If the va has no values, then they have all been removed -
+		   need to delete the key from the file */
+		GMAMEUI_DEBUG ("Saving %s - removing string array value %s",
+			       pr->priv->filename, key);
+		
+		g_key_file_remove_key (pr->priv->prefs_ini_file, "Preferences", key, NULL);
+	} else {	
+		/* Copy all the elements in the value array to a string array */
+		n_va = va->n_values;
+		value = g_new0 (gchar*, n_va);
+		for (i = 0; i < n_va; i++) {
+			GMAMEUI_DEBUG ("Value at %d is %s", i, g_value_get_string (g_value_array_get_nth (va, i)));
+			value[i] = g_strdup (g_value_get_string (g_value_array_get_nth (va, i)));
+		}
 	
-	GMAMEUI_DEBUG ("Saving %s - setting string array value %s",
-		       pr->priv->filename, key);
+		GMAMEUI_DEBUG ("Saving %s - setting string array value %s",
+			       pr->priv->filename, key);
 
-	/* Set the value and save the file */
-	g_key_file_set_string_list (pr->priv->prefs_ini_file, "Preferences", key, value, n_va);
+		/* Set the value and save the file */
+		g_key_file_set_string_list (pr->priv->prefs_ini_file, "Preferences", key, value, n_va);
+	}
 	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename, &error);
 	
 	if (error) {

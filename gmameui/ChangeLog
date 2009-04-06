@@ -1,4 +1,12 @@
-2009-04-04 13:10
+2009-04-07 00:10  adburton
+
+	* src/: directories.c, directories.h, gui_prefs.c,
+	  mame-exec.c, mame-exec-list.c: Fix crash when removing
+	  last MAME executable directory in Directories window, prompt
+	  user if no executable or ROM path is set when closing the 
+	  Directories window
+
+2009-04-04 13:10  adburton
 
 	* src/: gmameui-gamelist-view.c, interface.c, gmameui.c, gmameui.h
 	  filters_list.c, gui_prefs.c, gui_prefs.h, data/main_gui.glade:
@@ -6,7 +14,7 @@
 	  Best Available, add ROM availability filtering buttons
 	  (SF Feature Request 2474989)
 
-2009-03-31 22:39
+2009-03-31 22:39  adburton
 
 	* po/: gmameui.pot, POTFILES.in: Update pot template and list of
 	  source files

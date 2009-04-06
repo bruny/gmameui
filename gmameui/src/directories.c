@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -349,6 +349,8 @@ static void
 mame_directories_dialog_response (GtkDialog *dialog, gint response)
 {
 	MameDirectoriesDialogPrivate *priv;
+	gint num_execs, num_rom_paths;
+	gint result;
 	
 	priv = G_TYPE_INSTANCE_GET_PRIVATE (MAME_DIRECTORIES_DIALOG (dialog),
 					    MAME_TYPE_DIRECTORIES_DIALOG,
@@ -356,14 +358,53 @@ mame_directories_dialog_response (GtkDialog *dialog, gint response)
 
 	switch (response)
 	{
-
 		case GTK_RESPONSE_CLOSE:
 			/* Close button clicked */
-			mame_directories_dialog_save_changes (MAME_DIRECTORIES_DIALOG (dialog));
+			num_execs = gtk_tree_model_iter_n_children (priv->xmame_execs_tree_model, NULL);
+			num_rom_paths = gtk_tree_model_iter_n_children (priv->roms_path_tree_model, NULL);
 			
-			gtk_widget_destroy (GTK_WIDGET (dialog));
+			/* Check if there are no executables selected */
+			if (num_execs == 0) {
+				GtkWidget *msg_dlg;
+
+				msg_dlg = gtk_message_dialog_new (NULL,
+							GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+							GTK_MESSAGE_WARNING,
+							GTK_BUTTONS_YES_NO,
+							_("No MAME executables have been chosen"));
+
+				gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (msg_dlg),
+									  _("Without a MAME executable, you will not be able to emulate any ROMs. "
+									    "Are you sure you want to close the window?"));
+				result = gtk_dialog_run (GTK_DIALOG (msg_dlg));
+				gtk_widget_destroy (msg_dlg);
+			} else if (num_rom_paths == 0) {
+				GtkWidget *msg_dlg;
+
+				msg_dlg = gtk_message_dialog_new (NULL,
+							GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+							GTK_MESSAGE_WARNING,
+							GTK_BUTTONS_YES_NO,
+							_("No ROM directories have been chosen"));
+
+				gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (msg_dlg),
+									  _("Without any ROM directories, you will not be able to emulate any ROMs. "
+									    "Are you sure you want to close the window?"));
+				result = gtk_dialog_run (GTK_DIALOG (msg_dlg));
+				gtk_widget_destroy (msg_dlg);
+			} else
+				result = GTK_RESPONSE_YES;
 			
-//			create_gamelist_content ();
+			if (result == GTK_RESPONSE_YES) {
+				/* If the user chose to close the window */
+				gtk_widget_hide (GTK_WIDGET (dialog));
+				
+				mame_directories_dialog_save_changes (MAME_DIRECTORIES_DIALOG (dialog));
+			
+				gtk_widget_destroy (GTK_WIDGET (dialog));
+			
+				create_gamelist_content ();
+			}
 			
 			break;
 		case GTK_RESPONSE_DELETE_EVENT:
@@ -386,14 +427,20 @@ GMAMEUI_DEBUG ("Destroying mame directories dialog...");
 	
 	if (dlg->priv->xml)
 		g_object_unref (dlg->priv->xml);
-	
+
 	/* Empty models */
 	gtk_list_store_clear (GTK_LIST_STORE (dlg->priv->xmame_execs_tree_model));
+	g_object_unref (dlg->priv->xmame_execs_tree_model);
 	gtk_list_store_clear (GTK_LIST_STORE (dlg->priv->roms_path_tree_model));
+	g_object_unref (dlg->priv->roms_path_tree_model);
 	gtk_list_store_clear (GTK_LIST_STORE (dlg->priv->samples_path_tree_model));
+	g_object_unref (dlg->priv->samples_path_tree_model);
 	
-	if (dlg->priv)
-		g_object_unref (dlg->priv);
+	if (dlg->priv->va_orig_rom_paths)
+		g_value_array_free (dlg->priv->va_orig_rom_paths);
+	
+/*	if (dlg->priv)
+		g_object_unref (dlg->priv);*/
 	
 /*	GTK_OBJECT_CLASS (mame_directories_dialog_parent_class)->destroy (object);*/
 	
@@ -638,15 +685,19 @@ remove_path_from_tree_view (GtkWidget *button, gpointer user_data)
 		/* Get the associated parameter name */
 		param_name = (gchar *) g_object_get_data (G_OBJECT (view), "SettingName");
 		
-		/* GMAMEUI_DEBUG ("Removing path from list for %s", param_name); */
+		GMAMEUI_DEBUG ("Removing path from list for %s", param_name);
 		
 		if (g_ascii_strcasecmp (param_name, "executable-paths") == 0) {
 			/* Remove the relevant executable from the list of executables */
 			mame_exec_list_remove_by_path (main_gui.exec_list, path);
 		}
-		
+
 		/* Update the preferences */
 		GValueArray *va_paths = mame_exec_list_get_list_as_value_array (main_gui.exec_list);
+
+		g_return_if_fail (va_paths != NULL);
+		g_return_if_fail (main_gui.gui_prefs != NULL);
+
 		g_object_set (main_gui.gui_prefs, param_name, va_paths, NULL);
 		g_value_array_free (va_paths);
 		

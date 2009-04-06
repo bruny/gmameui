@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -97,13 +97,14 @@ mame_exec_list_get_list_as_value_array (MameExecList *list)
 		gchar *path;
 
 		exec = (MameExec *) node->data;
+
 		g_object_get (exec, "exec-path", &path, NULL);
 		
 		g_value_set_string (&val, path);
 		
 		va_paths = g_value_array_append (va_paths, &val);
 		/* GMAMEUI_DEBUG ("Adding %s to list of executables", path); */
-		
+
 		g_free (path);
 	}
 	
@@ -161,8 +162,10 @@ mame_exec_list_remove_by_path (MameExecList *list, gchar *path)
 	exec = mame_exec_list_get_exec_by_path (list, path);
 
 	g_return_if_fail (exec != NULL);
-	
-	list = g_list_remove (list->priv->list, exec);
+
+	list->priv->list = g_list_remove (list->priv->list, exec);
+
+	g_object_unref (exec);
 }
 
 void

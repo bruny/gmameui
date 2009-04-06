@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2008-2009 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
