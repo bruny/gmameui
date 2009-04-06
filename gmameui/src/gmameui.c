@@ -177,7 +177,8 @@ gmameui_init (void)
 		mame_exec_list_set_current_executable (main_gui.exec_list,
 						       mame_exec_list_get_exec_by_path (main_gui.exec_list, mame_executable));
 		g_free (mame_executable);
-	} else {
+	} else if (mame_exec_list_size (main_gui.exec_list) > 0) {
+		/* Only set a default executable if there are available ones to choose from */
 		mame_exec_list_set_current_executable (main_gui.exec_list,
 						       mame_exec_list_nth (main_gui.exec_list, 0));
 	}
