@@ -7,7 +7,6 @@ src/directories.c
 src/filter.c
 src/filters_list.c
 src/game_list.c
-src/game_options.c
 src/gmameui.c
 src/gmameui-audit-dlg.c
 src/gmameui-gamelist-view.c

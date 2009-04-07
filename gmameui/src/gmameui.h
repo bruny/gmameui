@@ -159,22 +159,12 @@ struct gui_prefs_struct {
 
 struct gui_prefs_struct gui_prefs;
 
-/* global variables */
-MameExec *current_exec;
-
 GMAMEUIFilter *selected_filter;
 
 Joystick *joydata;
 GdkPixbuf *Status_Icons[NUMBER_STATUS];
 
 gboolean dirty_icon_cache;
-
-/* Column number that is used in the gamelist popup menu */
-gint ColumnHide_selected;
-
-/* Debug Functions */
-void
-column_debug (void);
 
 /* Others Functions */
 gboolean

@@ -40,12 +40,12 @@
 #include "gmameui.h"
 #include "gui.h"
 #include "io.h"
-#include "game_options.h"
 #include "mame_options.h"
 #include "options_string.h"
 #include "progression_window.h"
 #include "gtkjoy.h"
 #include "mame-exec.h"
+#include "directories.h"
 
 #define BUFFER_SIZE 1000
 
@@ -84,21 +84,27 @@ main (int argc, char *argv[])
 	signal (SIGINT, gmameui_signal_handler);
 #endif
 
+	/* If no executables were found, prompt the user to open the directories
+	   window to add at least one */
 	if (!mame_exec_list_has_current_executable (main_gui.exec_list)) {
-		gmameui_message (ERROR, NULL, _("No xmame executable found"));
+		GtkWidget *dir_dlg, *msg_dlg;
+		gint response;
 		
-		/* Open file browser to select MAME executable *
-		GtkFileChooserDialog *dialog = gtk_file_chooser_dialog_new (_("Select a MAME executable"),
-			NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
-			GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-			GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-			NULL);
-		gtk_file_chooser_set_select_multiple (GTK_FILE_CHOOSER (dialog), FALSE);
-		if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT) {
-			xmame_table_add (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog)));    FIXME TODO DELETE
-			add_exec_menu ();
+		msg_dlg = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
+						  GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+						  GTK_MESSAGE_QUESTION,
+						  GTK_BUTTONS_YES_NO,
+						  _("No MAME executables were found"));
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (msg_dlg),
+							  _("Do you want to locate a MAME executable now?"));
+		
+		response = gtk_dialog_run (GTK_DIALOG (msg_dlg));
+		gtk_widget_destroy (msg_dlg);
+		
+		if (response == GTK_RESPONSE_YES) {
+			dir_dlg = mame_directories_dialog_new (GTK_WINDOW (MainWindow));
+			gtk_widget_show (dir_dlg);
 		}
-		gtk_widget_destroy (GTK_WIDGET (dialog));*/
 		
 	} 
 
@@ -170,15 +176,19 @@ gmameui_init (void)
 		
 		MameExec *exec = mame_exec_new_from_path (g_value_get_string (g_value_array_get_nth (va_exec_paths, i)));
 		mame_exec_list_add (main_gui.exec_list, exec);
+		
+		// FIXME TODO Unref the exec
 	}
 	g_value_array_free (va_exec_paths);
 	
-	if (mame_executable) {	
+	if (mame_executable) {
+		GMAMEUI_DEBUG ("Adding executable that was specified previously as %s", mame_executable);
 		mame_exec_list_set_current_executable (main_gui.exec_list,
 						       mame_exec_list_get_exec_by_path (main_gui.exec_list, mame_executable));
 		g_free (mame_executable);
 	} else if (mame_exec_list_size (main_gui.exec_list) > 0) {
 		/* Only set a default executable if there are available ones to choose from */
+		GMAMEUI_DEBUG ("Adding default executable in position 0");
 		mame_exec_list_set_current_executable (main_gui.exec_list,
 						       mame_exec_list_nth (main_gui.exec_list, 0));
 	}
@@ -210,9 +220,6 @@ g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer,
 			g_message (_("catver not loaded, using default values"));
 	}
 	
-	if (!load_options (NULL))
-		g_message (_("default options not loaded, using default values"));
-
 #ifdef ENABLE_DEBUG
 	g_timer_stop (mytimer);
 	g_message (_("Time to initialise GMAMEUI: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
@@ -719,7 +726,6 @@ void process_inp_function (RomEntry *rom, gchar *file, int action)
 	MameExec *exec;
 	char *filename;
 	gchar *opt, *opts_string;
-	GameOptions *target;
 	
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	
@@ -744,12 +750,6 @@ void process_inp_function (RomEntry *rom, gchar *file, int action)
 	else
 		GMAMEUI_DEBUG ("Record game %s", file);
 
-	/* prepares options*/
-	target = load_options (rom);
-	
-	if (!target)
-		target = &default_options;
-
 	opts_string = generate_command_line_options_string (exec, rom);
 
 	/* create the command */
@@ -771,9 +771,6 @@ void process_inp_function (RomEntry *rom, gchar *file, int action)
 		g_free (romname);
 	}
 
-	if (target != &default_options)
-		game_options_free (target);
-	
 	/* FIXME Playing back on xmame requires hitting enter to continue
 	   (run command from command line) */
 	launch_emulation (rom, opt);
@@ -790,8 +787,6 @@ exit_gmameui (void)
 	g_message (_("Exiting GMAMEUI..."));
 
 	save_games_ini ();
-
-	save_options (NULL, NULL);
 
 	joystick_close (joydata);
 	joydata = NULL;

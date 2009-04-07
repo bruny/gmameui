@@ -1,3 +1,10 @@
+2009-04-07 22:53  adburton
+
+	* src/: Makefile.am, gmameui.c, gmameui.h, game_options.c, 
+	  game_options.h, options_string.h, po/POTFILES.in: Delete
+	  redundant references to load_options() and save_options()
+	  in game_options.c and .h
+
 2009-04-07 16:42  adburton
 
 	* src/: Makefile.am, gmameui-gamelist-view.c, gmameui-sidebar.c,

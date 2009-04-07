@@ -12,7 +12,6 @@ gmameui_SOURCES = \
 	callbacks.c callbacks.h \
 	io.c io.h \
 	game_list.h game_list.c \
-	game_options.h game_options.c \
 	rom_entry.h rom_entry.c \
 	mameio.c \
 	gui.c gui.h \
@@ -44,7 +43,8 @@ gmameui_SOURCES = \
 	$(BUILT_SOURCES)
 
 REDUNDANT_FILES = \
-	network_game.h network_game.c 
+	network_game.h network_game.c \
+	game_options.h game_options.c 
 
 gmameui-marshaller.h: gmameui-marshallers.list 
 	glib-genmarshal --prefix=gmameui_marshaller --header $< > $@

@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -25,7 +25,6 @@
 #define __OPTIONS_STRING_H__
 
 #include "mame-exec.h"
-#include "game_options.h"
 
 gchar *
 create_rompath_options_string (MameExec *exec);

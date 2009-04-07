@@ -21,7 +21,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-
+#ifdef DELETE
 #include "game_options.h"
 #include <string.h>
 #include <stdlib.h>
@@ -751,3 +751,4 @@ save_options (RomEntry    *rom,
 	g_free (filename);
 	return TRUE;
 }
+#endif

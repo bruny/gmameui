@@ -21,6 +21,8 @@
  *
  */
 
+#ifdef DELETE
+
 #ifndef __GAME_OPTIONS_H__
 #define __GAME_OPTIONS_H__
 
@@ -323,5 +325,7 @@ gboolean
 save_options(RomEntry *rom, GameOptions *opts);
 
 void game_options_free(GameOptions *opts);
+
+#endif
 
 #endif
