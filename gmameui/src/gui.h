@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -44,6 +44,7 @@
 #include "filters_list.h"
 #include "gui_prefs.h"
 #include "interface.h"
+#include "gmameui-sidebar.h"
 #include "gmameui-gamelist-view.h"
 #include "mame-exec-list.h"
 
@@ -163,50 +164,7 @@ static const GtkActionEntry gmameui_column_entries[] =
 	  N_("Hide Column"), G_CALLBACK (on_column_hide_activate) },
 };
 
-/**** Sidebar functionality ****/
-#define GMAMEUI_TYPE_SIDEBAR        (gmameui_sidebar_get_type ())
-#define GMAMEUI_SIDEBAR(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), GMAMEUI_TYPE_SIDEBAR, GMAMEUISidebar))
-#define GMAMEUI_SIDEBAR_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST((k), GMAMEUI_TYPE_SIDEBAR, GMAMEUISidebarClass))
-#define GMAMEUI_IS_SIDEBAR(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), GMAMEUI_TYPE_SIDEBAR))
-#define GMAMEUI_IS_SIDEBAR_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), GMAMEUI_TYPE_SIDEBAR))
 
-typedef struct _GMAMEUISidebar        GMAMEUISidebar;
-typedef struct _GMAMEUISidebarClass   GMAMEUISidebarClass;
-typedef struct _GMAMEUISidebarPrivate GMAMEUISidebarPrivate;
-
-/*
- * Main object structure
- */
-
-struct _GMAMEUISidebar 
-{
-	GtkFrame parent; /* Container for all the nested widgets */
-
-	/*< private > */
-	GMAMEUISidebarPrivate *priv;
-};
-
-struct _GMAMEUISidebarClass {
-	GtkFrameClass parent_class;
-};
-
-GType gmameui_sidebar_get_type (void);
-
-GtkWidget *gmameui_sidebar_new (void);
-
-/*DELETEstatic void
-gmameui_sidebar_set_page (GMAMEUISidebar *sidebar, RomEntry *rom, screenshot_type page);*/
-/*DELETE
-static void
-gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom);
-
-static gboolean
-gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, RomEntry *rom);
-
-static void
-gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);*/
-
-/**** End Sidebar functionality ****/
 
 GtkWidget *MainWindow;
 

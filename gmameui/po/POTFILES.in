@@ -11,6 +11,7 @@ src/game_options.c
 src/gmameui.c
 src/gmameui-audit-dlg.c
 src/gmameui-gamelist-view.c
+src/gmameui-sidebar.c
 src/gmameui-rominfo-dlg.c
 src/gtkjoy.c
 src/gui.c

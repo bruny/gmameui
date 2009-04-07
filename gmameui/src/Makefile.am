@@ -17,6 +17,7 @@ gmameui_SOURCES = \
 	mameio.c \
 	gui.c gui.h \
 	gmameui-gamelist-view.c gmameui-gamelist-view.h \
+	gmameui-sidebar.c gmameui-sidebar.h \
 	progression_window.c progression_window.h \
 	directories.c directories.h \
 	about.c about.h \

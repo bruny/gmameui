@@ -1,3 +1,14 @@
+2009-04-07 16:42  adburton
+
+	* src/: Makefile.am, gmameui-gamelist-view.c, gmameui-sidebar.c,
+	  gmameui-sidebar.h, gmameui.h, gui.c, gui.h, po/POTFILES.in:
+	  Move code for RHS ROM sidebar to separate files
+
+2009-04-07 08:23  adburton
+
+	* src/: gmameui.c, mame-exec-list.c: Fix segfault on startup if
+	  no .gmameui directory found (SF Bug 2738775)
+
 2009-04-07 00:10  adburton
 
 	* src/: directories.c, directories.h, gui_prefs.c,
