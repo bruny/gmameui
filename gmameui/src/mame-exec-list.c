@@ -118,8 +118,8 @@ mame_exec_list_nth (MameExecList *list, guint index)
 	GList *list_ptr;
 
 	g_return_val_if_fail (list != NULL, NULL);
-	
-	if (g_list_length (list->priv->list) == 0);
+
+	if (g_list_length (list->priv->list) == 0)
 		return NULL;
 	
 	list_ptr = g_list_nth (list->priv->list, index);
