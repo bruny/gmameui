@@ -86,7 +86,7 @@ main (int argc, char *argv[])
 
 	/* If no executables were found, prompt the user to open the directories
 	   window to add at least one */
-	if (!mame_exec_list_has_current_executable (main_gui.exec_list)) {
+	if (mame_exec_list_size (main_gui.exec_list) == 0) {
 		GtkWidget *dir_dlg, *msg_dlg;
 		gint response;
 		

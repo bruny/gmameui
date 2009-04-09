@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -550,7 +550,6 @@ mame_audit_start_full (void)
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	
 	g_return_if_fail (exec != NULL);
-	g_return_if_fail (!mame_get_options (exec));
 
 	option_name = mame_get_option_name (exec, "verifyroms");
 

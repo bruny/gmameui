@@ -23,7 +23,6 @@
  */
 
 #include "common.h"
-
 #include <gtk/gtkcolorseldialog.h>
 #include <gtk/gtkfontsel.h>
 #include <gtk/gtklabel.h>
@@ -49,6 +48,7 @@
 #include "io.h"
 #include "gui_prefs_dialog.h"
 #include "mame_options_legacy_dialog.h"
+#include "gmameui-rominfo-dlg.h"
 
 void update_favourites_list (gboolean add);
 
@@ -273,19 +273,7 @@ void
 on_rebuild_game_list_menu_activate     (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-	gtk_widget_set_sensitive (main_gui.scrolled_window_games, FALSE);
-	UPDATE_GUI;
-	
-	GMAMEUI_DEBUG ("recreate game list");
-	gamelist_parse (mame_exec_list_get_current_executable (main_gui.exec_list));
-	GMAMEUI_DEBUG ("reload everything");
-
-	mame_gamelist_save (gui_prefs.gl);
-
-	load_games_ini ();
-	load_catver_ini ();
-	create_gamelist_content ();
-	gtk_widget_set_sensitive (main_gui.scrolled_window_games, TRUE);
+	gmameui_gamelist_rebuild ();
 }
 
 void

@@ -1,3 +1,16 @@
+2009-04-09 11:45  adburton
+
+	* data/main_gui.glade: Rename object to prevent warnings on
+	  command-line
+	* src/audit.c: Remove faulty g_return_if_val check preventing
+	  audit from occurring
+	* src/: callbacks.c, directories.c, gmameui-gamelist-view.c,
+	  gmameui-gamelist-view.h, gui.c: Prompt to rebuild gamelist
+	  when executable is changed, set default executable when
+	  selected is not available
+	* src/gmameui.c: Use size of executable list to determine whether
+	  to prompt to add executables
+
 2009-04-07 22:53  adburton
 
 	* src/: Makefile.am, gmameui.c, gmameui.h, game_options.c, 

@@ -29,6 +29,7 @@
 #include "interface.h"
 #include "gmameui.h"
 #include "gui.h"
+#include "io.h"
 
 static guint timeoutid;
 static gint ColumnHide_selected;
@@ -909,4 +910,24 @@ g_timer_start (timer);
 
 	GMAMEUI_DEBUG ("Time taken to create_gamelist_content is %.2f", g_timer_elapsed (timer, NULL));
 	g_timer_destroy (timer);
+}
+
+void
+gmameui_gamelist_rebuild ()
+{
+	gtk_widget_set_sensitive (main_gui.scrolled_window_games, FALSE);
+	UPDATE_GUI;
+	
+	GMAMEUI_DEBUG ("Parsing MAME output to recreate game list...");
+	gamelist_parse (mame_exec_list_get_current_executable (main_gui.exec_list));
+
+	GMAMEUI_DEBUG ("Reloading everything...");
+	mame_gamelist_save (gui_prefs.gl);
+
+	load_games_ini ();
+	load_catver_ini ();
+	create_gamelist_content ();
+	gtk_widget_set_sensitive (main_gui.scrolled_window_games, TRUE);
+	
+	GMAMEUI_DEBUG ("Done rebuilding gamelist");
 }

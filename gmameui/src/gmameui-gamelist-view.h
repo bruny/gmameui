@@ -67,4 +67,6 @@ void on_column_hide_activate (GtkMenuItem *menuitem, gpointer user_data);
 
 RomEntry * gamelist_get_selected_game (void);
 
+void gmameui_gamelist_rebuild ();
+
 #endif /* __GMAMEUI_GAMELIST_VIEW_H__ */

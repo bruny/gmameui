@@ -886,13 +886,6 @@ mame_directories_dialog_save_changes (MameDirectoriesDialog *dialog)
 	/* remove and destroy the submenu */
 	add_exec_menu ();
 
-	/* Here we should already have a valid executable except if MAME
-	   is not present in path */
-	if (!mame_exec_list_has_current_executable (main_gui.exec_list)) {
-		gmameui_message (ERROR, GTK_WINDOW (dialog),
-				 _("No valid xmame executables found"));
-	}
-	
 	/* Update the state of the menus and toolbars */
 	gmameui_ui_set_items_sensitive ();
 

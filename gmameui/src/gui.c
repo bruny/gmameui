@@ -219,12 +219,28 @@ g_message (_("Time to create main window, filters and gamelist: %.02f seconds"),
 static void
 set_current_executable (MameExec *new_exec)
 {
-	gboolean valid;
+	gint response;
 	
 	if (new_exec) {
+		GtkWidget *dlg;
+		
 		GMAMEUI_DEBUG ("Executable changed to %s", mame_exec_get_path (new_exec));
 		mame_exec_list_set_current_executable (main_gui.exec_list, new_exec);
 		g_object_set (main_gui.gui_prefs, "current-executable", mame_exec_get_path (new_exec), NULL);
+		
+		dlg = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
+					      GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+					      GTK_MESSAGE_QUESTION,
+					      GTK_BUTTONS_CANCEL,
+					      _("Do you want to rebuild the gamelist?"));
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dlg),
+							  _("The selected MAME executable has changed, so the list of supported ROMs will have changed. It is recommended that you rebuild the gamelist. Do you want to rebuild now?"));
+		gtk_dialog_add_button (GTK_DIALOG (dlg),
+				       _("Rebuild gamelist"),
+				       GTK_RESPONSE_YES);
+		response = gtk_dialog_run (GTK_DIALOG (dlg));
+		gtk_widget_destroy (dlg);
+				       
 	} else {
 		gmameui_message (ERROR, NULL, _("Executable is not valid MAME executable... skipping"));
 		/* FIXME TODO Remove the executable from the list */
@@ -233,6 +249,11 @@ set_current_executable (MameExec *new_exec)
 	/* Set sensitive the UI elements that require an executable to be set */
 	gtk_action_group_set_sensitive (main_gui.gmameui_rom_exec_action_group, new_exec != NULL);
 	gtk_action_group_set_sensitive (main_gui.gmameui_exec_action_group, new_exec != NULL);
+	
+	/* Rebuild the gamelist */
+	if (response == GTK_RESPONSE_YES) {
+		gmameui_gamelist_rebuild ();
+	}
 }
 
 /* executable selected from the menu */
@@ -240,14 +261,23 @@ static void
 on_executable_selected (GtkRadioAction *action,
 			gpointer          user_data)
 {
-	gint index = GPOINTER_TO_INT (user_data);
+	gint signal_index;      /* Index of the current action in the group for which "changed" has been emitted */
+	gint selected_index;    /* Index of the newly selected action */
+	
+	/* Because the "changed" signal is emitted on each member of the group,
+	   need to check that the current action is the one that is newly selected
+	   so this function doesn't process for each member of the group */
+	signal_index = GPOINTER_TO_INT (user_data);
+	selected_index = gtk_radio_action_get_current_value (action);
 
-	MameExec *exec;
+	if (signal_index == selected_index) {	
+		MameExec *exec;
 
-	exec = mame_exec_list_nth (main_gui.exec_list, index);
+		exec = mame_exec_list_nth (main_gui.exec_list, signal_index);
 
-	GMAMEUI_DEBUG ("Picking executable %d - %s", index, mame_exec_get_name (exec));
-	set_current_executable (exec);
+		GMAMEUI_DEBUG ("Picking executable %d - %s", signal_index, mame_exec_get_name (exec));
+		set_current_executable (exec);
+	}
 }
 
 /* Dynamically create the executables menu. */
@@ -257,9 +287,18 @@ add_exec_menu (void)
 	gchar *current_exec;
 	int num_execs;
 	int i;
+	gboolean default_exec;
 	MameExec *exec;
 
 	g_object_get (main_gui.gui_prefs, "current-executable", &current_exec, NULL);
+	
+	/* Determine whether the current-executable is defined - if not, we will
+	   have to pick a default later as we add items */
+	if (mame_exec_list_get_exec_by_path (main_gui.exec_list, current_exec) == NULL)
+		default_exec = 0;
+	else
+		default_exec = 1;
+	
 	
 	/* This is really hard to understand from the API. Why do they make it so hard?
 	   Ref: http://log.emmanuelebassi.net/archives/2006/08/boogie-woogie-bugle-boy/ */
@@ -321,9 +360,7 @@ add_exec_menu (void)
 					       "value", i,
 					       "stock_id", NULL,
 					       NULL);
-			g_signal_connect (action, "activate",
-					  G_CALLBACK (on_executable_selected),
-					  GINT_TO_POINTER (i));
+
 			gtk_action_group_add_action (exec_radio_action_group, GTK_ACTION (action));
 			gtk_radio_action_set_group (action, radio_group);
 			radio_group = gtk_radio_action_get_group (action);
@@ -343,7 +380,22 @@ add_exec_menu (void)
 					gtk_radio_action_set_current_value (action, i);
 				}
 			}
-		
+
+			/* Set the callback when this exec is chosen (need to do this
+			   AFTER gtk_radio_action_set_current_value to prevent signal
+			   from triggering during startup) */
+			g_signal_connect (action, "activate",
+					  G_CALLBACK (on_executable_selected),
+					  GINT_TO_POINTER (i));
+			
+			/* If the current exec is not available, pick the first item as default */
+			if ((i == 0) && (!default_exec)) {
+				gtk_radio_action_set_current_value (action, i);
+				
+				/* Manually emit the signal - the above is not enough */
+				g_signal_emit_by_name (action, "activate", GINT_TO_POINTER (i));
+			}
+			
 			/* TODO Free the executable */
 		
 			g_free (action_name);
