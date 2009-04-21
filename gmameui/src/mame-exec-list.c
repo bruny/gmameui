@@ -178,7 +178,7 @@ mame_exec_list_set_current_executable (MameExecList *list, MameExec *exec)
 {
 	g_return_if_fail (list != NULL);
 	g_return_if_fail (exec != NULL);
-
+	
 	list->priv->current_exec = exec;
 	GMAMEUI_DEBUG ("Setting current executable to %s", mame_exec_get_path (list->priv->current_exec));
 }

@@ -265,6 +265,7 @@ mame_audit_dialog_init (MameAuditDialog *dialog)
 	
 	/* We also need to initiate the audit process */
 	/* FIXME TODO Do this in g_idle_add? */
+	/* FIXME TODO Add return value which, if failed, stops the throbber, and shows an error message */
 	mame_audit_start_full ();
 }
 
