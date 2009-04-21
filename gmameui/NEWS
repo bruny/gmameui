@@ -1,3 +1,40 @@
+Overview of changes in GMAMEUI 0.2.8
+====================================
+
+* Directories window warns if no ROM or MAME executable chosen
+
+* Add new filter group Status, filters Correct and Best Available, and add ROM
+  availability filter buttons (SF Feature Request 2474989)
+  
+* Fix crash when removing last MAME executable directory in Directories window,
+  prompt user if no executable or ROM path is set when closing the Directories
+  window
+  
+* Fix segfault on startup if there is no .gmameui directory (SF Bug 2738775)
+
+* If no MAME executables are defined when starting, user is prompted to open
+  the Directories window
+
+* When switching to a different MAME executable, prompt to rebuild the gamelist
+
+* Added Swedish (sv) translation (thanks Daniel Nylander) (SF Feature Request
+  2544027)
+
+* Added .pot template and updated list of files to translate (SF 2544131)
+
+* Code cleanups:
+
+	- Delete global current_exec from gmameui.h
+
+    - Move ColumnHide_selected from gmameui.h to gmameui-gamelist-view.c
+
+    - Removed redundant header reference to column_debug in gmameui.h
+
+    - Move ROM sidebar widget to gmameui-sidebar.c/gmameui-sidebar.h
+
+    - Remove references to redundant load_options and save_options, as well as
+      source files game_options.c and game_options.h
+
 Overview of changes in GMAMEUI 0.2.7
 ====================================
 

@@ -1,3 +1,7 @@
+2009-04-21 20:20  adburton
+
+	* configure.ac, NEWS: Tagged for new release
+
 2009-04-09 11:45  adburton
 
 	* data/main_gui.glade: Rename object to prevent warnings on
