@@ -60,9 +60,7 @@ struct _MameGuiPrefsDialogPrivate {
 	
 	/* Miscellaneous option preferences *
 	GtkWidget *theprefix_checkbutton;
-	GtkWidget *theprefix_label;
-	GtkWidget *clone_color_button;
-	GtkWidget *clone_label;*/
+	GtkWidget *theprefix_label;*/
 };
 
 /* Preferences dialog */
@@ -72,7 +70,7 @@ static void on_prefs_entry_changed (GtkWidget *entry, gchar *widget_name);
 static void on_prefs_checkbutton_toggled (GtkWidget *toggle, gchar *widget_name);
 static void on_prefs_col_checkbutton_toggled (GtkWidget *toggle, gchar *widget_name);
 static void on_prefs_checkbutton_theprefix_toggled (GtkWidget *toggle, gpointer user_data);
-static void on_prefs_colour_button_toggled (GtkWidget *color, gpointer user_data);
+
 static void on_mame_gui_prefs_dialog_destroyed (GtkWidget *prefs_dialog, gpointer user_data);
 static gboolean on_mame_gui_prefs_dialog_deleted (GtkWidget *window,
 				                       GdkEventAny *event,
@@ -118,7 +116,6 @@ mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 	GtkWidget *clone_lbl;
 	GtkWidget *theprefix_label;
 	
-	GdkColor color;
 	GList *col_list;	/* GList of column checkbutton widgets */
 	GList *node;
 	
@@ -128,9 +125,7 @@ mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 	gboolean usejoyingui;
 	gchar *joystick_name;
 	gboolean theprefix;
-	
-	gchar *clone_color;
-	
+		
 	GValueArray *cols_shown;
 GMAMEUI_DEBUG ("Initialising gui prefs dialog");	
 	dlg->priv = g_new0 (MameGuiPrefsDialogPrivate, 1);
@@ -157,7 +152,6 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 		      "cols-shown", &cols_shown,
 		      /* Miscellaneous options */
 		      "theprefix", &theprefix,
-		      "clone-color", &clone_color,
 		      NULL);
 
 	widget = glade_xml_get_widget (xml, "gamecheck");
@@ -224,15 +218,6 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 	/* Default value may be off, so need to manually trigger */
 	on_prefs_checkbutton_theprefix_toggled (widget, theprefix_label);
 
-	/* Set up colour button and example label */
-	clone_lbl = glade_xml_get_widget (xml, "clone_label");
-	
-	widget = glade_xml_get_widget (xml, "clone_color");
-	gdk_color_parse (clone_color, &color);
-	g_signal_connect (widget, "color-set",
-			  G_CALLBACK (on_prefs_colour_button_toggled), clone_lbl);
-	gtk_color_button_set_color (GTK_COLOR_BUTTON (widget), &color);
-	
 	gtk_dialog_set_default_response (GTK_DIALOG (dlg), GTK_RESPONSE_CLOSE);
 	
 	g_object_unref (xml);
@@ -355,38 +340,6 @@ on_prefs_checkbutton_theprefix_toggled (GtkWidget *toggle,
 	g_free (text);
 }
 
-static void
-on_prefs_colour_button_toggled (GtkWidget *color, 
-								gpointer user_data)
-{
-
-	GtkWidget *clone_lbl;
-	gchar *color_string;
-	GdkColor *newcolour = NULL;
-	
-	newcolour = g_malloc (sizeof (GdkColor));
-	
-	gtk_color_button_get_color (GTK_COLOR_BUTTON (color), newcolour);
-	color_string = gdk_color_to_string (newcolour);
-	GMAMEUI_DEBUG ("clone-color changed colour to %s", color_string);
-
-	/* Trigger the set, which causes a save in the mame_gui_prefs_set_property () function */
-	g_object_set (main_gui.gui_prefs,
-				  "clone-color", color_string,
-				  NULL);
-
-	/* Set the colour of the example label */
-	clone_lbl = (GtkWidget *) user_data;
-	gtk_widget_modify_fg (clone_lbl, GTK_STATE_NORMAL, newcolour);
-
-	if (color_string)
-		g_free (color_string);
-/*	if (newcolour)
-		gdk_color_free (newcolour);*/
-
-}
-
-
 static void 
 on_mame_gui_prefs_dialog_destroyed (GtkWidget *prefs_dialog,
 									gpointer user_data)
@@ -418,9 +371,5 @@ GMAMEUI_DEBUG("Response from gui prefs dialog");
 	if (response_id == GTK_RESPONSE_CLOSE)
 		gtk_widget_hide (GTK_WIDGET (dlg));
 	
-	/* Recreate gamelist so that clone color etc take effect */
-	g_object_get (main_gui.gui_prefs, "current-mode", &mode, NULL);
-	create_gamelist (mode);
-	create_gamelist_content ();
 GMAMEUI_DEBUG("Response from gui prefs dialog... done");
 }

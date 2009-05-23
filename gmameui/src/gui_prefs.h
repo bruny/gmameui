@@ -56,6 +56,9 @@ struct _MameGuiPrefs {
 struct _MameGuiPrefsClass {
 	GObjectClass parent;
 	/* define vtable methods and signals here */
+
+	void (*col_toggled) (MameGuiPrefs *prefs, GValueArray *cols);
+	void (*theprefix_toggled) (MameGuiPrefs *prefs, gboolean theprefix);
 };
 
 /* Preferences */
@@ -87,7 +90,6 @@ enum
 	PROP_JOYSTICKNAME,
 	/* Miscellaneous preferences */
 	PROP_THEPREFIX,
-	PROP_CLONECOLOR,
 	PROP_CURRENT_ROM,
 	PROP_CURRENT_EXECUTABLE,
 	/* Executable, ROM and Sample paths - handled using GValueArrays, so

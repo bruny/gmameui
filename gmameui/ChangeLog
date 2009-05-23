@@ -1,3 +1,9 @@
+2009-05-23 16:51 adburton
+
+	* data/gmameui_prefs.glade, src/gui_prefs.c, src/gui_prefs.h,
+	  src/gui_prefs_dialog.c: Use italics to mark ROM as a clone
+	  rather than colour
+
 2009-05-23 16:32 adburton
 
 	* data/main_gui.glade: Add search field and ROM status filter

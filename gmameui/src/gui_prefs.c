@@ -39,6 +39,7 @@
 #include "gui_prefs.h"
 #include "rom_entry.h"
 #include "io.h"
+#include "gmameui-marshaller.h"
 
 /* Preferences */
 static void mame_gui_prefs_class_init (MameGuiPrefsClass *klass);
@@ -62,6 +63,15 @@ static gint mame_gui_prefs_get_int_property_from_key_file (MameGuiPrefs *pr, gch
 static gchar* mame_gui_prefs_get_string_property_from_key_file (MameGuiPrefs *pr, gchar *property);
 
 G_DEFINE_TYPE (MameGuiPrefs, mame_gui_prefs, G_TYPE_OBJECT)
+
+/* Signals enumeration */
+enum
+{
+	GUI_PREFS_COL_TOGGLED,    /* Emitted when a column is toggled */
+	GUI_PREFS_THEPREFIX_TOGGLED,    /* Emitted when "The" as a prefix is toggled */
+	LAST_GUI_PREFS_SIGNAL
+};
+static guint signals[LAST_GUI_PREFS_SIGNAL] = { 0 };
 
 struct _MameGuiPrefsPrivate {
 
@@ -105,7 +115,7 @@ struct _MameGuiPrefsPrivate {
 	
 	/* Miscellaneous option preferences */
 	gboolean theprefix;
-	gchar *clone_color;
+
 	//RomEntry *current_rom;
 	gchar *current_rom_name;
 	gchar *current_executable_name;
@@ -186,9 +196,10 @@ mame_gui_prefs_set_property (GObject *object,
 			break;
 		case PROP_THEPREFIX:
 			prefs->priv->theprefix = g_value_get_boolean (value);
-			break;
-		case PROP_CLONECOLOR:
-			prefs->priv->clone_color = g_strdup (g_value_get_string (value));
+
+			/* Emit the signal (so gamelist view can be changed */
+			g_signal_emit (G_OBJECT (prefs), signals[GUI_PREFS_THEPREFIX_TOGGLED], 0,
+				       prefs->priv->theprefix);
 			break;
 		case PROP_CURRENT_ROM:
 			//prefs->priv->current_rom = g_value_get_object (value);
@@ -229,6 +240,10 @@ mame_gui_prefs_set_property (GObject *object,
 			if (prefs->priv->cols_shown)
 				g_value_array_free (prefs->priv->cols_shown);
 			prefs->priv->cols_shown = va != NULL ? g_value_array_copy (va) : NULL;
+
+			/* Emit the signal (so gamelist view can be changed */
+			g_signal_emit (G_OBJECT (prefs), signals[GUI_PREFS_COL_TOGGLED], 0,
+				       prefs->priv->cols_shown);
 			break;
 		case PROP_COLS_WIDTH:
 			va = g_value_get_boxed (value);
@@ -332,9 +347,6 @@ mame_gui_prefs_get_property (GObject *object,
 		case PROP_THEPREFIX:
 			g_value_set_boolean (value, prefs->priv->theprefix);
 			break;
-		case PROP_CLONECOLOR:
-			g_value_set_string (value, prefs->priv->clone_color);
-			break;
 		case PROP_CURRENT_ROM:
 			//g_value_set_object (value, prefs->priv->current_rom);
 			g_value_set_string (value, prefs->priv->current_rom_name);
@@ -394,9 +406,6 @@ mame_gui_prefs_finalize (GObject *obj)
 	if (pr->priv->joystick_name)
 		g_free (pr->priv->joystick_name);
 	
-	if (pr->priv->clone_color)
-		g_free (pr->priv->clone_color);
-
 	if (pr->priv->cols_shown)
 		g_value_array_free (pr->priv->cols_shown);
 	if (pr->priv->cols_width)
@@ -466,10 +475,10 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 					 g_param_spec_int ("current-rom-filter", "Current ROM filter", "Current ROM filter", 0, 2, 0, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_CURRENT_MODE,
-					 g_param_spec_int ("current-mode", "Current Mode", "Current Mode", LIST, DETAILS_TREE, DETAILS, G_PARAM_READWRITE));
+					 g_param_spec_int ("current-mode", "Current Mode", "Current Mode", LIST, DETAILS, DETAILS, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_PREVIOUS_MODE,
-					 g_param_spec_int ("previous-mode", "Previous Mode", "Previous Mode", LIST, DETAILS_TREE, LIST, G_PARAM_READWRITE));
+					 g_param_spec_int ("previous-mode", "Previous Mode", "Previous Mode", LIST, DETAILS, LIST, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_COLS_SHOWN,
 					 g_param_spec_value_array ("cols-shown", "Columns Shown", "Which Columns Are Shown or Hidden", NULL, G_PARAM_READWRITE));
@@ -510,9 +519,7 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 	g_object_class_install_property (object_class,
 					 PROP_THEPREFIX,
 					 g_param_spec_boolean ("theprefix", "Display 'The'", "Display 'The' as a prefix in the gamelist", TRUE, G_PARAM_READWRITE));
-	g_object_class_install_property (object_class,
-					 PROP_CLONECOLOR,
-					 g_param_spec_string ("clone-color", "Clone Color", "Clone Color", "##5F5F5F", G_PARAM_READWRITE));      /* Default to grey */
+
 	g_object_class_install_property (object_class,
 					 PROP_CURRENT_ROM,
 					 g_param_spec_string ("current-rom", "Current Rom", "The currently selected ROM", NULL, G_PARAM_READWRITE));
@@ -537,6 +544,27 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 						 directory_prefs[i].prop_id,
 						 g_param_spec_string (directory_prefs[i].name, "", "", "", G_PARAM_READWRITE));
 	}
+
+	/* Signal emitted when a column is toggled */
+	signals[GUI_PREFS_COL_TOGGLED] = g_signal_new ("col-toggled",
+						     G_OBJECT_CLASS_TYPE (object_class),
+						     G_SIGNAL_RUN_LAST,
+						     G_STRUCT_OFFSET (MameGuiPrefsClass, col_toggled),
+						     NULL, NULL,     /* Accumulator and accumulator data */
+						     gmameui_marshaller_VOID__POINTER,
+						     G_TYPE_NONE,    /* Return type */
+						     1, G_TYPE_INT);
+
+	/* Signal emitted when the prefix is toggled */
+	signals[GUI_PREFS_THEPREFIX_TOGGLED] = g_signal_new ("theprefix-toggled",
+						     G_OBJECT_CLASS_TYPE (object_class),
+						     G_SIGNAL_RUN_LAST,
+						     G_STRUCT_OFFSET (MameGuiPrefsClass, theprefix_toggled),
+						     NULL, NULL,     /* Accumulator and accumulator data */
+						     gmameui_marshaller_VOID__BOOLEAN,
+						     G_TYPE_NONE,    /* Return type */
+						     1, G_TYPE_BOOLEAN);
+
 }
 
 static void
@@ -622,9 +650,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	
 	/* Miscellaneous preferences */
 	pr->priv->theprefix = mame_gui_prefs_get_bool_property_from_key_file (pr, "theprefix");
-	pr->priv->clone_color = mame_gui_prefs_get_string_property_from_key_file (pr, "clone-color");
-	if (!pr->priv->clone_color)
-		pr->priv->clone_color = g_strdup ("grey");
+
 	pr->priv->current_rom_name = mame_gui_prefs_get_string_property_from_key_file (pr, "current-rom");
 	pr->priv->current_executable_name = mame_gui_prefs_get_string_property_from_key_file (pr, "current-executable");
 
@@ -712,7 +738,6 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	g_signal_connect (pr, "notify::usejoyingui", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::joystick-name", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::theprefix", (GCallback) mame_gui_prefs_save_bool, NULL);
-	g_signal_connect (pr, "notify::clone-color", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::current-rom", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::current-executable", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::executable-paths", (GCallback) mame_gui_prefs_save_string_arr, NULL);
