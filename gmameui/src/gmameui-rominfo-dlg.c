@@ -90,6 +90,7 @@ audit_idle (gpointer data)
 	return FALSE;
 }
 
+/* FIXME TODO Move to RomEntry */
 static char *
 get_rom_clone_name (RomEntry *rom)
 {
@@ -110,6 +111,7 @@ get_rom_clone_name (RomEntry *rom)
 	return value;
 }
 
+/* FIXME TODO Move to RomEntry */
 static char *
 get_rom_cpu_value (RomEntry *rom)
 {
@@ -138,6 +140,7 @@ get_rom_cpu_value (RomEntry *rom)
 	return value;
 }
 
+/* FIXME TODO Move to RomEntry */
 static char *
 get_rom_sound_value (RomEntry *rom)
 {
@@ -199,7 +202,9 @@ on_romset_audited (GmameuiAudit *audit, gchar *audit_line, gint type, gint audit
 			gtk_label_set_text (GTK_LABEL (dialog->priv->sample_check_result), title);
 		}
 
-		update_game_in_list (dialog->priv->rom);
+		/* Update the game in the MameGamelistView */
+		mame_gamelist_view_update_game_in_list (main_gui.displayed_list, dialog->priv->rom);
+		
 	} else if (g_str_has_prefix (audit_line, dialog->priv->rom->romname)) {
 		/* Line relates to a ROM within the ROM set */
 		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (dialog->priv->details_audit_result_buffer), &text_iter);
@@ -412,9 +417,8 @@ mame_rominfo_dialog_response (GtkDialog *dialog, gint response)
 		case GTK_RESPONSE_CLOSE:
 			/* Close button clicked */
 			gtk_widget_destroy (GTK_WIDGET (dialog));
-			
-			//create_gamelist_content ();
 			break;
+			
 		case GTK_RESPONSE_DELETE_EVENT:
 			/* Dialog closed */
 			
@@ -422,8 +426,6 @@ mame_rominfo_dialog_response (GtkDialog *dialog, gint response)
 			//mame_audit_stop_full_audit (gui_prefs.audit);
 			
 			gtk_widget_destroy (GTK_WIDGET (dialog));
-			
-			//create_gamelist_content ();
 			break;
 		default:
 			g_assert_not_reached ();

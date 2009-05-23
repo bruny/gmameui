@@ -585,7 +585,7 @@ launch_emulation (RomEntry    *rom,
 	gtk_widget_show (MainWindow);
 	
 	/* Update the ROM with the times played or status if there was any error */
-	update_game_in_list (rom);
+	mame_gamelist_view_update_game_in_list (main_gui.displayed_list, rom);
 
 #ifdef ENABLE_JOYSTICK
 	gchar *joystick_device;
@@ -800,6 +800,9 @@ exit_gmameui (void)
 	g_object_unref (main_gui.exec_list);
 	main_gui.exec_list = NULL;
 	xmame_options_free ();
+	
+	g_object_unref (main_gui.displayed_list);
+	main_gui.displayed_list = NULL;
 
 	g_object_unref (main_gui.options);
 	main_gui.options = NULL;

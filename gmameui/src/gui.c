@@ -33,128 +33,24 @@
 #include "gmameui.h"
 #include "gui.h"
 #include "io.h"
-
-const int ROM_ICON_SIZE = 16;
+#include "gmameui-gamelist-view.h"
 
 static guint timeout_icon;
-
-static void
-set_game_pixbuff_from_iter (GtkTreeIter *iter,
-			    ZIP         *zip,
-			    gint         page_size)
-{
-	RomEntry *tmprom;
-	GdkRectangle rect;
-	GtkTreePath *tree_path;
-	ListMode current_mode;
-
-	gtk_tree_model_get (GTK_TREE_MODEL (main_gui.tree_model), iter, ROMENTRY, &tmprom, -1);
-	tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), iter);
-	gtk_tree_view_get_cell_area (GTK_TREE_VIEW (main_gui.displayed_list),
-				     tree_path,
-				     NULL, &rect);
-	gtk_tree_path_free (tree_path);
-
-	if (tmprom->has_roms == CORRECT
-	    && tmprom->status
-	    && (rect.y + rect.height) > 0
-	    && (rect.y < page_size)
-	    && !tmprom->icon_pixbuf) {
-		g_object_get (main_gui.gui_prefs, "current-mode", &current_mode, NULL);
-		    
-		tmprom->icon_pixbuf = get_icon_for_rom (tmprom, ROM_ICON_SIZE, zip);
-
-		if (tmprom->icon_pixbuf) {
-			if ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))
-				gtk_tree_store_set (GTK_TREE_STORE (main_gui.tree_model), iter,
-						    PIXBUF, tmprom->icon_pixbuf,
-						    -1);
-			else
-				gtk_list_store_set (GTK_LIST_STORE (main_gui.tree_model), iter,
-						    PIXBUF, tmprom->icon_pixbuf,
-						    -1);
-		}
-	}
-}
-
-/* This function is to set the game icon from the zip file for each visible game */
-static gboolean
-adjustment_scrolled_delayed (void)
-{
-	GtkTreeIter iter;
-	GtkTreeIter iter_child;
-	GtkTreePath *tree_path;
-	guint i;
-	ZIP *zip;
-	gchar *zipfile;
-	gboolean valid;
-	GtkAdjustment *vadj;
-	gchar *icon_dir;
-	
-	g_object_get (main_gui.gui_prefs,
-		      "dir-icons", &icon_dir,
-		      NULL);
-
-	/* open the zip file only at the begining */
-	zipfile = g_build_filename (icon_dir, "icons.zip", NULL);
-	zip = openzip (zipfile);
-
-	/* Getting the vertical window area */
-	vadj=gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games));
-
-	/* Disable the callback */
-	g_signal_handlers_block_by_func (G_OBJECT (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games))),
-					 (gpointer)adjustment_scrolled, NULL);
-/* FIXME TODO Use gtk_tree_model_foreach similar to callback for selecting random row */
-	if (visible_games > 0) {
-		valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-		set_game_pixbuff_from_iter (&iter,zip, (gint) (vadj->page_size));
-		i = 0;
-		while ((i < visible_games) && valid) {
-			tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-			/* Set the icon for all children if the parent row is expanded */
-			if (gtk_tree_view_row_expanded (GTK_TREE_VIEW (main_gui.displayed_list), tree_path)) {
-				if (gtk_tree_model_iter_children (GTK_TREE_MODEL (main_gui.tree_model), &iter_child, &iter)) {
-					set_game_pixbuff_from_iter (&iter_child,zip, (gint) (vadj->page_size));
-					while ((i < visible_games) && (gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter_child)) ) {
-						set_game_pixbuff_from_iter (&iter_child, zip, (gint) (vadj->page_size));
-						i++;
-					}
-				}
-			}
-
-			gtk_tree_path_free (tree_path);
-			if (i < visible_games) {
-				valid=gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter);
-				if (valid) {
-					set_game_pixbuff_from_iter (&iter,zip, (gint) (vadj->page_size));
-					i++;
-				}
-			}
-		}
-	}
-
-	/* Re-Enable the callback */
-	g_signal_handlers_unblock_by_func (G_OBJECT (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games))),
-					 (gpointer) adjustment_scrolled, NULL);
-
-	if (zip)
-		closezip (zip);
-	g_free (zipfile);
-	g_free (icon_dir);
-	
-	return FALSE;
-}
 
 void
 adjustment_scrolled (GtkAdjustment *adjustment,
 		     gpointer       user_data)
 {
+	MameGamelistView *gamelist_view = (gpointer) user_data;
+
 	if (timeout_icon)
 		g_source_remove (timeout_icon);
+		
+	else
 	timeout_icon =
 		g_timeout_add (ICON_TIMEOUT,
-			       (GSourceFunc) adjustment_scrolled_delayed, NULL);
+			       (GSourceFunc) adjustment_scrolled_delayed, gamelist_view);
+	timeout_icon = 0;
 }
 
 void
@@ -196,14 +92,15 @@ g_message (_("Time to create main window, filters and gamelist: %.02f seconds"),
 		gtk_paned_set_position (main_gui.hpanedRight, xpos_gamelist);*/
 
 	/* Grab focus on the game list */
-	gtk_widget_grab_focus (main_gui.displayed_list);
+	gtk_widget_grab_focus (GTK_WIDGET (main_gui.displayed_list));
 
 	g_signal_connect (G_OBJECT (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games))), "changed",
 	                  G_CALLBACK (adjustment_scrolled),
-	                  NULL);
+	                  main_gui.displayed_list);
+	/* Invoked whenever the gamelist is scrolled up or down */
 	g_signal_connect (G_OBJECT (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games))), "value-changed",
 	                  G_CALLBACK (adjustment_scrolled),
-	                  NULL);
+	                  main_gui.displayed_list);
 
 	/* Need to set the notebook page here otherwise it segfault */
 	g_object_get (main_gui.gui_prefs, "show-flyer", &show_flyer, NULL);
@@ -870,82 +767,6 @@ select_game (RomEntry *rom)
 }
 
 void
-update_game_in_list (RomEntry *tmprom)
-{
-	const gchar *my_hassamples;
-	GdkColor my_txtcolor;
-	GdkPixbuf *pixbuf;
-	gboolean is_tree_store;
-	ListMode current_mode;
-	gchar *clone_color;
-
-	if (!tmprom)
-		return;
-
-	g_object_get (main_gui.gui_prefs,
-		      "current-mode", &current_mode,
-		      "clone-color", &clone_color,
-		      NULL);
-	
-	/* Whether the Tree Model will a tree or a list */
-	is_tree_store = (current_mode == LIST_TREE) || (current_mode == DETAILS_TREE);
-
-	rom_entry_get_list_name (tmprom);
-	
-	/* Has Samples */
-	if (tmprom->nb_samples == 0)
-		my_hassamples = "";
-	else {
-		my_hassamples = (tmprom->has_samples == CORRECT) ? _("Yes") : _("No");
-	}
-	
-	/* Clone colour */
-	if ((!strcmp (tmprom->cloneof, "-")) || (!clone_color)) {
-		clone_color = g_strdup ("black");
-	}
-	gdk_color_parse (clone_color, &my_txtcolor);
-	
-
-	/* Set the pixbuf for the status icon */
-	pixbuf = Status_Icons [tmprom->has_roms];
-
-	if (is_tree_store) {
-		gtk_tree_store_set (GTK_TREE_STORE (main_gui.tree_model), &tmprom->position,
-				    GAMENAME,                   tmprom->name_in_list,
-				    HAS_SAMPLES,                my_hassamples,
-				    ROMNAME,                    tmprom->romname,
-				    TIMESPLAYED,                tmprom->timesplayed,
-				    MANU,                       tmprom->manu,
-				    YEAR,                       tmprom->year,
-				    CLONE,                      tmprom->cloneof,
-				    DRIVER,                     tmprom->driver,
-				    MAMEVER,                    tmprom->mame_ver_added,
-				    CATEGORY,                   tmprom->category,
-				    TEXTCOLOR,                  &my_txtcolor,           /* text color */
-				    PIXBUF,                     pixbuf,                 /* pixbuf */
-				    -1);
-	} else {
-		gtk_list_store_set (GTK_LIST_STORE (main_gui.tree_model), &tmprom->position,
-				    GAMENAME,                   tmprom->name_in_list,
-				    HAS_SAMPLES,                my_hassamples,
-				    ROMNAME,                    tmprom->romname,
-				    TIMESPLAYED,                tmprom->timesplayed,
-				    MANU,                       tmprom->manu,
-				    YEAR,                       tmprom->year,
-				    CLONE,                      tmprom->cloneof,
-				    DRIVER,                     tmprom->driver,
-				    MAMEVER,                    tmprom->mame_ver_added,
-				    CATEGORY,                   tmprom->category,
-				    TEXTCOLOR,                  &my_txtcolor,           /* text color */
-				    PIXBUF,                     pixbuf,                 /* pixbuf */
-				    -1);
-	}
-	
-	g_free (clone_color);
-
-}
-
-void
 select_inp (gboolean play_record)
 {
 	GtkWidget *inp_selection;
@@ -1016,5 +837,3 @@ select_inp (gboolean play_record)
 	g_free (inp_dir);
 	g_free (current_rom_name);
 }
-
-

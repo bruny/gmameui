@@ -29,6 +29,7 @@
 #include "io.h"
 #include "gui.h"
 #include "rom_entry.h"
+#include "gmameui-gamelist-view.h"
 
 
 #define LINE_BUF 1024
@@ -718,17 +719,11 @@ gamelist_check (MameExec *exec)
 	gboolean versioncheck;  /* Check the gamelist against the current executable */
 	gchar *gl_name, *gl_version;
 	
-	g_object_get (main_gui.gui_prefs,
-		      "versioncheck", &versioncheck,
-		      NULL);
+	g_return_if_fail (exec != NULL);
+	
+	g_object_get (main_gui.gui_prefs, "versioncheck", &versioncheck, NULL);
 
-	if (!exec)
-		return;
-
-	g_object_get (gui_prefs.gl,
-		      "name", &gl_name,
-		      "version", &gl_version,
-		      NULL);
+	g_object_get (gui_prefs.gl, "name", &gl_name, "version", &gl_version, NULL);
 	
 	if (!gl_version || !strcmp (gl_version, "unknown")) {
 		dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
@@ -796,7 +791,8 @@ gamelist_check (MameExec *exec)
 					load_games_ini ();
 					load_catver_ini ();
 					quick_check ();
-					create_gamelist_content ();
+
+					mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
 				}
 
 				gtk_widget_set_sensitive (main_gui.scrolled_window_games, TRUE);

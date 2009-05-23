@@ -34,6 +34,7 @@
 #include "gui.h"
 #include "filters_list.h"
 #include "gmameui.h"    /* For gui_prefs */
+#include "gmameui-search-entry.h"
 
 static void
 on_filter_btn_toggled (GtkWidget *widget, gpointer user_data);
@@ -91,7 +92,8 @@ on_filter_btn_toggled (GtkWidget *widget, gpointer user_data)
 	} else if (g_ascii_strcasecmp (widgetname, "filter_btn_unavail") == 0) {
 		g_object_set (main_gui.gui_prefs, "current-rom-filter", 2, NULL);
 	} 
-	create_gamelist_content ();     // !! FIXME TODO Probably need to put this in an idle loop! Or at least block UI
+
+	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
 }
 
 void
@@ -179,8 +181,8 @@ on_status_bar_view_menu_activate       (GtkAction *action,
 }
 
 /* This function is called when the radio option defining the list mode is changed. */
-void     on_view_type_changed                   (GtkRadioAction *action,
-                                                 gpointer       user_data)
+void
+on_view_type_changed (GtkRadioAction *action, gpointer user_data)
 {
 	guint val;
 	ListMode current_mode;
@@ -201,22 +203,13 @@ void     on_view_type_changed                   (GtkRadioAction *action,
 			      "current-mode", current_mode,
 			      "previous-mode", previous_mode,
 			      NULL);
-		
+#ifdef TREESTORE
 		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group,
 						(current_mode == LIST_TREE) ||
 						(current_mode == DETAILS_TREE));
+#endif
+		mame_gamelist_view_change_views (main_gui.displayed_list);
 
-		/* Rebuild the UI */
-		create_gamelist (current_mode);
-
-		/* Rebuild the List only if we change from/to tree mode */
-		if ((current_mode == DETAILS_TREE) || (current_mode == LIST_TREE)) {
-			if ( (previous_mode != DETAILS_TREE) && (previous_mode != LIST_TREE))
-				create_gamelist_content ();
-		} else {
-			if ((previous_mode == DETAILS_TREE) || (previous_mode == LIST_TREE))
-				create_gamelist_content ();
-		}
 	}	 
 }
 
@@ -230,18 +223,22 @@ gmameui_menu_set_view_mode_check (gint view_mode, gboolean state)
 			widget = gtk_ui_manager_get_widget (main_gui.manager,
 							    "/MenuBar/ViewMenu/ViewListViewMenu");
 			break;
+#ifdef TREESTORE
 		case (LIST_TREE):
 			widget = gtk_ui_manager_get_widget (main_gui.manager,
 							    "/MenuBar/ViewMenu/ViewTreeViewMenu");
 			break;
+#endif
 		case (DETAILS):
 			widget = gtk_ui_manager_get_widget (main_gui.manager,
 							    "/MenuBar/ViewMenu/ViewDetailsListViewMenu");
 			break;
+#ifdef TREESTORE
 		case (DETAILS_TREE):
 			widget = gtk_ui_manager_get_widget (main_gui.manager,
 							    "/MenuBar/ViewMenu/ViewDetailsTreeViewMenu");
 			break;
+#endif
 	}
 	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), state);
 }
@@ -447,7 +444,7 @@ create_MainWindow (void)
 	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
 	g_object_unref (action_group);
 	main_gui.gmameui_favourite_action_group = action_group;
-	
+#ifdef TREESTORE	
 	action_group = gtk_action_group_new ("GmameuiWindowViewActions");
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_actions (action_group,
@@ -457,7 +454,7 @@ create_MainWindow (void)
 	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
 	g_object_unref (action_group);
 	main_gui.gmameui_view_action_group = action_group;
-	
+#endif	
 	action_group = gtk_action_group_new ("GmameuiWindowToggleActions");
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_toggle_actions (action_group,
@@ -528,6 +525,14 @@ create_MainWindow (void)
 	main_gui.hpanedLeft = glade_xml_get_widget (xml, "hpanedLeft");
 	main_gui.hpanedRight = glade_xml_get_widget (xml, "hpanedRight");
 	
+	/* Set up the search field */
+	GtkWidget *search_box;
+	search_box = glade_xml_get_widget (xml, "filter_hbox");
+	main_gui.search_entry = mame_search_entry_new ();
+	/* In order to pack before the filter buttons, their pack must be set to End */
+	gtk_box_pack_start (GTK_BOX (search_box), main_gui.search_entry, FALSE, FALSE, 6);
+	gtk_widget_show (main_gui.search_entry);
+	
 	/* Prepare the ROM availability filter buttons */
 	GList *filter_btn_list, *list;
 	filter_btn_list = glade_xml_get_widget_prefix (xml, "filter_btn_");
@@ -542,7 +547,6 @@ create_MainWindow (void)
 				  G_CALLBACK (on_filter_btn_toggled), NULL);
 	}
 	/* End ROM availability filter buttons */
-	
 	
 	main_gui.filters_list = gmameui_filters_list_new ();
 
@@ -741,27 +745,17 @@ create_MainWindow (void)
 	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
 								 "/MenuBar/ViewMenu/ViewToolbarMenu")),
 				      show_toolbar);
-
+#ifdef TREESTORE
 	if (! ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))) {
 		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
 	}
-	
-	/* Show the main window and all its children */
-	//gtk_widget_show_all (GTK_WIDGET (main_window));
-
-	/* New stuff starts here */
-	
+#endif
 	/* Create the UI of the Game List */
-	create_gamelist (current_mode);
-#ifdef ENABLE_DEBUG
-//g_message (_("Time to create gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
-#endif
-	/* Feed the Game List */
-	create_gamelist_content ();
-#ifdef ENABLE_DEBUG
-//g_message (_("Time to create gamelist content: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
-#endif
+	main_gui.displayed_list = mame_gamelist_view_new ();
+mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
 	
+	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_games), main_gui.displayed_list);
+	gtk_widget_show_all (main_gui.scrolled_window_games);
 	
 	gtk_paned_set_position (GTK_PANED (main_gui.hpanedLeft), xpos_filters);
 	g_signal_connect (G_OBJECT (main_gui.hpanedLeft), "notify::position",
@@ -770,9 +764,6 @@ create_MainWindow (void)
 	gtk_paned_set_position (GTK_PANED (main_gui.hpanedRight), xpos_gamelist);
 	g_signal_connect (G_OBJECT (main_gui.hpanedRight), "notify::position",
 			  G_CALLBACK (on_hpaned_position_notify), NULL);
-	
-	/* New stuff finishes here */
-	
 	
 	/* Connect signals */
 	g_signal_connect (G_OBJECT (main_window), "delete_event",

@@ -159,8 +159,8 @@ typedef struct {
 	/* Runtime information */
 
 	/** position of the game in the GTKTreeView */
-	GtkTreeIter position;
-	gboolean is_in_list;
+	GtkTreeIter position;   /* FIXME TODO Delete this */
+	gboolean is_in_list;	/* FIXME TODO Delete this */
 	/** string in order to sort the clones with the original */
 	gchar *clonesort;
 	/** store the icon of the game in the RomEntry struct
@@ -187,6 +187,7 @@ void rom_entry_set_driver (RomEntry *rom, const gchar *driver);
 void rom_entry_set_year   (RomEntry *rom, const gchar *year);
 gchar **rom_entry_get_manufacturers (RomEntry * rom);
 const gchar *rom_entry_get_list_name(RomEntry *rom);
+void rom_entry_set_list_name(RomEntry *rom, gboolean the_prefix);
 ControlType get_control_type (gchar *control_type);
 DriverStatus get_driver_status (gchar *driver_status);
 

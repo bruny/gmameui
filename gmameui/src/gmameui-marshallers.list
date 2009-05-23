@@ -1,3 +1,6 @@
 # These marshallers are generated with glib-genmarshal(1)
 VOID:STRING,INT,INT
-
+VOID:STRING
+VOID:INT
+VOID:BOOLEAN
+VOID:POINTER

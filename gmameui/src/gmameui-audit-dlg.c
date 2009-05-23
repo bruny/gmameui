@@ -25,8 +25,9 @@
 #include <glade/glade.h>
 
 #include "gmameui.h"			/* Contains the GmameuiAudit object */
+#include "gui.h"			/* For main_gui */
 #include "audit.h"
-#include "gmameui-gamelist-view.h"  /* For create_gamelist_content () */
+#include "gmameui-gamelist-view.h"
 #include "gmameui-audit-dlg.h"
 
 struct _MameAuditDialogPrivate {
@@ -327,17 +328,19 @@ mame_audit_dialog_response (GtkDialog *dialog, gint response)
 			/* Close button clicked */
 			gtk_widget_destroy (GTK_WIDGET (dialog));
 			
-			create_gamelist_content ();
+			mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
+
 			break;
 		case GTK_RESPONSE_DELETE_EVENT:
 			/* Dialog closed */
 			
 			/* Stop the auditing process */
 			mame_audit_stop_full_audit (gui_prefs.audit);
-			
+
 			gtk_widget_destroy (GTK_WIDGET (dialog));
 			
-			create_gamelist_content ();
+			mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
+
 			break;
 		default:
 			g_assert_not_reached ();

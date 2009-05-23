@@ -235,18 +235,39 @@ rom_entry_get_manufacturers (RomEntry * rom)
 	return manufacturer_fields;
 }
 
-/* FIXME This function should either set or return. Do we need to do both? See
-   where it is called and use the most appropriate (pref. return, not set) */
 const gchar *
 rom_entry_get_list_name (RomEntry *rom)
 {
 	gboolean the_prefix;
 	
-	g_return_val_if_fail (rom != NULL, NULL);
+	g_object_get (main_gui.gui_prefs, "theprefix", &the_prefix, NULL);
+	if (rom->name_in_list == NULL) {
+if (!rom->the_trailer) {
+		if (!rom->name_in_list) {
+			rom->name_in_list = g_strdup_printf ("%s %s", rom->gamename, rom->gamenameext);
+		}
+	} else  {
+		if (the_prefix) {
+			if (!rom->name_in_list || strncmp (rom->name_in_list, "The", 3)) {
+				g_free (rom->name_in_list);
+				rom->name_in_list = g_strdup_printf ("The %s %s", rom->gamename, rom->gamenameext);
+			}
+		} else {
+			if (!rom->name_in_list || !strncmp (rom->name_in_list, "The", 3)) {
+				g_free (rom->name_in_list);
+				rom->name_in_list = g_strdup_printf ("%s, The %s", rom->gamename, rom->gamenameext);
+			}
+		}
 
-	g_object_get (main_gui.gui_prefs,
-		      "theprefix", &the_prefix,
-		      NULL);
+	} 		
+	}
+	return rom->name_in_list;
+}
+
+void
+rom_entry_set_list_name (RomEntry *rom, gboolean the_prefix)
+{
+	g_return_val_if_fail (rom != NULL, NULL);
 	
 	if (!rom->the_trailer) {
 		if (!rom->name_in_list) {
@@ -269,3 +290,4 @@ rom_entry_get_list_name (RomEntry *rom)
 
 	return rom->name_in_list;
 }
+

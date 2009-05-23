@@ -23,6 +23,7 @@ gmameui_SOURCES = \
 	audit.c audit.h \
 	gmameui-audit-dlg.c gmameui-audit-dlg.h \
 	gmameui-rominfo-dlg.c gmameui-rominfo-dlg.h \
+	gmameui-search-entry.c gmameui-search-entry.h \
 	options_string.c options_string.h \
 	gtkjoy.c gtkjoy.h \
 	gui_prefs.c gui_prefs.h \

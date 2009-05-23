@@ -56,7 +56,8 @@ typedef enum {
 /* Those are also columns. The only difference is that they are hidden */
 typedef enum {
 	ROMENTRY = NUMBER_COLUMN,
-	TEXTCOLOR,
+TEXTSTYLE,
+FILTERED,
 	PIXBUF,
 	HAS_ROMS,
 	ROMOF,
@@ -145,9 +146,13 @@ typedef enum  {
 
 typedef enum {
 	LIST,
+#ifdef TREESTORE
 	LIST_TREE,
+#endif
 	DETAILS,
+#ifdef TREESTORE
 	DETAILS_TREE
+#endif
 } ListMode;
 
 /* FIXME TODO Try and get rid of this struct */

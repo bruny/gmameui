@@ -1,3 +1,16 @@
+2009-05-23 16:32 adburton
+
+	* data/main_gui.glade: Add search field and ROM status filter
+	  buttons
+	* src/: Makefile.am gmameui-ui.xml gmameui-search-entry.c
+	  gmameui-search-entry.h gmameui-marshallers.list rom_entry.c
+	  rom_entry.h directories.c filters_list.c game_list.c
+	  interface.c interface.h gui.c gui.h gmameui.c gmameui.h
+	  gmameui-rominfo-dlg.c callbacks.c gmameui-audit-dlg.c
+	  gmameui-gamelist-view.c gmameui-gamelist-view.h: Add new
+	  search field, handling for ROM status filter buttons,
+	  move gamelist handling code to gmameui-gamelist-view.c
+
 2009-04-21 20:20  adburton
 
 	* configure.ac, NEWS: Tagged for new release

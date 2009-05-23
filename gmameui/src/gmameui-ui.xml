@@ -27,12 +27,16 @@
       <menuitem name="ViewSidebarPanelMenu" action="ViewSidebarPanel"/>
       <separator/>
       <menuitem name="ViewListViewMenu" action="ViewListView"/>
+<!--
       <menuitem name="ViewTreeViewMenu" action="ViewTreeView"/>
+-->
       <menuitem name="ViewDetailsListViewMenu" action="ViewDetailsListView"/>
+<!--
       <menuitem name="ViewDetailsTreeViewMenu" action="ViewDetailsTreeView"/>
       <separator/>
       <menuitem name="ViewExpandAllMenu" action="ViewExpandAll"/>
       <menuitem name="ViewCollapseAllMenu" action="ViewCollapseAll"/>
+-->
       <separator/>
       <menuitem name="ViewRefreshMenu" action="ViewRefresh"/>
     </menu>
@@ -62,9 +66,13 @@
     <toolitem action="ViewSidebarPanel"/>
     <separator/>
     <toolitem action="ViewListView"/>
+<!--
     <toolitem action="ViewTreeView"/>
+-->
     <toolitem action="ViewDetailsListView"/>
+<!--
     <toolitem action="ViewDetailsTreeView"/>
+-->
   </toolbar>
   
   <popup name="GameListPopup" action="GameListPopupAction">

@@ -28,6 +28,7 @@
 
 #include "gui.h"
 #include "directories.h"
+#include "gmameui-gamelist-view.h"
 
 /* Callbacks */
 static void on_dir_browse_button_clicked (GtkWidget *widget, gpointer user_data);
@@ -402,8 +403,8 @@ mame_directories_dialog_response (GtkDialog *dialog, gint response)
 				mame_directories_dialog_save_changes (MAME_DIRECTORIES_DIALOG (dialog));
 			
 				gtk_widget_destroy (GTK_WIDGET (dialog));
-			
-				create_gamelist_content ();
+
+				mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
 			}
 			
 			break;
@@ -857,6 +858,8 @@ mame_directories_dialog_save_changes (MameDirectoriesDialog *dialog)
 		g_object_set (main_gui.gui_prefs, "rom-paths", va_paths, NULL);
 	g_value_array_free (va_paths);
 	va_paths = NULL;
+	
+	/* FIXME TODO Prompt user to rebuild the gamelist */
 /*	
 	* FIXME TODO hiscore dir *
 	if (changed_flag) {

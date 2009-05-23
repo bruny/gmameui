@@ -25,7 +25,8 @@
 
 #include "filters_list.h"
 #include "filter.h"
-#include "gui.h"	/* Only needed for create_gamelist_content */
+#include "gui.h"	/* main_gui */
+#include "gmameui-gamelist-view.h"
 
 struct _GMAMEUIFiltersListPrivate
 {
@@ -654,7 +655,7 @@ filters_list_row_activated_cb (GMAMEUIFiltersList *list,
 
 	gtk_tree_model_get_iter (model, &iter, path);
 	gtk_tree_model_get (model, &iter,
-						GMAMEUI_FILTER_LIST_MODEL_COLUMN_NAME, &name, -1);
+			    GMAMEUI_FILTER_LIST_MODEL_COLUMN_NAME, &name, -1);
 
 	
 }
@@ -669,27 +670,25 @@ filters_list_selection_changed_cb (GtkTreeSelection *selection,
 	gchar *name;
 	gint folderid;
 
-	if (!gtk_tree_selection_get_selected (selection,
-										  &model, &iter))
+	if (!gtk_tree_selection_get_selected (selection, &model, &iter))
 		return;
 
 	gtk_tree_model_get (model, &iter,
-						GMAMEUI_FILTER_LIST_MODEL_COLUMN_FILTER, &filter,
-						-1);
+			    GMAMEUI_FILTER_LIST_MODEL_COLUMN_FILTER, &filter,
+			    -1);
 
 	g_return_if_fail (filter != NULL);  /* This will fail if the selected row is a group */
 	g_return_if_fail (GMAMEUI_IS_FILTER (filter));
 	
-	g_object_get (filter,
-				  "name", &name,
-				  "folderid", &folderid,
-				  NULL);
+	g_object_get (filter, "name", &name, "folderid", &folderid, NULL);
 
 /*	gui_prefs.FolderID = folderid;*/
 	selected_filter = filter;   /* Set global variable for use when re-creating the gamelist content */
 
 	GMAMEUI_DEBUG ("About to recreate gamelist after filter selected");
-	create_gamelist_content ();
+
+	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
+	
 	GMAMEUI_DEBUG ("Done recreating gamelist after filter selected");
 	
 	g_free (name);

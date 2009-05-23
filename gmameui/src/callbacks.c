@@ -86,9 +86,8 @@ on_select_random_game_activate         (GtkMenuItem     *menuitem,
 	random_game = (gint) g_random_int_range (0, visible_games);
 	GMAMEUI_DEBUG ("random game#%i", random_game);
 
-	gtk_tree_model_foreach (GTK_TREE_MODEL (main_gui.tree_model),
-				foreach_find_random_rom_in_store,
-				(gpointer *) random_game);
+	mame_gamelist_view_select_random_game (main_gui.displayed_list, random_game);
+
 }
 
 void update_favourites_list (gboolean add) {
@@ -98,12 +97,8 @@ void update_favourites_list (gboolean add) {
 
 	gmameui_ui_set_favourites_sensitive (add);
 	
-	g_object_get (selected_filter, "type", &type, NULL);
-	/* problems because the row values are completly changed, I redisplay the complete game list */
-	if (type == FAVORITE)
-		create_gamelist_content ();
-	else
-		update_game_in_list (gui_prefs.current_game);
+	mame_gamelist_view_update_game_in_list (main_gui.displayed_list,
+						gui_prefs.current_game);
 }
 
 void
@@ -247,7 +242,7 @@ quick_refresh_list (void)
 		rom->has_roms = UNKNOWN;
 	}
 	/* refresh the display */
-	create_gamelist_content ();
+	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
 
 	mame_gamelist_set_not_checked_list (gui_prefs.gl, romlist);
 

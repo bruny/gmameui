@@ -21,52 +21,73 @@
  *
  */
 
+
 #ifndef __GMAMEUI_GAMELIST_VIEW_H__
 #define __GMAMEUI_GAMELIST_VIEW_H__
 
-#include "common.h"
-//#include "callbacks.h"
-#include "interface.h"
-#include "gmameui.h"
+#include <gtk/gtk.h>
+
+#include "rom_entry.h"  /* For RomEntry */
+#include "gmameui.h"	/* For ListMode */
+
+G_BEGIN_DECLS
+
+/* Preferences dialog object */
+#define MAME_TYPE_GAMELIST_VIEW        (mame_gamelist_view_get_type ())
+#define MAME_GAMELIST_VIEW(o)          (G_TYPE_CHECK_INSTANCE_CAST ((o), MAME_TYPE_GAMELIST_VIEW, MameGamelistView))
+#define MAME_GAMELIST_VIEW_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST((k), MAME_TYPE_GAMELIST_VIEW, MameGamelistViewClass))
+#define MAME_IS_GAMELIST_VIEW(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), MAME_TYPE_GAMELIST_VIEW))
+#define MAME_IS_GAMELIST_VIEW_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), MAME_TYPE_GAMELIST_VIEW))
+#define MAME_GAMELIST_VIEW_GET_CLASS(o)	(G_TYPE_INSTANCE_GET_CLASS ((o), MAME_TYPE_GAMELIST_VIEW, MameGamelistViewClass))
+
+typedef struct _MameGamelistView        MameGamelistView;
+typedef struct _MameGamelistViewClass   MameGamelistViewClass;
+typedef struct _MameGamelistViewPrivate MameGamelistViewPrivate;
+
+struct _MameGamelistView {
+	GtkTreeView parent;
+	
+	MameGamelistViewPrivate *priv;
+};
+
+struct _MameGamelistViewClass {
+	GtkTreeViewClass parent_class;
+
+};
+
+GType mame_gamelist_view_get_type (void);
+MameGamelistView *mame_gamelist_view_new (void);
 
 guint visible_games;
-
-void create_gamelist_content (void);
-void create_gamelist (ListMode list_mode);
-
-gboolean foreach_find_random_rom_in_store (GtkTreeModel *model,
-					   GtkTreePath  *path,
-					   GtkTreeIter  *iter,
-					   gpointer      user_data);
-gboolean foreach_find_rom_in_store (GtkTreeModel *model,
-				    GtkTreePath  *path,
-				    GtkTreeIter  *iter,
-				    gpointer      user_data);
-void     on_collapse_all_activate               (GtkMenuItem *menuitem,
-                                                 gpointer         user_data);
-void     on_expand_all_activate                 (GtkMenuItem *menuitem,
-                                                 gpointer         user_data);
-void     on_displayed_list_resize_column        (GtkWidget *widget,
-                                                 GtkRequisition *requisition,
-                                                 gpointer user_data);
-void     on_displayed_list_sort_column_changed  (GtkTreeSortable *treesortable,
-                                                 gpointer user_data);
-void     on_displayed_list_row_collapsed        (GtkTreeView *treeview,
-                                                 GtkTreeIter *arg1,
-                                                 GtkTreePath *arg2,
-                                                 gpointer user_data);
-/* Main list */
-void on_row_selected (GtkTreeSelection *selection, gpointer data);
-
-gboolean on_list_keypress (GtkWidget *widget, GdkEventKey *event, gpointer user_data); 
-gboolean on_list_clicked (GtkWidget *widget, GdkEventButton *event, gpointer user_data);
-gboolean on_column_click (GtkWidget *button, GdkEventButton *event, GtkTreeViewColumn* column);
-
-/* Column Popup menu */
-void on_column_hide_activate (GtkMenuItem *menuitem, gpointer user_data);
+#ifdef TREESTORE
+void mame_gamelist_view_change_model        (MameGamelistView *gamelist_view);
+#endif
+void mame_gamelist_view_select_random_game  (MameGamelistView *gamelist_view,
+                                             gint              i);
+void mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view,
+                                             RomEntry         *tmprom);
+/*GtkTreeModel *
+mame_gamelist_view_get_data_model     (MameGamelistView *gamelist_view);*/
+void
+mame_gamelist_view_change_views (MameGamelistView *gamelist_view);
+#ifdef TREESTORE
+void on_collapse_all_activate               (GtkMenuItem      *menuitem,
+                                             gpointer          user_data);
+void on_expand_all_activate                 (GtkMenuItem      *menuitem,
+                                             gpointer          user_data);
+#endif
+void on_column_hide_activate                (GtkMenuItem      *menuitem,
+                                             gpointer          user_data);
 
 RomEntry * gamelist_get_selected_game (void);
 
 void gmameui_gamelist_rebuild ();
+gboolean adjustment_scrolled_delayed (MameGamelistView *gamelist_view);
+
+void mame_gamelist_view_scroll_to_selected_game (MameGamelistView *gamelist_view);
+
+void mame_gamelist_view_repopulate_contents (MameGamelistView *gamelist_view);
+
+G_END_DECLS
 
 #endif /* __GMAMEUI_GAMELIST_VIEW_H__ */

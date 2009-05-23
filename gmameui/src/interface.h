@@ -75,4 +75,7 @@ static const toolbar_item toolbar_items [] = {
 	{ TOOLBAR_DETAILSTREEVIEW, "/ToolBar/ViewDetailsTreeView", "gmameui-view-tree", 0, N_("Details Tree") },
 };
 
+/* Signal prototypes */
+void  (* search_filter_changed) (GtkEditable *search_field);
+
 #endif /* __INTERFACE_H__ */

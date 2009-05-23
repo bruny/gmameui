@@ -47,6 +47,7 @@
 #include "gmameui-sidebar.h"
 #include "gmameui-gamelist-view.h"
 #include "mame-exec-list.h"
+#include "gmameui-gamelist-view.h"
 
 /* The following menu entries are always enabled */
 static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
@@ -121,6 +122,7 @@ static const GtkActionEntry gmameui_favourite_menu_entries[] =
 	  N_("Remove this game from your 'Favorites' game folder"), G_CALLBACK (on_remove_from_favorites_activate) },
 };
 
+#ifdef TREESTORE
 /* The following menu entries are enabled when the view is changed to a tree view */
 static const GtkActionEntry gmameui_view_expand_menu_entries[] =
 {
@@ -129,7 +131,7 @@ static const GtkActionEntry gmameui_view_expand_menu_entries[] =
 	{ "ViewCollapseAll", NULL, N_("Collapse All"), NULL,
 	  N_("Collapse all rows"), G_CALLBACK (on_collapse_all_activate) },
 };
-
+#endif
 static const GtkToggleActionEntry gmameui_view_toggle_menu_entries[] = 
 {
 	{ "ViewToolbar", NULL, N_("_Toolbar"), "<alt>T",
@@ -150,12 +152,16 @@ static const GtkRadioActionEntry gmameui_view_radio_menu_entries[] =
 {
 	{ "ViewListView", NULL, N_("_List"), NULL,
 	  N_("Displays items in a list"), LIST },
+#ifdef TREESTORE
 	{ "ViewTreeView", NULL, N_("List _Tree"), NULL,
 	  N_("Displays items in a tree list with clones indented"), LIST_TREE },
+#endif
 	{ "ViewDetailsListView", NULL, N_("_Details"), NULL,
 	  N_("Displays detailed information about each item"), DETAILS },
+#ifdef TREESTORE
 	{ "ViewDetailsTreeView", NULL, N_("Detai_ls Tree"), NULL,
 	  N_("Displays detailed information about each item with clones indented"), DETAILS_TREE },
+#endif
 };
 
 static const GtkActionEntry gmameui_column_entries[] =
@@ -186,9 +192,9 @@ struct main_gui_struct {
 	GtkWidget *scrolled_window_filters;
 	GMAMEUIFiltersList *filters_list;
 
-	GtkWidget *scrolled_window_games;
-	GtkWidget *displayed_list;   /* Tree View */
-	GtkTreeModel *tree_model;
+	GtkWidget        *scrolled_window_games;
+	MameGamelistView *displayed_list;           /* The GtkTreeView displaying the ROMs */
+	GtkWidget        *search_entry;             /* GtkEntry used for searching tree view */
 
 	GMAMEUISidebar *screenshot_hist_frame;
 
@@ -199,7 +205,9 @@ struct main_gui_struct {
 	GtkActionGroup *gmameui_rom_exec_action_group;  /* Item entries that require both a ROM and an exec */
 	GtkActionGroup *gmameui_exec_action_group;  /* Item entries that require an exec */
 	GtkActionGroup *gmameui_favourite_action_group;
+#ifdef TREESTORE
 	GtkActionGroup *gmameui_view_action_group;
+#endif
 	GtkActionGroup *gmameui_exec_radio_action_group;	/* Executable radio buttons */
 	gint gmameui_exec_merge_id;
 	
