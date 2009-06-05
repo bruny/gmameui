@@ -26,6 +26,9 @@
 #include <string.h>
 
 #include "gmameui-gamelist-view.h"
+#include "game_list.h"
+#include "gmameui.h"    /* For game_filtered */
+#include "rom_entry.h"
 #include "gui.h"	/* For main_gui struct */
 #include "io.h"         /* For gmameui_gamelist_rebuild */
 #include "gui_prefs.h"
@@ -436,11 +439,11 @@ column_title (int column_num)
 		return _("Clone of");
 	case DRIVER:
 		return _("Driver");
-	case STATUS:       /*  Available / Not Available */
-		return _("Status");
 	case ROMOF:
 		return _("Rom of");
-	case DRIVERSTATUS: /*  Working / Not Working */
+
+	/*  Working / Not Working or Good / Imperfect / Preliminary */
+	case DRIVER_STATUS:
 		return _("Driver Status");
 	case COLOR_STATUS:
 		return _("Driver Colors");
@@ -544,7 +547,7 @@ mame_gamelist_view_select_random_game (MameGamelistView *gamelist_view, gint i)
 
 /* FIXME TODO Merge with the other code that performs a gtk_tree_store_set */
 void
-mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, RomEntry *tmprom)
+mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, MameRomEntry *tmprom)
 {
 	const gchar *my_hassamples;
 	GdkPixbuf *pixbuf;
@@ -554,6 +557,8 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, RomEntr
 	ListMode current_mode;
 	gint rom_filter_opt;
 	PangoStyle pangostyle;
+	const gchar *name_in_list;
+	GtkTreeIter iter;
 
 	g_return_if_fail (tmprom != NULL);
 
@@ -566,37 +571,58 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, RomEntr
 	/* Whether the Tree Model will a tree or a list */
 	is_tree_store = (current_mode == LIST_TREE) || (current_mode == DETAILS_TREE);
 #endif
-	rom_entry_get_list_name (tmprom);
-	
+	name_in_list = mame_rom_entry_get_list_name (tmprom);
+
 	/* Has Samples */
-	if (tmprom->nb_samples == 0)
+	if (!mame_rom_entry_has_samples (tmprom))
 		my_hassamples = "";
 	else {
-		my_hassamples = (tmprom->has_samples == CORRECT) ? _("Yes") : _("No");
+		my_hassamples = (mame_rom_entry_get_sample_status (tmprom) == CORRECT) ? _("Yes") : _("No");
 	}
 
 	/* Mark if clone */
-	if (g_ascii_strcasecmp (tmprom->cloneof, "-") != 0)
+	if (mame_rom_entry_is_clone (tmprom))
 		pangostyle = PANGO_STYLE_ITALIC;
 	else
 		pangostyle = PANGO_STYLE_NORMAL;
 
+	gchar *romname;
+	gint timesplayed;
+	gchar *manu;
+	gchar *year;
+	gchar *cloneof;
+	gchar *driver, *category, *version;
+
+	g_object_get (tmprom,
+		      "romname", &romname,
+		      "times-played", &timesplayed,
+		      "manufacturer", &manu,
+		      "year", &year,
+		      "cloneof", &cloneof,
+		      "driver", &driver,
+		      "category", &category,
+		      "version-added", &version,
+		      NULL);
+	
 	/* Set the pixbuf for the status icon */
-	pixbuf = Status_Icons [tmprom->has_roms];
+	pixbuf = Status_Icons [mame_rom_entry_get_rom_status (tmprom)];
+	
+	iter = mame_rom_entry_get_position (tmprom);
+
 #ifdef TREESTORE
 	if (is_tree_store) {
 		gtk_tree_store_set (GTK_TREE_STORE (gamelist_view->priv->curr_model),
-				    &tmprom->position,
-				    GAMENAME,     tmprom->name_in_list,
+				    &iter,
+				    GAMENAME,     name_in_list,
 				    HAS_SAMPLES,  my_hassamples,
-				    ROMNAME,      tmprom->romname,
-				    TIMESPLAYED,  tmprom->timesplayed,
-				    MANU,         tmprom->manu,
-				    YEAR,         tmprom->year,
-				    CLONE,        tmprom->cloneof,
-				    DRIVER,       tmprom->driver,
-				    MAMEVER,      tmprom->mame_ver_added,
-				    CATEGORY,     tmprom->category,
+				    ROMNAME,      romname,
+				    TIMESPLAYED,  timesplayed,
+				    MANU,         manu,
+				    YEAR,         year,
+				    CLONE,        cloneof,
+				    DRIVER,       driver,
+				    MAMEVER,      version,
+				    CATEGORY,     category,
 				    TEXTSTYLE,    pangostyle,
 				    FILTERED,     game_filtered (tmprom, rom_filter_opt),
 				    PIXBUF,       pixbuf,
@@ -604,17 +630,17 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, RomEntr
 	} else {
 #endif
 		gtk_list_store_set (GTK_LIST_STORE (gamelist_view->priv->curr_model),
-				    &tmprom->position,
-				    GAMENAME,     tmprom->name_in_list,
+				    &iter,
+				    GAMENAME,     name_in_list,
 				    HAS_SAMPLES,  my_hassamples,
-				    ROMNAME,      tmprom->romname,
-				    TIMESPLAYED,  tmprom->timesplayed,
-				    MANU,         tmprom->manu,
-				    YEAR,         tmprom->year,
-				    CLONE,        tmprom->cloneof,
-				    DRIVER,       tmprom->driver,
-				    MAMEVER,      tmprom->mame_ver_added,
-				    CATEGORY,     tmprom->category,
+				    ROMNAME,      romname,
+				    TIMESPLAYED,  timesplayed,
+				    MANU,         manu,
+				    YEAR,         year,
+				    CLONE,        cloneof,
+				    DRIVER,       driver,
+				    MAMEVER,      version,
+				    CATEGORY,     category,
 				    TEXTSTYLE,    pangostyle,
 				    FILTERED,     game_filtered (tmprom, rom_filter_opt),
 				    PIXBUF,       pixbuf,
@@ -622,6 +648,14 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, RomEntr
 #ifdef TREESTORE
 	}
 #endif
+	
+	g_free (romname);
+	g_free (manu);
+	g_free (year);
+	g_free (cloneof);
+	g_free (driver);
+	g_free (category);
+	g_free (version);
 }
 
 static void
@@ -673,8 +707,6 @@ g_timer_start (timer);
 	
 	/* Get the status icon */
 	get_status_icons ();
-
-	populate_model_from_gamelist (gamelist_view, gamelist_view->priv->curr_model);
 	
 	/* Add a filter, and link the model to a filter function so that
 	   calls to gtk_tree_model_filter_refilter cause the model to be
@@ -694,6 +726,10 @@ g_timer_start (timer);
 	gamelist_view->priv->sort_model = gtk_tree_model_sort_new_with_model (GTK_TREE_MODEL (gamelist_view->priv->filter_model));
 	gtk_tree_view_set_model (GTK_TREE_VIEW (gamelist_view), GTK_TREE_MODEL (gamelist_view->priv->sort_model));
 	
+	/* Populate the model here, since we want the sort/filter to apply, triggering
+	   the ROM icon loading */
+	populate_model_from_gamelist (gamelist_view, gamelist_view->priv->curr_model);
+	 
 	/* Sort the list */
 	set_list_sortable_column (gamelist_view);
 
@@ -811,7 +847,8 @@ foreach_find_rom_in_store (GtkTreeModel *model,
 			   GtkTreeIter  *iter,
 			   gpointer      user_data)
 {
-	RomEntry *rom;
+	MameRomEntry *rom;
+	
 	gchar *current_rom_name = (gchar *) user_data;
 	
 	/* Don't even bother trying to walk the store if the current game
@@ -824,8 +861,8 @@ foreach_find_rom_in_store (GtkTreeModel *model,
 	GMAMEUI_DEBUG ("Row %s: name is %s", tree_path_str, rom->romname);
 	g_free (tree_path_str);
 */	
-	if (g_ascii_strcasecmp (rom->romname, current_rom_name) == 0) {
-		GMAMEUI_DEBUG ("Found row in tree view - %s", rom->romname);
+	if (g_ascii_strcasecmp (mame_rom_entry_get_romname (rom), current_rom_name) == 0) {
+		GMAMEUI_DEBUG ("Found row in tree view - %s", mame_rom_entry_get_romname (rom));
 
 		/* Scroll to selection */
 		gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list),
@@ -910,18 +947,18 @@ on_expand_all_activate (GtkMenuItem *menuitem,
 static gboolean
 delayed_row_selected (GtkTreeSelection *selection)
 {
-	RomEntry *game_data;
+	MameRomEntry *rom;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	
 	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
-		gtk_tree_model_get (model, &iter, ROMENTRY, &game_data, -1);
+		gtk_tree_model_get (model, &iter, ROMENTRY, &rom, -1);
 
-		g_return_val_if_fail (game_data != NULL, FALSE);
+		g_return_val_if_fail (rom != NULL, FALSE);
 
-		g_object_set (main_gui.gui_prefs, "current-rom", game_data->romname, NULL);
+		g_object_set (main_gui.gui_prefs, "current-rom", mame_rom_entry_get_romname (rom), NULL);
 
-		select_game (game_data);
+		select_game (rom);
 	}
 	
 	return FALSE;
@@ -963,7 +1000,7 @@ on_list_clicked (GtkWidget      *widget,
 	GtkTreeIter iter;
 	gboolean myclick=FALSE;
 	GValue val = { 0, };
-	RomEntry *game_data;
+	MameRomEntry *game_data;
 	gint x,y;
 
 	/* Here we figure out which node was clicked */
@@ -1051,25 +1088,22 @@ foreach_update_prefix_in_store (GtkTreeModel *model,
 				GtkTreeIter  *iter,
 				gpointer      user_data)
 {
-	RomEntry *rom;
-	
-	gboolean theprefix = (gboolean) user_data;
+	MameRomEntry *rom;
 	
 	gtk_tree_model_get (model, iter, ROMENTRY, &rom, -1);
 
 	g_return_val_if_fail (rom != NULL, FALSE);
-	
-	rom_entry_set_list_name (rom, theprefix);
+
 #ifdef TREESTORE
 	if (gtk_tree_model_get_flags (model) & GTK_TREE_MODEL_LIST_ONLY) {
 #endif
 		gtk_list_store_set (GTK_LIST_STORE (model), iter,
-				    GAMENAME, rom->name_in_list,
+				    GAMENAME, mame_rom_entry_get_list_name (rom),
 				    -1);
 #ifdef TREESTORE
 	} else {
 		gtk_tree_store_set (GTK_TREE_STORE (model), iter,
-				    GAMENAME, rom->name_in_list,
+				    GAMENAME, mame_rom_entry_get_list_name (rom),
 				    -1);
 	}
 #endif
@@ -1271,10 +1305,10 @@ GMAMEUI_DEBUG ("Changing column %d to sort by %d", sort_column_id, order);
 	}
 }
 
-RomEntry *
+MameRomEntry *
 gamelist_get_selected_game (void)
 {
-	RomEntry *game_data;
+	MameRomEntry *game_data;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
 	GtkTreeSelection *select;
@@ -1319,9 +1353,10 @@ filter_func (GtkTreeModel *model,
 		return filtered;
 	
 	/*GMAMEUI_DEBUG ("Comparing search criteria %s against %s", needle, haystack);*/
-	if ((strcasestr (haystack, needle) != NULL) && filtered)
+	if ((strcasestr (haystack, needle) != NULL) && filtered) {
 		return TRUE;
-	else
+		visible_games++;
+	} else
 		return FALSE;
 
 
@@ -1354,7 +1389,7 @@ static void
 populate_model_from_gamelist (MameGamelistView *gamelist_view, GtkTreeModel *model)
 {
 	GList *listpointer;
-	RomEntry *tmprom;
+	MameRomEntry *tmprom;
 	gchar *my_romname_root = NULL;
 	gchar *my_hassamples;
 	GtkTreeIter iter;
@@ -1362,9 +1397,9 @@ populate_model_from_gamelist (MameGamelistView *gamelist_view, GtkTreeModel *mod
 	GtkTreeIter iter_root;
 	gboolean is_root;
 #endif
-	gint j = 0;
 	gint rom_filter_opt;
-	
+	const gchar *name_in_list;
+
 	g_return_if_fail (model != NULL);
 	
 	/* Get the current ROM filter setting */
@@ -1378,110 +1413,129 @@ populate_model_from_gamelist (MameGamelistView *gamelist_view, GtkTreeModel *mod
 	for (listpointer = g_list_first (mame_gamelist_get_roms_glist (gui_prefs.gl));
 	     (listpointer);
 	     listpointer = g_list_next (listpointer)) {
-		tmprom = (RomEntry *) listpointer->data;
 
-		/* Only add the ROM to the store if it complies with the chosen ROM filter on the LHS */
-		if (game_filtered (tmprom, rom_filter_opt)) {
-			PangoStyle pangostyle;
-			GdkPixbuf *pixbuf = NULL;
-			
-			rom_entry_get_list_name (tmprom);
+		tmprom = (MameRomEntry *) listpointer->data;	     
 
-			/* Has Samples */
-			if (tmprom->nb_samples == 0)
-				my_hassamples = NULL;
-			else
-				my_hassamples = (tmprom->has_samples == CORRECT) ? _("Yes") : _("No");
+		PangoStyle pangostyle;
+		GdkPixbuf *pixbuf = NULL;
+
+		name_in_list = mame_rom_entry_get_list_name (tmprom);
+
+		/* Has Samples */
+		if (!mame_rom_entry_has_samples (tmprom))
+			my_hassamples = NULL;
+		else
+			my_hassamples = (mame_rom_entry_get_sample_status (tmprom) == CORRECT) ? _("Yes") : _("No");
 		
-			/* Clone Color + Pixbuf width */
-			if (g_ascii_strcasecmp (tmprom->cloneof, "-") != 0) {
-				/* Clone */
-				pangostyle = PANGO_STYLE_ITALIC;
-			} else {
-				/* Original */
-				pangostyle = PANGO_STYLE_NORMAL;
-			}
+		if (mame_rom_entry_is_clone (tmprom)) {
+			pangostyle = PANGO_STYLE_ITALIC;	/* Clone */
+		} else {
+			pangostyle = PANGO_STYLE_NORMAL;	/* Original */
+		}
 
-			/* Set the pixbuf for the status icon */
-			pixbuf = Status_Icons [tmprom->has_roms];
+		/* Set the pixbuf for the status icon */
+		pixbuf = Status_Icons [mame_rom_entry_get_rom_status (tmprom)];
+
 #ifdef TREESTORE
-			/* Determine if the row is a root */
-			if ((j == 0) ||
-			    (g_ascii_strcasecmp (tmprom->cloneof, "-") == 0) || 
-			    !my_romname_root ||
-			    (g_ascii_strcasecmp (tmprom->cloneof, my_romname_root) != 0)) {
+		/* Determine if the row is a root */
+		if ((j == 0) ||
+		    (g_ascii_strcasecmp (tmprom->cloneof, "-") == 0) || 
+		    !my_romname_root ||
+		    (g_ascii_strcasecmp (tmprom->cloneof, my_romname_root) != 0)) {
 				is_root = TRUE;
 			} else {
 				is_root = FALSE;
 			}
 #endif
-			/* Memorize the original names */
-			if (!(g_ascii_strcasecmp (tmprom->cloneof, "-"))) {
-				if (my_romname_root)
-					g_free (my_romname_root);
+		/* Memorize the original names */
+/*		if (!(g_ascii_strcasecmp (tmprom->cloneof, "-"))) {
+			if (my_romname_root)
+				g_free (my_romname_root);
 
-				my_romname_root= g_strdup (tmprom->romname);
-			}
+			my_romname_root= g_strdup (tmprom->romname);
+		}*/
+		gchar *romname, *manu, *year, *cloneof, *driver, *category, *version;
+		gint timesplayed;
+
+		g_object_get (tmprom,
+			      "romname", &romname,
+			      "times-played", &timesplayed,
+			      "manufacturer", &manu,
+			      "year", &year,
+			      "cloneof", &cloneof,
+			      "driver", &driver,
+			      "category", &category,
+			      "version-added", &version,
+			      NULL);
+	      
 #ifdef TREESTORE
-			if (gamelist_view->priv->is_tree_mode) {
+		if (gamelist_view->priv->is_tree_mode) {
 
-				if (is_root)
-					gtk_tree_store_append (GTK_TREE_STORE (model),
-							       &iter, NULL);  /* Acquire an iterator */
-				else
-					gtk_tree_store_append (GTK_TREE_STORE (model),
-							       &iter, &iter_root);  /* Acquire an iterator */
+			if (is_root)
+				gtk_tree_store_append (GTK_TREE_STORE (model),
+						       &iter, NULL);  /* Acquire an iterator */
+			else
+				gtk_tree_store_append (GTK_TREE_STORE (model),
+						       &iter, &iter_root);  /* Acquire an iterator */
 
-				gtk_tree_store_set (GTK_TREE_STORE (model), &iter,
-						    GAMENAME,     tmprom->name_in_list,
-						    HAS_SAMPLES,  my_hassamples,
-						    ROMNAME,      tmprom->romname,
-						    TIMESPLAYED,  tmprom->timesplayed,
-						    MANU,         tmprom->manu,
-						    YEAR,         tmprom->year,
-						    CLONE,        tmprom->cloneof,
-						    DRIVER,       tmprom->driver,
-						    MAMEVER,      tmprom->mame_ver_added,
-						    CATEGORY,     tmprom->category,
-						    ROMENTRY,     tmprom,
-						    TEXTSTYLE,    pangostyle,
-						    FILTERED, game_filtered (tmprom, rom_filter_opt),
-						    PIXBUF,       pixbuf,
-						    -1);
+			gtk_tree_store_set (GTK_TREE_STORE (model), &iter,
+					    GAMENAME,     name_in_list,
+					    HAS_SAMPLES,  my_hassamples,
+					    ROMNAME,      romname,
+					    TIMESPLAYED,  timesplayed,
+					    MANU,         manu,
+					    YEAR,         year,
+					    CLONE,        cloneof,
+					    DRIVER,       driver,
+					    MAMEVER,      version,
+					    CATEGORY,     category,
+					    ROMENTRY,     tmprom,
+					    TEXTSTYLE,    pangostyle,
+					    FILTERED,     game_filtered (tmprom, rom_filter_opt),
+					    PIXBUF,       pixbuf,
+					    -1);
 
-				if (is_root)
-					iter_root = iter;
+			if (is_root)
+				iter_root = iter;
 			} else {
 #endif
 
-				gtk_list_store_append (GTK_LIST_STORE (model), &iter);  /* Acquire an iterator */
+			gtk_list_store_append (GTK_LIST_STORE (model), &iter);  /* Acquire an iterator */
 
-				gtk_list_store_set (GTK_LIST_STORE (model), &iter,
-						    GAMENAME,     tmprom->name_in_list,
-						    HAS_SAMPLES,  my_hassamples,
-						    ROMNAME,      tmprom->romname,
-						    TIMESPLAYED,  tmprom->timesplayed,
-						    MANU,         tmprom->manu,
-						    YEAR,         tmprom->year,
-						    CLONE,        tmprom->cloneof,
-						    DRIVER,       tmprom->driver,
-						    MAMEVER,      tmprom->mame_ver_added,
-						    CATEGORY,     tmprom->category,
-						    ROMENTRY,     tmprom,
-						    TEXTSTYLE,    pangostyle,
-						    FILTERED, game_filtered (tmprom, rom_filter_opt),
-						    PIXBUF,       pixbuf,
-						    -1);
+			gtk_list_store_set (GTK_LIST_STORE (model), &iter,
+					    GAMENAME,     name_in_list,
+					    HAS_SAMPLES,  my_hassamples,
+					    ROMNAME,      romname,
+					    TIMESPLAYED,  timesplayed,
+					    MANU,         manu,
+					    YEAR,         year,
+					    CLONE,        cloneof,
+					    DRIVER,       driver,
+					    MAMEVER,      version,
+					    CATEGORY,     category,
+					    ROMENTRY,     tmprom,
+					    TEXTSTYLE,    pangostyle,
+					    FILTERED,     game_filtered (tmprom, rom_filter_opt),
+					    PIXBUF,       pixbuf,
+					    -1);
 
 #ifdef TREESTORE
-			}
-#endif
-			tmprom->position = iter;
-
-			j++;
 		}
+#endif
+		mame_rom_entry_set_position (tmprom, iter);
+			
+		g_free (romname);
+		g_free (manu);
+		g_free (year);
+		g_free (cloneof);
+		g_free (driver);
+		g_free (category);
+		g_free (version);
+
 	}
-	visible_games = j;
+
+	/* Count the number of rows displayed in the filter model */
+	visible_games = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (gamelist_view->priv->filter_model), NULL);
 	
 	set_status_bar_game_count (visible_games);
 
@@ -1531,7 +1585,10 @@ adjustment_scrolled_delayed (MameGamelistView *gamelist_view)
 	gboolean valid;
 	GtkAdjustment *vadj;
 	gchar *icon_dir;
-
+	
+	g_return_val_if_fail (main_gui.gui_prefs != NULL, FALSE);
+	
+GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 	g_object_get (main_gui.gui_prefs,
 		      "dir-icons", &icon_dir,
 #ifdef TREESTORE
@@ -1585,7 +1642,8 @@ adjustment_scrolled_delayed (MameGamelistView *gamelist_view)
 		}
 #endif
 	i = 0;
-	RomEntry *tmprom;
+
+	MameRomEntry *tmprom;
 
 	while ((i < visible_games) && valid) {
 		GtkTreeIter filter_iter;
@@ -1612,10 +1670,13 @@ adjustment_scrolled_delayed (MameGamelistView *gamelist_view)
 		/* Only update the pixbuf if it is in the viewable area
 		   (defined by the rect), the ROM is correct, and the
 		   pixbuf is not already set */
-		if ((tmprom->has_roms == CORRECT) && (tmprom->status) &&
-		    (rect.y + rect.height) > 0 && (rect.y < vadj->page_size) &&
-		    !tmprom->icon_pixbuf) {
-			tmprom->icon_pixbuf = get_icon_for_rom (tmprom, ROM_ICON_SIZE, zip);
+		if ((rect.y + rect.height) > 0 && (rect.y < vadj->page_size) &&
+		    (mame_rom_entry_get_rom_status (tmprom) == CORRECT) &&
+		    !mame_rom_entry_get_icon (tmprom)) {
+			GdkPixbuf *icon;
+			icon = get_icon_for_rom (tmprom, ROM_ICON_SIZE, zip);
+
+			mame_rom_entry_set_icon (tmprom, icon);
 			
 			/* Sort +- Filter +- Model, so need to convert the iter
 			   on the sort to get to the base before we can update the base model */
@@ -1639,10 +1700,10 @@ adjustment_scrolled_delayed (MameGamelistView *gamelist_view)
 #endif
 
 			/* Update the ROM in the list store with the icon from the zip file */
-			if (tmprom->icon_pixbuf) {
+			if (icon) {
 				gtk_list_store_set (GTK_LIST_STORE (gamelist_view->priv->curr_model),
 						    &model_iter,
-						    PIXBUF, tmprom->icon_pixbuf,
+						    PIXBUF, icon,
 						    -1);
 				/* After the list store has been updated, the iterator
 				   is lost, so we need to get it from the updated model */
@@ -1667,8 +1728,9 @@ adjustment_scrolled_delayed (MameGamelistView *gamelist_view)
 
 	if (zip)
 		closezip (zip);
+	
 	g_free (zipfile);
 	g_free (icon_dir);
-
+GMAMEUI_DEBUG ("Leaving adjustment_scrolled_delayed");
 	return FALSE;
 }

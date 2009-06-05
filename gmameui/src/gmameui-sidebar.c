@@ -32,6 +32,7 @@
 
 static void gmameui_sidebar_class_init (GMAMEUISidebarClass *class);
 static void gmameui_sidebar_init (GMAMEUISidebar *dlg);
+static gboolean gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, MameRomEntry *rom);
 
 G_DEFINE_TYPE (GMAMEUISidebar, gmameui_sidebar, GTK_TYPE_FRAME)
 
@@ -183,19 +184,16 @@ set_history (const gchar   *entry_name,
 }
 
 static gboolean
-set_game_history (const RomEntry *rom,
-		  GtkTextBuffer  *text_buffer)
+set_game_history (MameRomEntry *rom, GtkTextBuffer *text_buffer)
 {
 	const gchar *entry_name;
 
-	if (!rom || !rom->romname)
-		return FALSE;
-
+	g_return_val_if_fail (rom != NULL, FALSE);
 	
-	if (rom->cloneof && (rom->cloneof[0] != '-'))
-		entry_name = rom->cloneof;
+	if (mame_rom_entry_is_clone (rom))
+		entry_name = mame_rom_entry_get_parent_romname (rom);
 	else
-		entry_name = rom->romname;
+		entry_name = mame_rom_entry_get_romname (rom);
 
 	return set_history (entry_name, text_buffer);
 }
@@ -286,19 +284,18 @@ set_info (const gchar   *entry_name,
 }
 
 static gboolean
-set_game_info (const RomEntry *rom,
+set_game_info (const MameRomEntry *rom,
 	       GtkTextBuffer  *text_buffer)
 {
 	const gchar *entry_name;
 
-	if (!rom || !rom->romname)
-		return FALSE;
-
 	
-	if (rom->cloneof && (rom->cloneof[0] != '-'))
-		entry_name = rom->cloneof;
+	g_return_val_if_fail (rom != NULL, FALSE);
+	
+	if (mame_rom_entry_is_clone (rom))
+		entry_name = mame_rom_entry_get_parent_romname (rom);
 	else
-		entry_name = rom->romname;
+		entry_name = mame_rom_entry_get_romname (rom);
 
 	return set_info (entry_name, text_buffer);
 }
@@ -378,7 +375,7 @@ get_pixbuf_from_zip_file (ZIP *zip, gchar *romname, gchar *parent_romname)
 
 /* Returns a GtkWidget representing a GtkImage */
 static GtkWidget *
-get_pixbuf (RomEntry       *rom,
+get_pixbuf (MameRomEntry       *tmprom,
 	    screenshot_type sctype,
 	    int             wwidth,
 	    int             wheight)
@@ -394,8 +391,7 @@ get_pixbuf (RomEntry       *rom,
 
 	GMAMEUI_DEBUG ("width:%i  height:%i", wwidth, wheight);
 
-	if (!rom)
-		return NULL;
+	g_return_val_if_fail (tmprom != NULL, NULL);
 	
 	/* Prevent a strange bug where wwidth=wheight=1 */
 	if (wwidth < 20)
@@ -432,8 +428,10 @@ get_pixbuf (RomEntry       *rom,
 		      directory_prefs[dir_num].name, &directory_name,
 		      NULL);
 	
-	filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", directory_name, rom->romname);
-	filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png", directory_name, rom->cloneof);
+	filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png",
+				    directory_name, mame_rom_entry_get_romname (tmprom));
+	filename_parent = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s.png",
+					   directory_name, mame_rom_entry_get_parent_romname (tmprom));
 
 	GMAMEUI_DEBUG ("Looking for image %s", filename);
 	pixbuf = gdk_pixbuf_new_from_file (filename, error);
@@ -441,7 +439,7 @@ get_pixbuf (RomEntry       *rom,
 		g_free (filename);
 	
 	/* no picture found try parent game if any*/
-	if ( (!pixbuf) && strcmp (rom->cloneof,"-")) {
+	if ( (!pixbuf) && mame_rom_entry_is_clone (tmprom)) {
 		GMAMEUI_DEBUG ("Looking for image from parent set %s", filename_parent);
 		pixbuf = gdk_pixbuf_new_from_file (filename_parent,error);
 	}
@@ -457,14 +455,16 @@ get_pixbuf (RomEntry       *rom,
 			
 		/* Since MAME 0.111, snapshots are now in a subdirectory per game
 		   with numeric names 0000.png, 0001.png, etc. */
-		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", snapshot_dir, rom->romname);
+		filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png",
+					    snapshot_dir, mame_rom_entry_get_romname (tmprom));
 		GMAMEUI_DEBUG ("Looking for image %s", filename);
 		pixbuf = gdk_pixbuf_new_from_file (filename,error);
 		g_free (filename);
 
 		/* If not found, look in parent folder */
-		if ((!pixbuf) && strcmp (rom->cloneof,"-")) {
-			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png", snapshot_dir, rom->cloneof);
+		if ((!pixbuf) && mame_rom_entry_is_clone (tmprom)) {
+			filename = g_strdup_printf ("%s" G_DIR_SEPARATOR_S "%s" G_DIR_SEPARATOR_S "0000.png",
+						    snapshot_dir, mame_rom_entry_get_parent_romname (tmprom));
 			GMAMEUI_DEBUG ("Looking for parent image %s", filename);
 			pixbuf = gdk_pixbuf_new_from_file (filename,error);
 			g_free (filename);
@@ -483,7 +483,9 @@ get_pixbuf (RomEntry       *rom,
 
 		if (zip) {
 			GMAMEUI_DEBUG ("Looking for image in zip file %s", zipfile);
-			pixbuf = get_pixbuf_from_zip_file (zip, rom->romname, rom->cloneof);
+			pixbuf = get_pixbuf_from_zip_file (zip,
+							   mame_rom_entry_get_romname (tmprom),
+							   mame_rom_entry_get_parent_romname (tmprom));
 			closezip (zip);
 		} else
 			GMAMEUI_DEBUG (_("Error - cannot open zip file %s"), zipfile);
@@ -552,7 +554,7 @@ on_screenshot_notebook_switch_page (GtkNotebook *notebook,
 		      NULL);
 
 	gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
-				  gui_prefs.current_game);
+				      gui_prefs.current_game);
 }
 
 static void
@@ -755,7 +757,7 @@ gmameui_sidebar_new (void)
 }
 
 void
-gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom)
+gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, MameRomEntry *rom)
 {
 	g_return_if_fail (sidebar != NULL);
 		
@@ -810,8 +812,8 @@ gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom)
 	GMAMEUI_DEBUG ("Setting page - done");
 }
 
-gboolean
-gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, RomEntry *rom)
+static gboolean
+gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, MameRomEntry *rom)
 {
 	GtkTextIter text_iter;
 	

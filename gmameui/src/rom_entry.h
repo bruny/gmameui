@@ -26,6 +26,8 @@
 
 #include "common.h"
 
+G_BEGIN_DECLS
+
 #define MAX_ROMNAME 20
 #define MAX_CPU 20
 #define MAX_CONTROL 20
@@ -38,7 +40,7 @@ changing this will break the gamelist compatibility
 typedef struct {
 	gchar *name;
 	guint clock;
-	gboolean sound_flag;
+	gboolean sound_flag;	/* This seems to be a deprecated option */
 } CPUInfo;
 
 typedef struct {
@@ -60,7 +62,8 @@ typedef enum {
 typedef enum {
 	JOYSTICK,
 	TRACKBALL,
-	LIGHTGUN
+	LIGHTGUN,
+	NUM_CONTROL_TYPE
 } ControlType;
 
 typedef enum {
@@ -89,106 +92,141 @@ static gchar* rom_status_string_value[NUMBER_STATUS] = {
 	N_("Not a valid set")
 };
 
-/** 
-* Information for a loaded game.
-* A RomEntry is invalid when the gamelist changes because there
-* are several pointers to the list.
-*
-*/
-typedef struct {
-	gchar romname[MAX_ROMNAME];
-	gchar *gamename;
-	gchar *gamenameext;
+/* Preferences object */
+#define MAME_TYPE_ROM_ENTRY            (mame_rom_entry_get_type ())
+#define MAME_ROM_ENTRY(o)            (G_TYPE_CHECK_INSTANCE_CAST((o), MAME_TYPE_ROM_ENTRY, MameRomEntry))
+#define MAME_ROM_ENTRY_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST ((k), MAME_TYPE_ROM_ENTRY, MameRomEntryClass))
+#define MAME_IS_ROM_ENTRY(o)         (G_TYPE_CHECK_INSTANCE_TYPE ((o), MAME_TYPE_ROM_ENTRY))
+#define MAME_IS_ROM_ENTRY_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), MAME_TYPE_ROM_ENTRY))
+#define MAME_ROM_ENTRY_GET_CLASS(o)  (G_TYPE_INSTANCE_GET_CLASS ((o), MAME_TYPE_ROM_ENTRY, MameRomEntryClass))
 
-	/** The year for the game.
-	* This is a pointer to a string in the game_list.years g_list
-	*/
-	const gchar *year;
-	gchar *manu;
-	gchar *cloneof;
-	gchar *romof;   /* This appears to be the same as cloneof in the XML output */
-	gchar *sampleof;
+typedef struct _MameRomEntry MameRomEntry;
+typedef struct _MameRomEntryClass MameRomEntryClass;
+typedef struct _MameRomEntryPrivate MameRomEntryPrivate;
+
+struct _MameRomEntry {
+	GObject parent;
 	
-	gboolean is_bios;
-	
-	/** The driver for the game.
-	This is a pointer to a string in the game_list.drivers g_list
-	*/
-	const gchar *driver;
-	CPUInfo cpu_info[NB_CPU];
-	SoundCPUInfo sound_info[NB_CPU];
-	ControlType control;
+	MameRomEntryPrivate *priv;
+	/* define public instance variables here */
+};
 
-	/** The category for the game.
-	This is a pointer to a string in the game_list.categories g_list
-	*/
-	const gchar *category;
-	const gchar *mame_ver_added;
-	gint num_players;
-	gint num_buttons;
-	gint channels;
-	gboolean vector;
-	DriverStatus status;
+struct _MameRomEntryClass {
+	GObjectClass parent;
+	/* define vtable methods and signals here */
+};
 
-	/** Driver status
-	Recent versions of MAME have good | imperfect or | preliminary
-	*/
-	DriverStatus driver_status_emulation;
-	DriverStatus driver_status_color;
-	DriverStatus driver_status_sound;
-	DriverStatus driver_status_graphic;
-	
-	gboolean horizontal;
-	guint screen_x;
-	guint screen_y;
-	gfloat screen_freq;
-	guint colors;
+/* Preferences */
+enum
+{
+	PROP_ROM_0,
 
-	gint nb_roms;
-	gint nb_samples;
-	gboolean the_trailer;
+	/* ROM properties */
+	PROP_ROM_ROMNAME,
+	PROP_ROM_GAMENAME,
+	PROP_ROM_GAMENAMEEXT,
+	PROP_ROM_CLONESORT,
 
-	/* gmameui information 
-	  (from game.ini)
-	*/
-	gint timesplayed;
-	RomStatus has_roms;
-	RomStatus has_samples;
-	gboolean favourite;
+	PROP_ROM_YEAR,
+	PROP_ROM_MANUFACTURER,
+	PROP_ROM_CLONEOF,
+	PROP_ROM_ROMOF,
+	PROP_ROM_SAMPLEOF,
+	PROP_ROM_DRIVER,
+	PROP_ROM_IS_BIOS,
 
-	/* Runtime information */
+	PROP_ROM_NUMPLAYERS,
+	PROP_ROM_NUMBUTTONS,
+	PROP_ROM_CONTROLTYPE,
+	PROP_ROM_CHANNELS,
 
-	/** position of the game in the GTKTreeView */
-	GtkTreeIter position;   /* FIXME TODO Delete this */
-	gboolean is_in_list;	/* FIXME TODO Delete this */
-	/** string in order to sort the clones with the original */
-	gchar *clonesort;
-	/** store the icon of the game in the RomEntry struct
-	   when game is visible on the list, used as cache  */
-	GdkPixbuf *icon_pixbuf;
-	/** Name in list */
-	gchar *name_in_list;
-} RomEntry;
+	PROP_ROM_TIMESPLAYED,
+	PROP_ROM_HAS_ROMS,
+	PROP_ROM_HAS_SAMPLES,
 
-/**
-* Frees a rom entry.
-*/
-void rom_entry_free (RomEntry *rom_entry);
+	PROP_ROM_DRIVER_STATUS,
+	PROP_ROM_DRIVER_STATUS_EMULATION,
+	PROP_ROM_DRIVER_STATUS_COLOUR,
+	PROP_ROM_DRIVER_STATUS_SOUND,
+	PROP_ROM_DRIVER_STATUS_GRAPHICS,
 
-/**
-* Creates a new rom entry.
-* Use rom_entry_free () to free this.
-*/
-RomEntry * rom_entry_new (void);
+	PROP_ROM_IS_VECTOR,
+	PROP_ROM_IS_HORIZONTAL,
+	PROP_ROM_SCREEN_X,
+	PROP_ROM_SCREEN_Y,
+	PROP_ROM_NUM_COLOURS,
+	PROP_ROM_SCREEN_FREQ,
+
+	PROP_ROM_IS_FAVOURITE,
+
+	PROP_ROM_NUM_ROMS,
+	PROP_ROM_NUM_SAMPLES,
+	PROP_ROM_THE_TRAILER,
+
+	PROP_ROM_CATEGORY,
+	PROP_ROM_VER_ADDED,
+
+	NUM_ROM_ENTRY_PROPERTIES
+};
 
 
-void rom_entry_set_name   (RomEntry *rom, gchar *value);
-void rom_entry_set_driver (RomEntry *rom, const gchar *driver);
-void rom_entry_set_year   (RomEntry *rom, const gchar *year);
-gchar **rom_entry_get_manufacturers (RomEntry * rom);
-const gchar *rom_entry_get_list_name(RomEntry *rom);
-void rom_entry_set_list_name(RomEntry *rom, gboolean the_prefix);
+GType mame_rom_entry_get_type (void);
+MameRomEntry* mame_rom_entry_new (void);
+
+void mame_rom_entry_set_name (MameRomEntry *rom, gchar *value);
+void mame_rom_entry_set_romname (MameRomEntry *rom, gchar *romname);
+void mame_rom_entry_set_gamename (MameRomEntry *rom, gchar *gamename);
+void mame_rom_entry_set_gamenameext (MameRomEntry *rom, gchar *gamenameext);
+void mame_rom_entry_set_category_version (MameRomEntry *rom, gchar *category, gchar *version);
+void mame_rom_entry_set_cloneof (MameRomEntry *rom, gchar *clone);
+void mame_rom_entry_set_romof (MameRomEntry *rom, gchar *romof);
+void mame_rom_entry_set_isbios (MameRomEntry *rom, gboolean isbios);
+void mame_rom_entry_set_driver (MameRomEntry *rom, const gchar *driver);
+void mame_rom_entry_set_year   (MameRomEntry *rom, const gchar *year);
+void mame_rom_entry_set_manufacturer   (MameRomEntry *rom, const gchar *manufacturer);
+void mame_rom_entry_set_default_fields (MameRomEntry *rom);
+void mame_rom_entry_set_icon (MameRomEntry *rom, GdkPixbuf *icon_pixbuf);
+void mame_rom_entry_set_position (MameRomEntry *rom, GtkTreeIter iter);
+
+gchar* mame_rom_entry_get_clonesort (MameRomEntry *rom);
+gboolean mame_rom_entry_is_bios (MameRomEntry *rom);
+gboolean mame_rom_entry_is_favourite (MameRomEntry *rom);
+gboolean mame_rom_entry_is_vector (MameRomEntry *rom);
+gboolean mame_rom_entry_is_clone (MameRomEntry *rom);
+
+gboolean mame_rom_entry_has_samples (MameRomEntry *rom);
+const gchar * mame_rom_entry_get_list_name (MameRomEntry *rom);
+const gchar * mame_rom_entry_get_gamename (MameRomEntry *rom);
+const gchar * mame_rom_entry_get_romname (MameRomEntry *rom);
+const gchar * mame_rom_entry_get_parent_romname (MameRomEntry *rom);
+const gchar * mame_rom_entry_get_year (MameRomEntry *rom);
+const gchar * mame_rom_entry_get_manufacturer (MameRomEntry *rom);
+RomStatus mame_rom_entry_get_rom_status (MameRomEntry *rom);
+RomStatus mame_rom_entry_get_sample_status (MameRomEntry *rom);
+gchar* mame_rom_entry_get_resolution (MameRomEntry *rom);
+gfloat mame_rom_entry_get_screen_freq (MameRomEntry *rom);
+GdkPixbuf * mame_rom_entry_get_icon (MameRomEntry *rom);
+GtkTreeIter mame_rom_entry_get_position (MameRomEntry *rom);
+
+gchar **mame_rom_entry_get_manufacturers (MameRomEntry * rom);
+
+void mame_rom_entry_add_rom (MameRomEntry *rom);
+void mame_rom_entry_add_sample (MameRomEntry *rom);
+void mame_rom_entry_add_cpu (MameRomEntry *rom, int i, gchar *name, gint clock);
+void mame_rom_entry_add_soundcpu (MameRomEntry *rom, int i, gchar *name, gint clock);
+
+void mame_rom_entry_rom_played (MameRomEntry *rom, gboolean warning, gboolean error);
+
+gchar* get_rom_clone_name (MameRomEntry *rom);
+gchar* get_rom_cpu_value (MameRomEntry *rom);
+gchar* get_rom_sound_value (MameRomEntry *rom);
+
+CPUInfo * get_rom_cpu (MameRomEntry *rom, int i);
+SoundCPUInfo * get_sound_cpu (MameRomEntry *rom, int i);
+
 ControlType get_control_type (gchar *control_type);
 DriverStatus get_driver_status (gchar *driver_status);
 
-#endif
+G_END_DECLS
+
+#endif /* __ROM_ENTRY_H__ */

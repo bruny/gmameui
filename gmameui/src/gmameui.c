@@ -200,19 +200,18 @@ g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NUL
 	/* Create a new audit object */
 	gui_prefs.audit = gmameui_audit_new ();
 	
-	/* Initialise the current game */
-	gui_prefs.current_game = NULL;
-	
+	/* Initialise the gamelist */
 	gui_prefs.gl = mame_gamelist_new ();
 	if (!mame_gamelist_load (gui_prefs.gl)) {
 		g_message (_("gamelist not found, need to rebuild one"));
 	} else {
-
+	
 #ifdef ENABLE_DEBUG
 g_message (_("Time to load gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
 		if (!load_games_ini ())
 			g_message (_("games.ini not loaded, using default values"));
+
 #ifdef ENABLE_DEBUG
 g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
@@ -250,9 +249,9 @@ g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer,
 }
 
 gboolean
-game_filtered (RomEntry * rom, gint rom_filter_opt)
+game_filtered (MameRomEntry * rom, gint rom_filter_opt)
 {
-	gchar **manufacturer;
+	/* gchar **manufacturer; */
 	
 	gboolean is;
 	Columns_type type;
@@ -260,7 +259,14 @@ game_filtered (RomEntry * rom, gint rom_filter_opt)
 	gint int_value;
 	gboolean retval;
 
+	/* ROM information */
+	gboolean is_bios;
+	gboolean is_favourite;
+	gboolean is_clone;
+	gboolean is_vector;
+	
 	g_return_val_if_fail (selected_filter != NULL, FALSE);
+	g_return_val_if_fail (rom != NULL, FALSE);
 	
 	retval = FALSE;
 
@@ -271,84 +277,116 @@ game_filtered (RomEntry * rom, gint rom_filter_opt)
 		      "int_value", &int_value,
 		      NULL);
 
+	is_bios = mame_rom_entry_is_bios (rom);
+
 	/* Only display a BIOS rom if the BIOS filter is explicitly stated */
-	if (rom->is_bios) { 
+	if (is_bios) { 
 		if (type == IS_BIOS) {
-			retval = ( (is && rom->is_bios) ||
-				 (!is && !rom->is_bios));
+			retval = ( (is && is_bios) ||
+				 (!is && !is_bios));
 		} else
 			retval = FALSE;
 	} else {
 		switch (type) {
+			
+			gchar *driver, *ver_added, *category;
+			DriverStatus driver_status;
+			DriverStatus driver_status_colour;
+			DriverStatus driver_status_sound;
+			DriverStatus driver_status_graphics;
+			gint timesplayed, num_channels;
+			RomStatus rom_status;
+			ControlType control;
+			
 			case DRIVER:
-				retval = ( (is && !g_strcasecmp (rom->driver,value)) ||
-					 (!is && g_strcasecmp (rom->driver,value)));
+				g_object_get (rom, "driver", &driver, NULL);
+				retval = ((is && !g_strcasecmp (driver,value)) ||
+					 (!is && g_strcasecmp (driver,value)));
+				g_free (driver);
 				break;
 			case CLONE:
-				retval = ( (is && !g_strcasecmp (rom->cloneof,value)) ||
-					 (!is && g_strcasecmp (rom->cloneof,value)));
+				is_clone = mame_rom_entry_is_clone (rom);
+				retval = ((is && !is_clone) || (!is && is_clone));
 				break;
 			case CONTROL:
-				retval = ( (is && (rom->control == (ControlType)int_value))  ||
-					 (!is && ! (rom->control == (ControlType)int_value)));
+				g_object_get (rom, "control-type", &control, NULL);
+				retval = ((is && (control == (ControlType) int_value))  ||
+					 (!is && !(control == (ControlType) int_value)));
 				break;
-			case MAMEVER:
-				if (rom->mame_ver_added)
-					retval = (g_ascii_strcasecmp (rom->mame_ver_added, value) == 0);
+			case MAMEVER:				
+				g_object_get (rom, "version-added", &ver_added, NULL);
+				if (ver_added)
+					retval = (g_ascii_strcasecmp (ver_added, value) == 0);
+				g_free (ver_added);
 				break;
 			case CATEGORY:
-				if (rom->category)
-					retval = (g_ascii_strcasecmp (rom->category, value) == 0);
+				g_object_get (rom, "category", &category, NULL);
+				if (category)
+					retval = (g_ascii_strcasecmp (category, value) == 0);
+				g_free (category);
 				break;
 			case FAVORITE:
-				retval = ( (is && rom->favourite) ||
-					 (!is && !rom->favourite));
+				is_favourite = mame_rom_entry_is_favourite (rom);
+				retval = ( (is && is_favourite) ||
+					 (!is && !is_favourite));
 				break;
 			case VECTOR:
-				retval = ( (is && rom->vector) ||
-					 (!is && !rom->vector));
+				is_vector = mame_rom_entry_is_vector (rom);
+				retval = ( (is && is_vector) ||
+					 (!is && !is_vector));
 				break;
-			case STATUS:
-				retval = ( (is && rom->status == (DriverStatus)int_value) ||
-					 (!is && !rom->status == (DriverStatus)int_value));
+			case DRIVER_STATUS:
+				/* This is a summary of imperfect colour, sound, graphic
+				   and emulation */
+				g_object_get (rom, "driver-status", &driver_status, NULL);
+				retval = ( (is && driver_status == (DriverStatus)int_value) ||
+					 (!is && !driver_status == (DriverStatus)int_value));
 				break;
 			case COLOR_STATUS:
-				retval = ( (is && (rom->driver_status_color == (DriverStatus)int_value))  ||
-					 (!is && ! (rom->driver_status_color == (DriverStatus)int_value)));
+				g_object_get (rom, "driver-status-colour", &driver_status_colour, NULL);
+				retval = ( (is && (driver_status_colour == (DriverStatus)int_value))  ||
+					 (!is && ! (driver_status_colour == (DriverStatus)int_value)));
 				break;
 			case SOUND_STATUS:
-				retval = ( (is && (rom->driver_status_sound == (DriverStatus)int_value))  ||
-					 (!is && ! (rom->driver_status_sound == (DriverStatus)int_value)));
+				g_object_get (rom, "driver-status-sound", &driver_status_sound, NULL);
+				retval = ( (is && (driver_status_sound == (DriverStatus)int_value))  ||
+					 (!is && ! (driver_status_sound == (DriverStatus)int_value)));
 				break;
 			case GRAPHIC_STATUS:
-				retval = ( (is && (rom->driver_status_graphic == (DriverStatus)int_value))  ||
-					 (!is && ! (rom->driver_status_graphic == (DriverStatus)int_value)));
+				g_object_get (rom, "driver-status-graphics", &driver_status_graphics, NULL);
+				retval = ( (is && (driver_status_graphics == (DriverStatus)int_value))  ||
+					 (!is && ! (driver_status_graphics == (DriverStatus)int_value)));
 				break;
 			case HAS_ROMS:
-				retval = ( (is && (rom->has_roms == (RomStatus)int_value))  ||
-					 (!is && ! (rom->has_roms == (RomStatus)int_value)));
+				rom_status = mame_rom_entry_get_rom_status (rom);
+				retval = ((is && (rom_status == (RomStatus) int_value))  ||
+					 (!is && !(rom_status == (RomStatus) int_value)));
 				break;
 			case HAS_SAMPLES:
-				retval = ( (is && (rom->nb_samples == int_value))  ||
-					 (!is && ! (rom->nb_samples == int_value)));
+				retval = ( (is && (mame_rom_entry_has_samples (rom) == int_value))  ||
+					 (!is && ! (mame_rom_entry_has_samples (rom) == int_value)));
 				break;
 			case TIMESPLAYED:
-				retval = ( (is && (rom->timesplayed == int_value)) ||
-					 (!is && ! (rom->timesplayed == int_value)));
+				g_object_get (rom, "times-played", &timesplayed, NULL);
+				retval = ( (is && (timesplayed == int_value)) ||
+					 (!is && ! (timesplayed == int_value)));
 				break;
 			case CHANNELS:
-				retval = ( (is && (rom->channels == int_value)) ||
-					 (!is && (rom->channels != int_value)));
+				g_object_get (rom, "num-channels", &num_channels, NULL);
+				retval = ( (is && (num_channels == int_value)) ||
+					 (!is && (num_channels != int_value)));
 				break;
-				/* Comparing text and int */
+			/* We are not currently supporting the YEAR and MANUFACTURER filters
+			   since it makes the LHS filter list too long 
+		
 			case YEAR:
 				retval = ( (is && (rom->year == value)) ||
 					 (!is && (rom->year != value)));
 				break;
-				/* comparing parsed text and text */
+				* comparing parsed text and text *
 			case MANU:
 				manufacturer = rom_entry_get_manufacturers (rom);
-				/* we have now one or two clean manufacturer (s) we still need to differentiates sub companies*/
+				* we have now one or two clean manufacturer (s) we still need to differentiates sub companies*
 				if (manufacturer[1] != NULL) {
 					if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
 					     (!is && g_strncasecmp (manufacturer[0], value, 5)) ||
@@ -368,7 +406,7 @@ game_filtered (RomEntry * rom, gint rom_filter_opt)
 					}
 				}
 				g_strfreev (manufacturer);
-				break;
+				break;*/
 			default:
 				GMAMEUI_DEBUG ("Trying to filter, but filter type %d is not handled", type);
 				retval = FALSE;
@@ -381,12 +419,14 @@ game_filtered (RomEntry * rom, gint rom_filter_opt)
 	if (retval) {
 		if (rom_filter_opt == 1) {
 			/* Only show Available */
-			retval = (rom->has_roms != NOT_AVAIL) ? TRUE : FALSE;
+			retval = (mame_rom_entry_get_rom_status (rom) != NOT_AVAIL) ? TRUE : FALSE;
 		} else if (rom_filter_opt == 2) {
 			/* Only show Unavailable */
-			retval = (rom->has_roms == NOT_AVAIL) ? TRUE : FALSE;
-		}
+			retval = (mame_rom_entry_get_rom_status (rom) == NOT_AVAIL) ? TRUE : FALSE;
+		} else {
 		/* No need to process for All ROMs */
+
+		}
 	}
 
 	return retval;
@@ -395,7 +435,7 @@ game_filtered (RomEntry * rom, gint rom_filter_opt)
 /* launch following the commandline prepared by play_game, playback_game and record_game 
    then test if the game is launched, detect error and update game status */
 void
-launch_emulation (RomEntry    *rom,
+launch_emulation (MameRomEntry    *rom,
 		  const gchar *options)
 {
 	FILE *xmame_pipe;
@@ -403,6 +443,7 @@ launch_emulation (RomEntry    *rom,
 	gchar *p, *p2;
 	gfloat done = 0;
 	gint nb_loaded = 0;
+	gint num_roms;
 	GList *extra_output = NULL;
 	
 	gboolean error_rom, error_mame;	 /* Error with the load */
@@ -416,10 +457,12 @@ launch_emulation (RomEntry    *rom,
 	joydata = NULL;
 #endif
 	
+	g_object_get (rom, "num-roms", &num_roms, NULL);
+	
 	/* FIXME Progress of loading ROMs is not reported in newer versions of MAME
 	   (e.g. SDLMame), so there is no way of updating a progress window */
 	progress_window = progress_window_new (TRUE);
-	progress_window_set_title (progress_window, _("Loading %s:"), rom_entry_get_list_name (rom));
+	progress_window_set_title (progress_window, _("Loading %s:"), mame_rom_entry_get_list_name (rom));
 	progress_window_show (progress_window);
 
 	gtk_widget_hide (MainWindow);
@@ -427,7 +470,7 @@ launch_emulation (RomEntry    *rom,
 	/* need to use printf otherwise, with GMAMEUI_DEBUG, we dont see the complete command line */
 	GMAMEUI_DEBUG ("Message: running command %s\n", options);
 	xmame_pipe = popen (options, "r");
-	GMAMEUI_DEBUG (_("Loading %s:"), rom->gamename);
+	GMAMEUI_DEBUG (_("Loading %s:"), mame_rom_entry_get_gamename (rom));
 
 	/* Loading */
 	
@@ -456,7 +499,7 @@ launch_emulation (RomEntry    *rom,
 	 svgalib: Failed to initialize mouse
 	*/
 	
-	error_rom = error_mame = FALSE;
+	error_rom = error_mame = warning_rom = FALSE;
 	while (fgets (line, BUFFER_SIZE, xmame_pipe)) {
 		/* remove the last \n */
 		for (p = line; (*p && (*p != '\n')); p++);
@@ -474,8 +517,8 @@ launch_emulation (RomEntry    *rom,
 			p = p + 2;
 			for (p2 = p; (*p2 && (*p2 != '\n')); p2++);
 			p2 = '\0';
-
-			done = (gfloat) (nb_loaded / rom->nb_roms);
+			
+			done = (gfloat) (nb_loaded / num_roms);
 
 			progress_window_set_value (progress_window, done);
 			progress_window_set_text (progress_window, p);
@@ -562,22 +605,11 @@ launch_emulation (RomEntry    *rom,
 
 		g_free (title);
 		g_free (secmessage);
-
-		/* Update game information if there was a ROM problem */
-		if (error_rom) rom->has_roms = INCORRECT;
 		
-	} else {
-		/* Game was successfully loaded */
-		GMAMEUI_DEBUG ("game over");
-
-		/* Update game informations */
-		/* FIXME TODO Set g_object rom info, which triggers signal to update game in list.
-		   This will then replace update_game_in_list call below */
-		rom->timesplayed++;
-
-		/* Update game information if there was a ROM warning, otherwise set to correct */
-		warning_rom ? rom->has_roms = BEST_AVAIL : CORRECT;
 	}
+	
+	/* Update game information */
+	mame_rom_entry_rom_played (rom, warning_rom, error_rom);
 	
 	g_list_foreach (extra_output, (GFunc)g_free, NULL);
 	g_list_free (extra_output);
@@ -625,7 +657,7 @@ gchar *legacy_categories[] = {
 };
 
 static gchar*
-generate_command_line_options_string (MameExec *exec, RomEntry *rom)
+generate_command_line_options_string (MameExec *exec, MameRomEntry *rom)
 {
 	gchar *cl_opts;
 	gchar *tmp_str;
@@ -646,7 +678,7 @@ generate_command_line_options_string (MameExec *exec, RomEntry *rom)
 		}
 
 		/* Add Vector-specific string */
-		if (rom->vector)
+		if (mame_rom_entry_is_vector (rom))
 			tmp_str = g_strconcat (tmp_str,
 					       mame_options_get_option_string (main_gui.options,
 									       "Vector"),
@@ -663,7 +695,7 @@ generate_command_line_options_string (MameExec *exec, RomEntry *rom)
 		}
 
 		/* Add Vector-specific string */
-		if (rom->vector)
+		if (mame_rom_entry_is_vector (rom))
 			tmp_str = g_strconcat (tmp_str,
 					       mame_options_legacy_get_option_string (main_gui.legacy_options,
 										      "Vector"),
@@ -686,7 +718,7 @@ generate_command_line_options_string (MameExec *exec, RomEntry *rom)
 
 /* Prepare the commandline to use to play a game */
 void
-play_game (RomEntry *rom)
+play_game (MameRomEntry *rom)
 {
 	MameExec *exec;
 	gchar *current_rom_name;
@@ -706,7 +738,9 @@ play_game (RomEntry *rom)
 	
 	if (use_xmame_options) {
 		GMAMEUI_DEBUG ("Using MAME options, ignoring GMAMEUI-specified options");
-		opt = g_strdup_printf ("%s %s 2>&1", mame_exec_get_path (exec), rom->romname);
+		opt = g_strdup_printf ("%s %s 2>&1",
+				       mame_exec_get_path (exec),
+				       mame_rom_entry_get_romname (rom));
 		launch_emulation (rom, opt);
 		g_free (opt);
 		return;
@@ -714,18 +748,22 @@ play_game (RomEntry *rom)
 	
 	opts_string = generate_command_line_options_string (exec, rom);
 
-	opt = g_strdup_printf ("%s %s 2>&1", opts_string, rom->romname);
+	opt = g_strdup_printf ("%s %s 2>&1",
+			       opts_string,
+			       mame_rom_entry_get_romname (rom));
 	launch_emulation (rom, opt);
 	
 	g_free (opts_string);
 	g_free (opt);
 }
 
-void process_inp_function (RomEntry *rom, gchar *file, int action)
+void process_inp_function (MameRomEntry *rom, gchar *file, int action)
 {
 	MameExec *exec;
 	char *filename;
 	gchar *opt, *opts_string;
+
+	g_return_if_fail (rom != NULL);	
 	
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	
@@ -791,6 +829,7 @@ exit_gmameui (void)
 	joystick_close (joydata);
 	joydata = NULL;
 
+	/* Clear the gamelist (which clears all the romset GObjects) */
 	g_object_unref (gui_prefs.gl);
 	gui_prefs.gl = NULL;
 	
@@ -801,6 +840,7 @@ exit_gmameui (void)
 	main_gui.exec_list = NULL;
 	xmame_options_free ();
 	
+	/* Clear the gamelist view */
 	g_object_unref (main_gui.displayed_list);
 	main_gui.displayed_list = NULL;
 

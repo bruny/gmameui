@@ -58,8 +58,6 @@ struct _MameAuditDialogPrivate {
 	GtkWidget *notfound_samples_value;
 	GtkWidget *total_samples_value;
 	
-	GList *romlist; /* Not necessary to free this */
-
 	/* Total number of ROMs and samples supported by this version of MAME */
 	gint num_roms;
 	gint num_samples;
@@ -181,8 +179,6 @@ mame_audit_dialog_init (MameAuditDialog *dialog)
 	priv->num_roms = priv->num_samples = 0;
 	/* Done initialising private variables */
 	
-	priv->romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
-
 	/* Build the UI and connect signals here */
 	priv->xml = glade_xml_new (GLADEDIR "audit_window.glade", "vbox1", GETTEXT_PACKAGE);
 	if (!priv->xml) {
@@ -429,17 +425,18 @@ on_romset_audited (GmameuiAudit *audit,
 	
 	if (auditresult != NOTROMSET) {
 		gchar *romname;
-		RomEntry *tmprom = NULL;
-		GList *listpointer;
+		MameRomEntry *tmprom;
 		
 		/* Write the audit details to the text buffer */
 		if ((auditresult == INCORRECT) || (auditresult == BEST_AVAIL))
-				update_text_buffer (dlg, audit_line);
+			update_text_buffer (dlg, audit_line);
 
 		/* Get the name of the rom being audited so we can update the processing label */
 		romname = get_romset_name_from_audit_line (audit_line);
-		listpointer = g_list_find_custom (dlg->priv->romlist, romname,
-										  (GCompareFunc) g_ascii_strcasecmp);
+
+		tmprom = get_rom_from_gamelist_by_name (gui_prefs.gl, romname);
+		
+		g_return_if_fail (tmprom != NULL);
 		
 		if (type == AUDIT_TYPE_ROM) {
 			dlg->priv->romset_count[auditresult]++;
@@ -447,13 +444,10 @@ on_romset_audited (GmameuiAudit *audit,
 
 			title = g_strdup_printf (_("Auditing romset %s"), romname);
 
-			if (listpointer) {
-				tmprom = (RomEntry *) listpointer->data;
-				tmprom->has_roms = auditresult;
-				/*GMAMEUI_DEBUG ("Setting rom %s to %d", tmprom->romname, auditresult);*/
+			g_object_set (tmprom, "has-roms", auditresult, NULL);
 
-				/* FIXME TODO Redraw gamelist with updated ROM details */
-			}
+			/* FIXME TODO Redraw gamelist with updated ROM details */
+
 			
 		} else if (type == AUDIT_TYPE_SAMPLE) {
 			dlg->priv->sampleset_count[auditresult]++;
@@ -461,12 +455,10 @@ on_romset_audited (GmameuiAudit *audit,
 			
 			title = g_strdup_printf (_("Auditing sampleset %s"), romname);
 
-			if (listpointer) {
-				tmprom = (RomEntry *) listpointer->data;
-				tmprom->has_samples = auditresult;
+			g_object_set (tmprom, "has-samples", auditresult, NULL);
 
-				/* FIXME TODO Redraw gamelist with updated ROM details */
-			}	
+			/* FIXME TODO Redraw gamelist with updated ROM details */
+
 		}
 
 		ngmameui_audit_window_set_details_label (dlg, title);

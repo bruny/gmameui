@@ -60,13 +60,7 @@ GType gmameui_sidebar_get_type (void);
 
 GtkWidget *gmameui_sidebar_new (void);
 
-/*DELETEstatic void
-gmameui_sidebar_set_page (GMAMEUISidebar *sidebar, RomEntry *rom, screenshot_type page);*/
-/*DELETE
-*/
-
-gboolean gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, RomEntry *rom);
-void gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, RomEntry *rom);
+void gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, MameRomEntry *rom);
 void gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);
 
 GdkPixbuf *

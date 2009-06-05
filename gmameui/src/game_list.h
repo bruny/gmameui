@@ -69,7 +69,7 @@ MameGamelist* mame_gamelist_new (void);
 
 void gamelist_check (MameExec *exec);
 
-RomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname);
+MameRomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname);
 GList* mame_gamelist_get_roms_glist (MameGamelist *gl);
 GList* mame_gamelist_get_categories_glist (MameGamelist *gl);
 GList* mame_gamelist_get_versions_glist (MameGamelist *gl);
@@ -97,7 +97,7 @@ gboolean mame_gamelist_load (MameGamelist *gl);
 */
 gboolean mame_gamelist_save (MameGamelist *gl);
 
-void mame_gamelist_add (MameGamelist *gl, RomEntry *rom);
+void mame_gamelist_add (MameGamelist *gl, MameRomEntry *rom);
 
 G_END_DECLS
 

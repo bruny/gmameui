@@ -146,9 +146,7 @@ on_screen_shot_activate (GtkAction *action,
 
 	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 	
-	g_object_set (main_gui.gui_prefs,
-		      "show-screenshot", visible,
-		      NULL);
+	g_object_set (main_gui.gui_prefs, "show-screenshot", visible, NULL);
 
 	if (visible) {
 		/* Show snapshot */
@@ -526,26 +524,43 @@ create_MainWindow (void)
 	main_gui.hpanedRight = glade_xml_get_widget (xml, "hpanedRight");
 	
 	/* Set up the search field */
+GMAMEUI_DEBUG ("Setting up search entry field...");
 	GtkWidget *search_box;
 	search_box = glade_xml_get_widget (xml, "filter_hbox");
 	main_gui.search_entry = mame_search_entry_new ();
 	/* In order to pack before the filter buttons, their pack must be set to End */
 	gtk_box_pack_start (GTK_BOX (search_box), main_gui.search_entry, FALSE, FALSE, 6);
 	gtk_widget_show (main_gui.search_entry);
-	
+GMAMEUI_DEBUG ("Setting up search entry field... done");
+
 	/* Prepare the ROM availability filter buttons */
+GMAMEUI_DEBUG ("Setting up ROM availability filter buttons...");
 	GList *filter_btn_list, *list;
+	
+	gint current_filter_btn;
 	filter_btn_list = glade_xml_get_widget_prefix (xml, "filter_btn_");
+	g_object_get (main_gui.gui_prefs, "current-rom-filter", &current_filter_btn, NULL);
+	i = 0;
+	
 	for (list = g_list_first (filter_btn_list);
 	     list != NULL;
-	     list = g_list_next (list)) {
+	     list = g_list_next (list)) {	
+		     
 		/* Hide the radio circle so only the button is visible */
 		gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (list->data), FALSE);
+		     
+		/* Set the button based on the preference */
+		/* AAA FIXME TODO Not working */
+		if (i == current_filter_btn)
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (list->data), TRUE);
 		
 		/* Set the signal callback */
 		g_signal_connect (G_OBJECT (list->data), "toggled",
 				  G_CALLBACK (on_filter_btn_toggled), NULL);
+		
+		i++;
 	}
+GMAMEUI_DEBUG ("Setting up ROM availability filter buttons... done");	
 	/* End ROM availability filter buttons */
 	
 	main_gui.filters_list = gmameui_filters_list_new ();
@@ -602,6 +617,7 @@ create_MainWindow (void)
 		{ IS_BIOS, FILTER_ARCH_BIOS, _("BIOS"), TRUE, NULL, TRUE, TRUE, NULL, _("Architecture") },
 	
 		/* Imperfect filters */
+		{ DRIVER_STATUS, FILTER_IMPERFECT_DRIVER, _("Driver"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
 		{ COLOR_STATUS, FILTER_IMPERFECT_COLORS, _("Colors"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
 		{ SOUND_STATUS, FILTER_IMPERFECT_SOUND, _("Sound"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
 		{ GRAPHIC_STATUS, FILTER_IMPERFECT_GRAPHIC, _("Graphics"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },

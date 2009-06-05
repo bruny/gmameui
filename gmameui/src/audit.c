@@ -542,7 +542,7 @@ mame_audit_start_full (void)
 	MameExec *exec;
 	gchar *rompath_option;
 	GList *listpointer;
-	RomEntry *tmprom = NULL;
+	MameRomEntry *tmprom;
 	const gchar *option_name;
 	
 	gchar *command;
@@ -566,8 +566,8 @@ mame_audit_start_full (void)
 	     (listpointer != NULL);
 	     listpointer = g_list_next (listpointer))
 	{
-		tmprom = (RomEntry *) listpointer->data;
-		tmprom->has_roms = NOT_AVAIL;
+		tmprom = (MameRomEntry *) listpointer->data;
+		g_object_set (tmprom, "has-roms", NOT_AVAIL, NULL);
 	}
 	
 	rompath_option = create_rompath_options_string (exec);

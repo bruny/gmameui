@@ -44,7 +44,7 @@ struct _MameRomInfoDialogPrivate {
 	GtkWidget     *sample_check_result;
 	GtkWidget     *rom_check_result;
 	
-	RomEntry *rom;
+	MameRomEntry *rom;
 };
 
 #define MAME_ROMINFO_DIALOG_GET_PRIVATE(o)  (MAME_ROMINFO_DIALOG (o)->priv)
@@ -67,7 +67,8 @@ audit_game (MameRomInfoDialog *dialog)
 
 	if (!mame_exec_list_has_current_executable (main_gui.exec_list)) {
 		gtk_label_set_text (GTK_LABEL (dialog->priv->rom_check_result), _("Can't audit game"));
-		if (dialog->priv->rom->nb_samples > 0) {
+		
+		if (mame_rom_entry_has_samples (dialog->priv->rom)) {
 			gtk_label_set_text (GTK_LABEL (dialog->priv->sample_check_result), _("Can't audit game"));
 		} else {
 			gtk_label_set_text (GTK_LABEL (dialog->priv->sample_check_result), _("None required"));
@@ -78,7 +79,7 @@ audit_game (MameRomInfoDialog *dialog)
 	g_return_if_fail (dialog != NULL);
 	g_return_if_fail (dialog->priv->rom != NULL);
 	
-	mame_audit_start_single (dialog->priv->rom->romname);
+	mame_audit_start_single (mame_rom_entry_get_romname (dialog->priv->rom));
 	
 }
 
@@ -88,87 +89,6 @@ audit_idle (gpointer data)
 	audit_game ((MameRomInfoDialog *) data);
 
 	return FALSE;
-}
-
-/* FIXME TODO Move to RomEntry */
-static char *
-get_rom_clone_name (RomEntry *rom)
-{
-	char    *value = NULL;
-
-	/* find the clone name if there is a clone */
-	if (strcmp (rom->cloneof, "-")) {
-		RomEntry *tmprom;
-
-		tmprom = get_rom_from_gamelist_by_name (gui_prefs.gl, rom->cloneof);
-		if (tmprom) {
-			value = g_strdup_printf ("%s - \"%s\"", rom_entry_get_list_name (tmprom), rom->cloneof);
-		} else {
-			value = g_strdup_printf (" - \"%s\"", rom->cloneof);
-		}
-	}
-
-	return value;
-}
-
-/* FIXME TODO Move to RomEntry */
-static char *
-get_rom_cpu_value (RomEntry *rom)
-{
-	char *value = NULL;
-	char *values [NB_CPU + 1];
-	gint  i, j;
-
-	j = 0;
-	values[j] = NULL;
-	for (i = 0; i < NB_CPU; i++) {
-		if (strcmp (rom->cpu_info[i].name, "-")
-		    && rom->cpu_info[i].name[0] != '\0') {
-			values[j++] = g_strdup_printf ("%s %f MHz%s",
-						       rom->cpu_info[i].name,
-						       rom->cpu_info[i].clock / 1000000.0,
-						       rom->cpu_info[i].sound_flag ? _(" (sound)") : " ");
-		}
-	}
-	values[j++] = NULL;
-
-	value = g_strjoinv ("\n", values);
-
-	for (i = 0; i < j; i++)
-		g_free (values[i]);
-
-	return value;
-}
-
-/* FIXME TODO Move to RomEntry */
-static char *
-get_rom_sound_value (RomEntry *rom)
-{
-	char *value = NULL;
-	char *values [NB_CPU + 1];
-	gint  i, j;
-
-	j = 0;
-	values[j] = NULL;
-	for (i = 0; i < NB_CPU; i++) {
-		if (strcmp (rom->sound_info[i].name, "-")
-		    && rom->sound_info[i].name[0]) {
-			if (rom->sound_info[i].clock == 0)
-				values[j++] = g_strdup_printf ("%s", rom->sound_info[i].name);
-			else
-				values[j++] = g_strdup_printf ("%s %f MHz",
-							      rom->sound_info[i].name,
-							      rom->sound_info[i].clock / 1000000.0);
-		}
-	}
-	values[j++] = NULL;
-
-	value = g_strjoinv ("\n", values);
-
-	for (i = 0; i < j; i++)
-		g_free (values[i]);
-
-	return value;
 }
 
 static void
@@ -195,17 +115,19 @@ on_romset_audited (GmameuiAudit *audit, gchar *audit_line, gint type, gint audit
 	if (auditresult != NOTROMSET) {
 		title = rom_status_desc[auditresult];
 		if (type == AUDIT_TYPE_ROM) {
-			dialog->priv->rom->has_roms = auditresult;
+			g_object_set (dialog->priv->rom, "has-roms", auditresult, NULL);
+
 			gtk_label_set_text (GTK_LABEL (dialog->priv->rom_check_result), title);
 		} else {
-			dialog->priv->rom->has_samples = auditresult;
+			g_object_set (dialog->priv->rom, "has-samples", auditresult, NULL);
+
 			gtk_label_set_text (GTK_LABEL (dialog->priv->sample_check_result), title);
 		}
 
 		/* Update the game in the MameGamelistView */
 		mame_gamelist_view_update_game_in_list (main_gui.displayed_list, dialog->priv->rom);
 		
-	} else if (g_str_has_prefix (audit_line, dialog->priv->rom->romname)) {
+	} else if (g_str_has_prefix (audit_line, mame_rom_entry_get_romname (dialog->priv->rom))) {
 		/* Line relates to a ROM within the ROM set */
 		gtk_text_buffer_get_end_iter (GTK_TEXT_BUFFER (dialog->priv->details_audit_result_buffer), &text_iter);
 		gtk_text_buffer_insert (GTK_TEXT_BUFFER (dialog->priv->details_audit_result_buffer), &text_iter, audit_line, -1);
@@ -276,7 +198,6 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	dialog->priv = priv;
 	
 	/* Initialise private variables */
-	
 	priv->rom = gui_prefs.current_game;
 
 	g_return_if_fail (priv->rom != NULL);
@@ -299,18 +220,18 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);
 	
-	gtk_window_set_title (GTK_WINDOW (dialog), rom_entry_get_list_name (priv->rom));
+	gtk_window_set_title (GTK_WINDOW (dialog), mame_rom_entry_get_list_name (priv->rom));
 
-	value = g_strdup_printf("<b>%s</b>", rom_entry_get_list_name (priv->rom));
+	value = g_strdup_printf("<b>%s</b>", mame_rom_entry_get_list_name (priv->rom));
 	label = glade_xml_get_widget (priv->xml, "rom_name_lbl");
 	gtk_label_set_markup (GTK_LABEL (label), value);
-	
+
 	label = glade_xml_get_widget (priv->xml, "year_result");
-	gtk_label_set_text (GTK_LABEL (label), priv->rom->year);
+	gtk_label_set_text (GTK_LABEL (label), mame_rom_entry_get_year (priv->rom));
 
 	label = glade_xml_get_widget (priv->xml, "manufacturer_result");
-	gtk_label_set_text (GTK_LABEL (label), priv->rom->manu);
-	
+	gtk_label_set_text (GTK_LABEL (label), mame_rom_entry_get_manufacturer (priv->rom));
+
 	title = get_rom_cpu_value (priv->rom);
 	label = glade_xml_get_widget (priv->xml, "cpu_result");
 	gtk_label_set_text (GTK_LABEL (label), title);
@@ -320,32 +241,41 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	label = glade_xml_get_widget (priv->xml, "sound_result");
 	gtk_label_set_text (GTK_LABEL (label), title);
 	g_free (title);
+gboolean horizontal;
+gint num_colours;
+gfloat freq;
+	g_object_get (priv->rom,
+		      "is-horizontal", &horizontal,
+		      "screen-freq", &freq,
+		      "num-colours", &num_colours,
+		      NULL);
+	
 
 	/* Don't display resolution if this is a vector game */
-	if (!priv->rom->vector)
-		value = g_strdup_printf ("%i \303\227 %i ", priv->rom->screen_x, priv->rom->screen_y);
+	if (!mame_rom_entry_is_vector (priv->rom))
+		value = mame_rom_entry_get_resolution (priv->rom);
 	else
 		value = g_strdup_printf ("");
 	title = g_strdup_printf ("%s%s %.2f Hz",
 				 value,
-				 priv->rom->horizontal ? "Horizontal" : "Vertical",
-				 priv->rom->screen_freq);
+				 horizontal ? "Horizontal" : "Vertical",
+				 freq);
 	g_free (value);
 
 	label = glade_xml_get_widget (priv->xml, "screen_result");
 	gtk_label_set_text (GTK_LABEL (label), title);
 	g_free (title);
 
-	title = g_strdup_printf (_("%i colors"), priv->rom->colors);
+	title = g_strdup_printf (_("%i colors"), num_colours);
 	label = glade_xml_get_widget (priv->xml, "colors_result");
 	gtk_label_set_text (GTK_LABEL (label), title);
 	g_free (title);
 
 	label = glade_xml_get_widget (priv->xml, "clone_result");
 	GtkWidget *clone_label = glade_xml_get_widget (priv->xml, "clone_label");
-	if (strcmp (priv->rom->cloneof, "-")) {
+	if (mame_rom_entry_is_clone (priv->rom)) {
 		/* Get the title of the original ROM */
-		title = get_rom_clone_name (priv->rom);
+		title = mame_rom_entry_get_parent_romname (priv->rom);
 		gtk_label_set_text (GTK_LABEL (label), title);
 		g_free (title);
 	} else {

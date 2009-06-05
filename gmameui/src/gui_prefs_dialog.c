@@ -59,8 +59,7 @@ struct _MameGuiPrefsDialogPrivate {
 	/* Column layout preferences */
 	
 	/* Miscellaneous option preferences *
-	GtkWidget *theprefix_checkbutton;
-	GtkWidget *theprefix_label;*/
+	GtkWidget *theprefix_checkbutton;*/
 };
 
 /* Preferences dialog */
@@ -69,7 +68,6 @@ static void mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg);
 static void on_prefs_entry_changed (GtkWidget *entry, gchar *widget_name);
 static void on_prefs_checkbutton_toggled (GtkWidget *toggle, gchar *widget_name);
 static void on_prefs_col_checkbutton_toggled (GtkWidget *toggle, gchar *widget_name);
-static void on_prefs_checkbutton_theprefix_toggled (GtkWidget *toggle, gpointer user_data);
 
 static void on_mame_gui_prefs_dialog_destroyed (GtkWidget *prefs_dialog, gpointer user_data);
 static gboolean on_mame_gui_prefs_dialog_deleted (GtkWidget *window,
@@ -209,14 +207,10 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 	g_list_free (node);
 	
 	/* Miscellaneous option widgets */
-	theprefix_label = glade_xml_get_widget (xml, "theprefix_lbl");
-	
 	widget = glade_xml_get_widget (xml, "theprefix");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), theprefix);
 	g_signal_connect (widget, "toggled", 
-			  G_CALLBACK (on_prefs_checkbutton_theprefix_toggled), theprefix_label);
-	/* Default value may be off, so need to manually trigger */
-	on_prefs_checkbutton_theprefix_toggled (widget, theprefix_label);
+			  G_CALLBACK (on_prefs_checkbutton_toggled), "theprefix");
 
 	gtk_dialog_set_default_response (GTK_DIALOG (dlg), GTK_RESPONSE_CLOSE);
 	
@@ -307,37 +301,6 @@ on_prefs_col_checkbutton_toggled (GtkWidget *toggle,
 	g_value_array_free (shown_columns);
 	
 	GMAMEUI_DEBUG("Setting integer array... done");	
-}
-
-/* This callback is slightly different - we pass the GtkWidget representing
-   the example label, and update it */
-static void
-on_prefs_checkbutton_theprefix_toggled (GtkWidget *toggle, 
-										gpointer user_data)
-{
-	GtkWidget *example_lbl;
-	gboolean active;
-	gchar *text;
-
-	example_lbl = (GtkWidget *) user_data;	
-	
-	GMAMEUI_DEBUG ("theprefix toggled");
-	active = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (toggle));
-
-	/* Trigger the set, which causes a save in the mame_gui_prefs_set_property () function */
-	g_object_set (main_gui.gui_prefs,
-				  "theprefix", active,
-				  NULL);
-	
-	/* Update the label to show the impact */
-	if (active)
-		text = g_strdup ("The King of Fighters 2001 (Set 1)");
-	else
-		text = g_strdup ("King of Fighters 2001, The (Set 1)");
-		
-	gtk_label_set_text (GTK_LABEL (example_lbl), text);
-
-	g_free (text);
 }
 
 static void 

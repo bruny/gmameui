@@ -228,10 +228,13 @@ move_up (int val)
 	GtkTreePath *tree_path;
 	GtkTreeIter iter1;
 	GtkTreeIter iter2;
+	GtkTreeModel *model;
+	
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW (main_gui.displayed_list));
 
 	gtk_tree_view_get_cursor (GTK_TREE_VIEW (main_gui.displayed_list), &path, NULL);
 	
-	if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (main_gui.tree_model), &iter1, path))
+	if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (model), &iter1, path))
 		return;
 
 	for (i = 0; i < val; i++) {
@@ -239,25 +242,25 @@ move_up (int val)
 			if (!gtk_tree_path_up (path)) {
 				break;
 			} else {
-				if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (main_gui.tree_model), &iter1, path))
+				if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (model), &iter1, path))
 					break;
 			}
 		} else {
 			if (gtk_tree_view_row_expanded (GTK_TREE_VIEW (main_gui.displayed_list), path)) {
 				gtk_tree_path_down (path);
-				gtk_tree_model_get_iter (GTK_TREE_MODEL (main_gui.tree_model), &iter2, path);
+				gtk_tree_model_get_iter (GTK_TREE_MODEL (model), &iter2, path);
 				iter1 = iter2;
-				while (gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter2)) {
+				while (gtk_tree_model_iter_next (GTK_TREE_MODEL (model), &iter2)) {
 					iter1 = iter2;
 				}
 			} else {
-				if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (main_gui.tree_model), &iter1, path))
+				if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (model), &iter1, path))
 					break;
 			}
 		}
 	}
 
-	tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter1);
+	tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (model), &iter1);
 	gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list), tree_path, NULL, FALSE);
 	gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list), tree_path, NULL, TRUE, 0.5, 0);
 	gtk_tree_path_free (tree_path);
@@ -274,20 +277,23 @@ move_down (int val)
 	GtkTreePath *tree_path;
 	GtkTreeIter iter1;
 	GtkTreeIter iter2;
-
+	GtkTreeModel *model;
+	
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW (main_gui.displayed_list));
+	
 	gtk_tree_view_get_cursor (GTK_TREE_VIEW (main_gui.displayed_list), &path, NULL);
-	if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (main_gui.tree_model), &iter1, path))
+	if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (model), &iter1, path))
 		return;
 
 	for (i = 0; i < val; i++) {
 		if (gtk_tree_view_row_expanded (GTK_TREE_VIEW (main_gui.displayed_list), path)) {
-			gtk_tree_model_iter_children (GTK_TREE_MODEL (main_gui.tree_model), &iter2, &iter1);
+			gtk_tree_model_iter_children (GTK_TREE_MODEL (model), &iter2, &iter1);
 			iter1 = iter2;
 		} else {
 			iter2 = iter1;
-			if (!gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter1)) {
-				if (gtk_tree_model_iter_parent (GTK_TREE_MODEL (main_gui.tree_model), &iter1, &iter2)) {
-					if (!gtk_tree_model_iter_next (GTK_TREE_MODEL (main_gui.tree_model), &iter1)) {
+			if (!gtk_tree_model_iter_next (GTK_TREE_MODEL (model), &iter1)) {
+				if (gtk_tree_model_iter_parent (GTK_TREE_MODEL (model), &iter1, &iter2)) {
+					if (!gtk_tree_model_iter_next (GTK_TREE_MODEL (model), &iter1)) {
 						iter1 = iter2;
 						break;
 					}
@@ -297,10 +303,10 @@ move_down (int val)
 				}
 			}
 		}
-		path=gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter1);
+		path=gtk_tree_model_get_path (GTK_TREE_MODEL (model), &iter1);
 	}
 
-	tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (main_gui.tree_model), &iter1);
+	tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (model), &iter1);
 	gtk_tree_view_set_cursor (GTK_TREE_VIEW (main_gui.displayed_list), tree_path, NULL, FALSE);
 	gtk_tree_view_scroll_to_cell (GTK_TREE_VIEW (main_gui.displayed_list), tree_path, NULL, TRUE, 0.5, 0);
 	gtk_tree_path_free (tree_path);
@@ -312,15 +318,17 @@ static void toggle_expand (void)
 {
 	GtkTreePath *path;
 	GtkTreeIter iter1;
-
+	GtkTreeModel *model;
+	
+	model = gtk_tree_view_get_model (GTK_TREE_VIEW (main_gui.displayed_list));
 	gtk_tree_view_get_cursor (GTK_TREE_VIEW (main_gui.displayed_list), &path, NULL);
-	if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (main_gui.tree_model), &iter1, path))
+	if (!gtk_tree_model_get_iter (GTK_TREE_MODEL (model), &iter1, path))
 		return;
 
 	if (gtk_tree_view_row_expanded (GTK_TREE_VIEW (main_gui.displayed_list), path)) {
 		gtk_tree_view_collapse_row (GTK_TREE_VIEW (main_gui.displayed_list), path);
 	} else {
-		if (gtk_tree_model_iter_has_child (GTK_TREE_MODEL (main_gui.tree_model), &iter1))
+		if (gtk_tree_model_iter_has_child (GTK_TREE_MODEL (model), &iter1))
 			gtk_tree_view_expand_row (GTK_TREE_VIEW (main_gui.displayed_list), path, TRUE);
 	}
 

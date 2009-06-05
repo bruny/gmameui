@@ -51,7 +51,8 @@ typedef struct
 	int game_count;
 	int total_games;
 
-	RomEntry *current_rom;
+	MameRomEntry *current_rom;
+	
 	int cpu_count;
 	int sound_count;
 } TCreateGameList;
@@ -68,25 +69,30 @@ static void CreateGameListProgress(TCreateGameList *_this)
 	UPDATE_GUI;
 }
 
-static void CreateGameListGame(TCreateGameList *_this)
+/* Create a new ROM from the XML handling */
+static void
+CreateGameListGame(TCreateGameList *_this)
 {
-	RomEntry *rom = _this->current_rom;
+	gchar *driver;
+	
+	MameRomEntry *rom = _this->current_rom;
 
-	if (!rom)
-		return;
+	g_return_if_fail (rom != NULL);
 
 	++_this->game_count;
-
-	if (rom->driver && rom->driver[0])
+	
+	g_object_get (rom, "driver", &driver, NULL);
+	
+	if (driver)
 		mame_gamelist_add (gui_prefs.gl, rom);
-
+	
 	CreateGameListProgress(_this);
 
-	_this->current_rom = NULL;
+	// g_object_unref (_this->current_rom);	/* FIXME TODO Fails in compare_game_name */
 }
 
-static const XML_Char *XMLGetAttrPtr(const XML_Char **atts,
-				     const XML_Char *name)
+static const
+XML_Char *XMLGetAttrPtr(const XML_Char **atts, const XML_Char *name)
 {
 	for(; atts[0]; atts += 2) {
 		if(!strcmp(atts[0], name))
@@ -96,9 +102,8 @@ static const XML_Char *XMLGetAttrPtr(const XML_Char **atts,
 	return 0;
 }
 
-static const XML_Char *XMLGetAttr(const XML_Char **atts, 
-				  const XML_Char *name,
-				  const XML_Char *def)
+static const
+XML_Char *XMLGetAttr(const XML_Char **atts, const XML_Char *name, const XML_Char *def)
  {
 	const XML_Char *ret = XMLGetAttrPtr(atts, name);
 
@@ -108,9 +113,9 @@ static const XML_Char *XMLGetAttr(const XML_Char **atts,
 		return def;
 }
 
-static int read_int_attribute(const XML_Char **atts, 
-			   const XML_Char *name,
-			   int def) {
+static int
+read_int_attribute (const XML_Char **atts, const XML_Char *name, int def)
+{
 	const XML_Char *ret = XMLGetAttrPtr(atts, name);
 
 	if (!ret)
@@ -119,9 +124,29 @@ static int read_int_attribute(const XML_Char **atts,
 		return atoi(ret);
 }
 
-static void XMLDataHandler(TCreateGameList *_this,
-			   const XML_Char *s,
-			   int len)
+static gchar *
+read_string_attribute (const XML_Char **atts, const XML_Char *name)
+{
+	const XML_Char *ret = XMLGetAttrPtr(atts, name);
+
+	return (gchar *) ret;
+}
+
+static gboolean
+read_boolean_attribute (const XML_Char **atts, const XML_Char *name, const gchar* comparison)
+{
+	const XML_Char *ret = XMLGetAttrPtr(atts, name);
+	
+	if (ret == NULL)
+		return FALSE;
+	
+	return !strcmp(ret, comparison);
+
+}
+
+
+static void
+XMLDataHandler (TCreateGameList *_this, const XML_Char *s, int len)
 {
 	char *p;
 
@@ -146,11 +171,10 @@ static void XMLDataHandler(TCreateGameList *_this,
 	}
 }
 
-static void XMLStartHandler(TCreateGameList *_this,
-			    const XML_Char *name,
-			    const XML_Char **atts)
+static void
+XMLStartHandler (TCreateGameList *_this, const XML_Char *name, const XML_Char **atts)
 {
-	RomEntry *rom;
+	MameRomEntry *rom;
 	int i;	
 
 	XML_SetCharacterDataHandler(_this->xmlParser, NULL);
@@ -159,26 +183,20 @@ static void XMLStartHandler(TCreateGameList *_this,
 	{
 		char *p;
 		char *tmp;
-		
 
-		_this->current_rom = rom_entry_new();
+		_this->current_rom = mame_rom_entry_new ();
 		_this->cpu_count = 0;
 		_this->sound_count = 0;
 
 		rom = _this->current_rom;
 
+		mame_rom_entry_set_romname (rom, g_strdup (read_string_attribute (atts, "name")));
+		mame_rom_entry_set_cloneof (rom, g_strdup (read_string_attribute (atts, "cloneof")));
+		mame_rom_entry_set_romof (rom, g_strdup (read_string_attribute (atts, "romof")));
+		mame_rom_entry_set_isbios (rom, read_boolean_attribute (atts, "isbios", "yes"));
+		
 		for (i =0; atts[i]; i += 2) {
-			if(!strcmp(atts[i], "name")) {
-				g_strlcpy(rom->romname, atts[i+1], MAX_ROMNAME);
-
-			} else if (!strcmp(atts[i], "cloneof")) {
-				rom->cloneof = g_strdup(atts[i+1]);
-
-			} else if (!strcmp(atts[i], "romof")) {
-				rom->romof = g_strdup(atts[i+1]);
-			} else if (!strcmp(atts[i], "isbios")) {
-				rom->is_bios = !strcmp(atts[i+1], "yes");
-			} else if (!strcmp(atts[i], "sourcefile")) {
+			if (!strcmp(atts[i], "sourcefile")) {
 
 				tmp = g_strdup(atts[i+1]);
 
@@ -186,19 +204,18 @@ static void XMLStartHandler(TCreateGameList *_this,
 				for (p = tmp; *p && *p != '.'; p++);
 				*p = 0;
 
-				rom_entry_set_driver(rom, tmp);
-
+				mame_rom_entry_set_driver (rom, tmp);
 				g_free(tmp);
 			}
 		}
 	}
-	else if(_this->current_rom)
+	else if (_this->current_rom)
 	{
 		rom = _this->current_rom;
-
+		
 		if(!strcmp(name, "rom"))
 		{
-			rom->nb_roms++;
+			mame_rom_entry_add_rom (rom);
 		}
 		else if(!strcmp(name, "chip"))
 		{
@@ -206,112 +223,88 @@ static void XMLStartHandler(TCreateGameList *_this,
 
 			if(!strcmp(type, "cpu"))
 			{
-				//_this->cpu_count++;
-
 				if(_this->cpu_count <= NB_CPU) {
-					CPUInfo *cpu;
+					CPUInfo *cpu = (CPUInfo *) g_malloc0 (sizeof (CPUInfo));
 
-					cpu = &rom->cpu_info[_this->cpu_count];
 					cpu->sound_flag = FALSE;
+					cpu->name = "-";
+					cpu->clock = 0;
 
-					for (i =0; atts[i]; i += 2) {
-						if (!strcmp(atts[i], "name")) {
-							cpu->name = g_strdup (atts[i+1]);
-						} else if (!strcmp(atts[i], "clock")) {
-							cpu->clock = atoi(atts[i+1]);
-						} else if (!strcmp(atts[i], "soundonly")) {
-							cpu->sound_flag = !strcmp(atts[i+1], "yes");
-						}
-					}
-_this->cpu_count++;
+					cpu->name = g_strdup (read_string_attribute (atts, "name"));
+					cpu->clock = read_int_attribute (atts, "clock", 0);
+					/* sound_flag doesn't appear to be in the
+					   -listxml output anymore */
+					cpu->sound_flag = read_boolean_attribute (atts, "soundonly", "yes");
+
+					mame_rom_entry_add_cpu (rom, _this->cpu_count, cpu->name, cpu->clock);
+					_this->cpu_count++;
+					
+					g_free (cpu);
 				}
 			}
 			else if(!strcmp(type, "audio"))
 			{
-				//_this->sound_count++;
-
 				if(_this->sound_count <= NB_CPU) {
-					SoundCPUInfo *cpu;
+					SoundCPUInfo *cpu = (SoundCPUInfo *) g_malloc0 (sizeof (SoundCPUInfo));
 
-					cpu = &rom->sound_info[_this->sound_count];
+					cpu->name = "-";
+					cpu->clock = 0;
+					
+					cpu->name = g_strdup (read_string_attribute (atts, "name"));
+					cpu->clock = read_int_attribute (atts, "clock", 0);
 
-					for (i =0; atts[i]; i += 2) {
-						if (!strcmp(atts[i], "name")) {
-							cpu->name = g_strdup (atts[i+1]);
-						} else if (!strcmp(atts[i], "clock")) {
-							cpu->clock = atoi(atts[i+1]);
-						}
-					}
+					mame_rom_entry_add_soundcpu (rom, _this->sound_count, cpu->name, cpu->clock);
+					_this->sound_count++;
 
+					g_free (cpu);
 				}
-_this->sound_count++;
 			}
 		}
 		else if(!strcmp(name, "input"))
 		{
 
 			for (i =0; atts[i]; i += 2) {
-				if (!strcmp(atts[i], "players")) {
-					rom->num_players = atoi(atts[i+1]);
-				} else if (!strcmp(atts[i], "control")) {
-					rom->control = get_control_type (atts[i+1]);
-				} else if (!strcmp(atts[i], "buttons")) {
-					rom->num_buttons = atoi(atts[i+1]);	
+				if (!strcmp(atts[i], "control")) {
+					g_object_set (rom, "control-type", get_control_type (atts[i+1]), NULL);
 				}
 			}
+			g_object_set (rom,
+				      "num-players", read_int_attribute (atts, "players", 0),
+				      "num-buttons", read_int_attribute (atts, "buttons", 0),
+				      NULL);
 		}
 		else if(!strcmp(name, "control"))
 		{
 			/* Control is an element of input in later versions of the
 			   XML output */
-			for (i =0; atts[i]; i += 2) {
-				if (!strcmp(atts[i], "type")) {
-					rom->control = get_control_type (atts[i+1]);
-				}
-			}
+			g_object_set (rom, "control-type", get_control_type (read_string_attribute (atts, "type")), NULL);
+			
 		}
 		else if(!strcmp(name, "driver"))
 		{
 			
-			for (i =0; atts[i]; i += 2) {
-
-				if (!strcmp(atts[i], "status")) {
-					rom->status = !strcmp(atts[i+1], "good");
-				} else if (!strcmp(atts[i], "emulation")) {
-					rom->driver_status_emulation = get_driver_status (atts[i+1]);
-				} else if (!strcmp(atts[i], "color")) {
-					rom->driver_status_color = get_driver_status (atts[i+1]);
-				} else if (!strcmp(atts[i], "sound")) {
-					rom->driver_status_sound = get_driver_status (atts[i+1]);
-				} else if (!strcmp(atts[i], "graphic")) {
-					rom->driver_status_graphic = get_driver_status (atts[i+1]);
-				} else if (!strcmp(atts[i], "palettesize")) {
-					rom->colors = atoi(atts[i+1]);
-				}
-				
-			}
+			g_object_set (rom,
+				      "driver-status", get_driver_status (read_string_attribute (atts, "status")),
+				      "driver-status-emulation", get_driver_status (read_string_attribute (atts, "emulation")),
+				      "driver-status-colour", get_driver_status (read_string_attribute (atts, "color")),
+				      "driver-status-sound", get_driver_status (read_string_attribute (atts, "sound")),
+				      "driver-status-graphics", get_driver_status (read_string_attribute (atts, "graphic")),
+				      "num-colours", read_int_attribute (atts, "palettesize", 0),
+				      NULL);
 		}
 		else if(!strcmp(name, "video"))
 		{
-			for (i =0; atts[i]; i += 2) {
-				
-				if (!strcmp(atts[i], "screen")) {
-					rom->vector = !strcmp(atts[i+1], "vector");
-
-				} else if (!strcmp(atts[i], "orientation")) {
-					rom->horizontal = !strcmp(atts[i+1], "horizontal");
-
-				} else if (!strcmp(atts[i], "refresh"))  {
-					rom->screen_freq = g_ascii_strtod(atts[i+1], NULL);
-
-				} else if  (!strcmp(atts[i], "width"))  {
-					rom->screen_y = atoi(atts[i+1]);
-
-				} else if  (!strcmp(atts[i], "height"))  {
-					rom->screen_x = atoi(atts[i+1]);
-
+			for (i =0; atts[i]; i += 2) {				
+				if (!strcmp(atts[i], "refresh"))  {
+					g_object_set (rom, "screen-freq", g_ascii_strtod(atts[i+1], NULL), NULL);
 				}
 			}
+			g_object_set (rom,
+				      "screenx", read_int_attribute (atts, "width", 0),
+				      "screeny", read_int_attribute (atts, "height", 0),
+				      "is-horizontal", read_boolean_attribute (atts, "orientation", "horizontal"),
+				      "is-vector", read_boolean_attribute (atts, "screen", "vector"),
+				      NULL);
 		}
 		else if (!strcmp(name, "display"))
 		{
@@ -321,23 +314,24 @@ _this->sound_count++;
 			<display type="vector" rotate="180" flipx="yes" refresh="38.000000" /> */
 			for (i =0; atts[i]; i += 2) {
 				if (!strcmp(atts[i], "type")) {
-					rom->vector = !strcmp(atts[i+1], "vector");
-				} else if (!strcmp(atts[i], "width")) {
-					rom->screen_y = atoi(atts[i+1]);
-				} else if (!strcmp(atts[i], "height")) {
-					rom->screen_x = atoi(atts[i+1]);	
+					g_object_set (rom, "is-vector", !strcmp(atts[i+1], "vector"), NULL);
 				} else if (!strcmp(atts[i], "refresh")) {
-					rom->screen_freq = g_ascii_strtod(atts[i+1], NULL);	
+					g_object_set (rom, "screen-freq", g_ascii_strtod(atts[i+1], NULL), NULL);
 				}
 			}
+			
+			g_object_set (rom,
+				      "screenx", read_int_attribute (atts, "width", 0),
+				      "screeny", read_int_attribute (atts, "height", 0),
+				      NULL);
 		}
 		else if(!strcmp(name, "sound"))
 		{
-			rom->channels = read_int_attribute(atts, "channels", 0);
+			g_object_set (rom, "num-channels", read_int_attribute(atts, "channels", 0), NULL);
 		}
 		else if(!strcmp(name, "sample"))
 		{
-			rom->nb_samples++;
+			mame_rom_entry_add_sample (rom);
 		}
 
 		else if(
@@ -363,24 +357,25 @@ static void XMLEndHandler(TCreateGameList *_this,
 		CreateGameListGame(_this);
 	} 
 	else if (_this->text_buf[0] && name) {
-		RomEntry *rom = _this->current_rom;
-
-		if (rom) {
-
-			if (!strcmp(name, "year")) {
-				rom_entry_set_year(rom, _this->text_buf);
-			} else if (!strcmp(name, "manufacturer")) {
-				rom->manu = g_strdup(_this->text_buf);
-			} else if (!strcmp(name, "description")) {
-				rom_entry_set_name(rom, _this->text_buf);
-			}
+		MameRomEntry *rom = _this->current_rom;
+		
+		g_return_if_fail (rom != NULL);
+		
+		if (!strcmp(name, "year")) {
+			mame_rom_entry_set_year (rom, _this->text_buf);
+		} else if (!strcmp(name, "manufacturer")) {
+			mame_rom_entry_set_manufacturer (rom, _this->text_buf);
+		} else if (!strcmp(name, "description")) {
+			mame_rom_entry_set_name (rom, _this->text_buf);
 		}
+
 	}
 }
 
 #define XML_BUFFER_SIZE (4096)
 
-static gboolean CreateGameListRun(TCreateGameList *_this)
+static gboolean
+CreateGameListRun (TCreateGameList *_this)
 {
 	int len;
 	int final;
@@ -477,7 +472,8 @@ static gboolean CreateGameListRun(TCreateGameList *_this)
 	return TRUE;
 }
  
-static gboolean create_gamelist_xmlinfo(MameExec *exec)
+static gboolean
+create_gamelist_xmlinfo (MameExec *exec)
 {
 	gboolean res;
 	TCreateGameList _this;
@@ -538,11 +534,14 @@ static gboolean create_gamelist_xmlinfo(MameExec *exec)
 * Listinfo parser
 */
 
+#ifdef OBSOLETE_XMAME
 /**
 * Gets a hash table with all supported drivers
 * Updates game count;
 */
-static GHashTable *get_driver_table(MameExec *exec, int *total_games) {
+static GHashTable *
+get_driver_table (MameExec *exec, int *total_games)
+{
 	FILE *xmame_pipe;
 	gchar line[BUFFER_SIZE];
 	GHashTable *driver_htable;
@@ -613,11 +612,12 @@ static GHashTable *get_driver_table(MameExec *exec, int *total_games) {
 	return driver_htable;
 }
 
-static gboolean create_gamelist_listinfo(MameExec *exec)
+static gboolean
+create_gamelist_listinfo (MameExec *exec)
 {
 	FILE *xmame_pipe;
 	gchar line[BUFFER_SIZE];
-	RomEntry *rom;
+	MameRomEntry *rom;
 	char term_char;	
 
 	gchar *p = NULL;
@@ -680,7 +680,7 @@ static gboolean create_gamelist_listinfo(MameExec *exec)
 	{
 		/*the game begin here*/
 		if (!strncmp(line, "game (", 6)) {
-			rom = rom_entry_new();
+			rom = mame_rom_entry_new ();
 			cpu_count = 0;
 			sound_count = 0;
 
@@ -735,29 +735,28 @@ static gboolean create_gamelist_listinfo(MameExec *exec)
 					*(p-1) = 0;
 
 				if (!strcmp(keyword, "name")) {
-					g_strlcpy(rom->romname, value, MAX_ROMNAME);
-
+					mame_rom_entry_set_romname (rom, value);
 				} else if (!strcmp(keyword, "description"))
 				{
-					rom_entry_set_name(rom, value);
+					mame_rom_entry_set_name (rom, value);
 				}
 				else if (!strcmp(keyword, "year"))
-					rom_entry_set_year(rom, value);
+					mame_rom_entry_set_year (rom, value);
 				else if (!strcmp(keyword, "manufacturer"))
 				{
 					if(strncmp(value, "???", 3))
-						rom->manu = g_strdup(value);
+						mame_rom_entry_set_manufacturer (rom, value);
 				}
 				else if (!strcmp(keyword, "rom"))
-					rom->nb_roms++;
+					mame_rom_entry_add_rom (rom);
 				else if (!strcmp(keyword, "sample"))
-					rom->nb_samples++;
+					mame_rom_entry_add_sample (rom);
 				else if (!strcmp(keyword, "cloneof"))
-					rom->cloneof = g_strdup(value);
+					mame_rom_entry_set_cloneof (rom, value);
 				else if (!strcmp(keyword, "romof"))
-					rom->romof = g_strdup(value);
-				else if (!strcmp(keyword, "sampleof"))
-					rom->sampleof = g_strdup(value);
+					mame_rom_entry_set_romof (rom, value);
+				/* FIXME TODO else if (!strcmp(keyword, "sampleof"))
+					rom->sampleof = g_strdup(value);*/
 				else if (!strcmp(keyword, "chip")) {
 
 					gboolean is_sound;
@@ -771,7 +770,7 @@ static gboolean create_gamelist_listinfo(MameExec *exec)
 					
 					while (tmp_array[tmp_counter]) {
 
-						if (!strcmp(tmp_array[tmp_counter], "name")) {
+					/* FIXME TODO	if (!strcmp(tmp_array[tmp_counter], "name")) {
 							if (is_sound)
 								rom->sound_info[sound_count].name = g_strdup (tmp_array[tmp_counter+1]);
 							else
@@ -791,7 +790,7 @@ static gboolean create_gamelist_listinfo(MameExec *exec)
 						
 							if (!is_sound)
 								rom->cpu_info[cpu_count].sound_flag = TRUE;
-						}
+						}*/
 						
 
 						tmp_counter++;
@@ -809,16 +808,16 @@ static gboolean create_gamelist_listinfo(MameExec *exec)
 						line_key = tmp_array[tmp_counter];
 
 						if (!strcmp(line_key, "screen")) {
-							rom->vector = !strncmp(tmp_array[tmp_counter+1], "vector", 6);
+							g_object_set (rom, "is-vector", !strncmp(tmp_array[tmp_counter+1], "vector", 6), NULL);
 							tmp_counter++;
 						} else if (!strcmp(line_key, "orientation")) {
-							rom->horizontal = !strncmp(tmp_array[tmp_counter+1], "h", 1);
+							g_object_set (rom, "is-vector", !strncmp(tmp_array[tmp_counter+1], "h", 1), NULL);
 							tmp_counter++;
 						} else if (!strcmp(line_key, "x")) {
-							rom->screen_x = atoi(tmp_array[tmp_counter+1]);
+							g_object_set (rom, "screenx", atoi(tmp_array[tmp_counter+1]), NULL); 
 							tmp_counter++;
 						} else if (!strcmp(line_key, "y")) {
-							rom->screen_y = atoi(tmp_array[tmp_counter+1]);
+							g_object_set (rom, "screeny", atoi(tmp_array[tmp_counter+1]), NULL); 
 						}
 
 						tmp_counter++;
@@ -835,20 +834,25 @@ static gboolean create_gamelist_listinfo(MameExec *exec)
 
 					while ((tmp_array[tmp_counter] != NULL)) {
 	
-						if (!strcmp
-						    (tmp_array[tmp_counter], "players")) {
-
-							rom->num_players = atoi(tmp_array[tmp_counter + 1]);
+						if (!strcmp (tmp_array[tmp_counter], "players")) {
+							g_object_set (rom,
+								      "num-players",
+								      atoi(tmp_array[tmp_counter + 1]),
+								      NULL);
 							
 						}
-						else if (!strcmp
-						    (tmp_array[tmp_counter], "control")) {
-							rom->control = get_control_type (tmp_array[tmp_counter + 1]);
-							tmp_counter++;		
-						}else if (!strcmp
-						    (tmp_array[tmp_counter], "buttons")) {
+						else if (!strcmp (tmp_array[tmp_counter], "control")) {
+							g_object_set (rom,
+								      "control",
+								      get_control_type (tmp_array[tmp_counter + 1]),
+								      NULL);
 
-							rom->num_buttons = atoi(tmp_array[tmp_counter + 1]);
+							tmp_counter++;		
+						}else if (!strcmp (tmp_array[tmp_counter], "buttons")) {
+							g_object_set (rom,
+								      "num-buttons",
+								      atoi(tmp_array[tmp_counter + 1]),
+								      NULL);
 							tmp_counter++;
 						}
 						tmp_counter++;
@@ -864,11 +868,14 @@ static gboolean create_gamelist_listinfo(MameExec *exec)
 					while ((tmp_array[tmp_counter] != NULL)) {
 
 						if (!strcmp(tmp_array[tmp_counter], "status")) { 
-							rom->status = !strcmp(tmp_array[tmp_counter+1], "good");
+						/* FIXME TODO rom->status = !strcmp(tmp_array[tmp_counter+1], "good");*/
 							tmp_counter++;
 						}
 						else if (!strcmp(tmp_array[tmp_counter], "palettesize")) {
-							rom->colors = atoi(tmp_array[tmp_counter+1]);
+							g_object_set (rom,
+								      "num-colours",
+								      atoi(tmp_array[tmp_counter+1]),
+								      NULL);
 							tmp_counter++;
 						}
 
@@ -881,18 +888,21 @@ static gboolean create_gamelist_listinfo(MameExec *exec)
 				{
 					tmp_array = g_strsplit(value, " ",3);
 					if (!strcmp(tmp_array[0], "channels"))
-						rom->channels = atoi(tmp_array[1]);
+						g_object_set (rom,
+							      "num-channels",
+							      atoi(tmp_array[1]),
+							      NULL);
 					g_strfreev(tmp_array);
 				}
 
 			}
 			
-			driver = g_hash_table_lookup(driver_htable, rom->romname);
+			driver = g_hash_table_lookup(driver_htable, mame_rom_entry_get_romname (rom));
 
 			if (!driver)
-				rom_entry_set_driver(rom, "Unknown");
+				mame_rom_entry_set_driver (rom, "Unknown");
 			else
-				rom_entry_set_driver(rom, driver);
+				mame_rom_entry_set_driver (rom, driver);
 
 			mame_gamelist_add (gui_prefs.gl, rom);
 
@@ -912,9 +922,10 @@ static gboolean create_gamelist_listinfo(MameExec *exec)
 	progress_window_destroy(progress_window);
 	
 	g_object_set (gui_prefs.gl, "num-games", num_games, NULL);
-	
+
 	return TRUE;
 }
+#endif
 
 gboolean gamelist_parse(MameExec *exec)
 {
@@ -928,15 +939,20 @@ gboolean gamelist_parse(MameExec *exec)
 	
 	mame_get_options(exec);
 
-	/* Check if we will use listinfo or listxml */
+	/* Check if we will use listinfo or listxml. Later versions of XMAME and
+	   all versions of SDLMAME use listxml. */
 	if (mame_has_option(exec, "listinfo")) {
-		GMAMEUI_DEBUG("Recreating gamelist using -listinfo\n");
-		ret = create_gamelist_listinfo(exec);
+#ifdef OBSOLETE_XMAME
+		GMAMEUI_DEBUG ("Recreating gamelist using -listinfo\n");
+		ret = create_gamelist_listinfo (exec);
+#else
+		GMAMEUI_DEBUG ("GMAMEUI does not support the obsolete option -listinfo");
+#endif
 	} else if (mame_has_option(exec, "listxml")) {
 		GMAMEUI_DEBUG("Recreating gamelist using -listxml\n");
-		ret = create_gamelist_xmlinfo(exec);
+		ret = create_gamelist_xmlinfo (exec);
 	} else {
-		gmameui_message(ERROR, NULL, _("I don't know how to generate a gamelist for this version of xmame!"));
+		gmameui_message(ERROR, NULL, _("I don't know how to generate a gamelist for this version of MAME!"));
 		ret = FALSE;
 	}
 	

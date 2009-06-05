@@ -232,11 +232,11 @@ GtkWidget * gmameui_get_image_from_stock (const char *);
 void add_exec_menu(void);
 void init_gui(void);
 
-GdkPixbuf * get_icon_for_rom (RomEntry *rom, guint size, ZIP *zip);
+GdkPixbuf * get_icon_for_rom (MameRomEntry *rom, guint size, ZIP *zip);
 GdkPixbuf * gmameui_get_icon_from_stock (const char *id);
 GtkWidget * gmameui_get_image_from_stock (const char *id);
 void get_status_icons (void);
-void        gmameui_icons_init (void);
+void gmameui_icons_init (void);
 
 
 void gamelist_popupmenu_show (GdkEventButton *event);
@@ -244,8 +244,7 @@ void gmameui_ui_set_favourites_sensitive (gboolean rom_is_favourite);
 void gmameui_ui_set_items_sensitive (void);
 void gmameui_menu_set_view_mode_check (gint view_mode, gboolean state);
 
-void update_game_in_list (RomEntry *rom);
 void select_inp (gboolean play_record);
-void select_game (RomEntry *rom);
+void select_game (MameRomEntry *rom);
 
 #endif /* __GUI_H__ */

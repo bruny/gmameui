@@ -62,7 +62,7 @@ FILTERED,
 	HAS_ROMS,
 	ROMOF,
 	STATUS,
-	DRIVERSTATUS,   /* Good | Imperfect | Preliminary */
+	DRIVER_STATUS,   /* Good | Imperfect | Preliminary */
 	COLOR_STATUS,	/* Good | Imperfect | Preliminary */
 	SOUND_STATUS,	/* Good | Imperfect | Preliminary */
 	GRAPHIC_STATUS,	/* Good | Imperfect | Preliminary */
@@ -113,6 +113,7 @@ typedef enum  {
 	FILTER_ARCH_SEGAM2,
 	FILTER_ARCH_BIOS,
 /* TODO	IMPERFECT,  * i.e. imperfect color/sound/graphics */
+	FILTER_IMPERFECT_DRIVER,
 	FILTER_IMPERFECT_COLORS,
 	FILTER_IMPERFECT_SOUND,
 	FILTER_IMPERFECT_GRAPHIC,
@@ -157,7 +158,7 @@ typedef enum {
 
 /* FIXME TODO Try and get rid of this struct */
 struct gui_prefs_struct {
-	RomEntry *current_game;
+	MameRomEntry *current_game;
 	MameGamelist *gl;
 	GmameuiAudit *audit;
 };
@@ -172,20 +173,15 @@ GdkPixbuf *Status_Icons[NUMBER_STATUS];
 gboolean dirty_icon_cache;
 
 /* Others Functions */
-gboolean
-game_filtered (RomEntry * rom, gint rom_filter_opt);
+gboolean game_filtered (MameRomEntry * rom, gint rom_filter_opt);
 
-void
-process_inp_function (RomEntry *rom, gchar *file, int action);
+void process_inp_function (MameRomEntry *rom, gchar *file, int action);
 
-void
-launch_emulation (RomEntry *rom, const gchar *command_line);
+void launch_emulation (MameRomEntry *rom, const gchar *command_line);
 
-void
-play_game (RomEntry *rom);
+void play_game (MameRomEntry *rom);
 
-void
-exit_gmameui (void);
+void exit_gmameui (void);
 
 #if 0
 GList*

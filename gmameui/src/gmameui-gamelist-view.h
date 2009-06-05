@@ -27,7 +27,7 @@
 
 #include <gtk/gtk.h>
 
-#include "rom_entry.h"  /* For RomEntry */
+#include "rom_entry.h"  /* For MameRomEntry */
 #include "gmameui.h"	/* For ListMode */
 
 G_BEGIN_DECLS
@@ -65,7 +65,7 @@ void mame_gamelist_view_change_model        (MameGamelistView *gamelist_view);
 void mame_gamelist_view_select_random_game  (MameGamelistView *gamelist_view,
                                              gint              i);
 void mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view,
-                                             RomEntry         *tmprom);
+                                             MameRomEntry     *tmprom);
 /*GtkTreeModel *
 mame_gamelist_view_get_data_model     (MameGamelistView *gamelist_view);*/
 void
@@ -79,7 +79,7 @@ void on_expand_all_activate                 (GtkMenuItem      *menuitem,
 void on_column_hide_activate                (GtkMenuItem      *menuitem,
                                              gpointer          user_data);
 
-RomEntry * gamelist_get_selected_game (void);
+MameRomEntry* gamelist_get_selected_game (void);
 
 void gmameui_gamelist_rebuild ();
 gboolean adjustment_scrolled_delayed (MameGamelistView *gamelist_view);

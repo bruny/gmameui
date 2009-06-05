@@ -1,3 +1,14 @@
+2009-06-05 17:26 adburton
+
+	* src/: audit.c, callbacks.c, game_list.c, game_list.h,
+	  gmameui-audit-dlg.c, gmameui-gamelist-view.c,
+	  gmameui-gamelist-view.h, gmameui-rominfo-dlg.c,
+	  gmameui-search-entry.c, gmameui-search-entry.h,
+	  gmameui-sidebar.c, gmameui-sidebar.h, gmameui.c, gmameui.h, gtkjoy.c
+	  gui.c, gui.h, gui_prefs_dialog.c, interface.c, io.c, mameio.c,
+	  rom_entry.c, rom_entry.h: Migrate RomEntry struct to GObject
+	  MameRomEntry, various codefixes
+
 2009-05-23 16:51 adburton
 
 	* data/gmameui_prefs.glade, src/gui_prefs.c, src/gui_prefs.h,

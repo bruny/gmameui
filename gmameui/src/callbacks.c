@@ -93,7 +93,7 @@ on_select_random_game_activate         (GtkMenuItem     *menuitem,
 void update_favourites_list (gboolean add) {
 	Columns_type type;
 
-	gui_prefs.current_game->favourite = add;
+	g_object_set (gui_prefs.current_game, "is-favourite", add, NULL);
 
 	gmameui_ui_set_favourites_sensitive (add);
 	
@@ -223,7 +223,7 @@ quick_refresh_list (void)
 {
 	static gboolean quick_check_running;
 	GList *list_pointer;
-	RomEntry *rom;
+	MameRomEntry *rom;
 	GList *romlist;
 	
 	if (quick_check_running) {
@@ -238,23 +238,25 @@ quick_refresh_list (void)
 // FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), FALSE);
 	/* remove all information concerning the presence of roms */
 	for (list_pointer = g_list_first (romlist); list_pointer; list_pointer = g_list_next (list_pointer)) {
-		rom = (RomEntry *)list_pointer->data;
-		rom->has_roms = UNKNOWN;
+		rom = (MameRomEntry *) list_pointer->data;
+		g_object_set (rom, "has-roms", UNKNOWN, NULL);
 	}
-	/* refresh the display */
+
+	/* Refresh the display */
 	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
 
 	mame_gamelist_set_not_checked_list (gui_prefs.gl, romlist);
 
 	quick_check ();
-	/* final refresh only if we are in AVAILABLE or UNAVAILABLE Folder*/
+
+	/* Final refresh only if we are in AVAILABLE or UNAVAILABLE Folder*/
 /* DELETE Not using FolderID in new prefs
 	if ((gui_prefs.FolderID == AVAILABLE) || (gui_prefs.FolderID == UNAVAILABLE)) {
 		create_gamelist_content ();
 		GMAMEUI_DEBUG ("Final Refresh");
 	}*/
 	quick_check_running = 0;
-// FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), TRUE);
+// FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), TRUE);*/
 }
 
 void

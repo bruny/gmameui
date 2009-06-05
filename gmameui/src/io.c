@@ -89,21 +89,22 @@ gboolean
 load_games_ini (void)
 {
 	gchar *filename;
-	RomEntry *tmprom = NULL;
+	MameRomEntry *tmprom;
 	GList *romlist;
 		
 	GMAMEUI_DEBUG ("Loading games.ini");
-
+	
 	filename = g_build_filename (g_get_home_dir (), ".gmameui", "games.ini", NULL);
 	if (!filename)
 		return FALSE;
 	
 	romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
-
+	
 	GKeyFile *gameini_list = g_key_file_new ();
 	GError *error = NULL;
 	gboolean result = g_key_file_load_from_file (gameini_list, filename, G_KEY_FILE_KEEP_COMMENTS, &error);
 	g_free (filename);
+	
 	if (!result) {
 		GMAMEUI_DEBUG ("Error loading games.ini file: %s", error->message);
 		g_error_free (error);
@@ -118,25 +119,39 @@ load_games_ini (void)
 	the key values; if the first cannot be found, assume the rest cannot be either */
 	gchar **gamelist = g_key_file_get_groups (gameini_list, NULL);
 	int i;
+	
 	for (i = 0; gamelist[i] != NULL; i++) {
 		tmprom = get_rom_from_gamelist_by_name (gui_prefs.gl, gamelist[i]);
+		
 		if (tmprom) {
-			tmprom->timesplayed = g_key_file_get_integer (gameini_list, gamelist[i], "PlayCount", &error);
-			if (!tmprom->timesplayed) tmprom->timesplayed = 0;	/* Set default */
-			tmprom->has_roms = g_key_file_get_integer (gameini_list, gamelist[i], "HasRoms", &error);
-			tmprom->has_samples = g_key_file_get_integer (gameini_list, gamelist[i], "HasSamples", &error);
-			tmprom->favourite = g_key_file_get_integer (gameini_list, gamelist[i], "Favorite", &error);
-			if (!tmprom->favourite) tmprom->favourite = 0;	/* Set default */
-			/* TODO AutofireDelay */
+			gint timesplayed;
+			RomStatus has_roms;
+			RomStatus has_samples;
+			gboolean is_favourite;
+					
+			timesplayed = g_key_file_get_integer (gameini_list, gamelist[i], "PlayCount", &error);
+			has_roms = g_key_file_get_integer (gameini_list, gamelist[i], "HasRoms", &error);
+			has_samples = g_key_file_get_integer (gameini_list, gamelist[i], "HasSamples", &error);
+			is_favourite = g_key_file_get_integer (gameini_list, gamelist[i], "Favorite", &error);
+
+			g_object_set (tmprom,
+				      "times-played", timesplayed,
+				      "has-roms", has_roms,
+				      "has-samples", has_samples,
+				      "is-favourite", is_favourite,
+				      NULL);
+
 #ifdef QUICK_CHECK_ENABLED
-			if (((tmprom->has_roms == UNKNOWN) ||
-			     (tmprom->has_roms == NOT_AVAIL) ||
-			     (tmprom->has_roms == INCORRECT)) && gui_prefs.GameCheck)
+			if ((mame_rom_entry_get_rom_status (tmprom) == UNKNOWN || NOT_AVAIL || INCORRECT) &&
+			    (gui_prefs.GameCheck))
 			{
 				game_list.not_checked_list = g_list_append (game_list.not_checked_list, tmprom);
 			}
 #endif
+		} else {
+			GMAMEUI_DEBUG ("Could not find ROM in list for %s", gamelist[i]);
 		}
+		
 	}
 
 	g_strfreev (gamelist);
@@ -151,7 +166,7 @@ save_games_ini (void)
 {
 	FILE *game_ini_file;
 	gchar *filename;
-	RomEntry *rom;
+	MameRomEntry *rom;
 	GList *romlist, *list_pointer;
 	
 	
@@ -172,13 +187,28 @@ save_games_ini (void)
 	     (list_pointer != NULL);
 	     list_pointer=g_list_next (list_pointer))
 	{
-		rom = (RomEntry *)list_pointer->data;
-		fprintf (game_ini_file, "[%s]\n", rom->romname);
-		fprintf (game_ini_file, "PlayCount=%i\n", rom->timesplayed);
-		fprintf (game_ini_file, "HasRoms=%i\n", rom->has_roms);
-		fprintf (game_ini_file, "HasSamples=%i\n", rom->has_samples);
-		fprintf (game_ini_file, "Favorite=%s\n", rom->favourite ? "1" : "0");
+		gchar *romname;
+		gint hasroms, hassamples, timesplayed;
+		gboolean favourite;
+		
+		rom = (MameRomEntry *) list_pointer->data;
+		
+		g_object_get (rom,
+			      "romname", &romname,
+			      "has-roms", &hasroms,
+			      "has-samples", &hassamples,
+			      "times-played", &timesplayed,
+			      "is-favourite", &favourite,
+			      NULL);
+
+		fprintf (game_ini_file, "[%s]\n", romname);
+		fprintf (game_ini_file, "PlayCount=%i\n", timesplayed);
+		fprintf (game_ini_file, "HasRoms=%i\n", hasroms);
+		fprintf (game_ini_file, "HasSamples=%i\n", hassamples);
+		fprintf (game_ini_file, "Favorite=%s\n", favourite ? "1" : "0");
 		fputs ("\r\n", game_ini_file);
+		
+		g_free (romname);
 	}
 	fclose (game_ini_file);
 	
@@ -188,11 +218,11 @@ save_games_ini (void)
 
 gboolean
 load_catver_ini (void)
-{
+{ 
 	gchar *filename;
 	GList *romlist, *listpointer;
 	GList *catlist, *verlist;
-	RomEntry *tmprom = NULL;
+	MameRomEntry *tmprom;
 	gchar *category;
 	gchar *version;
 	GError *error = NULL;
@@ -224,15 +254,6 @@ load_catver_ini (void)
 	version = g_strdup (_("Unknown"));
 	verlist = g_list_append (NULL, version);
 	
-	/* Set all roms to unknown */
-	for (listpointer = g_list_first (romlist); (listpointer != NULL);
-		listpointer = g_list_next (listpointer))
-	{
-		tmprom = (RomEntry *) listpointer->data;
-		tmprom->category = category;
-		tmprom->mame_ver_added = version;
-	}
-
 	g_object_get (main_gui.gui_prefs, "file-catver", &filename, NULL);
 
 	if (!filename)
@@ -252,27 +273,31 @@ load_catver_ini (void)
 	   version from the ini file, and add to the list of known categories/versions
 	   for use in the custom filters */
 	for (listpointer = g_list_first (romlist); listpointer; listpointer = g_list_next (listpointer)) {
-		tmprom = (RomEntry *)listpointer->data;
-		/*GMAMEUI_DEBUG ("Parsing catver - %s", tmprom->romname);*/
-		category = g_key_file_get_string (catver_file, "Category", tmprom->romname, &error);
-		if (error) {
-			/*GMAMEUI_DEBUG ("Error parsing catver - %s", error->message);*/
-			g_error_free (error);
-			error = NULL;
-		}
-		version = g_key_file_get_string (catver_file, "VerAdded", tmprom->romname, &error);
-		if (error) {
-			/*GMAMEUI_DEBUG ("Error parsing catver - %s", error->message);*/
-			g_error_free (error);
-			error = NULL;
-		}
-		tmprom->category = category;
-		mame_gamelist_add_category (gui_prefs.gl, category);
+		const gchar *romname;
 
-		tmprom->mame_ver_added = version;
+		tmprom = (MameRomEntry *) listpointer->data;
+		romname = mame_rom_entry_get_romname (tmprom);
+
+		category = g_key_file_get_string (catver_file, "Category", romname, &error);
+		if (error) {
+			/*GMAMEUI_DEBUG ("Error parsing catver - %s", error->message);*/
+			g_error_free (error);
+			error = NULL;
+		}
+
+		version = g_key_file_get_string (catver_file, "VerAdded", romname, &error);
+		if (error) {
+			/*GMAMEUI_DEBUG ("Error parsing catver - %s", error->message);*/
+			g_error_free (error);
+			error = NULL;
+		}
+
+		mame_gamelist_add_category (gui_prefs.gl, category);
 		mame_gamelist_add_version (gui_prefs.gl, version);
 
+		mame_rom_entry_set_category_version (tmprom, category, version);
 	}
+	
 	g_key_file_free (catver_file);
 	g_free (category);
 	g_free (version);
@@ -345,7 +370,7 @@ quick_check (void)
 	GList *list_pointer;
 	gint nb_rom_not_checked;
 	gfloat done;
-	RomEntry *rom;
+	MameRomEntry *rom;
 #ifdef QUICK_CHECK_ENABLED
 	GMAMEUI_DEBUG ("Running quick check.");
 	if (game_list.num_games == 0)
@@ -368,37 +393,40 @@ quick_check (void)
 					 (gpointer)adjustment_scrolled, NULL);
 
 	/* need to use the last or I can find the list anymore*/
-	for (list_pointer = game_list.not_checked_list;list_pointer ;list_pointer = g_list_next (list_pointer))
+	for (list_pointer = game_list.not_checked_list;
+	     list_pointer;
+	     list_pointer = g_list_next (list_pointer))
 	{
-		rom = (RomEntry *)list_pointer->data;
+		rom = (MameRomEntry *)list_pointer->data;
 
 		/* Check for the existence of the ROM; if the ROM is a clone, the
 		   parent set must exist as well */
-		if (strcmp (rom->cloneof, "-"))
-			if ((check_rom_exists_as_file (rom->romname)) &&
-			    (check_rom_exists_as_file (rom->cloneof)))
-				rom->has_roms = UNKNOWN;
+		if (mame_rom_entry_is_clone (rom))
+			if ((check_rom_exists_as_file (mame_rom_entry_get_romname (rom))) &&
+			    (check_rom_exists_as_file (mame_rom_entry_get_parent_romname (rom))))
+			    g_object_set (rom, "has-roms", UNKNOWN, NULL);
 			else
-				rom->has_roms = NOT_AVAIL;
-		else if (check_rom_exists_as_file (rom->romname))
-			rom->has_roms = UNKNOWN;
+			    g_object_set (rom, "has-roms", NOT_AVAIL, NULL);
+
+		else if (check_rom_exists_as_file (mame_rom_entry_get_romname (rom)))
+			g_object_set (rom, "has-roms", UNKNOWN, NULL);
 		else
-			rom->has_roms = NOT_AVAIL;
+			g_object_set (rom, "has-roms", NOT_AVAIL, NULL);
 
 
 		/* Looking for samples */
 		rom->has_samples = 0;
 
-		if (rom->nb_samples > 0)
+		if (mame_rom_entry_has_samples (rom))
 		{
 			/* Check for the existence of the samples; if the samples is a clone, the
 			   parent set must exist as well */
 			if (strcmp (rom->sampleof, "-")) {
-				if ((check_rom_exists_as_file (rom->romname)) &&
+				if ((check_rom_exists_as_file (mame_rom_entry_get_romname (rom))) &&
 				    (check_rom_exists_as_file (rom->sampleof)))
-					rom->has_samples = CORRECT;
-			} else if (check_rom_exists_as_file (rom->romname))
-				rom->has_samples = CORRECT;
+					g_object_set (rom, "has-samples", CORRECT, NULL);
+			} else if (check_rom_exists_as_file (mame_rom_entry_get_romname (rom)))
+				g_object_set (rom, "has-samples", CORRECT, NULL);
 		}
 		
 		list_pointer->data = NULL;
@@ -413,7 +441,7 @@ quick_check (void)
 
 		/* if the game is in the list, update it */
 		if (rom->is_in_list)
-			update_game_in_list (rom);
+			mame_gamelist_view_update_game_in_list (rom);
 	}
 	g_list_free(game_list.not_checked_list);
 	game_list.not_checked_list = NULL;

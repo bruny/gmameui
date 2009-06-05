@@ -34,6 +34,7 @@
 #include "gui.h"
 #include "io.h"
 #include "gmameui-gamelist-view.h"
+#include "gmameui-sidebar.h"
 
 static guint timeout_icon;
 
@@ -340,7 +341,7 @@ void gmameui_ui_set_items_sensitive () {
 	
 	/* Set the Add/Remove Favourites depending whether the game is a favourite */
 	if (gui_prefs.current_game != NULL)
-		gmameui_ui_set_favourites_sensitive (gui_prefs.current_game->favourite);
+		gmameui_ui_set_favourites_sensitive (mame_rom_entry_is_favourite (gui_prefs.current_game));
 }
 
 void
@@ -365,24 +366,27 @@ gamelist_popupmenu_show (GdkEventButton *event)
    specified). Search first for the .ico file for the ROM, then for the parent
    ROM, then for the icon zipfile */
 GdkPixbuf *
-get_icon_for_rom (RomEntry *rom,
-		  guint     size,
-		  ZIP      *zip)
+get_icon_for_rom (MameRomEntry *rom, guint size, ZIP *zip)
 {
 	GdkPixbuf *pixbuf, *scaled_pixbuf = NULL;
 	gchar *icon_filename;
 	gchar *icon_path;
 	gchar *icon_dir;
 	GError **error = NULL;
+	
+	const gchar *romname;
+	const gchar *parent_romname;
+	
+	g_return_val_if_fail (rom != NULL, NULL);
+	
+	romname = mame_rom_entry_get_romname (rom);
+	parent_romname = mame_rom_entry_get_parent_romname (rom);
 
-	if (!rom)
-		return NULL;
-
-	GMAMEUI_DEBUG ("Attempting to get icon for ROM %s", rom->romname);
+	GMAMEUI_DEBUG ("Attempting to get icon for ROM %s", romname);
 	
 	g_object_get (main_gui.gui_prefs, "dir-icons", &icon_dir, NULL);
 	
-	icon_filename = g_strdup_printf ("%s.ico", rom->romname);
+	icon_filename = g_strdup_printf ("%s.ico", romname);
 	icon_path = g_build_filename (icon_dir, icon_filename, NULL);
 	pixbuf = gdk_pixbuf_new_from_file (icon_path, error);
 	
@@ -390,9 +394,9 @@ get_icon_for_rom (RomEntry *rom,
 	g_free (icon_path);
 
 	/* If icon not found, try looking for parent's icon */
-	if ((pixbuf == NULL) && strcmp (rom->cloneof, "-")) {
-		GMAMEUI_DEBUG ("Attempting to get icon for ROM %s from parent %s", rom->romname, rom->cloneof);
-		icon_filename = g_strdup_printf ("%s.ico", rom->cloneof);
+	if ((pixbuf == NULL) && mame_rom_entry_is_clone (rom)) {
+		GMAMEUI_DEBUG ("Attempting to get icon for ROM %s from parent %s", romname, parent_romname);
+		icon_filename = g_strdup_printf ("%s.ico", parent_romname);
 		icon_path = g_build_filename (icon_dir, icon_filename, NULL);
 		pixbuf = gdk_pixbuf_new_from_file (icon_path, error);
 
@@ -403,18 +407,18 @@ get_icon_for_rom (RomEntry *rom,
 	/* If icon not found, look in a zipfile */
 	if (pixbuf == NULL) {
 		if (zip != 0) {
-			GMAMEUI_DEBUG ("Attempting to get icon for ROM %s from icon zipfile", rom->romname);
+			GMAMEUI_DEBUG ("Attempting to get icon for ROM %s from icon zipfile", romname);
 			rewindzip (zip);
-			pixbuf = get_pixbuf_from_zip_file (zip, rom->romname, rom->cloneof);					
+			pixbuf = get_pixbuf_from_zip_file (zip, romname, parent_romname);					
 		}
 	}
 
 	if (pixbuf != NULL) {
-		GMAMEUI_DEBUG ("Found icon for ROM %s, scaling to size %ix%i", rom->romname, size, size);
+		GMAMEUI_DEBUG ("Found icon for ROM %s, scaling to size %ix%i", romname, size, size);
 		scaled_pixbuf = gdk_pixbuf_scale_simple (pixbuf, size, size, GDK_INTERP_BILINEAR);
 		g_object_unref (pixbuf);
 	} else
-		GMAMEUI_DEBUG ("Could not find icon for %s", rom->romname);
+		GMAMEUI_DEBUG ("Could not find icon for %s", romname);
 	
 	g_free (icon_dir);
 	
@@ -738,14 +742,14 @@ get_status_icons (void)
 }
 
 void
-select_game (RomEntry *rom)
+select_game (MameRomEntry *rom)
 {
 	gui_prefs.current_game = rom;
 
 	if (rom != NULL) {
 		/* update statusbar */
-		set_status_bar (rom_entry_get_list_name (rom),
-				_(rom_status_string_value [rom->has_roms]));
+		set_status_bar (mame_rom_entry_get_list_name (rom),
+				_(rom_status_string_value [mame_rom_entry_get_rom_status (rom)]));
 
 		/* update screenshot panel */
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
@@ -772,9 +776,8 @@ select_inp (gboolean play_record)
 	GtkWidget *inp_selection;
 	gchar *inp_dir;
 	gchar *current_rom_name;
-
-	RomEntry *rom;
-
+	MameRomEntry *rom;
+	
 	g_return_if_fail (mame_exec_list_has_current_executable (main_gui.exec_list));
 	
 	joy_focus_off ();

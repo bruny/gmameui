@@ -101,7 +101,7 @@ mame_gamelist_class_init (MameGamelistClass *klass)
 static void
 mame_gamelist_init (MameGamelist *gl)
 {
-	
+	int i;
 GMAMEUI_DEBUG ("Creating mame_gamelist object");	
 	gl->priv = g_new0 (MameGamelistPrivate, 1);
 	
@@ -124,13 +124,15 @@ mame_gamelist_finalize (GObject *obj)
 		g_free (gl->priv->name);
 	if (gl->priv->version)
 		g_free (gl->priv->version);
+
 GMAMEUI_DEBUG ("Freeing roms");
 	if (gl->priv->roms)
 	{
-		g_list_foreach (gl->priv->roms, (GFunc) rom_entry_free, NULL);
+		g_list_foreach (gl->priv->roms, (GFunc) g_object_unref, NULL);
 		g_list_free (gl->priv->roms);
 	}
 GMAMEUI_DEBUG ("Freeing roms... done");
+	
 	if (gl->priv->years)
 	{
 		g_list_foreach (gl->priv->years, (GFunc) g_free, NULL);
@@ -260,25 +262,24 @@ glist_insert_unique (GList **list, const gchar *data) {
 }
 
 static gint
-compare_game_name (RomEntry *rom1,
-		   RomEntry *rom2)
+compare_game_name (MameRomEntry *rom1, MameRomEntry *rom2)
 {
-	return strcmp (rom1->clonesort, rom2->clonesort);
+	return g_ascii_strcasecmp (mame_rom_entry_get_clonesort (rom1),
+				   mame_rom_entry_get_clonesort (rom2));
 }
 
 #define FIELDS_PER_RECORD 27 + (NB_CPU * 4)
 
-void mame_gamelist_add (MameGamelist *gl, RomEntry *rom) {
+void mame_gamelist_add (MameGamelist *gl, MameRomEntry *rom)
+{
 	gchar **manufacturer_fields;
 	int i;
-
+	
 	g_return_if_fail (gl != NULL);
 	g_return_if_fail (rom != NULL);
-	g_return_if_fail (rom->romname != NULL);
-
 
 	/*generate glist for manufacturers*/
-	manufacturer_fields = rom_entry_get_manufacturers (rom);
+	manufacturer_fields = mame_rom_entry_get_manufacturers (rom);
 	if (manufacturer_fields) {
 		for (i = 0; i < 2; i++) {
 			if (manufacturer_fields[i])
@@ -286,38 +287,20 @@ void mame_gamelist_add (MameGamelist *gl, RomEntry *rom) {
 		}				
 		g_strfreev (manufacturer_fields);
 	}
-/* FIXME TODO These should all be set in the rom creation */	
-	if (!rom->cloneof) {
-		rom->cloneof = g_strdup ("-");
-	}
 
-	if (!rom->sampleof) {
-		rom->sampleof = g_strdup ("-");
-	}
+	
+	mame_rom_entry_set_default_fields (rom);
 
-	if (!rom->romof) {
-		rom->romof = g_strdup ("-");
-	}
 
-	if (rom->cloneof[0] == '-') {
-
-		/* original. Point to romname */
-		rom->clonesort = rom->romname;
-
-	} else {
-		rom->clonesort = g_strdup_printf ("%s-%s",
-			rom->cloneof , rom->romname);
-	}
-
-	if (!rom->year)
-		rom_entry_set_year (rom, _("Unknown"));
-
-	gl->priv->roms = g_list_insert_sorted (gl->priv->roms, (gpointer) rom, (GCompareFunc )compare_game_name);
+	gl->priv->roms = g_list_insert_sorted (gl->priv->roms,
+					       (gpointer) rom,
+					       (GCompareFunc) compare_game_name);
 
 	gl->priv->num_games++;
 
-	if  (rom->nb_samples > 0)
+	if (mame_rom_entry_has_samples (rom))
 		gl->priv->num_sample_games++;
+
 }
 
 GList* mame_gamelist_get_roms_glist (MameGamelist *gl) {
@@ -346,7 +329,7 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 	gchar line[LINE_BUF];
 	gchar **tmp_array;
 	gchar *tmp, *p;
-	RomEntry *rom;
+	MameRomEntry *rom;
 	gboolean exe_version_checked = FALSE;
 	gint offset;
 	int i;
@@ -392,7 +375,7 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 				}
 			}
 
-			rom = rom_entry_new ();
+			rom = mame_rom_entry_new ();
 
 			if (!rom || !tmp_array)
 			{
@@ -403,39 +386,32 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 				return FALSE;
 			}
 			
-			g_strlcpy (rom->romname, tmp_array[0], MAX_ROMNAME);
-			rom->gamename = g_strdup (tmp_array[1]);
-			rom->gamenameext = g_strdup (tmp_array[2]);
-			rom->the_trailer = !strcmp (tmp_array[3], "true");
-			rom->is_bios = !strcmp (tmp_array[4], "true");
-			rom_entry_set_year (rom, tmp_array[5]);
-			rom->manu = g_strdup (tmp_array[6]);
-			rom->cloneof = g_strdup (tmp_array[7]);
-			rom->romof = g_strdup (tmp_array[8]);
-			rom_entry_set_driver (rom, tmp_array[9]);
-			
-			rom->status = atoi (tmp_array[10]);
-			rom->driver_status_color = atoi (tmp_array[11]);
-			rom->driver_status_sound = atoi (tmp_array[12]);
-			rom->driver_status_graphic = atoi (tmp_array[13]);
-			rom->colors = atoi (tmp_array[14]);
+			mame_rom_entry_set_romname (rom, tmp_array[0]);
+			mame_rom_entry_set_gamename (rom, tmp_array[1]);
+			mame_rom_entry_set_gamenameext (rom, tmp_array[2]);
+			mame_rom_entry_set_isbios (rom, !strcmp (tmp_array[4], "true"));
+			mame_rom_entry_set_year (rom, tmp_array[5]);
+			mame_rom_entry_set_manufacturer (rom, tmp_array[6]);
+			mame_rom_entry_set_cloneof (rom, g_strdup (tmp_array[7]));
+			mame_rom_entry_set_romof (rom, g_strdup (tmp_array[8]));
+
+			mame_rom_entry_set_driver (rom, tmp_array[9]);
+
+			g_object_set (rom,
+				      "the-trailer", !strcmp (tmp_array[3], "true"),
+				      "driver-status", atoi (tmp_array[10]),
+				      "driver-status-colour", atoi (tmp_array[11]),
+				      "driver-status-sound", atoi (tmp_array[12]),
+				      "driver-status-graphics", atoi (tmp_array[13]),
+				      NULL);
 
 			/* offset of cpu infos in the array */
 			offset = 15;
 			for (j = 0; j < NB_CPU; j++)
 			{
-				if (!strncmp (tmp_array[ (j * 2) + offset], "(sound)", 7)) {
-					p = tmp_array[ (j * 2) + offset];
-					p += 7;
-					rom->cpu_info[j].name = g_strdup (p);
-					rom->cpu_info[j].sound_flag = TRUE;
-				}
-				else
-				{
-					rom->cpu_info[j].name = g_strdup (tmp_array[ (j * 2) + offset]);
-					rom->cpu_info[j].sound_flag = FALSE;
-				}
-				rom->cpu_info[j].clock = atoi (tmp_array[ (j * 2) + offset + 1]);
+				mame_rom_entry_add_cpu (rom, j,
+							tmp_array[ (j * 2) + offset],
+							atoi (tmp_array[ (j * 2) + offset + 1]));
 			}
 
 			/* calculate offset of sound cpu infos in the array */
@@ -443,31 +419,30 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 
 			for (j = 0; j < NB_CPU; j++)
 			{
-				if (strcmp (tmp_array[offset + (j * 2)], "")) {
-					rom->sound_info[j].name = g_strdup (tmp_array[offset + (j * 2)]);
-				}
-				rom->sound_info[j].clock = atoi (tmp_array[offset + (j * 2) + 1]);
+				mame_rom_entry_add_soundcpu (rom, j,
+							     tmp_array[offset + (j * 2)],
+							     atoi (tmp_array[offset + (j * 2) + 1]));
 			}
 
 			offset = 15 + (NB_CPU * 4);
 
-			rom->num_players = atoi (tmp_array[offset + 0]);
-			rom->num_buttons = atoi (tmp_array[offset + 1]);
-			rom->control = atoi (tmp_array[offset + 2]);
-
-			rom->vector = !strcmp (tmp_array[offset + 3], "true");
-		
-			rom->screen_x = atoi (tmp_array[offset + 4]);
-			rom->screen_y = atoi (tmp_array[offset + 5]);
-			rom->screen_freq = atoi (tmp_array[offset + 6]);
-			rom->horizontal = (*tmp_array[offset + 7] == 'h');
-
-			rom->channels = atoi (tmp_array[offset + 8]);
-
-			rom->nb_roms = atoi (tmp_array[offset + 9]);
-			rom->nb_samples = atoi (tmp_array[offset + 10]);
-			rom->sampleof = g_strdup (tmp_array[offset + 11]);
-
+			g_object_set (rom,
+				      "num-colours", atoi (tmp_array[14]),
+				      "num-players", atoi (tmp_array[offset + 0]),
+				      "num-buttons", atoi (tmp_array[offset + 1]),
+				      "control-type", atoi (tmp_array[offset + 2]),
+				      "screenx", atoi (tmp_array[offset + 4]),
+				      "screeny", atoi (tmp_array[offset + 5]),
+				      "screen-freq", atof (tmp_array[offset + 6]),
+				      "is-horizontal",  (*tmp_array[offset + 7] == 'h'),
+				      "num-channels", atoi (tmp_array[offset + 8]),
+				      "is-vector", (!strcmp (tmp_array[offset + 3], "true")),
+				      "num-roms", atoi (tmp_array[offset + 9]),
+				      "num-samples", atoi (tmp_array[offset + 10]),
+				      "sampleof", g_strdup (tmp_array[offset + 11]),
+				      NULL);
+	      
+	      
 			g_strfreev (tmp_array);
 
 			mame_gamelist_add (gl, rom);
@@ -539,16 +514,50 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 * Appends a rom entry to the gamelist.
 */
 static void
-mame_gamelist_print (FILE     *handle,
-		RomEntry *rom)
+mame_gamelist_print (FILE *handle, MameRomEntry *rom)
 {
 	int i;
 	char float_buf[FLOAT_BUF_SIZE];
 
+	gchar *romname, *gamename, *gamenameext;
+	gboolean thetrailer, is_vector, horizontal;
+	gchar *year, *manufacturer, *cloneof, *romof, *driver, *sampleof;
+	gint num_colours, num_players, num_buttons, num_channels, screenx, screeny, num_roms, num_samples;
+	DriverStatus status, driver_status_colour, driver_status_sound, driver_status_graphics;
+	gfloat screen_freq;
+	ControlType control;
+	
+	g_return_if_fail (rom != NULL);
 
-	if (!rom)
-		return;
-
+	g_object_get (rom,
+		      "romname", &romname,
+		      "gamename", &gamename,
+		      "gamenameext", &gamenameext,
+		      "the-trailer", &thetrailer,
+		      "year", &year,
+		      "manufacturer", &manufacturer,
+		      "cloneof", &cloneof,
+		      "romof", &romof, 
+		      "driver", &driver,
+		      "driver-status", &status,
+		      "driver-status-colour", &driver_status_colour,
+		      "driver-status-sound", &driver_status_sound,
+		      "driver-status-graphics", &driver_status_graphics,
+		      "num-colours", &num_colours,
+		      "num-players", &num_players,
+		      "num-buttons", &num_buttons,
+		      "num-channels", &num_channels,
+		      "control-type", &control,
+		      "is-vector", &is_vector,
+		      "screenx", &screenx,
+		      "screeny", &screeny,
+		      "screen-freq", &screen_freq,
+		      "is-horizontal", &horizontal,
+		      "num-roms", &num_roms,
+		      "num-samples", &num_samples,
+		      "sampleof", &sampleof,
+		      NULL);
+	      
 	fprintf (handle,
 		"%s" SEP	/* romname */
 		"%s" SEP	/* gamename */
@@ -566,32 +575,34 @@ mame_gamelist_print (FILE     *handle,
 		"%d" SEP	/* driver sound graphic */
 		"%i" SEP	/* colors */
 		,
-		rom->romname,
-		rom->gamename,
-		rom->gamenameext,
-		rom->the_trailer ? "true" : "false",
-		rom->is_bios ? "true" : "false",
-		rom->year,
-		rom->manu,
-		rom->cloneof,
-		rom->romof,
-		rom->driver,
-		rom->status,
-		rom->driver_status_color,
-		rom->driver_status_sound,
-		rom->driver_status_graphic,
-		rom->colors
+		romname,
+		gamename,
+		gamenameext,
+		thetrailer ? "true" : "false",
+		mame_rom_entry_is_bios (rom) ? "true" : "false",
+		year,
+		manufacturer,
+		cloneof,
+		romof,
+		driver,
+		status,
+		driver_status_colour,
+		driver_status_sound,
+		driver_status_graphics,
+		num_colours
 	);
-
+	
 	for (i=0; i < NB_CPU; i++) {
-		fprintf (handle, "%s" SEP "%i" SEP, 
-			rom->cpu_info[i].name, rom->cpu_info[i].clock);
+		CPUInfo *cpu = (CPUInfo *) g_malloc0 (sizeof (CPUInfo));
+		cpu = get_rom_cpu (rom, i);
+		fprintf (handle, "%s" SEP "%i" SEP, cpu->name, cpu->clock);
 	}
 	for (i=0; i < NB_CPU; i++) {
-		fprintf (handle, "%s" SEP "%i" SEP, 
-			rom->sound_info[i].name, rom->sound_info[i].clock);
+		SoundCPUInfo *soundcpu = (SoundCPUInfo *) g_malloc0 (sizeof (SoundCPUInfo));
+		soundcpu = get_sound_cpu (rom, i);
+		fprintf (handle, "%s" SEP "%i" SEP, soundcpu->name, soundcpu->clock);
 	}
-
+	
 	fprintf (handle,
 		"%i" SEP	/* players */
 		"%i" SEP	/* buttons */
@@ -604,19 +615,31 @@ mame_gamelist_print (FILE     *handle,
 		"%i" SEP	/* channels */
 		"%i" SEP	/* roms */
 		"%i" SEP	/* samples */
+		 "%s" SEP	/* sample of */
 		"\n",
-		rom->num_players,
-		rom->num_buttons,
-		rom->control,
-		rom->vector ? "true" : "false",
-		rom->screen_x,
-		rom->screen_y,
-		my_dtostr (float_buf, rom->screen_freq),
-		rom->horizontal ? "horizontal" : "vertical",
-		rom->channels,
-		rom->nb_roms,
-		rom->nb_samples
+		num_players,
+		num_buttons,
+		control,
+		is_vector ? "true" : "false",
+		screenx,
+		screeny,
+		my_dtostr (float_buf, screen_freq),
+		horizontal ? "horizontal" : "vertical",
+		num_channels,
+		num_roms,
+		num_samples,
+		sampleof
 	);
+
+	g_free (romname);
+	g_free (gamename);
+	g_free (gamenameext);
+	g_free (year);
+	g_free (manufacturer);
+	g_free (cloneof);
+	g_free (romof);
+	g_free (driver);
+	g_free (sampleof);
 
 }
 
@@ -691,7 +714,7 @@ GMAMEUI_DEBUG ("Saving gamelist");
 	listpointer = g_list_first (gl->priv->roms);
 
 	while (listpointer) {
-		mame_gamelist_print (gamelist, (RomEntry*)listpointer->data);
+		mame_gamelist_print (gamelist, (MameRomEntry*) listpointer->data);
 		listpointer = g_list_next (listpointer);
 	}
 
@@ -802,9 +825,9 @@ gamelist_check (MameExec *exec)
 	}		
 }
 
-RomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname) {
+MameRomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname) {
 	GList *listpointer;
-	RomEntry *tmprom = NULL;
+	MameRomEntry *tmprom;
 	
 	g_return_val_if_fail ((gl != NULL), NULL);
 	g_return_val_if_fail ((romname != NULL), NULL);
@@ -813,8 +836,8 @@ RomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname) {
 	     (listpointer != NULL);
 	     listpointer = g_list_next (listpointer))
 	{
-		tmprom = (RomEntry *) listpointer->data;
-		if (!strcmp (tmprom->romname, romname))
+		tmprom = (MameRomEntry *) listpointer->data;
+		if (!g_ascii_strcasecmp (mame_rom_entry_get_romname (tmprom), romname))
 		{
 			break;
 		}
