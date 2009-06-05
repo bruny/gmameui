@@ -56,7 +56,7 @@ about_window_show (void)
 			       "name", "GMAMEUI",
 			       "version", VERSION,
 			       "logo", pixbuf,
-			       "copyright", _("Copyright (c) 2007-2008 Andrew Burton"),
+			       "copyright", _("Copyright (c) 2007-2009 Andrew Burton"),
 			       "website", "http://gmameui.sourceforge.net",
 			       "comments", _("A program to play MAME under Linux"),
 			       "authors", authors,
@@ -134,7 +134,8 @@ create_CreditsWindow (GtkWindow *parent)
 	translators_label = gtk_label_new (_("Translators"));
 	translators = gtk_label_new(_("The following people translated GMAMEUI:\n"
 				      "Brazilian Portugese (pt_BR) - Alfredo Jr <junix@linuxinabox.org>\n"
-				      "Italian (it) - Ugo Viti <ugo.viti@initzero.it>\n"));
+				      "Italian (it) - Ugo Viti <ugo.viti@initzero.it>\n"
+				      "Swedish (sv) - Daniel Nylander <dnylander@users.sourceforge.net>\n"));
 	gtk_widget_show (translators);
 	gtk_notebook_append_page (credits_notebook, translators, translators_label);
 
@@ -233,7 +234,7 @@ create_AboutWindow (void)
 	gtk_widget_show (label3);
 	gtk_box_pack_start (GTK_BOX (vbox2), label3, TRUE, TRUE, 0);
 
-	text = g_strdup_printf ("<span size=\"small\">%s</span>", _("Copyright (c) 2007-2008 Andrew Burton"));
+	text = g_strdup_printf ("<span size=\"small\">%s</span>", _("Copyright (c) 2007-2009 Andrew Burton"));
 	label4 = gtk_label_new (text);
 	g_free (text);
 	gtk_label_set_use_markup (GTK_LABEL (label4), TRUE);

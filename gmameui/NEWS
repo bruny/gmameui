@@ -1,3 +1,29 @@
+Overview of changes in GMAMEUI 0.2.9
+====================================
+
+* Add search field for the gamelist, performing a case-insensitive search on 
+  the ROM name
+
+* Add buttons to filter on all, available and unavailable ROMs
+
+* Set row height to be consistent whether custom icon displayed or not
+
+* Handle changes to display in the GUI Preferences screen immediately (i.e. 
+  column changes)
+
+* Use italic, rather than text colour, to distinguish Clones
+
+* Removed the option to display the gamelist with clones nested as a tree;
+  the Gamelist now only displays in a GtkListView
+
+* Added new filter Imperfect Driver
+
+* Add support for -waitvsync option (SF Bug 2800305)
+
+* Migrate gamelist to a GObject
+
+* Migrate RomEntry struct to a GObject
+
 Overview of changes in GMAMEUI 0.2.8
 ====================================
 

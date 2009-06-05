@@ -5,6 +5,7 @@ glade_DATA =    audit_window.glade \
 		sidebar.glade \
 		gmameui_prefs.glade \
 		options.glade \
+		options_legacy.glade \
 		rom_info.glade \
 		main_gui.glade
 
