@@ -1255,6 +1255,26 @@ mame_get_options (MameExec *exec)
 	return exec->priv->supported_options;
 }
 
+/* Check whether the option is a toggle option that is turned off by
+   using the -no<option> syntax, e.g. -nolog. Some versions of XMAME
+   (e.g. 0.92) simply omit the option, others (e.g. 0.106) use -nolog */
+gboolean
+mame_option_supports_no_prefix (MameExec *exec, const gchar *option_name)
+{
+	g_return_val_if_fail (exec != NULL, FALSE);
+	
+	const MameOption *option;
+	
+	option = g_hash_table_lookup (exec->priv->supported_options, option_name);
+	
+	if (!option) {
+		GMAMEUI_DEBUG ("The option %s does not have a listing in the hash table", option_name);
+		return FALSE;
+	}
+	
+	return option->no_option;
+}
+
 gboolean
 mame_has_option (MameExec *exec, const gchar *option_name)
 {

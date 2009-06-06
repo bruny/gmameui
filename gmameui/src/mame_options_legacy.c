@@ -110,6 +110,8 @@ enum {
 	LEGACY_OPTION_MAXAUTOFRAMESKIP,
 	LEGACY_OPTION_BRIGHTNESS,
 	LEGACY_OPTION_PAUSE_BRIGHTNESS,
+	LEGACY_OPTION_EFFECT,
+	LEGACY_OPTION_SCANLINES,
 	LEGACY_OPTION_GAMMA,
 	LEGACY_OPTION_NOROTATE,
 	LEGACY_OPTION_ROR,
@@ -118,6 +120,10 @@ enum {
 	LEGACY_OPTION_AUTOROL,
 	LEGACY_OPTION_FLIPX,
 	LEGACY_OPTION_FLIPY,
+
+	LEGACY_OPTION_HEIGHTSCALE,
+	LEGACY_OPTION_WIDTHSCALE,
+	LEGACY_OPTION_BPP,
 	
 	/* Artwork */
 	LEGACY_OPTION_ARTWORK,
@@ -136,9 +142,6 @@ enum {
 	LEGACY_OPTION_INTENSITY,
 	LEGACY_OPTION_ANTIALIAS,
 	LEGACY_OPTION_TRANSLUCENCY,
-	
-	LEGACY_OPTION_HEIGHTSCALE,
-	LEGACY_OPTION_WIDTHSCALE,
 	
 	/* OpenGL options */
 	LEGACY_OPTION_GLDOUBLEBUF,
@@ -197,14 +200,8 @@ static _MameSupportedOptionsLegacyInt MameSupportedOptionsLegacyInt[] =
 	{ LEGACY_OPTION_ARBHEIGHT, "Video", "arbheight", 1, 0, 4096, { 0, } },    /* AKA ah */
 	{ LEGACY_OPTION_HEIGHTSCALE, "Video", "heightscale", 1, 1, 8, { 0, } },    /* AKA hs */
 	{ LEGACY_OPTION_WIDTHSCALE, "Video", "widthscale", 1, 1, 8, { 0, } },    /* AKA ws */
-	{ LEGACY_OPTION_AUTOFRAMESKIP, "Video", "frameskip", 0, 0, 12, { 0, } },    /* AKA fs */
 	{ LEGACY_OPTION_MAXAUTOFRAMESKIP, "Video", "maxautoframeskip", 1, 1, 12, { 0, } },    /* AKA mafs */
-	{ LEGACY_OPTION_ARTWORKRES, "Artwork", "artwork_resolution", 0, 0, 2, { 0, } },
-	{ LEGACY_OPTION_GLTEXTURESIZE, "OpenGL", "gl_texturesize", 0, 0, 2048, { 0, } },
-	{ LEGACY_OPTION_SOUND_VOLUME, "Sound", "volume", 0, -32, 0, { 0, } },       /* AKA v */
-	{ LEGACY_OPTION_SOUND_SAMPLERATE, "Sound", "samplefreq", 44100, 8000, 48000, { 0, } },
-	{ LEGACY_OPTION_INPUT_JOYTYPE, "Input", "joytype", 0, 0, 7, { 0, } },
-	{ LEGACY_OPTION_MAME_BIOS, "MAME", "bios", 0, 0, 14, { 0, } },
+	{ LEGACY_OPTION_GLTEXTURESIZE, "OpenGL", "gltexture_size", 0, 0, 2048, { 0, } },
 };
 
 /* Boolean options. These options are prefixed by 'no' if the value is set off */
@@ -215,6 +212,7 @@ static _MameSupportedOptionsLegacyBool MameSupportedOptionsLegacyBool[] =
 	{ LEGACY_OPTION_AUTODOUBLE, "Video", "autodouble", TRUE, { 0, } },     /* AKA adb */
 	{ LEGACY_OPTION_THROTTLE, "Video", "throttle", TRUE, { 0, } },     /* AKA th */
 	{ LEGACY_OPTION_SLEEPIDLE, "Video", "sleepidle", TRUE, { 0, } },     /* AKA si */
+	{ LEGACY_OPTION_SCANLINES, "Video", "scanlines", TRUE, { 0, } },
 	{ LEGACY_OPTION_AUTOFRAMESKIP, "Video", "autoframeskip", TRUE, { 0, } },     /* AKA afs */
 	{ LEGACY_OPTION_NOROTATE, "Video", "norotate", TRUE, { 0, } },     /* AKA nr */
 	{ LEGACY_OPTION_ROR, "Video", "ror", FALSE, { 0, } },     /* AKA ror */
@@ -285,6 +283,7 @@ static _MameSupportedOptionsLegacyDbl MameSupportedOptionsLegacyDbl[] =
 	{ LEGACY_OPTION_BEAM, "Vector", "beam", 1, 1, 16, { 0, } },    /* AKA B */
 	{ LEGACY_OPTION_FLICKER, "Vector", "flicker", 0, 0, 1, { 0, } },    /* AKA f */
 	{ LEGACY_OPTION_INTENSITY, "Vector", "intensity", 1, 0, 1, { 0, } },
+	{ LEGACY_OPTION_SOUND_VOLUME, "Sound", "volume", 0, -32, 0, { 0, } },       /* AKA v */
 	{ LEGACY_OPTION_SOUND_BUFSIZE, "Sound", "bufsize", 1, 0, 5, { 0, } },   /* AKA bs */
 	
 	{ LEGACY_OPTION_GLBEAM, "OpenGL", "glbeam", 1, 0, 100, { 0, } },
@@ -293,6 +292,7 @@ static _MameSupportedOptionsLegacyDbl MameSupportedOptionsLegacyDbl[] =
 /* FIXME TODO Set default values for ALL options */
 
 /* String options */
+/* Note that options intended to be displayed in ComboBoxes (e.g. effect) should be strings */
 static _MameSupportedOptionsLegacyString MameSupportedOptionsLegacyString[] =
 {
 	{ LEGACY_OPTION_VECTORRES, "Vector", "vectorres", "640x480", { 0, } },
@@ -302,6 +302,14 @@ static _MameSupportedOptionsLegacyString MameSupportedOptionsLegacyString[] =
 	{ LEGACY_OPTION_SOUND_MIXERPLUGIN, "Sound", "sound-mixer-plugin", "", { 0, } },
 	{ LEGACY_OPTION_FILE_STDERR, "File", "stderr-file", "stderr.log", { 0, } },
 	{ LEGACY_OPTION_FILE_STDOUT, "File", "stdout-file", "stdout.log", { 0, } },
+	/* The following are combobox entries so are marked as strings */
+	{ LEGACY_OPTION_EFFECT, "Video", "effect", "0", { 0, } },    /* AKA ef */
+	{ LEGACY_OPTION_AUTOFRAMESKIP, "Video", "frameskip", "0", { 0, } },    /* AKA fs */
+	{ LEGACY_OPTION_EFFECT, "Video", "bpp", "0", { 0, } },
+	{ LEGACY_OPTION_ARTWORKRES, "Artwork", "artwork_resolution", "0", { 0, } },
+	{ LEGACY_OPTION_MAME_BIOS, "MAME", "bios", "0", { 0, } },
+	{ LEGACY_OPTION_INPUT_JOYTYPE, "Input", "joytype", "0", { 0, } },
+	{ LEGACY_OPTION_SOUND_SAMPLERATE, "Sound", "samplefreq", "44100", { 0, } },
 
 };
 
@@ -367,10 +375,16 @@ mame_options_legacy_get_option_string (MameOptionsLegacy *opts, gchar *category)
 						       MameSupportedOptionsLegacyBool[i].key,
 						       NULL);
 			} else {
-				command = g_strconcat (command,
-						       " -no",
-						       MameSupportedOptionsLegacyBool[i].key,
-						       NULL);
+				/* Some toggle options are disabled using 'no' as a
+				   prefix (e.g. -nolog) but we need to check whether MAME
+				   recognises them first */
+				if (mame_option_supports_no_prefix (exec, MameSupportedOptionsLegacyBool[i].key)) {
+					command = g_strconcat (command,
+							       " -no",
+							       MameSupportedOptionsLegacyBool[i].key,
+							       NULL);
+				} /* else we simply omit it */
+
 			}
 		
 			g_free (catkey);
@@ -455,7 +469,27 @@ mame_options_legacy_get_option_string (MameOptionsLegacy *opts, gchar *category)
 static void
 mame_options_legacy_save_string (MameOptionsLegacy *opts, GParamSpec *param, gpointer user_data)
 {
-	GMAMEUI_DEBUG ("FIXME TODO mame_options_save_string: %s", param->name);
+	GMAMEUI_DEBUG ("mame_options_save_string: %s", param->name);
+	/* param->name will be of the form Category-Key, e.g. Video-beam */
+	
+//	gchar** stv;
+//	GValue *dbl_value;
+	_MameSupportedOptionsLegacyString *opt;
+	gchar *value;
+
+	g_return_if_fail (MAME_IS_OPTIONS_LEGACY (opts));
+	g_return_if_fail (param->name != NULL);
+	
+	opt = (_MameSupportedOptionsLegacyString *) user_data;
+	g_return_if_fail (opt != NULL);
+	
+	value = g_value_get_string (&opt->value);
+	
+//	stv = g_strsplit (param->name, "-", 2); /* Split only on the first '-', so keys with a '-' are ignored */
+	g_key_file_set_string (opts->priv->options_file, opt->category, opt->key, value);
+//	g_strfreev (stv);
+	
+	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename, NULL);
 }
 
 static void
@@ -587,7 +621,8 @@ mame_legacy_options_get (MameOptionsLegacy *opts, const gchar *key)
 		GMAMEUI_DEBUG ("Error retrieving string option %s: %s", key, error->message);
 		g_error_free (error);
 		error = NULL;
-		
+/* FIXME TODO Set default value and use the G_CONSTRUCT parameter to set it up automatically
+   (both for this and other similar instances */		
 		/* Value doesn't exist in the file, so we need to use the default value */
 		GParamSpec *spec;
 		GValue value = { 0, };
@@ -614,7 +649,7 @@ mame_legacy_options_set_int (MameOptionsLegacy *opts, gchar *key, gint value)
 	gchar *prop_name;
 	
 	prop_name = g_strdup (key);
-	prop_name = g_strcanon (prop_name, G_CSET_A_2_Z G_CSET_a_2_z "-", '-');
+	prop_name = g_strcanon (prop_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-", '-');
 	g_object_set (opts, prop_name, value, NULL);
 	g_free (prop_name);
 }
@@ -625,7 +660,7 @@ mame_legacy_options_set_dbl (MameOptionsLegacy *opts, gchar *key, gdouble value)
 	gchar *prop_name;
 	
 	prop_name = g_strdup (key);
-	prop_name = g_strcanon (prop_name, G_CSET_A_2_Z G_CSET_a_2_z "-", '-');
+	prop_name = g_strcanon (prop_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-", '-');
 	g_object_set (opts, prop_name, value, NULL);
 	g_free (prop_name);
 }
@@ -636,7 +671,7 @@ mame_legacy_options_set_string (MameOptionsLegacy *opts, gchar *key, gchar* valu
 	gchar *prop_name;
 	
 	prop_name = g_strdup (key);
-	prop_name = g_strcanon (prop_name, G_CSET_A_2_Z G_CSET_a_2_z "-", '-');
+	prop_name = g_strcanon (prop_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-", '-');
 	g_object_set (opts, prop_name, value, NULL);
 	g_free (prop_name);
 }
@@ -770,7 +805,7 @@ find_bool_offset (gchar *prop_name)
 	for (i = 0; i < G_N_ELEMENTS (MameSupportedOptionsLegacyBool); i++) {
 		gchar *tmp_prop_name;
 		tmp_prop_name = g_strdup (MameSupportedOptionsLegacyBool[i].key);
-		tmp_prop_name = g_strcanon (tmp_prop_name, G_CSET_A_2_Z G_CSET_a_2_z "-", '-');
+		tmp_prop_name = g_strcanon (tmp_prop_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-", '-');
 		
 		if (g_ascii_strcasecmp (tmp_prop_name, tokens[1]) == 0) {
 			found = i;
@@ -798,7 +833,7 @@ find_str_offset (gchar *prop_name)
 	for (i = 0; i < G_N_ELEMENTS (MameSupportedOptionsLegacyString); i++) {
 		gchar *tmp_prop_name;
 		tmp_prop_name = g_strdup (MameSupportedOptionsLegacyString[i].key);
-		tmp_prop_name = g_strcanon (tmp_prop_name, G_CSET_A_2_Z G_CSET_a_2_z "-", '-');
+		tmp_prop_name = g_strcanon (tmp_prop_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-", '-');
 			
 		if (g_ascii_strcasecmp (tmp_prop_name, tokens[1]) == 0) {
 			found = i;
@@ -826,7 +861,7 @@ find_int_offset (gchar *prop_name)
 	for (i = 0; i < G_N_ELEMENTS (MameSupportedOptionsLegacyInt); i++) {
 		gchar *tmp_prop_name;
 		tmp_prop_name = g_strdup (MameSupportedOptionsLegacyInt[i].key);
-		tmp_prop_name = g_strcanon (tmp_prop_name, G_CSET_A_2_Z G_CSET_a_2_z "-", '-');
+		tmp_prop_name = g_strcanon (tmp_prop_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-", '-');
 		
 		if (g_ascii_strcasecmp (tmp_prop_name, tokens[1]) == 0) {
 			found = i;
@@ -854,7 +889,7 @@ find_dbl_offset (gchar *prop_name)
 	for (i = 0; i < G_N_ELEMENTS (MameSupportedOptionsLegacyDbl); i++) {
 		gchar *tmp_prop_name;
 		tmp_prop_name = g_strdup (MameSupportedOptionsLegacyDbl[i].key);
-		tmp_prop_name = g_strcanon (tmp_prop_name, G_CSET_A_2_Z G_CSET_a_2_z "-", '-');
+		tmp_prop_name = g_strcanon (tmp_prop_name, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-", '-');
 		
 		if (g_ascii_strcasecmp (tmp_prop_name, tokens[1]) == 0) {
 			found = i;
@@ -964,7 +999,7 @@ static gchar
 	
 	/* Replace any characters that are not letters or '-'. This
 	   should replace any underline characters */
-	ret = g_strcanon (ret, G_CSET_A_2_Z G_CSET_a_2_z "-", '-');
+	ret = g_strcanon (ret, G_CSET_A_2_Z G_CSET_a_2_z G_CSET_DIGITS "-", '-');
 	
 	return ret;
 }
@@ -979,7 +1014,7 @@ mame_options_legacy_class_init (MameOptionsLegacyClass *klass)
 	object_class->set_property = mame_options_legacy_set_property;
 	object_class->get_property = mame_options_legacy_get_property;
 	object_class->finalize = mame_options_legacy_finalize;
-
+GMAMEUI_DEBUG ("Creating MameOptionsLegacy class object...");
 	/* Initialise the class properties - any MAME option which contains an
 	   underscore needs to be have the underscore replaced by a hyphen; this
 	   is to workaround issues with GLib where a property/signal name cannot
@@ -996,7 +1031,7 @@ mame_options_legacy_class_init (MameOptionsLegacyClass *klass)
 Issue: g_param_spec_internal indicates that mixing _ and - cannot be done; signals need - */
 		attr_name = create_property_name (MameSupportedOptionsLegacyBool[i].category,
 						  MameSupportedOptionsLegacyBool[i].key);
-		GMAMEUI_DEBUG ("Creating boolean class property %s with id %d",
+		GMAMEUI_DEBUG ("   Creating boolean class property %s with id %d",
 			       attr_name,
 			       MameSupportedOptionsLegacyBool[i].id);
 		/* Initialise type */
@@ -1021,7 +1056,7 @@ Issue: g_param_spec_internal indicates that mixing _ and - cannot be done; signa
 		attr_name = create_property_name (MameSupportedOptionsLegacyDbl[i].category,
 						  MameSupportedOptionsLegacyDbl[i].key);
 		
-		GMAMEUI_DEBUG ("Creating double class property %s with id %d",
+		GMAMEUI_DEBUG ("   Creating double class property %s with id %d",
 			       attr_name,
 			       MameSupportedOptionsLegacyDbl[i].id);
 		/* Initialise type */
@@ -1046,7 +1081,7 @@ Issue: g_param_spec_internal indicates that mixing _ and - cannot be done; signa
 		attr_name = create_property_name (MameSupportedOptionsLegacyInt[i].category,
 						  MameSupportedOptionsLegacyInt[i].key);
 		
-		GMAMEUI_DEBUG ("Creating integer class property %s with id %d",
+		GMAMEUI_DEBUG ("   Creating integer class property %s with id %d",
 			       attr_name,
 			       MameSupportedOptionsLegacyInt[i].id);
 		/* Initialise type */
@@ -1071,7 +1106,7 @@ Issue: g_param_spec_internal indicates that mixing _ and - cannot be done; signa
 		attr_name = create_property_name (MameSupportedOptionsLegacyString[i].category,
 						  MameSupportedOptionsLegacyString[i].key);
 		
-		GMAMEUI_DEBUG ("Creating string class property %s with id %d",
+		GMAMEUI_DEBUG ("   Creating string class property %s with id %d",
 			       attr_name,
 			       MameSupportedOptionsLegacyString[i].id);
 		/* Initialise type */
@@ -1085,8 +1120,7 @@ Issue: g_param_spec_internal indicates that mixing _ and - cannot be done; signa
 		
 		g_free (attr_name);
 	}
-	
-	
+GMAMEUI_DEBUG ("Creating MameOptionsLegacy class object... done");
 }
 
 static void

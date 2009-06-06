@@ -1,3 +1,20 @@
+2009-06-06 21:47 adburton
+
+	* src/mame-exec.c, mame-exec.h, mame_options_legacy.c, 
+	  mame_options_legacy_dialog.c, xmame_options.c,
+	  data/options_legacy.glade: Changes for legacy XMAME support:
+	  - Add support for XMAME legacy options -scanlines, -volume
+	  - Fix mis-spelled XMAME legacy option -gltexture_size
+	  - Fix XMAME legacy options using GtkComboBox widgets (-effect, -bios, 
+	    -samplefreq, -bpp, -artwork_resolution, -joytype)
+	  - Fix XMAME legacy options using GtkHSscale widgets
+	  - Fix link between parent option Artwork and child options Backdrops, 
+	    Bezels and Overlays
+	  - Support for older versions of XMAME not supporting [no] prefix for 
+	    disabling toggle options
+	  - Fix crash when opening XMAME Legacy Options screen (add support for 
+	    option keys containing numbers e.g. X11Input)
+
 2009-06-05 19:30 adburton
 
 	* configure.ac, NEWS, src/about.c: Tagged for new release

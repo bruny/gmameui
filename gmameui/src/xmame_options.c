@@ -38,6 +38,8 @@ xmame_options_free (void)
 	g_hash_table_destroy (option_map);
 }
 
+/* This function sets up all the options that are supported by MAME; options
+   supported by each version of MAME are parsed in mame_get_options */
 void
 xmame_options_init (void)
 {

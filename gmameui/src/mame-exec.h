@@ -115,6 +115,9 @@ mame_get_options (MameExec *exec);
 const gchar
 *mame_get_option_name (const MameExec *exec, const gchar* option_name);
 
+gboolean
+mame_option_supports_no_prefix (MameExec *exec, const gchar *option_name);
+
 /** Checks if the executable has the given option */
 gboolean
 mame_has_option (MameExec *exec, const gchar *option_name);

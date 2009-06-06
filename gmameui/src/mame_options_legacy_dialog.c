@@ -85,9 +85,9 @@ static const WidgetRelationship widget_relationships[] =
 	{ "Video-autoframeskip", "Video-frameskip", "0" },
 	{ "Video-autoframeskip", "Video-maxautoframeskip", "0" },
 	{ "Video-autoframeskip", "Video-maxautoframeskip", "0" },
-	{ "Artwork-artwork", "Artwork-use-backdrops", "1" },
-	{ "Artwork-artwork", "Artwork-use-bezels", "1" },
-	{ "Artwork-artwork", "Artwork-use-overlays", "1" },
+	{ "Artwork-artwork", "Artwork-use_backdrops", "1" },
+	{ "Artwork-artwork", "Artwork-use_bezels", "1" },
+	{ "Artwork-artwork", "Artwork-use_overlays", "1" },
 
 };
 
@@ -99,13 +99,29 @@ typedef struct {
 _combo_link combo_links[] = {
 	{ "Video-frameskip", "0:1:2:3:4:5:6:7:8:9:10:11:12" },
 	{ "Video-bpp", "0:8:15:16:32" },
-	{ "Video-effect", "none:scale2x:lq2x:hq2x:6tap2x:scan2:rgbscan:scan3:fakescan" },
+	{ "Video-effect", "0:1:2:3:4:5:6:7:8" },
 	{ "Artwork-artwork_resolution", "0:1:2" },
 	{ "Sound-samplefreq", "8000:11025:16000:22050:44100" },
 	{ "Sound-dsp_plugin", "oss:sdl:arts" },
 	{ "Sound-sound_mixer_plugin", "oss" },
 	{ "Vector-vectorres", "320x200:640x480:800x600:1024x768:1280x1024:1600x1200" },
 	{ "Input-joytype", "0:5" },
+	/* Defined in src/drivers/neogeo.c - we can either use the numbers below or 
+	   the reference to the bios (e.g. euro, japan, etc). These are listed
+	   here for reference:
+	   Europe, 1 Slot (also been seen on a 4 slot)	euro - sp-s2.sp1
+	   Europe, 4 Slot				euro-s1 - sp-s.sp1
+	   US, 2 Slot					us - usa_2slt.bin
+	   US, 6 Slot (V5?)				us-e - sp-e.sp1
+	   Asia S3 Ver 6				asia - asia-s3.rom
+	   Japan, Ver 6 VS Bios				japan - vs-bios.rom
+	   Japan, Older					japan-s2 - sp-j2.sp1
+	   Universe Bios v1.0 (hack)			uni-bios_1_0 - uni-bios_1_0.rom
+	   Universe Bios v1.1 (hack)			uni-bios_1_1 - uni-bios_1_1.rom
+	   Debug (Development) Bios			debug - neodebug.rom
+	   AES Console (Asia?) Bios			asia-aes - neo-epo.bin
+	   Universe Bios v1.2 (hack)			uni-bios_1_2 - uni-bios_1_2.rom
+	 */
 	{ "MAME-bios", "0:1:2:3:4:5:6:7:8:9:10:11" },
 };
 
@@ -193,6 +209,9 @@ get_property_value_as_string (GtkWidget *widget, gchar *key)
 		double_value = gtk_range_get_value (GTK_RANGE (widget));
 		text_value = g_strdup_printf ("%.2f", double_value);
 	} else if (GTK_IS_COMBO_BOX (widget)) {
+		/* Note that some options (e.g. effect) that are displayed using
+		   ComboBoxes are string options even though the value sent to MAME
+		   is an integer; MAME accepts the integer in quotes. */
 		gint idx;
 		gchar **values_arr;
 		
@@ -353,10 +372,13 @@ parent_widget_clicked (GtkWidget *widget, gpointer user_data)
 			/* Set the state of the children based on the value of the parent */
 			gchar *parent_val = get_property_value_as_string (widget, key);
 
-			if (strcmp (parent_val, widget_relationships[i].relationship) == 0)
+			if (strcmp (parent_val, widget_relationships[i].relationship) == 0) {
 				gtk_widget_set_sensitive (child, TRUE);
-			else
+				/* FIXME TODO Also turn off the option */
+			} else {
 				gtk_widget_set_sensitive (child, FALSE);
+				/* FIXME TODO Also turn on the option */
+			}
 		}
 	}
 }
@@ -455,6 +477,7 @@ connect_prop_to_object (MameOptionsLegacyDialog *dlg, GtkWidget *object, const g
 {
 	guint i;
 	int int_value;
+	gdouble dbl_value;
 	gchar *value;
 	
 	if (GTK_IS_TOGGLE_BUTTON (object))
@@ -462,12 +485,15 @@ connect_prop_to_object (MameOptionsLegacyDialog *dlg, GtkWidget *object, const g
 		int_value = mame_legacy_options_get_bool (main_gui.legacy_options, key);
 		value = g_strdup_printf ("%d", int_value);
 		set_property_value_as_string (object, value);
+		g_free (value);
 	} else if (GTK_IS_SPIN_BUTTON (object)) {
 		int_value = mame_legacy_options_get_int (main_gui.legacy_options, key);
 		value = g_strdup_printf ("%d", int_value);
 		set_property_value_as_string (object, value);
+		g_free (value);
 	} else if (GTK_IS_HSCALE (object)) {
-		value = mame_legacy_options_get (main_gui.legacy_options, key);
+		dbl_value = mame_legacy_options_get_dbl (main_gui.legacy_options, key);
+		value = g_strdup_printf ("%f", dbl_value);
 		set_property_value_as_string (object, value);
 		g_free (value);
 	} else if (GTK_IS_COMBO_BOX (object)) {

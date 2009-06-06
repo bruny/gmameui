@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue Jan  6 23:18:01 2009 -->
+<?xml version="1.0"?>
 <glade-interface>
+  <!-- interface-requires gtk+ 2.16 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="Display">
     <child>
       <widget class="GtkNotebook" id="DisplayNotebook">
@@ -22,6 +22,7 @@
               </widget>
               <packing>
                 <property name="expand">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -36,20 +37,23 @@
                     <property name="spacing">6</property>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-fullscreen">
+                        <property name="label" translatable="yes">Fullscreen</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Fullscreen</property>
-                        <property name="response_id">0</property>
+                        <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
                       </widget>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-dirty">
+                        <property name="label" translatable="yes">Draw only changes</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Draw only changes</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -59,11 +63,11 @@
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-throttle">
+                        <property name="label" translatable="yes">Throttle</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Throttle</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -73,11 +77,11 @@
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-sleepidle">
+                        <property name="label" translatable="yes">Sleep when idle</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Sleep when idle</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -121,11 +125,11 @@
                     <property name="row_spacing">6</property>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-autodouble">
+                        <property name="label" translatable="yes">Autodouble</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Autodouble</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -294,23 +298,24 @@
                     <property name="spacing">6</property>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-ror">
+                        <property name="label" translatable="yes">Rotate right</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Rotate right</property>
-                        <property name="response_id">0</property>
+                        <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-rol">
+                        <property name="label" translatable="yes">Rotate left</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Rotate left</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -320,11 +325,11 @@
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-norotate">
+                        <property name="label" translatable="yes">Do not apply rotation</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Do not apply rotation</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -334,11 +339,11 @@
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-flipy">
+                        <property name="label" translatable="yes">Flip screen upside-down</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Flip screen upside-down</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -348,11 +353,11 @@
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-flipx">
+                        <property name="label" translatable="yes">Flip screen left-right</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Flip screen left-right</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -377,8 +382,8 @@
             <property name="label" translatable="yes">Display Options</property>
           </widget>
           <packing>
-            <property name="type">tab</property>
             <property name="tab_fill">False</property>
+            <property name="type">tab</property>
           </packing>
         </child>
         <child>
@@ -396,6 +401,7 @@
               </widget>
               <packing>
                 <property name="expand">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -424,15 +430,16 @@ Black Scanlines</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-scanlines">
+                        <property name="label" translatable="yes">Use Scanlines</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Use Scanlines</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -479,6 +486,7 @@ Black Scanlines</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -488,7 +496,7 @@ Black Scanlines</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                         <property name="adjustment">0.5 0.5 2 0.050000000000000003 0.050000000000000003 0</property>
                         <property name="digits">2</property>
-                        <property name="value_pos">GTK_POS_RIGHT</property>
+                        <property name="value_pos">right</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
@@ -514,7 +522,7 @@ Black Scanlines</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                         <property name="adjustment">0.5 0.5 2 0.050000000000000003 0.050000000000000003 0</property>
                         <property name="digits">2</property>
-                        <property name="value_pos">GTK_POS_RIGHT</property>
+                        <property name="value_pos">right</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
@@ -540,7 +548,7 @@ Black Scanlines</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                         <property name="adjustment">0.5 0.5 2 0.050000000000000003 0.050000000000000003 0</property>
                         <property name="digits">2</property>
-                        <property name="value_pos">GTK_POS_RIGHT</property>
+                        <property name="value_pos">right</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
@@ -624,11 +632,11 @@ Skip 12 out of 12 frames</property>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Video-autoframeskip">
+                        <property name="label" translatable="yes">Automatic</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Automatic</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -684,9 +692,9 @@ Skip 12 out of 12 frames</property>
             <property name="label" translatable="yes">Effects &amp; Corrections</property>
           </widget>
           <packing>
-            <property name="type">tab</property>
             <property name="position">1</property>
             <property name="tab_fill">False</property>
+            <property name="type">tab</property>
           </packing>
         </child>
         <child>
@@ -704,6 +712,7 @@ Skip 12 out of 12 frames</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="padding">6</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -729,6 +738,7 @@ Skip 12 out of 12 frames</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -751,6 +761,7 @@ Skip 12 out of 12 frames</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="padding">6</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -767,7 +778,7 @@ Skip 12 out of 12 frames</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="adjustment">0.5 0.5 3 0.10000000000000001 1 0</property>
                             <property name="digits">2</property>
-                            <property name="value_pos">GTK_POS_RIGHT</property>
+                            <property name="value_pos">right</property>
                           </widget>
                           <packing>
                             <property name="left_attach">1</property>
@@ -783,7 +794,7 @@ Skip 12 out of 12 frames</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="adjustment">0 0 100 1 10 10</property>
                             <property name="digits">0</property>
-                            <property name="value_pos">GTK_POS_RIGHT</property>
+                            <property name="value_pos">right</property>
                           </widget>
                           <packing>
                             <property name="left_attach">1</property>
@@ -799,7 +810,7 @@ Skip 12 out of 12 frames</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="adjustment">1 1 16 1 1 1</property>
                             <property name="digits">2</property>
-                            <property name="value_pos">GTK_POS_RIGHT</property>
+                            <property name="value_pos">right</property>
                           </widget>
                           <packing>
                             <property name="left_attach">1</property>
@@ -855,11 +866,11 @@ Skip 12 out of 12 frames</property>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Vector-antialias">
+                        <property name="label" translatable="yes">Draw antialiased vectors</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Draw antialiased vectors</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -869,11 +880,11 @@ Skip 12 out of 12 frames</property>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Vector-translucency">
+                        <property name="label" translatable="yes">Draw translucent vectors</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Draw translucent vectors</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -900,9 +911,9 @@ Skip 12 out of 12 frames</property>
             <property name="label" translatable="yes">Vector</property>
           </widget>
           <packing>
-            <property name="type">tab</property>
             <property name="position">2</property>
             <property name="tab_fill">False</property>
+            <property name="type">tab</property>
           </packing>
         </child>
         <child>
@@ -919,6 +930,7 @@ Skip 12 out of 12 frames</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="padding">6</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -933,15 +945,16 @@ Skip 12 out of 12 frames</property>
                     <property name="spacing">6</property>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Artwork-artwork">
+                        <property name="label" translatable="yes">Use additional game artwork:</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Use additional game artwork:</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -956,24 +969,25 @@ Skip 12 out of 12 frames</property>
                             <property name="spacing">6</property>
                             <child>
                               <widget class="GtkCheckButton" id="preferences_Artwork-use_backdrops">
+                                <property name="label" translatable="yes">Backdrops</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                <property name="label" translatable="yes">Backdrops</property>
-                                <property name="response_id">0</property>
                                 <property name="draw_indicator">True</property>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
                               <widget class="GtkCheckButton" id="preferences_Artwork-use_bezels">
+                                <property name="label" translatable="yes">Bezels</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                <property name="label" translatable="yes">Bezels</property>
-                                <property name="response_id">0</property>
                                 <property name="draw_indicator">True</property>
                               </widget>
                               <packing>
@@ -983,11 +997,11 @@ Skip 12 out of 12 frames</property>
                             </child>
                             <child>
                               <widget class="GtkCheckButton" id="preferences_Artwork-use_overlays">
+                                <property name="label" translatable="yes">Overlays</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                                <property name="label" translatable="yes">Overlays</property>
-                                <property name="response_id">0</property>
                                 <property name="draw_indicator">True</property>
                               </widget>
                               <packing>
@@ -1016,6 +1030,7 @@ Skip 12 out of 12 frames</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -1039,11 +1054,11 @@ High</property>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_Artwork-artwork_crop">
+                        <property name="label" translatable="yes">Crop artwork</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Crop artwork</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -1070,9 +1085,9 @@ High</property>
             <property name="label" translatable="yes">Artwork</property>
           </widget>
           <packing>
-            <property name="type">tab</property>
             <property name="position">3</property>
             <property name="tab_fill">False</property>
+            <property name="type">tab</property>
           </packing>
         </child>
         <child>
@@ -1088,6 +1103,7 @@ High</property>
               </widget>
               <packing>
                 <property name="expand">False</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
@@ -1100,14 +1116,15 @@ High</property>
                     <property name="spacing">6</property>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_OpenGL-gldblbuffer">
+                        <property name="label" translatable="yes">Enable double buffering</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Enable double buffering</property>
-                        <property name="response_id">0</property>
+                        <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -1122,6 +1139,7 @@ High</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -1142,10 +1160,10 @@ High</property>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_OpenGL-glbilinear">
+                        <property name="label" translatable="yes">Enable bilinear filtering</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Enable bilinear filtering</property>
-                        <property name="response_id">0</property>
+                        <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -1164,6 +1182,7 @@ High</property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -1171,7 +1190,7 @@ High</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="adjustment">0 0 100 1 10 10</property>
-                            <property name="value_pos">GTK_POS_RIGHT</property>
+                            <property name="value_pos">right</property>
                           </widget>
                           <packing>
                             <property name="position">1</property>
@@ -1184,10 +1203,10 @@ High</property>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_OpenGL-glantialias">
+                        <property name="label" translatable="yes">Enable antialiasing</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Enable antialiasing</property>
-                        <property name="response_id">0</property>
+                        <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -1197,11 +1216,11 @@ High</property>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_OpenGL-glantialiasvec">
+                        <property name="label" translatable="yes">Enable vector antialiasing</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="label" translatable="yes">Enable vector antialiasing</property>
-                        <property name="response_id">0</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -1211,10 +1230,10 @@ High</property>
                     </child>
                     <child>
                       <widget class="GtkCheckButton" id="preferences_OpenGL-cabview">
+                        <property name="label" translatable="yes">Start in cabinet view</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="label" translatable="yes">Start in cabinet view</property>
-                        <property name="response_id">0</property>
+                        <property name="receives_default">False</property>
                         <property name="draw_indicator">True</property>
                       </widget>
                       <packing>
@@ -1241,9 +1260,9 @@ High</property>
             <property name="label" translatable="yes">OpenGL</property>
           </widget>
           <packing>
-            <property name="type">tab</property>
             <property name="position">4</property>
             <property name="tab_fill">False</property>
+            <property name="type">tab</property>
           </packing>
         </child>
       </widget>
@@ -1263,6 +1282,7 @@ High</property>
           </widget>
           <packing>
             <property name="expand">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -1276,24 +1296,25 @@ High</property>
                 <property name="spacing">6</property>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_MAME-cheat">
+                    <property name="label" translatable="yes">Enable game cheats</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Enable game cheats</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_MAME-skip_disclaimer">
+                    <property name="label" translatable="yes">Skip disclaimer info</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Skip disclaimer info</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1303,11 +1324,11 @@ High</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_MAME-skip_gameinfo">
+                    <property name="label" translatable="yes">Skip game info</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Skip game info</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1329,6 +1350,7 @@ High</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -1361,11 +1383,11 @@ Universe Bios v1.2 (hack)</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_MAME-autosave">
+                    <property name="label" translatable="yes">Enable automatic save/restore</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Enable automatic save/restore</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1375,11 +1397,11 @@ Universe Bios v1.2 (hack)</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_MAME-keyboard_leds">
+                    <property name="label" translatable="yes">Use keyboard LEDs as game indicators</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Use keyboard LEDs as game indicators</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1449,11 +1471,11 @@ Universe Bios v1.2 (hack)</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_File-log">
+                    <property name="label" translatable="yes">Log debug info</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Log debug info</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1488,6 +1510,7 @@ Universe Bios v1.2 (hack)</property>
           </widget>
           <packing>
             <property name="expand">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -1516,6 +1539,7 @@ Universe Bios v1.2 (hack)</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -1524,7 +1548,7 @@ Universe Bios v1.2 (hack)</property>
                         <property name="can_focus">True</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                         <property name="adjustment">3.2999999999999998 1 30 1 1 0</property>
-                        <property name="value_pos">GTK_POS_RIGHT</property>
+                        <property name="value_pos">right</property>
                       </widget>
                       <packing>
                         <property name="position">1</property>
@@ -1563,6 +1587,7 @@ Universe Bios v1.2 (hack)</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -1572,7 +1597,7 @@ Universe Bios v1.2 (hack)</property>
                         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                         <property name="adjustment">0 -32 0 1 1 0</property>
                         <property name="digits">0</property>
-                        <property name="value_pos">GTK_POS_RIGHT</property>
+                        <property name="value_pos">right</property>
                       </widget>
                       <packing>
                         <property name="position">1</property>
@@ -1629,14 +1654,6 @@ Universe Bios v1.2 (hack)</property>
 /dev/dsp3
 /dev/audio
 /dev/null</property>
-                    <child internal-child="entry">
-                      <widget class="GtkEntry" id="comboboxentry-entry2">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="max_length">20</property>
-                      </widget>
-                    </child>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1652,14 +1669,6 @@ Universe Bios v1.2 (hack)</property>
                     <property name="visible">True</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                     <property name="items" translatable="yes">/dev/mixer</property>
-                    <child internal-child="entry">
-                      <widget class="GtkEntry" id="comboboxentry-entry1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                        <property name="max_length">20</property>
-                      </widget>
-                    </child>
                   </widget>
                   <packing>
                     <property name="left_attach">1</property>
@@ -1714,11 +1723,11 @@ Universe Bios v1.2 (hack)</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_Sound-fakesound">
+                    <property name="label" translatable="yes">Fake sound</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Fake sound</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1731,11 +1740,11 @@ Universe Bios v1.2 (hack)</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_Sound-samples">
+                    <property name="label" translatable="yes">Use samples</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Use samples</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1748,11 +1757,11 @@ Universe Bios v1.2 (hack)</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_Sound-sound">
+                    <property name="label" translatable="yes">Enable sound</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Enable sound</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1885,11 +1894,11 @@ aRTS</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_Sound-timer">
+                    <property name="label" translatable="yes">Timer based audio</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Timer based audio</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1928,6 +1937,7 @@ aRTS</property>
           </widget>
           <packing>
             <property name="expand">False</property>
+            <property name="position">0</property>
           </packing>
         </child>
         <child>
@@ -1950,6 +1960,7 @@ aRTS</property>
                       </widget>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -1966,14 +1977,17 @@ SDL joystick</property>
                       </packing>
                     </child>
                   </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_Input-analogstick">
+                    <property name="label" translatable="yes">Analog joystick</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Analog joystick</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1982,11 +1996,11 @@ SDL joystick</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_Input-ugcicoin">
+                    <property name="label" translatable="yes">UGCI (tm) Coin/Play support</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">UGCI (tm) Coin/Play support</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -1995,11 +2009,11 @@ SDL joystick</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_Input-steadykey">
+                    <property name="label" translatable="yes">Enable steadykey support</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Enable steadykey support</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -2009,11 +2023,11 @@ SDL joystick</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_Input-usbpspad">
+                    <property name="label" translatable="yes">USB PS Game Pads</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">USB PS Game Pads</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -2022,11 +2036,11 @@ SDL joystick</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_Input-rapidfire">
+                    <property name="label" translatable="yes">Rapid-fire</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
                     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="label" translatable="yes">Rapid-fire</property>
-                    <property name="response_id">0</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -2063,19 +2077,22 @@ SDL joystick</property>
                 <property name="spacing">6</property>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_X11Input-grabmouse">
+                    <property name="label" translatable="yes">Select mouse grabbing</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Select mouse grabbing</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
                   </widget>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_X11Input-grabkeyboard">
+                    <property name="label" translatable="yes">Select keyboard grabbing</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Select keyboard grabbing</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -2084,10 +2101,10 @@ SDL joystick</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_X11Input-alwaysusemouse">
+                    <property name="label" translatable="yes">Always use mouse</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Always use mouse</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -2096,10 +2113,10 @@ SDL joystick</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_X11Input-cursor">
+                    <property name="label" translatable="yes">Show cursor</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Show cursor</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
@@ -2108,10 +2125,10 @@ SDL joystick</property>
                 </child>
                 <child>
                   <widget class="GtkCheckButton" id="preferences_X11Input-winkeys">
+                    <property name="label" translatable="yes">Enable mapping of Windows keys</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="label" translatable="yes">Enable mapping of Windows keys</property>
-                    <property name="response_id">0</property>
+                    <property name="receives_default">False</property>
                     <property name="draw_indicator">True</property>
                   </widget>
                   <packing>
