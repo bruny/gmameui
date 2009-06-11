@@ -1,3 +1,8 @@
+2009-06-11 20:30 adburton
+
+	* src/*.[ch]: Update copyright headers to replace FSF physical address
+	  with web address, use GPL v3 as per COPYING file
+
 2009-06-06 21:47 adburton
 
 	* src/mame-exec.c, mame-exec.h, mame_options_legacy.c, 
