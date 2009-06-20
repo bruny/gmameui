@@ -10,7 +10,7 @@ AC_ISC_POSIX
 AC_PROG_CC
 AC_HEADER_STDC
 AC_CHECK_FUNCS(strchr)
-AC_CHECK_LIB(z,inflate,,AC_MSG_ERROR(Cannot find zlib))
+dnl AC_CHECK_LIB(z,inflate,,AC_MSG_ERROR(Cannot find zlib))
 AC_CHECK_LIB(expat, XML_ParserCreate,,
   AC_CHECK_LIB(xmlparse, XML_ParserCreate,,AC_MSG_ERROR(Cannot find libexpat))
 )
@@ -47,6 +47,14 @@ else
    AC_SUBST(GNOME_CFLAGS)
    AC_SUBST(GNOME_LIBS)
 fi
+
+
+dnl Check for the existence of libarchive, to support reading and writing
+dnl compressed (zip) files
+dnl AC_CHECK_LIB([archive], [archive_read_open_filename],, AC_MSG_ERROR([Cannot find libarchive])) 
+AC_SEARCH_LIBS([archive_read_new], [archive],
+    ARCHIVE_LIBS=-larchive AC_SUBST(ARCHIVE_LIBS),
+    AC_MSG_ERROR([Cannot find libarchive]))
 
 AC_PATH_PROG(gmameuipath, gmameui)
 dnl Subst PACKAGE_PIXMAPS_DIR.

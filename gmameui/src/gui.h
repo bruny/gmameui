@@ -36,7 +36,6 @@
 #include <gtk/gtktoolbar.h>
 
 #include "gmameui.h"
-#include "unzip.h"
 #include "callbacks.h"
 #include "mame_options.h"
 #include "mame_options_legacy.h"
@@ -231,7 +230,7 @@ GtkWidget * gmameui_get_image_from_stock (const char *);
 void add_exec_menu(void);
 void init_gui(void);
 
-GdkPixbuf * get_icon_for_rom (MameRomEntry *rom, guint size, ZIP *zip);
+GdkPixbuf * get_icon_for_rom (MameRomEntry *rom, guint size, gchar *zipfilename);
 GdkPixbuf * gmameui_get_icon_from_stock (const char *id);
 GtkWidget * gmameui_get_image_from_stock (const char *id);
 void get_status_icons (void);

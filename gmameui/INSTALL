@@ -14,3 +14,12 @@ rpmbuild -ta gmameui-x.y.z.tar.gz
 Releases (tarballs and RPMs) can be generated using:
 
 make release
+
+Dependencies
+============
+
+libarchive-dev
+libexpat-dev
+libgtk2.0-dev
+libglade2-dev
+libgnome2-dev

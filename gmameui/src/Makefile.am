@@ -28,7 +28,7 @@ gmameui_SOURCES = \
 	gtkjoy.c gtkjoy.h \
 	gui_prefs.c gui_prefs.h \
 	gui_prefs_dialog.c gui_prefs_dialog.h \
-	unzip.c unzip.h \
+	gmameui-zip-utils.c gmameui-zip-utils.h \
 	keyboard.c keyboard.h \
 	xmame_options.h xmame_options.c \
 	mame-exec.h mame-exec.c \
@@ -54,9 +54,10 @@ gmameui-marshaller.c: gmameui-marshallers.list
 	echo "#include \"gmameui-marshaller.h\"" > $@ && \
 	glib-genmarshal --prefix=gmameui_marshaller --body $< >> $@
 
-gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(GNOME_LIBS) $(INTLLIBS) 
+gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(GNOME_LIBS) $(ARCHIVE_LIBS) $(INTLLIBS) 
 
 AM_CPPFLAGS = -g -Wall $(GTK_CFLAGS) $(GLADE2_CFLAGS) $(GNOME_CFLAGS) \
+		-I$(top_srcdir)/include \
 		-DDATADIR=\""$(datadir)"\" \
 		-DGLADEDIR=\"${datadir}/gmameui/glade/\" \
 		-DGMAMEUI_UI_DIR=\"${datadir}/gmameui/ui/\" \

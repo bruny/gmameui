@@ -1,3 +1,12 @@
+2009-06-20 20:05 adburton
+
+	* INSTALL: Updated list of dependencies
+	* configure.ac,
+	  src/: Makefile.am, gmameui-gamelist-view.c, gui.c, gui.h,
+	  gmameui-sidebar.c, gmameui-sidebar.h, gmameui-zip-utils.c,
+	  gmameui-zip-utils.h, unzip.c, unzip.h: Remove non-GPL friendly
+	  unzip.c and unzip.h and replace with libarchive functions
+
 2009-06-11 20:30 adburton
 
 	* src/*.[ch]: Update copyright headers to replace FSF physical address

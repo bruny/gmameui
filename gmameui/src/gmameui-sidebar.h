@@ -26,7 +26,6 @@
 #include <gtk/gtk.h>
 //#include "common.h"
 #include "rom_entry.h"
-#include "unzip.h"
 
 /**** Sidebar functionality ****/
 #define GMAMEUI_TYPE_SIDEBAR        (gmameui_sidebar_get_type ())
@@ -61,9 +60,6 @@ GtkWidget *gmameui_sidebar_new (void);
 
 void gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, MameRomEntry *rom);
 void gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);
-
-GdkPixbuf *
-get_pixbuf_from_zip_file (ZIP *zip, gchar *romname, gchar *parent_romname);
 
 /**** End Sidebar functionality ****/
 

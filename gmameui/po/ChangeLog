@@ -1,3 +1,7 @@
+2009-06-20  adburton <adb@iinet.net.au>
+
+	* POTFILES.in: Replaced unzip.c with gmameui-zip-utils.c
+
 2009-06-11  adburton <adb@iinet.net.au>
 
 	* POTFILES.in: Added data/main_gui.glade and

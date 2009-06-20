@@ -1579,7 +1579,6 @@ adjustment_scrolled_delayed (MameGamelistView *gamelist_view)
 #endif
 	GtkTreePath *tree_path;
 	guint i;
-	ZIP *zip;
 	gchar *zipfile;
 	gboolean valid;
 	GtkAdjustment *vadj;
@@ -1597,9 +1596,7 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 
 	g_return_val_if_fail (visible_games > 0, FALSE);
 	
-	/* Open the zip file only at the begining */
 	zipfile = g_build_filename (icon_dir, "icons.zip", NULL);
-	zip = openzip (zipfile);
 
 	/* Getting the vertical window area */
 	vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games));
@@ -1673,7 +1670,8 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 		    (mame_rom_entry_get_rom_status (tmprom) == CORRECT) &&
 		    !mame_rom_entry_get_icon (tmprom)) {
 			GdkPixbuf *icon;
-			icon = get_icon_for_rom (tmprom, ROM_ICON_SIZE, zip);
+
+			icon = get_icon_for_rom (tmprom, ROM_ICON_SIZE, zipfile);
 
 			mame_rom_entry_set_icon (tmprom, icon);
 			
@@ -1725,9 +1723,6 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 					   adjustment_scrolled,
 					   gamelist_view);
 
-	if (zip)
-		closezip (zip);
-	
 	g_free (zipfile);
 	g_free (icon_dir);
 GMAMEUI_DEBUG ("Leaving adjustment_scrolled_delayed");

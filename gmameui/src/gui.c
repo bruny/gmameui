@@ -365,7 +365,7 @@ gamelist_popupmenu_show (GdkEventButton *event)
    specified). Search first for the .ico file for the ROM, then for the parent
    ROM, then for the icon zipfile */
 GdkPixbuf *
-get_icon_for_rom (MameRomEntry *rom, guint size, ZIP *zip)
+get_icon_for_rom (MameRomEntry *rom, guint size, gchar *zipfilename)
 {
 	GdkPixbuf *pixbuf, *scaled_pixbuf = NULL;
 	gchar *icon_filename;
@@ -404,13 +404,8 @@ get_icon_for_rom (MameRomEntry *rom, guint size, ZIP *zip)
 	}
 
 	/* If icon not found, look in a zipfile */
-	if (pixbuf == NULL) {
-		if (zip != 0) {
-			GMAMEUI_DEBUG ("Attempting to get icon for ROM %s from icon zipfile", romname);
-			rewindzip (zip);
-			pixbuf = get_pixbuf_from_zip_file (zip, romname, parent_romname);					
-		}
-	}
+	if (pixbuf == NULL)
+		pixbuf = read_pixbuf_from_zip_file (zipfilename, romname);
 
 	if (pixbuf != NULL) {
 		GMAMEUI_DEBUG ("Found icon for ROM %s, scaling to size %ix%i", romname, size, size);

@@ -33,7 +33,7 @@ src/options_string.c
 src/progression_window.c
 src/rom_entry.c
 src/rom_entry.h
-src/unzip.c
+src/gmameui-zip-utils.c
 src/xmame_options.c
 src/gmameui-ui.xml
 data/audit_window.glade
