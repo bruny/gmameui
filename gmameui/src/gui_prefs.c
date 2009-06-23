@@ -68,6 +68,7 @@ enum
 {
 	GUI_PREFS_COL_TOGGLED,    /* Emitted when a column is toggled */
 	GUI_PREFS_THEPREFIX_TOGGLED,    /* Emitted when "The" as a prefix is toggled */
+	GUI_PREFS_PREFERCUSTOMICONS_TOGGLED,    /* Emitted when "Prefer custom icons" is toggled */
 	LAST_GUI_PREFS_SIGNAL
 };
 static guint signals[LAST_GUI_PREFS_SIGNAL] = { 0 };
@@ -107,6 +108,7 @@ struct _MameGuiPrefsPrivate {
 	gboolean GameCheck;		/* Check for new games on startup FIXME NOT USED? */
 	gboolean VersionCheck;		/* Check for new version of MAME on startup */
 	gboolean use_xmame_options;     /* Use MAME options, or options set within GMAMEUI */
+	gboolean prefercustomicons;     /* Whether to use custom icons or status icons in gamelist */
 	gboolean gui_joy;
 	gchar *joystick_name;
 	
@@ -187,6 +189,11 @@ mame_gui_prefs_set_property (GObject *object,
 		case PROP_USEXMAMEOPTIONS:
 			prefs->priv->use_xmame_options = g_value_get_boolean (value);
 			break;
+		case PROP_PREFERCUSTOMICONS:
+			prefs->priv->prefercustomicons = g_value_get_boolean (value);
+			/* Emit the signal (so gamelist view can be changed */
+			g_signal_emit (G_OBJECT (prefs), signals[GUI_PREFS_PREFERCUSTOMICONS_TOGGLED], 0,
+				       prefs->priv->theprefix);
 		case PROP_USEJOYINGUI:
 			prefs->priv->gui_joy = g_value_get_boolean (value);
 			break;
@@ -337,6 +344,9 @@ mame_gui_prefs_get_property (GObject *object,
 		case PROP_USEXMAMEOPTIONS:
 			g_value_set_boolean (value, prefs->priv->use_xmame_options);
 			break;
+		case PROP_PREFERCUSTOMICONS:
+			g_value_set_boolean (value, prefs->priv->prefercustomicons);
+			break;	
 		case PROP_USEJOYINGUI:
 			g_value_set_boolean (value, prefs->priv->gui_joy);
 			break;
@@ -508,6 +518,9 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 					 PROP_USEXMAMEOPTIONS,
 					 g_param_spec_boolean ("usexmameoptions", "Use MAME Options", "Use MAME options, rather than those set in GMAMEUI", FALSE, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
+					 PROP_PREFERCUSTOMICONS,
+					 g_param_spec_boolean ("prefercustomicons", "Prefer custom icons", "Prefer custom icons over status icons", FALSE, G_PARAM_READWRITE));
+	g_object_class_install_property (object_class,
 					 PROP_USEJOYINGUI,
 					 g_param_spec_boolean ("usejoyingui", "Use Joystick in GUI", "Use the joystick to navigate in GMAMEUI", 0, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
@@ -564,6 +577,15 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 						     G_TYPE_NONE,    /* Return type */
 						     1, G_TYPE_BOOLEAN);
 
+	/* Signal emitted when custom icon preference is toggled */
+	signals[GUI_PREFS_PREFERCUSTOMICONS_TOGGLED] = g_signal_new ("prefercustomicons-toggled",
+						     G_OBJECT_CLASS_TYPE (object_class),
+						     G_SIGNAL_RUN_LAST,
+						     G_STRUCT_OFFSET (MameGuiPrefsClass, prefercustomicons_toggled),
+						     NULL, NULL,     /* Accumulator and accumulator data */
+						     gmameui_marshaller_VOID__BOOLEAN,
+						     G_TYPE_NONE,    /* Return type */
+						     1, G_TYPE_BOOLEAN);
 }
 
 static void
@@ -642,6 +664,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	pr->priv->GameCheck = mame_gui_prefs_get_bool_property_from_key_file (pr, "gamecheck");
 	pr->priv->VersionCheck = mame_gui_prefs_get_bool_property_from_key_file (pr, "versioncheck");
 	pr->priv->use_xmame_options = mame_gui_prefs_get_bool_property_from_key_file (pr, "usexmameoptions");
+	pr->priv->prefercustomicons = mame_gui_prefs_get_bool_property_from_key_file (pr, "prefercustomicons");
 	pr->priv->gui_joy = mame_gui_prefs_get_bool_property_from_key_file (pr, "usejoyingui");
 	pr->priv->joystick_name = mame_gui_prefs_get_string_property_from_key_file (pr, "joystick-name");
 	if (!pr->priv->joystick_name)
@@ -734,6 +757,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	g_signal_connect (pr, "notify::gamecheck", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::versioncheck", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::usexmameoptions", (GCallback) mame_gui_prefs_save_bool, NULL);
+	g_signal_connect (pr, "notify::prefercustomicons", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::usejoyingui", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::joystick-name", (GCallback) mame_gui_prefs_save_string, NULL);
 	g_signal_connect (pr, "notify::theprefix", (GCallback) mame_gui_prefs_save_bool, NULL);

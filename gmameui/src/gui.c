@@ -47,9 +47,9 @@ adjustment_scrolled (GtkAdjustment *adjustment,
 		g_source_remove (timeout_icon);
 		
 	else
-	timeout_icon =
-		g_timeout_add (ICON_TIMEOUT,
-			       (GSourceFunc) adjustment_scrolled_delayed, gamelist_view);
+		timeout_icon = g_timeout_add (ICON_TIMEOUT,
+					      (GSourceFunc) adjustment_scrolled_delayed,
+					      gamelist_view);
 	timeout_icon = 0;
 }
 
@@ -365,32 +365,42 @@ gamelist_popupmenu_show (GdkEventButton *event)
    specified). Search first for the .ico file for the ROM, then for the parent
    ROM, then for the icon zipfile */
 GdkPixbuf *
-get_icon_for_rom (MameRomEntry *rom, guint size, gchar *zipfilename)
+get_icon_for_rom (MameRomEntry *rom,
+		  guint size,
+		  gchar *icon_dir,
+		  gchar *zipfilename,
+		  gboolean usecustomicons)
 {
 	GdkPixbuf *pixbuf, *scaled_pixbuf = NULL;
 	gchar *icon_filename;
 	gchar *icon_path;
-	gchar *icon_dir;
 	GError **error = NULL;
-	
+
 	const gchar *romname;
 	const gchar *parent_romname;
-	
+
 	g_return_val_if_fail (rom != NULL, NULL);
 	
 	romname = mame_rom_entry_get_romname (rom);
 	parent_romname = mame_rom_entry_get_parent_romname (rom);
 
 	GMAMEUI_DEBUG ("Attempting to get icon for ROM %s", romname);
+
+	/* Use the status icon if we are not using custom icons, or if the
+	   ROM status is not correct (want to emphasis incorrect ROMs) */
+	if (!usecustomicons || (mame_rom_entry_get_rom_status (rom) != CORRECT)) {
+		pixbuf = Status_Icons [mame_rom_entry_get_rom_status (rom)];
+		/* Return pixbuf here, since we don't need to scale/resize it */
+		return pixbuf;
+	} else {
+		/* Look for <romname>.ico in icon dir */
+		icon_filename = g_strdup_printf ("%s.ico", romname);
+		icon_path = g_build_filename (icon_dir, icon_filename, NULL);
+		pixbuf = gdk_pixbuf_new_from_file (icon_path, error);
 	
-	g_object_get (main_gui.gui_prefs, "dir-icons", &icon_dir, NULL);
-	
-	icon_filename = g_strdup_printf ("%s.ico", romname);
-	icon_path = g_build_filename (icon_dir, icon_filename, NULL);
-	pixbuf = gdk_pixbuf_new_from_file (icon_path, error);
-	
-	g_free (icon_filename);
-	g_free (icon_path);
+		g_free (icon_filename);
+		g_free (icon_path);
+	}
 
 	/* If icon not found, try looking for parent's icon */
 	if ((pixbuf == NULL) && mame_rom_entry_is_clone (rom)) {
@@ -413,8 +423,6 @@ get_icon_for_rom (MameRomEntry *rom, guint size, gchar *zipfilename)
 		g_object_unref (pixbuf);
 	} else
 		GMAMEUI_DEBUG ("Could not find icon for %s", romname);
-	
-	g_free (icon_dir);
 	
 	return scaled_pixbuf;
 }

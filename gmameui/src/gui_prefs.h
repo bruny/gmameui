@@ -58,6 +58,7 @@ struct _MameGuiPrefsClass {
 
 	void (*col_toggled) (MameGuiPrefs *prefs, GValueArray *cols);
 	void (*theprefix_toggled) (MameGuiPrefs *prefs, gboolean theprefix);
+	void (*prefercustomicons_toggled) (MameGuiPrefs *prefs, gboolean prefercustomicons);
 };
 
 /* Preferences */
@@ -85,6 +86,7 @@ enum
 	PROP_GAMECHECK,
 	PROP_VERSIONCHECK,
 	PROP_USEXMAMEOPTIONS,
+	PROP_PREFERCUSTOMICONS,
 	PROP_USEJOYINGUI,
 	PROP_JOYSTICKNAME,
 	/* Miscellaneous preferences */

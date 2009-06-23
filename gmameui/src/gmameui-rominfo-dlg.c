@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -276,7 +276,6 @@ gfloat freq;
 		/* Get the title of the original ROM */
 		title = mame_rom_entry_get_parent_romname (priv->rom);
 		gtk_label_set_text (GTK_LABEL (label), title);
-		g_free (title);
 	} else {
 		gtk_widget_hide (label);
 		gtk_widget_hide (clone_label);
@@ -304,7 +303,7 @@ gfloat freq;
 	priv->details_audit_result_buffer = gtk_text_buffer_new (NULL);
 	priv->details_audit_result = glade_xml_get_widget (priv->xml, "details_audit_result");
 	gtk_text_view_set_buffer (GTK_TEXT_VIEW (priv->details_audit_result), priv->details_audit_result_buffer);
-	
+
 	priv->romset_sigid = g_signal_connect (gui_prefs.audit, "romset-audited",
 					       G_CALLBACK (on_romset_audited), dialog);
 	

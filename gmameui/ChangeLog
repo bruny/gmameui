@@ -1,3 +1,12 @@
+2009-06-23 18:55 adburton
+
+	* data/gmameui_prefs.glade, src/: gmameui-gamelist-view.c,
+	  gmameui-rominfo-dlg.c, gui.c, gui.h, gui_prefs.c, gui_prefs.h,
+	  gui_prefs_dialog.c: New preference option for using custom icons where
+	  available instead of status icons. Also retain the setting even the ROM
+	  is played or audited (SF Bug 2011168)
+	* src/gmameui-rominfo-dlg.c: Fix free of const gchar pointer
+
 2009-06-20 20:05 adburton
 
 	* INSTALL: Updated list of dependencies

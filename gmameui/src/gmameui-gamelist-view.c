@@ -118,6 +118,8 @@ static void
 on_prefs_column_shown_toggled (MameGuiPrefs *prefs, gpointer va, gpointer user_data);
 static void
 on_prefs_theprefix_toggled    (MameGuiPrefs *prefs, gboolean theprefix, gpointer user_data);
+static void
+on_prefs_prefercustomicons_toggled  (MameGuiPrefs *prefs, gboolean customicons, gpointer user_data);
 
 /* Callbacks handling when the Search Entry text changes */
 static void
@@ -360,6 +362,8 @@ mame_gamelist_view_init (MameGamelistView *gamelist_view)
 	/* Callback handling on MameGuiPrefs changes */
 	g_signal_connect (G_OBJECT (main_gui.gui_prefs), "col-toggled",
 			  G_CALLBACK (on_prefs_column_shown_toggled), gamelist_view);
+	g_signal_connect (G_OBJECT (main_gui.gui_prefs), "prefercustomicons-toggled",
+			  G_CALLBACK (on_prefs_prefercustomicons_toggled), gamelist_view);
 	g_signal_connect (G_OBJECT (main_gui.gui_prefs), "theprefix-toggled",
 			  G_CALLBACK (on_prefs_theprefix_toggled), gamelist_view);
 
@@ -558,13 +562,20 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, MameRom
 	PangoStyle pangostyle;
 	const gchar *name_in_list;
 	GtkTreeIter iter;
-
+	gchar *iconzipfile;
+	gchar *icondir;
+	gboolean prefercustomicons;
+	
 	g_return_if_fail (tmprom != NULL);
 
 	g_object_get (main_gui.gui_prefs,
 		      "current-mode", &current_mode,
-		      "current-rom-filter", &rom_filter_opt,
+		      "current-rom-filter", &rom_filter_opt,	      
+		      "dir-icons", &icondir,
+		      "prefercustomicons", &prefercustomicons,
 		      NULL);
+	
+	iconzipfile = g_build_filename (icondir, "icons.zip", NULL);
 	
 #ifdef TREESTORE	
 	/* Whether the Tree Model will a tree or a list */
@@ -604,7 +615,7 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, MameRom
 		      NULL);
 	
 	/* Set the pixbuf for the status icon */
-	pixbuf = Status_Icons [mame_rom_entry_get_rom_status (tmprom)];
+	pixbuf = get_icon_for_rom (tmprom, ROM_ICON_SIZE, icondir, iconzipfile, prefercustomicons);
 	
 	iter = mame_rom_entry_get_position (tmprom);
 
@@ -647,7 +658,7 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, MameRom
 #ifdef TREESTORE
 	}
 #endif
-	
+
 	g_free (romname);
 	g_free (manu);
 	g_free (year);
@@ -655,6 +666,10 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, MameRom
 	g_free (driver);
 	g_free (category);
 	g_free (version);
+	
+	g_free (iconzipfile);
+	g_free (icondir);
+
 }
 
 static void
@@ -1108,7 +1123,7 @@ foreach_update_prefix_in_store (GtkTreeModel *model,
 #endif
 	return FALSE;   /* Do not stop walking the store, call us with next row */
 }
-	
+
 /* Handler for when the columns in the GuiPrefs object are changed (usually via
    the GUI Preferences dialog */
 static void
@@ -1144,6 +1159,26 @@ on_prefs_column_shown_toggled (MameGuiPrefs *prefs, gpointer va_cols, gpointer u
 	}
 	
 	g_list_free (column_list);
+}
+
+/* Handler for when 'Prefer custom icons' in the GuiPrefs object is changed
+   (usually via the GUI Preferences dialog). If turned on, want to use
+   custom icons for non-correct ROMs. Trigger this by invoking
+   adjustment_scrolled_delayed which updates the icons appropriately. This is
+   done in a g_timeout_add clause to prevent blocking the UI */
+static void
+on_prefs_prefercustomicons_toggled (MameGuiPrefs *prefs, gboolean prefercustomicons, gpointer user_data)
+{
+
+	MameGamelistView *gamelist_view;
+	
+	gamelist_view = (gpointer) user_data;
+
+	/* Call adjustment_scrolled_delayed which updates the icons in the
+	   visible range of the gamelist */
+	g_timeout_add (ICON_TIMEOUT,
+		       (GSourceFunc) adjustment_scrolled_delayed, gamelist_view);
+
 }
 
 /* Handler for when the 'The' prefix in the GuiPrefs object is changed
@@ -1432,7 +1467,9 @@ populate_model_from_gamelist (MameGamelistView *gamelist_view, GtkTreeModel *mod
 			pangostyle = PANGO_STYLE_NORMAL;	/* Original */
 		}
 
-		/* Set the pixbuf for the status icon */
+		/* Set the pixbuf for the status icon - start as being the status icon,
+		   then look for the custom icon in the adjustment_scrolled_delayed
+		   callback since we don't want to load icons from zips for EVERY ROM */
 		pixbuf = Status_Icons [mame_rom_entry_get_rom_status (tmprom)];
 
 #ifdef TREESTORE
@@ -1579,16 +1616,18 @@ adjustment_scrolled_delayed (MameGamelistView *gamelist_view)
 #endif
 	GtkTreePath *tree_path;
 	guint i;
-	gchar *zipfile;
 	gboolean valid;
 	GtkAdjustment *vadj;
-	gchar *icon_dir;
+	gchar *icondir;
+	gchar *iconzipfile;
+	gboolean prefercustomicons;
 	
 	g_return_val_if_fail (main_gui.gui_prefs != NULL, FALSE);
 	
 GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 	g_object_get (main_gui.gui_prefs,
-		      "dir-icons", &icon_dir,
+		      "dir-icons", &icondir,
+		      "prefercustomicons", &prefercustomicons,
 #ifdef TREESTORE
 		      "current-mode", &current_mode,
 #endif
@@ -1596,7 +1635,7 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 
 	g_return_val_if_fail (visible_games > 0, FALSE);
 	
-	zipfile = g_build_filename (icon_dir, "icons.zip", NULL);
+	iconzipfile = g_build_filename (icondir, "icons.zip", NULL);
 
 	/* Getting the vertical window area */
 	vadj = gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games));
@@ -1663,15 +1702,11 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 					     tree_path,
 					     NULL, &rect);
 
-		/* Only update the pixbuf if it is in the viewable area
-		   (defined by the rect), the ROM is correct, and the
-		   pixbuf is not already set */
-		if ((rect.y + rect.height) > 0 && (rect.y < vadj->page_size) &&
-		    (mame_rom_entry_get_rom_status (tmprom) == CORRECT) &&
-		    !mame_rom_entry_get_icon (tmprom)) {
+		/* Only update the pixbuf if it is in the viewable area (defined by the rect) */
+		if ((rect.y + rect.height) > 0 && (rect.y < vadj->page_size)) {
 			GdkPixbuf *icon;
 
-			icon = get_icon_for_rom (tmprom, ROM_ICON_SIZE, zipfile);
+			icon = get_icon_for_rom (tmprom, ROM_ICON_SIZE, icondir, iconzipfile, prefercustomicons);
 
 			mame_rom_entry_set_icon (tmprom, icon);
 			
@@ -1723,8 +1758,8 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 					   adjustment_scrolled,
 					   gamelist_view);
 
-	g_free (zipfile);
-	g_free (icon_dir);
+	g_free (iconzipfile);
+	g_free (icondir);
 GMAMEUI_DEBUG ("Leaving adjustment_scrolled_delayed");
 	return FALSE;
 }
