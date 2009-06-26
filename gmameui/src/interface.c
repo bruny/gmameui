@@ -504,7 +504,7 @@ create_MainWindow (void)
 	
 	GtkWidget *toolbar_widget;
 	GtkWidget *toolbar_icon;
-	
+
 	int z;
 	for (z = 0; z < NUM_TOOLBAR_ITEMS; z++) {
 		toolbar_widget = gtk_ui_manager_get_widget (main_gui.manager,
@@ -773,6 +773,11 @@ mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
 	gtk_widget_show_all (main_gui.scrolled_window_games);
 	
 	gtk_paned_set_position (GTK_PANED (main_gui.hpanedLeft), xpos_filters);
+
+	/* Update UI if executables or entries in the MameGamelistView are
+	   not available */
+	gmameui_ui_set_items_sensitive ();
+
 	g_signal_connect (G_OBJECT (main_gui.hpanedLeft), "notify::position",
 			  G_CALLBACK (on_hpaned_position_notify), NULL);
 	

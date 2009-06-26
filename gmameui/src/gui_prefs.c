@@ -23,17 +23,12 @@
 /* Set in Glade file, add new property, add get handler, add set handler, add support in gui_prefs_dialog,
    add load in init, add cleanup in finalise */
 
+#include "common.h"
 
 #include <string.h>
 #include <sys/stat.h>   /* For S_IRWXU */
-
-#include <gtk/gtkcheckbutton.h>
-#include <gtk/gtkentry.h>
-#include <gtk/gtklabel.h>
 #include <glib/gstdio.h>	/* For g_mkdir */
-#include <glade/glade.h>
 
-#include "common.h"
 #include "gmameui.h"
 #include "gui_prefs.h"
 #include "rom_entry.h"
@@ -645,6 +640,11 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 		GMAMEUI_DEBUG ("Value for cols-shown at %d is %d", i, g_value_get_int (&val));
 		g_value_array_append (pr->priv->cols_shown, &val);
 	}
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving cols-shown: %s", error->message);
+		g_error_free (error);
+		error = NULL;
+	}
 
 	int_array = g_key_file_get_integer_list (pr->priv->prefs_ini_file, "Preferences", "cols-width", &columnsize, &error);
 	for (i = 0; i < NUMBER_COLUMN; ++i) {
@@ -655,6 +655,12 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 		GMAMEUI_DEBUG ("Value for cols-width at %d is %d", i, g_value_get_int (&val));
 		g_value_array_append (pr->priv->cols_width, &val);
 	}
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving cols-width: %s", error->message);
+		g_error_free (error);
+		error = NULL;
+	}
+
 	pr->priv->sort_col = mame_gui_prefs_get_int_property_from_key_file (pr, "sort-col");
 	pr->priv->sort_col_direction = mame_gui_prefs_get_int_property_from_key_file (pr, "sort-col-direction");
 	pr->priv->xpos_filters = mame_gui_prefs_get_int_property_from_key_file (pr, "xpos-filters");
@@ -687,6 +693,11 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 		GMAMEUI_DEBUG ("Value for executable-paths at %d is %s", i, g_value_get_string (&val));
 		g_value_array_append (pr->priv->executable_paths, &val);
 	}
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving executable-paths: %s", error->message);
+		g_error_free (error);
+		error = NULL;
+	}
 	
 	/* Load the ROM paths */
 	str_array = g_key_file_get_string_list (pr->priv->prefs_ini_file, "Preferences", "rom-paths", &paths, &error);
@@ -699,6 +710,11 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 		GMAMEUI_DEBUG ("Value for rom-paths at %d is %s", i, g_value_get_string (&val));
 		g_value_array_append (pr->priv->rom_paths, &val);
 	}
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving rom-paths: %s", error->message);
+		g_error_free (error);
+		error = NULL;
+	}
 	
 	/* Load the Samples paths */
 	str_array = g_key_file_get_string_list (pr->priv->prefs_ini_file, "Preferences", "sample-paths", &paths, &error);
@@ -710,6 +726,11 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 			g_value_set_string (&val, str_array[i]);	/* If not available, default to NULL */
 		GMAMEUI_DEBUG ("Value for sample-paths at %d is %s", i, g_value_get_string (&val));
 		g_value_array_append (pr->priv->sample_paths, &val);
+	}
+	if (error) {
+		GMAMEUI_DEBUG ("Error retrieving sample-paths: %s", error->message);
+		g_error_free (error);
+		error = NULL;
 	}
 	
 	/* Directory preferences */

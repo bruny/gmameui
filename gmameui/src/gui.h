@@ -228,7 +228,7 @@ GdkPixbuf * gmameui_get_icon_from_stock (const char *);
 GtkWidget * gmameui_get_image_from_stock (const char *);
 
 void add_exec_menu(void);
-void init_gui(void);
+int init_gui(void);
 
 GdkPixbuf * get_icon_for_rom (MameRomEntry *rom, guint size, gchar *icon_dir,
 							  gchar *zipfilename, gboolean usecustomicons);

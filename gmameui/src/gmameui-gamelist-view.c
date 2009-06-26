@@ -21,6 +21,8 @@
  *
  */
 
+#include "common.h"
+
 #include <gdk/gdkkeysyms.h>
 #include <string.h>
 
@@ -961,10 +963,10 @@ on_expand_all_activate (GtkMenuItem *menuitem,
 static gboolean
 delayed_row_selected (GtkTreeSelection *selection)
 {
-	MameRomEntry *rom;
+	MameRomEntry *rom = NULL;
 	GtkTreeIter iter;
 	GtkTreeModel *model;
-	
+
 	if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
 		gtk_tree_model_get (model, &iter, ROMENTRY, &rom, -1);
 
@@ -972,9 +974,9 @@ delayed_row_selected (GtkTreeSelection *selection)
 
 		g_object_set (main_gui.gui_prefs, "current-rom", mame_rom_entry_get_romname (rom), NULL);
 
-		select_game (rom);
+//		select_game (rom);
 	}
-	
+select_game (rom);
 	return FALSE;
 }
 
@@ -1424,7 +1426,9 @@ populate_model_from_gamelist (MameGamelistView *gamelist_view, GtkTreeModel *mod
 {
 	GList *listpointer;
 	MameRomEntry *tmprom;
+#ifdef TREESTORE
 	gchar *my_romname_root = NULL;
+#endif
 	gchar *my_hassamples;
 	GtkTreeIter iter;
 #ifdef TREESTORE

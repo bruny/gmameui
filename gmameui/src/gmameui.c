@@ -72,7 +72,8 @@ main (int argc, char *argv[])
 	gtk_init (&argc, &argv);
 	
 	gmameui_init ();
-	init_gui ();
+	if (init_gui () == -1)
+return -1;
 
 	/* Load the default options */
 	main_gui.options = mame_options_new ();

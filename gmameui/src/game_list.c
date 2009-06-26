@@ -21,6 +21,8 @@
  *
  */
 
+#include "common.h"
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -100,7 +102,6 @@ mame_gamelist_class_init (MameGamelistClass *klass)
 static void
 mame_gamelist_init (MameGamelist *gl)
 {
-	int i;
 GMAMEUI_DEBUG ("Creating mame_gamelist object");	
 	gl->priv = g_new0 (MameGamelistPrivate, 1);
 	
@@ -341,13 +342,14 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 	g_message (_("Loading gamelist %s"), filename);
 	
 	gamelist = fopen (filename, "r");
-	g_free (filename);
 
 	if (!gamelist) {
 		GMAMEUI_DEBUG ("Could not open gamelist file %s", filename);
 		gl->priv->version = g_strdup ("unknown");
 		return FALSE;
 	}
+
+	g_free (filename);
 	
 	while (fgets (line, LINE_BUF, gamelist)) {
 		p = line;

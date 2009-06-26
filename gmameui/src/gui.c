@@ -34,6 +34,7 @@
 #include "io.h"
 #include "gmameui-gamelist-view.h"
 #include "gmameui-sidebar.h"
+#include "gmameui-zip-utils.h"
 
 static guint timeout_icon;
 
@@ -53,7 +54,7 @@ adjustment_scrolled (GtkAdjustment *adjustment,
 	timeout_icon = 0;
 }
 
-void
+int
 init_gui (void)
 {
 	GtkTooltips *tooltips;
@@ -80,6 +81,8 @@ g_message (_("Time to initialise icons: %.02f seconds"), g_timer_elapsed (mytime
 #endif
 	/* Create the main window */
 	MainWindow = create_MainWindow ();
+	if (!MainWindow)
+		return -1;
 #ifdef ENABLE_DEBUG
 g_message (_("Time to create main window, filters and gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 #endif
@@ -111,6 +114,8 @@ g_message (_("Time to create main window, filters and gamelist: %.02f seconds"),
 	g_message (_("Time to complete start of UI: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 	g_timer_destroy (mytimer);
 #endif
+
+	return 0;
 }
 
 static void
@@ -415,7 +420,7 @@ get_icon_for_rom (MameRomEntry *rom,
 
 	/* If icon not found, look in a zipfile */
 	if (pixbuf == NULL)
-		pixbuf = read_pixbuf_from_zip_file (zipfilename, romname);
+		pixbuf = read_pixbuf_from_zip_file (zipfilename, (gchar *)  romname);
 
 	if (pixbuf != NULL) {
 		GMAMEUI_DEBUG ("Found icon for ROM %s, scaling to size %ix%i", romname, size, size);

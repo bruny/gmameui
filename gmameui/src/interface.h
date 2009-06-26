@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -46,9 +46,13 @@ enum {
 	TOOLBAR_VIEWFOLDERLIST,
 	TOOLBAR_VIEWSIDEBAR,
 	TOOLBAR_LISTVIEW,
+#ifdef TREESTORE
 	TOOLBAR_TREEVIEW,
+#endif
 	TOOLBAR_DETAILSLISTVIEW,
+#ifdef TREESTORE
 	TOOLBAR_DETAILSTREEVIEW,
+#endif
 	NUM_TOOLBAR_ITEMS
 };
 
@@ -69,9 +73,13 @@ static const toolbar_item toolbar_items [] = {
 	{ TOOLBAR_VIEWFOLDERLIST, "/ToolBar/ViewFolderList", "gmameui-view-folders", 0, N_("Show Folders") },
 	{ TOOLBAR_VIEWSIDEBAR, "/ToolBar/ViewSidebarPanel", "gmameui-view-screenshot", 0, N_("Show Sidebar") },
 	{ TOOLBAR_LISTVIEW, "/ToolBar/ViewListView", "gmameui-view-list", 0, N_("List") },
+#ifdef TREESTORE
 	{ TOOLBAR_TREEVIEW, "/ToolBar/ViewTreeView", "gmameui-view-tree", 0, N_("List Tree") },
+#endif
 	{ TOOLBAR_DETAILSLISTVIEW, "/ToolBar/ViewDetailsListView", "gmameui-view-list", 0, N_("Details") },
+#ifdef TREESTORE
 	{ TOOLBAR_DETAILSTREEVIEW, "/ToolBar/ViewDetailsTreeView", "gmameui-view-tree", 0, N_("Details Tree") },
+#endif
 };
 
 /* Signal prototypes */
