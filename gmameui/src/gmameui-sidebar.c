@@ -21,6 +21,8 @@
  *
  */
 
+#include "common.h"
+
 #include <string.h>
 #include <glade/glade.h>
 
@@ -28,6 +30,7 @@
 #include "gmameui.h"
 #include "gui.h"
 #include "gui_prefs.h"
+#include "gmameui-zip-utils.h"
 
 static void gmameui_sidebar_class_init (GMAMEUISidebarClass *class);
 static void gmameui_sidebar_init (GMAMEUISidebar *dlg);
@@ -765,6 +768,8 @@ gmameui_sidebar_set_history (GMAMEUISidebar *sidebar, MameRomEntry *rom)
 void
 gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page)
 {
+	g_return_if_fail (sidebar != NULL);
+
 	gtk_notebook_set_current_page (GTK_NOTEBOOK (sidebar->priv->screenshot_notebook),
 				       page);
 }

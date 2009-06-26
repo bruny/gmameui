@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,6 +119,7 @@ mame_gui_prefs_dialog_init (MameGuiPrefsDialog *dlg)
 	gboolean gamecheck;
 	gboolean versioncheck;
 	gboolean usexmameoptions;
+	gboolean prefercustomicons;
 	gboolean usejoyingui;
 	gchar *joystick_name;
 	gboolean theprefix;
@@ -143,6 +144,7 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 		      "gamecheck", &gamecheck,
 		      "versioncheck", &versioncheck,
 		      "usexmameoptions", &usexmameoptions,
+		      "prefercustomicons", &prefercustomicons,
 		      "usejoyingui", &usejoyingui,
 		      "joystick-name", &joystick_name,
 		      /* Column options */
@@ -166,6 +168,11 @@ GMAMEUI_DEBUG ("Initialising gui prefs dialog");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), usexmameoptions);
 	g_signal_connect (widget, "toggled", 
 			  G_CALLBACK (on_prefs_checkbutton_toggled), "usexmameoptions");
+	
+	widget = glade_xml_get_widget (xml, "prefercustomicons");
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), prefercustomicons);
+	g_signal_connect (widget, "toggled", 
+			  G_CALLBACK (on_prefs_checkbutton_toggled), "prefercustomicons");
 	
 	widget = glade_xml_get_widget (xml, "usejoyingui");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget), usejoyingui);
