@@ -134,7 +134,8 @@ create_CreditsWindow (GtkWindow *parent)
 	translators = gtk_label_new(_("The following people translated GMAMEUI:\n"
 				      "Brazilian Portugese (pt_BR) - Alfredo Jr <junix@linuxinabox.org>\n"
 				      "Italian (it) - Ugo Viti <ugo.viti@initzero.it>\n"
-				      "Swedish (sv) - Daniel Nylander <dnylander@users.sourceforge.net>\n"));
+				      "Swedish (sv) - Daniel Nylander <dnylander@users.sourceforge.net>\n"
+				      "French (fr) - Loïc Martin <loic.martin3@gmail.com>"));
 	gtk_widget_show (translators);
 	gtk_notebook_append_page (credits_notebook, translators, translators_label);
 

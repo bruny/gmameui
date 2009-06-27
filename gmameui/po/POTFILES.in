@@ -28,7 +28,6 @@ src/mame_options.c
 src/mame_options_dialog.c
 src/mame_options_legacy.c
 src/mame_options_legacy_dialog.c
-src/network_game.c
 src/options_string.c
 src/progression_window.c
 src/rom_entry.c
