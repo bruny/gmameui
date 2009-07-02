@@ -1,3 +1,14 @@
+2009-07-02  adburton <adb@iinet.net.au>
+
+	* fr.po: Updated French translation (thanks Loïc Martin)
+	* pt_BR.po: Updated Portugese translation (thanks Junix)
+	* it.po: Updated Italian translation (thanks Ugo Viti)
+
+2009-06-27  adburton <adb@iinet.net.au>
+
+	* POTFILES.in: Removed network_game.c from list of translatable files
+	* LINGUAS, fr.po: New French translation (thanks Loïc Martin)
+
 2009-06-20  adburton <adb@iinet.net.au>
 
 	* POTFILES.in: Replaced unzip.c with gmameui-zip-utils.c

@@ -1,3 +1,12 @@
+2009-07-02 20:45 adburton
+
+	* INSTALL: Updated installation instructions for CVS
+	* src/interface.c: Remember choice of selected filter button upon start
+
+2009-06-27 15:08 adburton
+
+	* AUTHORS, src/about.c: New French translation
+
 2009-06-26 20:58 adburton
 
 	* src/: gui.c, gui.h, interface.c, gmameui.c: Fix segfault if Glade data

@@ -95,6 +95,21 @@ on_filter_btn_toggled (GtkWidget *widget, gpointer user_data)
 	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
 }
 
+static GtkWidget *
+get_filter_btn_by_id (GladeXML *xml, gint i)
+{
+	GtkWidget *radio = NULL;
+
+	if (i == 0)
+		radio = glade_xml_get_widget (xml, "filter_btn_all");
+	else if (i == 1)
+		radio = glade_xml_get_widget (xml, "filter_btn_avail");
+	else if (i == 2)
+		radio = glade_xml_get_widget (xml, "filter_btn_unavail");
+
+	return radio;
+}
+
 void
 on_toolbar_view_menu_activate (GtkAction *action,
 			       gpointer          user_data)
@@ -534,34 +549,31 @@ GMAMEUI_DEBUG ("Setting up search entry field... done");
 
 	/* Prepare the ROM availability filter buttons */
 GMAMEUI_DEBUG ("Setting up ROM availability filter buttons...");
-	GList *filter_btn_list, *list;
 	
+	GList *filter_btn_list, *list;
 	gint current_filter_btn;
+	
 	filter_btn_list = glade_xml_get_widget_prefix (xml, "filter_btn_");
 	g_object_get (main_gui.gui_prefs, "current-rom-filter", &current_filter_btn, NULL);
-	i = 0;
 	
 	for (list = g_list_first (filter_btn_list);
 	     list != NULL;
 	     list = g_list_next (list)) {	
-		     
 		/* Hide the radio circle so only the button is visible */
 		gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (list->data), FALSE);
-		     
-		/* Set the button based on the preference */
-		/* AAA FIXME TODO Not working */
-		if (i == current_filter_btn)
-			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (list->data), TRUE);
-		
+
 		/* Set the signal callback */
 		g_signal_connect (G_OBJECT (list->data), "toggled",
 				  G_CALLBACK (on_filter_btn_toggled), NULL);
-		
-		i++;
 	}
+	
+	/* Set the button based on the preference */
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (get_filter_btn_by_id (xml, current_filter_btn)),
+				      TRUE);
+
 GMAMEUI_DEBUG ("Setting up ROM availability filter buttons... done");	
 	/* End ROM availability filter buttons */
-	
+		
 	main_gui.filters_list = gmameui_filters_list_new ();
 
 /* FIXME TODO
@@ -767,9 +779,9 @@ GMAMEUI_DEBUG ("Setting up ROM availability filter buttons... done");
 #endif
 	/* Create the UI of the Game List */
 	main_gui.displayed_list = mame_gamelist_view_new ();
-mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
+	mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
 	
-	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_games), main_gui.displayed_list);
+	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_games), GTK_WIDGET (main_gui.displayed_list));
 	gtk_widget_show_all (main_gui.scrolled_window_games);
 	
 	gtk_paned_set_position (GTK_PANED (main_gui.hpanedLeft), xpos_filters);

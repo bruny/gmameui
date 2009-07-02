@@ -3,6 +3,7 @@ Installing
 
 To install from source:
 
+sh autogen.sh (if you have downloaded from CVS)
 ./configure
 make
 make install (as root)
