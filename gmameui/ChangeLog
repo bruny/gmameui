@@ -1,3 +1,7 @@
+2009-07-03 20:35 adburton
+
+	* configure.ac, NEWS: Tagged for new release
+
 2009-07-02 20:45 adburton
 
 	* INSTALL: Updated installation instructions for CVS
@@ -11,17 +15,12 @@
 
 	* src/: gui.c, gui.h, interface.c, gmameui.c: Fix segfault if Glade data
 	files could not be loaded on startup
-
 	* src/game_list.c: Move free of string after debug line
-
 	* src/interface.c: Set UI items disabled if no executable or games listed
-
 	* src/interface.h: ifdef out treeview items to hide Gtk-CRITICAL warnings
 	on startup
-
 	* src/gui_prefs.c: Report and clear GError to fix Gtk-CRITICAL warnings on
 	startup
-
 	* src/gmameui-gamelist-view.c: Fix compilation warnings
 
 2009-06-23 18:55 adburton

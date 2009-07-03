@@ -1,3 +1,17 @@
+Overview of changes in GMAMEUI 0.2.10
+=====================================
+
+* Replace non-GPL zip handling code
+
+* Add new GMAMEUI Preferences option to prefer either custom icons (using
+  icons.zip) or status icons (SF Bug 2011168)
+
+* Fix some broken legacy XMAME options handling
+
+* New French translation, updated Italian and Portugese translations
+
+* Fix some compilation/runtime GTK warnings
+
 Overview of changes in GMAMEUI 0.2.9
 ====================================
 
