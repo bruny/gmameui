@@ -182,10 +182,14 @@ mame_rominfo_dialog_class_init (MameRomInfoDialogClass *class)
 static void
 mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 {
+	MameExec *exec;
 	GtkWidget *rominfo_vbox;
 	GtkWidget *label;
 	GtkWidget *scrolledwindow;
 	gchar *value;
+	gboolean horizontal;
+	gint num_colours;
+	gfloat freq;
 	char *title;
 	
 	MameRomInfoDialogPrivate *priv;
@@ -200,6 +204,13 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	priv->rom = gui_prefs.current_game;
 
 	g_return_if_fail (priv->rom != NULL);
+
+	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
+	g_return_if_fail (exec != NULL);
+
+	/* Get extra details about the ROM from -xmlinfo that aren't stored in
+	   the gamelist file */
+	priv->rom = create_gamelist_xmlinfo_for_rom (exec, priv->rom);
 
 	/* Build the UI and connect signals here */
 	priv->xml = glade_xml_new (GLADEDIR "rom_info.glade", "vbox2", GETTEXT_PACKAGE);
@@ -229,8 +240,8 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	gtk_label_set_text (GTK_LABEL (label), mame_rom_entry_get_year (priv->rom));
 
 	label = glade_xml_get_widget (priv->xml, "manufacturer_result");
-	gtk_label_set_text (GTK_LABEL (label), mame_rom_entry_get_manufacturer (priv->rom));
-
+	gtk_label_set_text (GTK_LABEL (label), mame_rom_entry_get_manufacturer (priv->rom));	
+	
 	title = get_rom_cpu_value (priv->rom);
 	label = glade_xml_get_widget (priv->xml, "cpu_result");
 	gtk_label_set_text (GTK_LABEL (label), title);
@@ -240,15 +251,12 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	label = glade_xml_get_widget (priv->xml, "sound_result");
 	gtk_label_set_text (GTK_LABEL (label), title);
 	g_free (title);
-gboolean horizontal;
-gint num_colours;
-gfloat freq;
+
 	g_object_get (priv->rom,
 		      "is-horizontal", &horizontal,
 		      "screen-freq", &freq,
 		      "num-colours", &num_colours,
 		      NULL);
-	
 
 	/* Don't display resolution if this is a vector game */
 	if (!mame_rom_entry_is_vector (priv->rom))

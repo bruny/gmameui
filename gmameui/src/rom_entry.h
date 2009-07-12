@@ -24,6 +24,7 @@
 #define __ROM_ENTRY_H__
 
 #include "common.h"
+#include "mame-exec.h"
 
 G_BEGIN_DECLS
 
@@ -46,6 +47,13 @@ typedef struct {
 	gchar *name;
 	guint clock;
 } SoundCPUInfo;
+
+typedef struct {
+	gchar *name;    /* Name */
+	gint uncomp_size;   /* Uncompressed size in bytes */
+	gchar *sha1;   /* SHA1 checksum */
+	gboolean present;
+} individual_rom;
 
 typedef enum {
 	INCORRECT,
@@ -213,6 +221,8 @@ void mame_rom_entry_add_rom (MameRomEntry *rom);
 void mame_rom_entry_add_sample (MameRomEntry *rom);
 void mame_rom_entry_add_cpu (MameRomEntry *rom, int i, gchar *name, gint clock);
 void mame_rom_entry_add_soundcpu (MameRomEntry *rom, int i, gchar *name, gint clock);
+/* FIXME TODO Combine this and mame_rom_entry_add_rom above; create equivalent sample function */
+void mame_rom_entry_add_rom_ref (MameRomEntry *rom, individual_rom *rom_ref);
 
 void mame_rom_entry_rom_played (MameRomEntry *rom, gboolean warning, gboolean error);
 
@@ -225,6 +235,8 @@ SoundCPUInfo * get_sound_cpu (MameRomEntry *rom, int i);
 
 ControlType get_control_type (gchar *control_type);
 DriverStatus get_driver_status (gchar *driver_status);
+
+MameRomEntry *create_gamelist_xmlinfo_for_rom (MameExec *exec, MameRomEntry *rom);
 
 G_END_DECLS
 

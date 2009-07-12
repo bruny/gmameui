@@ -32,7 +32,9 @@
 #include "rom_entry.h"
 #include "gmameui-gamelist-view.h"
 
-
+#define GAMELIST_DEFINED_VERSION 0.92   /* The version of the gamelist layout. If this
+					   changes, need to update the user's gamelist */
+#define FIELDS_PER_RECORD 20
 #define LINE_BUF 1024
 
 /* Separator for game list fields.
@@ -268,8 +270,6 @@ compare_game_name (MameRomEntry *rom1, MameRomEntry *rom2)
 				   mame_rom_entry_get_clonesort (rom2));
 }
 
-#define FIELDS_PER_RECORD 27 + (NB_CPU * 4)
-
 void mame_gamelist_add (MameGamelist *gl, MameRomEntry *rom)
 {
 	gchar **manufacturer_fields;
@@ -321,17 +321,16 @@ GList* mame_gamelist_get_versions_glist (MameGamelist *gl) {
 	return gl->priv->versions;
 }
 
+// AAA FIXME TODO rename to mame_gamelist_load_from_file
 gboolean mame_gamelist_load (MameGamelist *gl)
 {
 	gchar *filename;
 	FILE *gamelist;
-	gint j;
 	gchar line[LINE_BUF];
 	gchar **tmp_array;
 	gchar *tmp, *p;
 	MameRomEntry *rom;
 	gboolean exe_version_checked = FALSE;
-	gint offset;
 	int i;
 	int supported_games = 0;	
 
@@ -345,7 +344,7 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 
 	if (!gamelist) {
 		GMAMEUI_DEBUG ("Could not open gamelist file %s", filename);
-		gl->priv->version = g_strdup ("unknown");
+		gl->priv->version = g_strdup ("none");
 		return FALSE;
 	}
 
@@ -390,7 +389,7 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 			mame_rom_entry_set_romname (rom, tmp_array[0]);
 			mame_rom_entry_set_gamename (rom, tmp_array[1]);
 			mame_rom_entry_set_gamenameext (rom, tmp_array[2]);
-			mame_rom_entry_set_isbios (rom, !strcmp (tmp_array[4], "true"));
+			mame_rom_entry_set_isbios (rom, atoi (tmp_array[4]));
 			mame_rom_entry_set_year (rom, tmp_array[5]);
 			mame_rom_entry_set_manufacturer (rom, tmp_array[6]);
 			mame_rom_entry_set_cloneof (rom, g_strdup (tmp_array[7]));
@@ -399,48 +398,17 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 			mame_rom_entry_set_driver (rom, tmp_array[9]);
 
 			g_object_set (rom,
-				      "the-trailer", !strcmp (tmp_array[3], "true"),
+				      "the-trailer", atoi (tmp_array[3]),
 				      "driver-status", atoi (tmp_array[10]),
 				      "driver-status-colour", atoi (tmp_array[11]),
 				      "driver-status-sound", atoi (tmp_array[12]),
 				      "driver-status-graphics", atoi (tmp_array[13]),
-				      NULL);
-
-			/* offset of cpu infos in the array */
-			offset = 15;
-			for (j = 0; j < NB_CPU; j++)
-			{
-				mame_rom_entry_add_cpu (rom, j,
-							tmp_array[ (j * 2) + offset],
-							atoi (tmp_array[ (j * 2) + offset + 1]));
-			}
-
-			/* calculate offset of sound cpu infos in the array */
-			offset = 15 + (NB_CPU * 2);
-
-			for (j = 0; j < NB_CPU; j++)
-			{
-				mame_rom_entry_add_soundcpu (rom, j,
-							     tmp_array[offset + (j * 2)],
-							     atoi (tmp_array[offset + (j * 2) + 1]));
-			}
-
-			offset = 15 + (NB_CPU * 4);
-
-			g_object_set (rom,
-				      "num-colours", atoi (tmp_array[14]),
-				      "num-players", atoi (tmp_array[offset + 0]),
-				      "num-buttons", atoi (tmp_array[offset + 1]),
-				      "control-type", atoi (tmp_array[offset + 2]),
-				      "screenx", atoi (tmp_array[offset + 4]),
-				      "screeny", atoi (tmp_array[offset + 5]),
-				      "screen-freq", atof (tmp_array[offset + 6]),
-				      "is-horizontal",  (*tmp_array[offset + 7] == 'h'),
-				      "num-channels", atoi (tmp_array[offset + 8]),
-				      "is-vector", (!strcmp (tmp_array[offset + 3], "true")),
-				      "num-roms", atoi (tmp_array[offset + 9]),
-				      "num-samples", atoi (tmp_array[offset + 10]),
-				      "sampleof", g_strdup (tmp_array[offset + 11]),
+				      "control-type", atoi (tmp_array[14]),
+				      "is-vector", atoi (tmp_array[15]),
+				      "is-horizontal",  (*tmp_array[16] == 'h'),
+				      "num-channels", atoi (tmp_array[17]),
+				      "num-roms", atoi (tmp_array[18]),
+				      "num-samples", atoi (tmp_array[19]),
 				      NULL);
 	      
 	      
@@ -465,14 +433,14 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 				fclose (gamelist);
 				return FALSE;
 			}
-			if (g_ascii_strtod (tmp_array[2], NULL) < 0.91)
+			if (g_ascii_strtod (tmp_array[2], NULL) < GAMELIST_DEFINED_VERSION)
 			{
 				gl->priv->version = g_strdup ("too old");
 				g_strfreev (tmp_array);
 				fclose (gamelist);
 				return FALSE;
 			}
-			if (g_ascii_strtod (tmp_array[2], NULL) > 0.91)
+			if (g_ascii_strtod (tmp_array[2], NULL) > GAMELIST_DEFINED_VERSION)
 			{
 				gl->priv->version = g_strdup ("unknown");
 				g_strfreev (tmp_array);
@@ -517,15 +485,12 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 static void
 mame_gamelist_print (FILE *handle, MameRomEntry *rom)
 {
-	int i;
-	char float_buf[FLOAT_BUF_SIZE];
-
+	
 	gchar *romname, *gamename, *gamenameext;
 	gboolean thetrailer, is_vector, horizontal;
-	gchar *year, *manufacturer, *cloneof, *romof, *driver, *sampleof;
-	gint num_colours, num_players, num_buttons, num_channels, screenx, screeny, num_roms, num_samples;
+	gchar *year, *manufacturer, *cloneof, *romof, *driver;
+	gint num_channels, num_roms, num_samples;
 	DriverStatus status, driver_status_colour, driver_status_sound, driver_status_graphics;
-	gfloat screen_freq;
 	ControlType control;
 	
 	g_return_if_fail (rom != NULL);
@@ -544,27 +509,20 @@ mame_gamelist_print (FILE *handle, MameRomEntry *rom)
 		      "driver-status-colour", &driver_status_colour,
 		      "driver-status-sound", &driver_status_sound,
 		      "driver-status-graphics", &driver_status_graphics,
-		      "num-colours", &num_colours,
-		      "num-players", &num_players,
-		      "num-buttons", &num_buttons,
 		      "num-channels", &num_channels,
 		      "control-type", &control,
 		      "is-vector", &is_vector,
-		      "screenx", &screenx,
-		      "screeny", &screeny,
-		      "screen-freq", &screen_freq,
 		      "is-horizontal", &horizontal,
 		      "num-roms", &num_roms,
 		      "num-samples", &num_samples,
-		      "sampleof", &sampleof,
 		      NULL);
 	      
 	fprintf (handle,
 		"%s" SEP	/* romname */
 		"%s" SEP	/* gamename */
 		"%s" SEP	/* gamenameext */
-		"%s" SEP	/* the trailer */
-		"%s" SEP	/* is_bios */
+		"%i" SEP	/* the trailer */
+		"%i" SEP	/* is_bios */
 		"%s" SEP	/* year */
 		"%s" SEP	/* manu */
 		"%s" SEP	/* clone of */
@@ -574,13 +532,18 @@ mame_gamelist_print (FILE *handle, MameRomEntry *rom)
 		"%d" SEP	/* driver color status */
 		"%d" SEP	/* driver sound status */
 		"%d" SEP	/* driver sound graphic */
-		"%i" SEP	/* colors */
-		,
+		"%d" SEP	/* control */
+		"%i" SEP	/* vector */
+		"%s" SEP	/* orientation */
+		"%i" SEP	/* channels */
+		"%i" SEP	/* roms */
+		"%i" SEP	/* samples */
+		"\n",
 		romname,
 		gamename,
 		gamenameext,
-		thetrailer ? "true" : "false",
-		mame_rom_entry_is_bios (rom) ? "true" : "false",
+		thetrailer,
+		mame_rom_entry_is_bios (rom),
 		year,
 		manufacturer,
 		cloneof,
@@ -590,46 +553,12 @@ mame_gamelist_print (FILE *handle, MameRomEntry *rom)
 		driver_status_colour,
 		driver_status_sound,
 		driver_status_graphics,
-		num_colours
-	);
-	
-	for (i=0; i < NB_CPU; i++) {
-		CPUInfo *cpu = (CPUInfo *) g_malloc0 (sizeof (CPUInfo));
-		cpu = get_rom_cpu (rom, i);
-		fprintf (handle, "%s" SEP "%i" SEP, cpu->name, cpu->clock);
-	}
-	for (i=0; i < NB_CPU; i++) {
-		SoundCPUInfo *soundcpu = (SoundCPUInfo *) g_malloc0 (sizeof (SoundCPUInfo));
-		soundcpu = get_sound_cpu (rom, i);
-		fprintf (handle, "%s" SEP "%i" SEP, soundcpu->name, soundcpu->clock);
-	}
-	
-	fprintf (handle,
-		"%i" SEP	/* players */
-		"%i" SEP	/* buttons */
-		"%d" SEP	/* control */
-		"%s" SEP	/* vector */
-		"%i" SEP	/* screen X */
-		"%i" SEP	/* screen Y */
-		"%s" SEP	/* screen frequency */
-		"%s" SEP	/* orientation */
-		"%i" SEP	/* channels */
-		"%i" SEP	/* roms */
-		"%i" SEP	/* samples */
-		 "%s" SEP	/* sample of */
-		"\n",
-		num_players,
-		num_buttons,
 		control,
-		is_vector ? "true" : "false",
-		screenx,
-		screeny,
-		my_dtostr (float_buf, screen_freq),
+		is_vector,
 		horizontal ? "horizontal" : "vertical",
 		num_channels,
 		num_roms,
-		num_samples,
-		sampleof
+		num_samples
 	);
 
 	g_free (romname);
@@ -640,7 +569,6 @@ mame_gamelist_print (FILE *handle, MameRomEntry *rom)
 	g_free (cloneof);
 	g_free (romof);
 	g_free (driver);
-	g_free (sampleof);
 
 }
 
@@ -660,7 +588,7 @@ GMAMEUI_DEBUG ("Saving gamelist");
 	g_return_val_if_fail (gamelist != NULL, FALSE);
 
 	fprintf (gamelist,
-		"# GMAMEUI 0.91\n"
+		"# GMAMEUI %0.03f\n"
 		"# Name %s\n"
 		"# Version %s\n"
 		"# list of xmame games for GMAMEUI front-end\n"
@@ -679,35 +607,14 @@ GMAMEUI_DEBUG ("Saving gamelist");
 		"drivercolorstatus" SEP
 		"driversoundstatus" SEP
 		"drivergraphicstatus" SEP
-		"colors" SEP
-		"cpu1" SEP
-		"cpu1_clock" SEP
-		"cpu2" SEP
-		"cpu2_clock" SEP
-		"cpu3" SEP
-		"cpu3_clock" SEP
-		"cpu4" SEP
-		"cpu4_clock" SEP
-		"sound1" SEP
-		"sound1_clock" SEP
-		"sound2" SEP
-		"sound2_clock" SEP
-		"sound3" SEP
-		"sound3_clock" SEP
-		"sound4" SEP
-		"sound4_clock" SEP
-		"num_players" SEP
-		"num_buttons" SEP
 		"control" SEP
 		"vector" SEP
-		"screen_x" SEP
-		"screen_y" SEP
-		"screen_freq" SEP
 		"horizontal" SEP
 		"channels" SEP
 		"num_roms" SEP
 		"num_samples" SEP
 		"sampleof\n",
+		GAMELIST_DEFINED_VERSION,
 		gl->priv->name,
 		gl->priv->version
 	);
@@ -731,7 +638,7 @@ GMAMEUI_DEBUG ("Saving gamelist... done");
 * Checks:
 * - Gamelist was read but it was a version we don't support.
 * - Gamelist is not available.
-* - Gamelist was read but it was created with a very old version of gmameui.
+* - Gamelist was read but it was created with a very old version of GMAMEUI.
 * - Gamelist does not match the current executable (and VersionCheck = TRUE)
 */
 void
@@ -776,7 +683,7 @@ gamelist_check (MameExec *exec)
 							  "The gamelist is not supported.\n"
 							  "Do you want to rebuild the gamelist?"));
 
-	} else if (versioncheck) {	
+	} else if (versioncheck) {	/* AAA FIXME TODO Automatically do this */
 		if (strcmp (mame_exec_get_name (exec), gl_name) ||
 			strcmp (mame_exec_get_version (exec), gl_version))
 		{

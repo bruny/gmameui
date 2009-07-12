@@ -21,7 +21,7 @@
  *
  */
 
-#include "game_list.h"
+#include "common.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +31,7 @@
 #include <expat.h>
 #include <stdarg.h>
 
+#include "game_list.h"
 #include "gui.h"
 #include "progression_window.h"
 #include "rom_entry.h"
@@ -143,6 +144,8 @@ read_boolean_attribute (const XML_Char **atts, const XML_Char *name, const gchar
 
 }
 
+gint cpu_count;
+gint sound_count;
 
 static void
 XMLDataHandler (TCreateGameList *_this, const XML_Char *s, int len)
@@ -168,6 +171,109 @@ XMLDataHandler (TCreateGameList *_this, const XML_Char *s, int len)
 
 		_this->character_count += copy_chars;
 	}
+}
+
+static void
+XMLEndRomHandler (MameRomEntry *rom, const XML_Char *name)
+{
+	/* No need to do anything here */
+}
+
+static void
+XMLStartRomHandler (void *user_data, const XML_Char *name, const XML_Char **atts)
+{
+	/* i.e. we are now processing the ROM data */
+
+	MameRomEntry *rom = (MameRomEntry *) user_data;
+	int i;
+	
+	if (g_ascii_strcasecmp (name, "rom") == 0)
+	{
+		individual_rom *rom_value = (individual_rom *) g_malloc0 (sizeof (individual_rom));
+
+		rom_value->name = g_strdup (read_string_attribute (atts, "name"));
+
+		rom_value->sha1 = g_strdup (read_string_attribute (atts, "sha1"));
+		
+		/* FIXME TODO romset listing may be null */
+		mame_rom_entry_add_rom_ref (rom, rom_value);
+
+	} else if(!strcmp(name, "chip")) {
+		const char *type = XMLGetAttr(atts, "type", 0);
+
+		if(!strcmp(type, "cpu")){
+			if(cpu_count <= NB_CPU) {
+				CPUInfo *cpu = (CPUInfo *) g_malloc0 (sizeof (CPUInfo));
+
+				cpu->sound_flag = FALSE;
+				cpu->name = "-";
+				cpu->clock = 0;
+
+				cpu->name = g_strdup (read_string_attribute (atts, "name"));
+				cpu->clock = read_int_attribute (atts, "clock", 0);
+				/* sound_flag doesn't appear to be in the
+				   -listxml output anymore */
+				cpu->sound_flag = read_boolean_attribute (atts, "soundonly", "yes");
+
+				mame_rom_entry_add_cpu (rom, cpu_count, cpu->name, cpu->clock);
+				cpu_count++;
+					
+				g_free (cpu);
+			}
+		} else if(!strcmp(type, "audio")) {
+			if(sound_count <= NB_CPU) {
+				SoundCPUInfo *cpu = (SoundCPUInfo *) g_malloc0 (sizeof (SoundCPUInfo));
+
+				cpu->name = "-";
+				cpu->clock = 0;
+					
+				cpu->name = g_strdup (read_string_attribute (atts, "name"));
+				cpu->clock = read_int_attribute (atts, "clock", 0);
+
+				mame_rom_entry_add_soundcpu (rom, sound_count, cpu->name, cpu->clock);
+				sound_count++;
+
+				g_free (cpu);
+			}
+		}
+	} else if(!strcmp(name, "input")) {
+
+		g_object_set (rom,
+			      "num-players", read_int_attribute (atts, "players", 0),
+			      "num-buttons", read_int_attribute (atts, "buttons", 0),
+			      NULL);
+	} else if(!strcmp(name, "driver")) {
+			
+		g_object_set (rom,
+			      "num-colours", read_int_attribute (atts, "palettesize", 0),
+			      NULL);
+	} else if(!strcmp(name, "video")) {
+		for (i =0; atts[i]; i += 2) {
+			if (!strcmp(atts[i], "refresh"))  {
+				g_object_set (rom, "screen-freq", g_ascii_strtod(atts[i+1], NULL), NULL);
+			}
+		}
+		g_object_set (rom,
+			      "screenx", read_int_attribute (atts, "width", 0),
+			      "screeny", read_int_attribute (atts, "height", 0),
+			      NULL);
+	} else if (!strcmp(name, "display")) {
+		/* New for SDLMame and MAME32. Values will be:
+		<display type="raster" rotate="0" width="256" height="240" refresh="60.000000" />
+		<display type="vector" rotate="0" refresh="60.000000" />
+		<display type="vector" rotate="180" flipx="yes" refresh="38.000000" /> */
+		for (i =0; atts[i]; i += 2) {
+			if (!strcmp(atts[i], "refresh")) {
+				g_object_set (rom, "screen-freq", g_ascii_strtod(atts[i+1], NULL), NULL);
+			}
+		}
+			
+		g_object_set (rom,
+			      "screenx", read_int_attribute (atts, "width", 0),
+			      "screeny", read_int_attribute (atts, "height", 0),
+			      NULL);
+	}
+
 }
 
 static void
@@ -212,75 +318,20 @@ XMLStartHandler (TCreateGameList *_this, const XML_Char *name, const XML_Char **
 	{
 		rom = _this->current_rom;
 		
-		if(!strcmp(name, "rom"))
-		{
+		if(!strcmp(name, "rom")) {
 			mame_rom_entry_add_rom (rom);
-		}
-		else if(!strcmp(name, "chip"))
-		{
-			const char *type = XMLGetAttr(atts, "type", 0);
-
-			if(!strcmp(type, "cpu"))
-			{
-				if(_this->cpu_count <= NB_CPU) {
-					CPUInfo *cpu = (CPUInfo *) g_malloc0 (sizeof (CPUInfo));
-
-					cpu->sound_flag = FALSE;
-					cpu->name = "-";
-					cpu->clock = 0;
-
-					cpu->name = g_strdup (read_string_attribute (atts, "name"));
-					cpu->clock = read_int_attribute (atts, "clock", 0);
-					/* sound_flag doesn't appear to be in the
-					   -listxml output anymore */
-					cpu->sound_flag = read_boolean_attribute (atts, "soundonly", "yes");
-
-					mame_rom_entry_add_cpu (rom, _this->cpu_count, cpu->name, cpu->clock);
-					_this->cpu_count++;
-					
-					g_free (cpu);
-				}
-			}
-			else if(!strcmp(type, "audio"))
-			{
-				if(_this->sound_count <= NB_CPU) {
-					SoundCPUInfo *cpu = (SoundCPUInfo *) g_malloc0 (sizeof (SoundCPUInfo));
-
-					cpu->name = "-";
-					cpu->clock = 0;
-					
-					cpu->name = g_strdup (read_string_attribute (atts, "name"));
-					cpu->clock = read_int_attribute (atts, "clock", 0);
-
-					mame_rom_entry_add_soundcpu (rom, _this->sound_count, cpu->name, cpu->clock);
-					_this->sound_count++;
-
-					g_free (cpu);
-				}
-			}
-		}
-		else if(!strcmp(name, "input"))
-		{
-
+		} else if(!strcmp(name, "input")) {
 			for (i =0; atts[i]; i += 2) {
 				if (!strcmp(atts[i], "control")) {
 					g_object_set (rom, "control-type", get_control_type (atts[i+1]), NULL);
 				}
 			}
-			g_object_set (rom,
-				      "num-players", read_int_attribute (atts, "players", 0),
-				      "num-buttons", read_int_attribute (atts, "buttons", 0),
-				      NULL);
-		}
-		else if(!strcmp(name, "control"))
-		{
+		} else if(!strcmp(name, "control")) {
 			/* Control is an element of input in later versions of the
 			   XML output */
 			g_object_set (rom, "control-type", get_control_type (read_string_attribute (atts, "type")), NULL);
 			
-		}
-		else if(!strcmp(name, "driver"))
-		{
+		} else if(!strcmp(name, "driver")) {
 			
 			g_object_set (rom,
 				      "driver-status", get_driver_status (read_string_attribute (atts, "status")),
@@ -288,25 +339,13 @@ XMLStartHandler (TCreateGameList *_this, const XML_Char *name, const XML_Char **
 				      "driver-status-colour", get_driver_status (read_string_attribute (atts, "color")),
 				      "driver-status-sound", get_driver_status (read_string_attribute (atts, "sound")),
 				      "driver-status-graphics", get_driver_status (read_string_attribute (atts, "graphic")),
-				      "num-colours", read_int_attribute (atts, "palettesize", 0),
 				      NULL);
-		}
-		else if(!strcmp(name, "video"))
-		{
-			for (i =0; atts[i]; i += 2) {				
-				if (!strcmp(atts[i], "refresh"))  {
-					g_object_set (rom, "screen-freq", g_ascii_strtod(atts[i+1], NULL), NULL);
-				}
-			}
+		} else if(!strcmp(name, "video")) {
 			g_object_set (rom,
-				      "screenx", read_int_attribute (atts, "width", 0),
-				      "screeny", read_int_attribute (atts, "height", 0),
 				      "is-horizontal", read_boolean_attribute (atts, "orientation", "horizontal"),
 				      "is-vector", read_boolean_attribute (atts, "screen", "vector"),
 				      NULL);
-		}
-		else if (!strcmp(name, "display"))
-		{
+		} else if (!strcmp(name, "display")) {
 			/* New for SDLMame and MAME32. Values will be:
 			<display type="raster" rotate="0" width="256" height="240" refresh="60.000000" />
 			<display type="vector" rotate="0" refresh="60.000000" />
@@ -314,30 +353,13 @@ XMLStartHandler (TCreateGameList *_this, const XML_Char *name, const XML_Char **
 			for (i =0; atts[i]; i += 2) {
 				if (!strcmp(atts[i], "type")) {
 					g_object_set (rom, "is-vector", !strcmp(atts[i+1], "vector"), NULL);
-				} else if (!strcmp(atts[i], "refresh")) {
-					g_object_set (rom, "screen-freq", g_ascii_strtod(atts[i+1], NULL), NULL);
 				}
 			}
-			
-			g_object_set (rom,
-				      "screenx", read_int_attribute (atts, "width", 0),
-				      "screeny", read_int_attribute (atts, "height", 0),
-				      NULL);
-		}
-		else if(!strcmp(name, "sound"))
-		{
+		} else if(!strcmp(name, "sound")) {
 			g_object_set (rom, "num-channels", read_int_attribute(atts, "channels", 0), NULL);
-		}
-		else if(!strcmp(name, "sample"))
-		{
+		} else if(!strcmp(name, "sample")) {
 			mame_rom_entry_add_sample (rom);
-		}
-
-		else if(
-			!strcmp(name, "year") ||
-			!strcmp(name, "description") ||
-			!strcmp(name, "manufacturer")
-		) {
+		} else if(!strcmp(name, "year") || !strcmp(name, "description") || !strcmp(name, "manufacturer")) {
 
 			XML_SetCharacterDataHandler(_this->xmlParser, 
 				(XML_CharacterDataHandler ) &XMLDataHandler);
@@ -346,7 +368,6 @@ XMLStartHandler (TCreateGameList *_this, const XML_Char *name, const XML_Char **
 			memset(_this->text_buf, 0, BUFFER_SIZE); 
 		}
 	}
-
 }
  
 static void XMLEndHandler(TCreateGameList *_this,
@@ -470,7 +491,70 @@ CreateGameListRun (TCreateGameList *_this)
 
 	return TRUE;
 }
- 
+
+/**
+ *  Update the ROM to include other information not contained in the gamelist
+ *  file but which is available from the -listxml option. Usually triggered
+ *  from the MAME ROM Information dialog.
+ */
+MameRomEntry *
+create_gamelist_xmlinfo_for_rom (MameExec *exec, MameRomEntry *rom)
+{
+	XML_Parser xmlParser;
+	FILE *mame_handle;
+	
+	g_return_val_if_fail (rom != NULL, NULL);
+	
+	cpu_count = sound_count = 0;
+
+	GMAMEUI_DEBUG ("Starting parsing ROM");
+	mame_handle = mame_open_pipe(exec, "-%s %s",
+				     mame_get_option_name(exec, "listxml"),
+				     mame_rom_entry_get_romname (rom));
+
+	g_return_val_if_fail (mame_handle != NULL, FALSE);
+	
+	xmlParser = XML_ParserCreate (NULL);
+	XML_SetElementHandler (xmlParser,
+			       (XML_StartElementHandler) &XMLStartRomHandler,
+			       (XML_EndElementHandler)   &XMLEndRomHandler);
+	XML_SetUserData (xmlParser, rom);
+	
+	int final;
+	int bytes_read;
+	for (;;) {
+		char *buffer;
+
+		buffer = XML_GetBuffer (xmlParser, XML_BUFFER_SIZE);
+		
+		if (!buffer) {
+			GMAMEUI_DEBUG("Failed to allocate buffer.");
+		}
+
+		bytes_read = fread (buffer, 1, XML_BUFFER_SIZE, mame_handle);
+		final = !bytes_read;
+
+		if (bytes_read && !XML_ParseBuffer(xmlParser, bytes_read, final))
+		{
+			GMAMEUI_DEBUG ("Error!");
+		}
+      
+		if (final)
+			break;
+
+	}
+	
+	pclose (mame_handle);
+	XML_ParserFree (xmlParser);
+	
+	return rom;
+}
+
+
+/**
+ *  Create a gamelist (GList consisting of MameRomEntry objects) from the output
+ *  of -listxml. Triggered when rebuilding the gamelist.
+ */
 static gboolean
 create_gamelist_xmlinfo (MameExec *exec)
 {
@@ -611,6 +695,12 @@ get_driver_table (MameExec *exec, int *total_games)
 	return driver_htable;
 }
 
+/**
+ *  Create a gamelist (GList consisting of MameRomEntry objects) from the output
+ *  of -listinfo. Triggered when rebuilding the gamelist.
+ *  Note this function is for legacy versions of MAME. More recent versions use
+ *  -listxml.
+ */
 static gboolean
 create_gamelist_listinfo (MameExec *exec)
 {

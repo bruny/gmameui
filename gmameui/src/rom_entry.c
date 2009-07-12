@@ -21,6 +21,8 @@
  *
  */
 
+#include "common.h"
+
 #include <string.h>
 
 #include "rom_entry.h"
@@ -140,6 +142,8 @@ struct _MameRomEntryPrivate {
 	DriverStatus driver_status_color;
 	DriverStatus driver_status_sound;
 	DriverStatus driver_status_graphics;
+	
+	GList *roms;    /* GList of individual_rom structs */
 	
 	/* String to sort the clones next to the original (will be original-clone) */
 	gchar *clonesort;
@@ -390,6 +394,16 @@ mame_rom_entry_get_property (GObject *object,
 }
 
 static void
+destroy_rom (gpointer data, gpointer user_data)
+{
+	/* FIXME TODO Not getting invoked at shutdown */
+	individual_rom *rom = (individual_rom *) data;
+	GMAMEUI_DEBUG ("  Deleting ROM with name %s", rom->name);
+	g_free (rom->name);
+	g_free (rom->sha1);
+}
+
+static void
 mame_rom_entry_finalize (GObject *obj)
 {
 	
@@ -423,6 +437,11 @@ mame_rom_entry_finalize (GObject *obj)
 	
 	if (rom->priv->icon_pixbuf)
 		g_object_unref (rom->priv->icon_pixbuf);
+	
+	/* Free the GList */
+	g_list_foreach (rom->priv->roms,
+			(GFunc) destroy_rom,
+			NULL);
 		
 // FIXME TODO	g_free (pr->priv);
 
@@ -580,6 +599,9 @@ mame_rom_entry_init (MameRomEntry *rom)
 		rom->priv->cpu_info[i].name = g_strdup ("-");
 		rom->priv->sound_info[i].name = g_strdup ("-");
 	}*/
+	
+	/* Initialise the GList */
+	rom->priv->roms = NULL;
 	
 	/* Set handlers so that whenever the values are changed (from anywhere), the signal handler
 	   is invoked; the callback then saves to the g_key_file */
@@ -960,6 +982,12 @@ mame_rom_entry_add_sample (MameRomEntry *rom)
 }
 
 void
+mame_rom_entry_add_rom_ref (MameRomEntry *rom, individual_rom *rom_ref)
+{
+	rom->priv->roms = g_list_append (rom->priv->roms, rom_ref);
+}
+
+void
 mame_rom_entry_rom_played (MameRomEntry *rom, gboolean warning, gboolean error)
 {
 	g_return_if_fail (rom != NULL);
@@ -1106,5 +1134,4 @@ mame_rom_entry_get_position (MameRomEntry *rom)
 {
 	return rom->priv->position;
 }
-
 
