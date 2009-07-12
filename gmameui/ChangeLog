@@ -1,3 +1,20 @@
+2009-07-12 13:45 adburton
+
+	* src/: gmameui-gamelist-view.c gmameui-gamelist-view.h filters_list.c
+	  filters_list.h gmameui.c gmameui.h interface.c: Move filter setup code
+	  into filters_list.c, improve speed of switching between filters on the LHS
+	  and the filter buttons at the top of the gamelist by not rebuilding the
+	  entire GtkTreeModel whenever the filter is changed, prompt user to rebuild
+	  gamelist if it is out of date or missing at startup
+
+2009-07-12 13:42 adburton
+
+	* src/: rom_entry.c, rom_entry.h, mameio.c, gmameui-rominfo-dlg.c,
+	  game_list.c: Remove items from the gamelist file that are not required on
+	  startup and only load them when opening the ROM Properties dialog (this
+	  requires a gamelist rebuild), add processing of individual ROMs and SHA1
+	  values
+
 2009-07-03 20:35 adburton
 
 	* configure.ac, NEWS: Tagged for new release

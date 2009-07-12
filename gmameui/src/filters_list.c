@@ -19,6 +19,8 @@
  *
  */
 
+#include "common.h"
+
 #include <stdio.h>
 #include <gtk/gtk.h>
 
@@ -26,6 +28,7 @@
 #include "filter.h"
 #include "gui.h"	/* main_gui */
 #include "gmameui-gamelist-view.h"
+#include "game_list.h"
 
 struct _GMAMEUIFiltersListPrivate
 {
@@ -45,6 +48,20 @@ typedef struct {
 	gboolean     found;
 } FindGroup;
 
+typedef struct _folder_filter folder_filter;
+
+struct _folder_filter {
+	gint type;
+	gint filterid;
+	gchar *name;
+	gboolean is;
+	gchar *text_value;
+	gint int_value;
+	gboolean update_list;   // FIXME TODO Is this used?
+	gchar *pixbuf;
+	gchar *category;	// FIXME TODO Is this used?
+};
+
 static void gmameui_filters_list_class_init    (GMAMEUIFiltersListClass *class);
 static void gmameui_filters_list_init (GMAMEUIFiltersList      *fl);
 
@@ -54,11 +71,6 @@ filters_list_get_group (GMAMEUIFiltersList *fl,
 			GtkTreeIter       *iter_group_to_set,
 			GtkTreeIter       *iter_separator_to_set,
 			gboolean          *created);
-
-static gboolean
-filters_list_filter_func (GtkTreeModel           *model,
-			  GtkTreeIter            *iter,
-			  GMAMEUIFiltersList      *list);
 
 static void
 filters_list_pixbuf_cell_data_func (GtkTreeViewColumn *tree_column,
@@ -89,6 +101,14 @@ filters_list_row_activated_cb        (GMAMEUIFiltersList      *list,
 static void
 filters_list_selection_changed_cb (GtkTreeSelection *selection,
 				    GMAMEUIFiltersList     *fl);
+
+static void
+gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
+				 GMAMEUIFilter *filter,
+				 gchar *group);
+
+static void
+filters_list_select (GMAMEUIFiltersList *fl, GMAMEUIFilter *filter);
 
 G_DEFINE_TYPE (GMAMEUIFiltersList, gmameui_filters_list,
 			   GTK_TYPE_TREE_VIEW);
@@ -126,6 +146,8 @@ static void
 gmameui_filters_list_init (GMAMEUIFiltersList *fl)
 {
 	GtkTreeModel *model;
+	guint i;
+	gchar *catver_file;
 	
 GMAMEUI_DEBUG ("Creating filters list");
 
@@ -163,8 +185,7 @@ GMAMEUI_DEBUG ("Creating filters list");
 	/* State */
 	cell = gtk_cell_renderer_pixbuf_new ();
 	gtk_tree_view_column_pack_start (col, cell, FALSE);
-	gtk_tree_view_column_set_cell_data_func (
-		col, cell,
+	gtk_tree_view_column_set_cell_data_func (col, cell,
 		(GtkTreeCellDataFunc) filters_list_pixbuf_cell_data_func,
 		fl, NULL);
 
@@ -177,8 +198,7 @@ GMAMEUI_DEBUG ("Creating filters list");
 	/* Name */
 	cell = gtk_cell_renderer_text_new ();
 	gtk_tree_view_column_pack_start (col, cell, TRUE);
-	gtk_tree_view_column_set_cell_data_func (
-		col, cell,
+	gtk_tree_view_column_set_cell_data_func (col, cell,
 		(GtkTreeCellDataFunc) filters_list_text_cell_data_func,
 		fl, NULL);
 	g_object_set (cell, "ellipsize", PANGO_ELLIPSIZE_END, NULL);
@@ -190,8 +210,7 @@ GMAMEUI_DEBUG ("Creating filters list");
 	/* Expander */
 	cell = gossip_cell_renderer_expander_new ();
 	gtk_tree_view_column_pack_end (col, cell, FALSE);
-	gtk_tree_view_column_set_cell_data_func (
-		col, cell,
+	gtk_tree_view_column_set_cell_data_func (col, cell,
 		(GtkTreeCellDataFunc) filters_list_expander_cell_data_func,
 		fl, NULL);
 
@@ -202,25 +221,170 @@ GMAMEUI_DEBUG ("Creating filters list");
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Available"));
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Status"));
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Architecture"));
-	fl->priv->groups = g_list_append (fl->priv->groups, _("Imperfect"));
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Game Details"));
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Custom"));
+	fl->priv->groups = g_list_append (fl->priv->groups, _("Imperfect"));
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Category"));
 	fl->priv->groups = g_list_append (fl->priv->groups, _("Version"));
 
 	fl->priv->selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (fl));
 	
 	/* Double-click on row */
-	g_signal_connect (fl,
-					  "row-activated",
-					  G_CALLBACK (filters_list_row_activated_cb),
-					  NULL);
+	g_signal_connect (fl, "row-activated",
+			  G_CALLBACK (filters_list_row_activated_cb), NULL);
 	
 	/* Single click on row */
-	g_signal_connect (fl->priv->selection,
-					  "changed",
-					  G_CALLBACK (filters_list_selection_changed_cb),
-					  NULL);
+	g_signal_connect (fl->priv->selection, "changed",
+			  G_CALLBACK (filters_list_selection_changed_cb), NULL);
+	
+	
+	/* Add the contents now */
+		
+	/* Recent versions of MAME use neodrvr */
+	MameExec *exec = mame_exec_list_get_current_executable (main_gui.exec_list);
+	static char *neogeo_value;
+	GList *listpointer;
+
+	if (mame_compare_raw_version (exec, "0.116") >= 0)
+		neogeo_value = "neodrvr";
+	else
+		neogeo_value = "neogeo"; 
+
+	folder_filter folder_filters [] = {
+		/* Availability-related filters */
+		{ DRIVER, FILTER_ALL, _("All ROMs"), FALSE, " ", 0, TRUE, NULL, _("Available") },
+/*		{ HAS_ROMS, FILTER_AVAILABLE, _("Available"), FALSE, NULL, NOT_AVAIL, TRUE, NULL, _("Available") },
+		{ HAS_ROMS, FILTER_UNAVAILABLE, _("Unavailable"), TRUE, NULL, NOT_AVAIL, TRUE, "gmameui-emblem-unavailable", _("Available") },*/
+	
+		/* Status-related filters */
+		{ HAS_ROMS, FILTER_CORRECT, _("Correct"), TRUE, NULL, CORRECT, TRUE, "gmameui-emblem-correct", _("Status") },
+		{ HAS_ROMS, FILTER_BEST_AVAIL, _("Best Available"), TRUE, NULL, BEST_AVAIL, TRUE, "gmameui-emblem-not-working", _("Status") },
+		{ HAS_ROMS, FILTER_INCORRECT, _("Incorrect"), TRUE, NULL, INCORRECT, TRUE, "gmameui-emblem-incorrect", _("Status") },
+	
+		/* Architecture-related filters */
+		{ DRIVER, FILTER_ARCH_NEOGEO, _("Neo-Geo"), TRUE, neogeo_value, 0, TRUE, NULL, _("Architecture") },	
+		{ DRIVER, FILTER_ARCH_CPS1, _("CPS1"), TRUE, "cps1", 0, TRUE, NULL, _("Architecture") },
+		{ DRIVER, FILTER_ARCH_CPS2, _("CPS2"), TRUE, "cps2", 0, TRUE, NULL, _("Architecture") },	
+		{ DRIVER, FILTER_ARCH_CPS3, _("CPS3"), TRUE, "cps3", 0, TRUE, NULL, _("Architecture") },
+		{ DRIVER, FILTER_ARCH_SEGAS16, _("Sega System 16"), TRUE, "segas16b", 0, TRUE, NULL, _("Architecture") },
+		{ DRIVER, FILTER_ARCH_SEGAM2, _("Sega Model 2"), TRUE, "model2", 0, TRUE, NULL, _("Architecture") },
+		{ DRIVER, FILTER_ARCH_NAMCOS22, _("Namco System 22"), TRUE, "namcos22", 0, TRUE, NULL, _("Architecture") },
+		{ IS_BIOS, FILTER_ARCH_BIOS, _("BIOS"), TRUE, NULL, TRUE, TRUE, NULL, _("Architecture") },
+
+		/* Game Details filters */
+		{ CLONE, FILTER_DETAILS_ORIGINALS, _("Originals"), TRUE, "-", 0, TRUE, NULL, _("Game Details") },
+		{ CLONE, FILTER_DETAILS_CLONES, _("Clones"), FALSE, "-", 0, TRUE, NULL, _("Game Details") },
+		{ HAS_SAMPLES, FILTER_DETAILS_SAMPLES, _("Samples"), FALSE, NULL, 0, TRUE, "gmameui-emblem-sound", _("Game Details") },
+		{ CHANNELS, FILTER_DETAILS_STEREO, _("Stereo"), TRUE, NULL, 2, TRUE, "gmameui-emblem-sound", _("Game Details") },
+		{ VECTOR, FILTER_DETAILS_RASTERS, _("Raster"), FALSE, NULL, 0, TRUE, NULL, _("Game Details") },
+		{ VECTOR, FILTER_DETAILS_VECTORS, _("Vector"), TRUE, NULL, 0, TRUE, NULL, _("Game Details") },
+/*TODO		{ ORIENTATION, FILTER_ORIENTATION_V, _("Vertical"), TRUE, "vertical", 0, TRUE, NULL, _("Game Details") },
+		{ ORIENTATION, FILTER_ORIENTATION_H, _("Horizontal"), TRUE, "horizontal", 0, TRUE, NULL, _("Game Details") },*/
+		{ CONTROL, FILTER_CONTROL_TRACKBALL, _("Trackball"), TRUE, NULL, TRACKBALL, TRUE, NULL, _("Game Details") },
+		{ CONTROL, FILTER_CONTROL_LIGHTGUN, _("Lightgun"), TRUE, NULL, LIGHTGUN, TRUE, NULL, _("Game Details") },
+
+		/* Imperfect filters */
+		{ DRIVER_STATUS, FILTER_IMPERFECT_DRIVER, _("Driver"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
+		{ COLOR_STATUS, FILTER_IMPERFECT_COLORS, _("Colors"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
+		{ SOUND_STATUS, FILTER_IMPERFECT_SOUND, _("Sound"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
+		{ GRAPHIC_STATUS, FILTER_IMPERFECT_GRAPHIC, _("Graphics"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },		
+
+		/* Custom filters */
+		{ FAVORITE, FILTER_CUSTOM_FAVORITES, _("Favorites"), TRUE, NULL, 0, TRUE, "gmameui-emblem-favorite", _("Custom") },
+		{ TIMESPLAYED, FILTER_CUSTOM_PLAYED, _("Played"), FALSE, NULL, 0, TRUE, NULL, _("Custom") },
+	};
+	
+	GMAMEUIFilter *folder_filter, *avail_folder_filter;
+
+	/* Create the list of filters, and add each one to the sidebar */
+	for (i = 0; i < G_N_ELEMENTS (folder_filters); i++) {
+		folder_filter = gmameui_filter_new ();
+		g_object_set (folder_filter,
+			      "name", folder_filters[i].name,
+			      "folderid", folder_filters[i].filterid,
+			      "type", folder_filters[i].type,
+			      "is", folder_filters[i].is,
+			      "value", folder_filters[i].text_value,
+			      "int_value", folder_filters[i].int_value,
+			      "update_list", folder_filters[i].update_list,
+			      NULL);
+		if (folder_filters[i].pixbuf)
+			g_object_set (folder_filter,
+				      "pixbuf", gmameui_get_icon_from_stock (folder_filters[i].pixbuf),
+				      NULL);
+	
+		GMAMEUI_DEBUG ("Creating new filter: %s", folder_filters[i].name);
+	
+		gmameui_filters_list_add_filter (fl, folder_filter, folder_filters[i].category);
+		GMAMEUI_DEBUG ("Added filter %s to list", folder_filters[i].name);
+	
+		/* Set the filter to iterate to within the tree afterwards. If we
+		   try to iterate to the first filter to be added, it doesn't
+		   work - FIXME TODO */
+		if (folder_filters[i].filterid == FILTER_CORRECT) {
+			avail_folder_filter = folder_filter;
+		}
+	
+		g_object_unref (folder_filter);
+	}
+
+	/* Select the Correct filter as the default upon startup */
+	filters_list_select (fl, avail_folder_filter);
+	/* FIXME TODO Causes a segfault: g_object_unref (avail_folder_filter); */
+
+	/* Catver.ini filters - Category and Version */
+	g_object_get (main_gui.gui_prefs, "file-catver", &catver_file, NULL);
+
+	if (catver_file) {
+		GList *catlist, *verlist;
+		/* Categories */
+		catlist = mame_gamelist_get_categories_glist (gui_prefs.gl);
+		for (listpointer = g_list_first (catlist);
+		     (listpointer);
+		     listpointer = g_list_next (listpointer)) {
+			folder_filter = gmameui_filter_new ();
+			     g_object_set (folder_filter,
+					   "name", (gchar *)listpointer->data,
+					   "folderid", FILTER_CATEGORIES,
+					   "type", CATEGORY,
+					   "is", TRUE,
+					   "value", (gchar *)listpointer->data,
+					   "int_value", 0,
+					   "update_list", TRUE,
+					   NULL);
+			     gmameui_filters_list_add_filter (fl,
+							      folder_filter,
+							      _("Category"));
+			     g_object_unref (folder_filter);
+		}
+		
+		/* Version */
+		verlist = mame_gamelist_get_versions_glist (gui_prefs.gl);
+		for (listpointer = g_list_first (verlist);
+		     (listpointer);
+		     listpointer = g_list_next (listpointer)) {
+			     folder_filter = gmameui_filter_new ();
+			     g_object_set (folder_filter,
+					   "name", (gchar *)listpointer->data,
+					   "folderid", FILTER_VERSIONS,
+					   "type", MAMEVER,
+					   "is", TRUE,
+					   "value", (gchar *)listpointer->data,
+					   "int_value", 0,
+					   "update_list", TRUE,
+					   NULL);
+			     gmameui_filters_list_add_filter (fl,
+							      folder_filter,
+							      _("Version"));
+			     g_object_unref (folder_filter);
+		}
+		
+		/* AAA FIXME TODO unref the GLists */
+	}
+	gtk_widget_show (GTK_WIDGET (fl));
+	g_free (catver_file);
+	/* Finished setting up filters list */		
+
 GMAMEUI_DEBUG ("Finished creating filters list");
 }
 
@@ -232,10 +396,10 @@ gmameui_filters_list_new (void)
 
 }
 
-void
+static void
 gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
-						 GMAMEUIFilter *filter, 
-						 gchar *group)
+				 GMAMEUIFilter *filter,
+				 gchar *group)
 {
 	GtkTreeIter iter, iter_group, iter_separator;
 	GList *l;
@@ -260,10 +424,7 @@ gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
 		if (g_ascii_strcasecmp (name, group) != 0)
 			continue;
 
-		g_object_get (filter,
-		      "name", &filter_name,
-		      "pixbuf", &filter_pixbuf,
-		      NULL);
+		g_object_get (filter, "name", &filter_name, "pixbuf", &filter_pixbuf, NULL);
 
 		/* Expand if there are child nodes (i.e. filters) in the group */
 		path = gtk_tree_model_get_path (GTK_TREE_MODEL (fl->priv->store), &iter_group);
@@ -273,12 +434,12 @@ gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
 		//gtk_tree_store_insert_after (fl->priv->store, &iter, &iter_group, NULL);
 		gtk_tree_store_append (fl->priv->store, &iter, &iter_group);
 		gtk_tree_store_set (fl->priv->store, &iter,
-						GMAMEUI_FILTER_LIST_MODEL_COLUMN_PIXBUF, filter_pixbuf,
-						GMAMEUI_FILTER_LIST_MODEL_COLUMN_NAME, filter_name,
-						GMAMEUI_FILTER_LIST_MODEL_COLUMN_FILTER, filter,
-						GMAMEUI_FILTER_LIST_MODEL_IS_GROUP, FALSE,
-						GMAMEUI_FILTER_LIST_MODEL_IS_SEPARATOR, FALSE,
-						-1);
+				    GMAMEUI_FILTER_LIST_MODEL_COLUMN_PIXBUF, filter_pixbuf,
+				    GMAMEUI_FILTER_LIST_MODEL_COLUMN_NAME, filter_name,
+				    GMAMEUI_FILTER_LIST_MODEL_COLUMN_FILTER, filter,
+				    GMAMEUI_FILTER_LIST_MODEL_IS_GROUP, FALSE,
+				    GMAMEUI_FILTER_LIST_MODEL_IS_SEPARATOR, FALSE,
+				    -1);
 
 		g_free (filter_name);
 		if (filter_pixbuf != NULL)
@@ -317,41 +478,6 @@ filters_list_get_group_foreach (GtkTreeModel *model,
 	g_free (str);
 
 	return fg->found;
-}
-
-static gboolean
-filters_list_filter_func (GtkTreeModel      *model,
-			  GtkTreeIter       *iter,
-			  GMAMEUIFiltersList *list)
-{
-	gboolean               is_group;
-	gboolean               is_separator;
-	gchar                 *name;
-
-	gtk_tree_model_get (model, iter,
-			    GMAMEUI_FILTER_LIST_MODEL_IS_GROUP, &is_group,
-			    GMAMEUI_FILTER_LIST_MODEL_IS_SEPARATOR, &is_separator,
-			    GMAMEUI_FILTER_LIST_MODEL_COLUMN_NAME, &name,
-			    -1);
-
-	if (is_separator) {
-		GMAMEUI_DEBUG ("<--- Filter func: ** SEPARATOR **");
-		GMAMEUI_DEBUG ("---> Filter func: returning TRUE\n");
-		g_free (name);
-		return TRUE;
-	}
-/* FIXME TODO 
-	if (is_group) { 
-		GMAMEUI_DEBUG ("<--- Filter func: ** GROUP = '%s' **", name);
-		g_free (name);
-		return contact_list_filter_func_show_group (model, iter, list);
-	} else {
-		GMAMEUI_DEBUG ("<--- Filter func: ** FILTER = '%s' **", name);
-		g_free (name);
-		return contact_list_filter_func_show_contact (model, iter, list);
-	}*/
-
-	return FALSE;
 }
 
 /* Sets the background colours of the row */
@@ -601,8 +727,8 @@ match_source_to_iter (GtkTreeModel *model,
 /* Sets iter to the row of the filters list containing the specified filter */
 static gboolean
 gmameui_filters_list_source_to_iter (GMAMEUIFiltersList *fl,
-									 GMAMEUIFilter *filter,
-									 GtkTreeIter  *iter)
+				     GMAMEUIFilter *filter,
+				     GtkTreeIter  *iter)
 {
 	FilterPath *fp;
 	gboolean    ret;
@@ -626,9 +752,8 @@ gmameui_filters_list_source_to_iter (GMAMEUIFiltersList *fl,
 
 /* This function takes care of selecting the specified filter in
    the filters list, navigating to the row and highlighting it */
-void
-gmameui_filters_list_select (GMAMEUIFiltersList *fl,
-							 GMAMEUIFilter *filter)
+static void
+filters_list_select (GMAMEUIFiltersList *fl, GMAMEUIFilter *filter)
 {
 	GtkTreeIter iter;
 
@@ -686,7 +811,7 @@ filters_list_selection_changed_cb (GtkTreeSelection *selection,
 
 	GMAMEUI_DEBUG ("About to recreate gamelist after filter selected");
 
-	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
+	mame_gamelist_view_update_filter (main_gui.displayed_list);
 	
 	GMAMEUI_DEBUG ("Done recreating gamelist after filter selected");
 	

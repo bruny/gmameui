@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -86,6 +86,7 @@ gboolean adjustment_scrolled_delayed (MameGamelistView *gamelist_view);
 void mame_gamelist_view_scroll_to_selected_game (MameGamelistView *gamelist_view);
 
 void mame_gamelist_view_repopulate_contents (MameGamelistView *gamelist_view);
+void mame_gamelist_view_update_filter (MameGamelistView *gamelist_view);
 
 G_END_DECLS
 

@@ -92,7 +92,7 @@ on_filter_btn_toggled (GtkWidget *widget, gpointer user_data)
 		g_object_set (main_gui.gui_prefs, "current-rom-filter", 2, NULL);
 	} 
 
-	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
+	mame_gamelist_view_update_filter (main_gui.displayed_list);
 }
 
 static GtkWidget *
@@ -313,20 +313,6 @@ update_progress_bar (gfloat current_value)
 */
 }
 
-typedef struct _folder_filter folder_filter;
-
-struct _folder_filter {
-	gint type;
-	gint filterid;
-	gchar *name;
-	gboolean is;
-	gchar *text_value;
-	gint int_value;
-	gboolean update_list;   // FIXME TODO Is this used?
-	gchar *pixbuf;
-	gchar *category;	// FIXME TODO Is this used?
-};
-
 GtkWidget *
 create_MainWindow (void)
 {
@@ -338,8 +324,6 @@ create_MainWindow (void)
 
 	GtkAccelGroup *accel_group;
 	GtkTooltips *tooltips;
-
-	gchar *catver_file;
 	
 	GtkActionGroup *action_group;
 	GError *error = NULL;
@@ -356,8 +340,6 @@ create_MainWindow (void)
 	gint show_filters, show_screenshot, show_flyer;
 	gint show_statusbar, show_toolbar;
 	gint current_mode;
-	
-	guint i;
 
 	g_object_get (main_gui.gui_prefs,
 		      "ui-width", &ui_width,
@@ -574,8 +556,6 @@ GMAMEUI_DEBUG ("Setting up ROM availability filter buttons...");
 GMAMEUI_DEBUG ("Setting up ROM availability filter buttons... done");	
 	/* End ROM availability filter buttons */
 		
-	main_gui.filters_list = gmameui_filters_list_new ();
-
 /* FIXME TODO
 	combo_progress_bar = gtk_hbox_new (FALSE, 2);
 	gtk_widget_show (combo_progress_bar);
@@ -593,151 +573,6 @@ GMAMEUI_DEBUG ("Setting up ROM availability filter buttons... done");
 	gtk_box_pack_end (GTK_BOX (combo_progress_bar), progress_progress_bar, TRUE, TRUE, 0);
 	 
 	gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));*/
-
-	/* Populate the filters list - this should be done in filters_list.c */
-	
-	/* Recent versions of MAME use neodrvr */
-	MameExec *exec = mame_exec_list_get_current_executable (main_gui.exec_list);
-	static char *neogeo_value;
-	GList *listpointer;
-
-	if (mame_compare_raw_version (exec, "0.116") >= 0)
-		neogeo_value = "neodrvr";
-	else
-		neogeo_value = "neogeo"; 
-
-	folder_filter folder_filters [] = {
-		/* Availability-related filters */
-		{ DRIVER, FILTER_ALL, _("All ROMs"), FALSE, " ", 0, TRUE, NULL, _("Available") },
-		{ HAS_ROMS, FILTER_AVAILABLE, _("Available"), FALSE, NULL, NOT_AVAIL, TRUE, NULL, _("Available") },
-		{ HAS_ROMS, FILTER_UNAVAILABLE, _("Unavailable"), TRUE, NULL, NOT_AVAIL, TRUE, "gmameui-emblem-unavailable", _("Available") },
-	
-		/* Status-related filters */
-		{ HAS_ROMS, FILTER_CORRECT, _("Correct"), TRUE, NULL, CORRECT, TRUE, "gmameui-emblem-correct", _("Status") },
-		{ HAS_ROMS, FILTER_BEST_AVAIL, _("Best Available"), TRUE, NULL, BEST_AVAIL, TRUE, "gmameui-emblem-not-working", _("Status") },
-		{ HAS_ROMS, FILTER_INCORRECT, _("Incorrect"), TRUE, NULL, INCORRECT, TRUE, "gmameui-emblem-incorrect", _("Status") },
-	
-		/* Architecture-related filters */
-		{ DRIVER, FILTER_ARCH_NEOGEO, _("Neo-Geo"), TRUE, neogeo_value, 0, TRUE, NULL, _("Architecture") },	
-		{ DRIVER, FILTER_ARCH_CPS1, _("CPS1"), TRUE, "cps1", 0, TRUE, NULL, _("Architecture") },
-		{ DRIVER, FILTER_ARCH_CPS2, _("CPS2"), TRUE, "cps2", 0, TRUE, NULL, _("Architecture") },	
-		{ DRIVER, FILTER_ARCH_CPS3, _("CPS3"), TRUE, "cps3", 0, TRUE, NULL, _("Architecture") },
-		{ DRIVER, FILTER_ARCH_SEGAS16, _("Sega System 16"), TRUE, "segas16b", 0, TRUE, NULL, _("Architecture") },
-		{ DRIVER, FILTER_ARCH_SEGAM2, _("Sega Model 2"), TRUE, "model2", 0, TRUE, NULL, _("Architecture") },
-		{ DRIVER, FILTER_ARCH_NAMCOS22, _("Namco System 22"), TRUE, "namcos22", 0, TRUE, NULL, _("Architecture") },
-		{ IS_BIOS, FILTER_ARCH_BIOS, _("BIOS"), TRUE, NULL, TRUE, TRUE, NULL, _("Architecture") },
-	
-		/* Imperfect filters */
-		{ DRIVER_STATUS, FILTER_IMPERFECT_DRIVER, _("Driver"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
-		{ COLOR_STATUS, FILTER_IMPERFECT_COLORS, _("Colors"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
-		{ SOUND_STATUS, FILTER_IMPERFECT_SOUND, _("Sound"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
-		{ GRAPHIC_STATUS, FILTER_IMPERFECT_GRAPHIC, _("Graphics"), FALSE, NULL, DRIVER_STATUS_GOOD, TRUE, "gmameui-emblem-not-working", _("Imperfect") },
-
-		/* Game Details filters */
-		{ CLONE, FILTER_DETAILS_ORIGINALS, _("Originals"), TRUE, "-", 0, TRUE, NULL, _("Game Details") },
-		{ CLONE, FILTER_DETAILS_CLONES, _("Clones"), FALSE, "-", 0, TRUE, NULL, _("Game Details") },
-		{ HAS_SAMPLES, FILTER_DETAILS_SAMPLES, _("Samples"), FALSE, NULL, 0, TRUE, "gmameui-emblem-sound", _("Game Details") },
-		{ CHANNELS, FILTER_DETAILS_STEREO, _("Stereo"), TRUE, NULL, 2, TRUE, "gmameui-emblem-sound", _("Game Details") },
-		{ VECTOR, FILTER_DETAILS_RASTERS, _("Raster"), FALSE, NULL, 0, TRUE, NULL, _("Game Details") },
-		{ VECTOR, FILTER_DETAILS_VECTORS, _("Vector"), TRUE, NULL, 0, TRUE, NULL, _("Game Details") },
-/*TODO		{ ORIENTATION, FILTER_ORIENTATION_V, _("Vertical"), TRUE, "vertical", 0, TRUE, NULL, _("Game Details") },
-		{ ORIENTATION, FILTER_ORIENTATION_H, _("Horizontal"), TRUE, "horizontal", 0, TRUE, NULL, _("Game Details") },*/
-		{ CONTROL, FILTER_CONTROL_TRACKBALL, _("Trackball"), TRUE, NULL, TRACKBALL, TRUE, NULL, _("Game Details") },
-		{ CONTROL, FILTER_CONTROL_LIGHTGUN, _("Lightgun"), TRUE, NULL, LIGHTGUN, TRUE, NULL, _("Game Details") },
-
-		/* Custom filters */
-		{ FAVORITE, FILTER_CUSTOM_FAVORITES, _("Favorites"), TRUE, NULL, 0, TRUE, "gmameui-emblem-favorite", _("Custom") },
-		{ TIMESPLAYED, FILTER_CUSTOM_PLAYED, _("Played"), FALSE, NULL, 0, TRUE, NULL, _("Custom") },
-	};
-	
-	GMAMEUIFilter *folder_filter, *avail_folder_filter;
-
-	/* Create the list of filters, and add each one to the sidebar */
-	for (i = 0; i < G_N_ELEMENTS (folder_filters); i++) {
-		folder_filter = gmameui_filter_new ();
-		g_object_set (folder_filter,
-			      "name", folder_filters[i].name,
-			      "folderid", folder_filters[i].filterid,
-			      "type", folder_filters[i].type,
-			      "is", folder_filters[i].is,
-			      "value", folder_filters[i].text_value,
-			      "int_value", folder_filters[i].int_value,
-			      "update_list", folder_filters[i].update_list,
-			      NULL);
-		if (folder_filters[i].pixbuf)
-			g_object_set (folder_filter,
-				      "pixbuf", gmameui_get_icon_from_stock (folder_filters[i].pixbuf),
-				      NULL);
-	
-		GMAMEUI_DEBUG ("Creating new filter: %s", folder_filters[i].name);
-	
-		gmameui_filters_list_add_filter (main_gui.filters_list, folder_filter, folder_filters[i].category);
-		GMAMEUI_DEBUG ("Added filter %s to list", folder_filters[i].name);
-	
-		/* Set the filter to iterate to within the tree afterwards. If we
-		   try to iterate to the first filter to be added, it doesn't
-		   work - FIXME TODO */
-		if (folder_filters[i].filterid == FILTER_CORRECT) {
-			avail_folder_filter = folder_filter;
-		}
-	
-		g_object_unref (folder_filter);
-	}
-
-	/* Select the Correct filter as the default upon startup */
-	gmameui_filters_list_select (main_gui.filters_list, avail_folder_filter);
-	/* FIXME TODO Causes a segfault: g_object_unref (avail_folder_filter); */
-
-	/* Catver.ini filters - Category and Version */
-	g_object_get (main_gui.gui_prefs, "file-catver", &catver_file, NULL);
-
-	if (catver_file) {
-		GList *catlist, *verlist;
-		/* Categories */
-		catlist = mame_gamelist_get_categories_glist (gui_prefs.gl);
-		for (listpointer = g_list_first (catlist);
-		     (listpointer);
-		     listpointer = g_list_next (listpointer)) {
-			folder_filter = gmameui_filter_new ();
-			     g_object_set (folder_filter,
-					   "name", (gchar *)listpointer->data,
-					   "folderid", FILTER_CATEGORIES,
-					   "type", CATEGORY,
-					   "is", TRUE,
-					   "value", (gchar *)listpointer->data,
-					   "int_value", 0,
-					   "update_list", TRUE,
-					   NULL);
-			     gmameui_filters_list_add_filter (main_gui.filters_list,
-							      folder_filter,
-							      _("Category"));
-			     g_object_unref (folder_filter);
-		}
-		
-		/* Version */
-		verlist = mame_gamelist_get_versions_glist (gui_prefs.gl);
-		for (listpointer = g_list_first (verlist);
-		     (listpointer);
-		     listpointer = g_list_next (listpointer)) {
-			     folder_filter = gmameui_filter_new ();
-			     g_object_set (folder_filter,
-					   "name", (gchar *)listpointer->data,
-					   "folderid", FILTER_VERSIONS,
-					   "type", MAMEVER,
-					   "is", TRUE,
-					   "value", (gchar *)listpointer->data,
-					   "int_value", 0,
-					   "update_list", TRUE,
-					   NULL);
-			     gmameui_filters_list_add_filter (main_gui.filters_list,
-							      folder_filter,
-							      _("Version"));
-			     g_object_unref (folder_filter);
-		}
-	}
-	gtk_widget_show (GTK_WIDGET (main_gui.filters_list));
-	g_free (catver_file);
-	/* Finished setting up filters list */
 	
 	/* Enable keyboard shortcuts defined in the UI Manager */
 	gtk_window_add_accel_group (GTK_WINDOW (main_window), accel_group);     /* FIXME TODO Is this one required? */
@@ -745,6 +580,7 @@ GMAMEUI_DEBUG ("Setting up ROM availability filter buttons... done");
 				    gtk_ui_manager_get_accel_group (main_gui.manager));
 	
 	/* Add filter list on LHS */
+	main_gui.filters_list = gmameui_filters_list_new ();
 	main_gui.scrolled_window_filters = glade_xml_get_widget (xml, "scrolledwindowFilters");
 	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_filters), GTK_WIDGET (main_gui.filters_list));
 

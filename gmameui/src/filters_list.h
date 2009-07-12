@@ -59,15 +59,7 @@ struct _GMAMEUIFiltersListClass
 GType gmameui_filters_list_get_type (void);
 
 GtkWidget *gmameui_filters_list_new (void);
-
-void
-gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
-						 GMAMEUIFilter *filter, gchar *group);
-
-void
-gmameui_filters_list_select (GMAMEUIFiltersList *fl,
-							 GMAMEUIFilter *filter);
-			
+		
 /* Model */
 typedef enum {
 	GMAMEUI_FILTER_LIST_MODEL_COLUMN_PIXBUF = 0,

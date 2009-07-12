@@ -38,9 +38,9 @@
 static const int ROM_ICON_SIZE = 24;
 
 struct _MameGamelistViewPrivate {
-	GtkTreeModel *liststore;	/* The representation of the model in Tree mode */
+	GtkTreeModel *liststore;	/* The representation of the model in List mode */
 #ifdef TREESTORE
-	GtkTreeModel *treestore;	/* The representation of the model in List mode */
+	GtkTreeModel *treestore;	/* The representation of the model in Tree mode */
 #endif
 	GtkTreeModel *curr_model;       /* A pointer to either the base liststore or treestore */
 
@@ -114,6 +114,18 @@ foreach_find_rom_in_store             (GtkTreeModel *model,
 				       GtkTreePath  *path,
 				       GtkTreeIter  *iter,
 				       gpointer      user_data);
+
+static gboolean
+foreach_update_prefix_in_store (GtkTreeModel *model,
+				GtkTreePath  *path,
+				GtkTreeIter  *iter,
+				gpointer      user_data);
+
+static gboolean
+foreach_update_filter (GtkTreeModel *model,
+		       GtkTreePath  *path,
+		       GtkTreeIter  *iter,
+		       gpointer      user_data);
 
 /* Callbacks handling when the preferences change */
 static void
@@ -1439,10 +1451,9 @@ populate_model_from_gamelist (MameGamelistView *gamelist_view, GtkTreeModel *mod
 	const gchar *name_in_list;
 
 	g_return_if_fail (model != NULL);
-	
+
 	/* Get the current ROM filter setting */
 	g_object_get (main_gui.gui_prefs, "current-rom-filter", &rom_filter_opt, NULL);
-	GMAMEUI_DEBUG ("ROM filter is %d", rom_filter_opt);
 	
 	/* Always clear and repopulate, since we call from numerous instances */
 	gtk_list_store_clear (GTK_LIST_STORE (model));
@@ -1581,12 +1592,61 @@ populate_model_from_gamelist (MameGamelistView *gamelist_view, GtkTreeModel *mod
 
 }
 
+static gboolean
+foreach_update_filter (GtkTreeModel *model,
+		       GtkTreePath  *path,
+		       GtkTreeIter  *iter,
+		       gpointer      user_data)
+{
+	MameRomEntry *tmprom;
+	gint rom_filter_opt;
+
+	rom_filter_opt = (gint) user_data;
+
+	gtk_tree_model_get (model, iter,
+			    ROMENTRY, &tmprom,
+			    -1);
+
+	gtk_list_store_set (GTK_LIST_STORE (model), iter,
+			    FILTERED, game_filtered (tmprom, rom_filter_opt),
+			    -1);
+
+	return FALSE;
+}
+
+/* Completely clear the existing gamelist and repopulate it - usually after
+   starting GMAMEUI, or when rebuilding the contents */
 void
 mame_gamelist_view_repopulate_contents (MameGamelistView *gamelist_view)
 {
 	g_return_if_fail (gamelist_view != NULL);
 
 	populate_model_from_gamelist (gamelist_view, gamelist_view->priv->curr_model);
+}
+
+/* For each ROM in the model, recalculate whether it should be shown, based on the
+   selected filter. Invoked whenever the LHS filter selection is changed, or the
+   top filter buttons are changed */
+void
+mame_gamelist_view_update_filter (MameGamelistView *gamelist_view)
+{
+	gint rom_filter_opt;
+	gint visible_games;
+	
+	g_return_if_fail (gamelist_view != NULL);	
+	
+	/* Get the current ROM filter setting */
+	g_object_get (main_gui.gui_prefs, "current-rom-filter", &rom_filter_opt, NULL);
+
+	gtk_tree_model_foreach (GTK_TREE_MODEL (gamelist_view->priv->curr_model),
+				foreach_update_filter,
+				(gpointer) rom_filter_opt);
+
+	/* Update the number of ROMs displayed in the list */
+	visible_games = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (gamelist_view->priv->filter_model),
+							NULL);
+	set_status_bar_game_count (visible_games);
+
 }
 
 void

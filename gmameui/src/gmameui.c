@@ -204,6 +204,8 @@ g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NUL
 	gui_prefs.gl = mame_gamelist_new ();
 	if (!mame_gamelist_load (gui_prefs.gl)) {
 		g_message (_("gamelist not found, need to rebuild one"));
+		/* Loading the gamelist failed - prompt the user to recreate it */
+		gamelist_check (mame_exec_list_get_current_executable (main_gui.exec_list));
 	} else {
 	
 #ifdef ENABLE_DEBUG
