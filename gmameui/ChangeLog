@@ -1,3 +1,8 @@
+2009-07-24 21:10 adburton
+
+	* src/: audit.c audit.h: Move ROMSET_AUDITED signal to the correct place,
+	  change function prototype to return const to avoid free corruption
+
 2009-07-12 13:45 adburton
 
 	* src/: gmameui-gamelist-view.c gmameui-gamelist-view.h filters_list.c

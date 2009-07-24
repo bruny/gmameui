@@ -150,7 +150,7 @@ gmameui_audit_finalize (GObject *obj)
 /* Function takes a line e.g. 'rom astro is bad' and extracts the romname -
    this is usually the second word. This is usually used so that the calling
    area can then find the relevant ROM and update it */
-gchar*
+const gchar*
 get_romset_name_from_audit_line (gchar *line)
 {
 	gchar *romname, *p;
@@ -457,15 +457,15 @@ process_audit_romset (gchar *line, gint settype) {
 			result = UNKNOWN;
 		}
 
+		/* Emit signal for clients to handle as they see fit */
+		g_signal_emit (gui_prefs.audit, signals[ROMSET_AUDITED], 0, line, settype, result);
+
 	} else if (!strncmp (tmp, "name", 4) || !strncmp (tmp, "---", 3)) {
 		/* do nothing */
 	} else {
 		/* Line is for a rom within a romset */
 		result = NOTROMSET;
 	}
-
-	/* Emit signal for clients to handle as they see fit */
-	g_signal_emit (gui_prefs.audit, signals[ROMSET_AUDITED], 0, line, settype, result);
 	 
 	g_free (tmp);
 

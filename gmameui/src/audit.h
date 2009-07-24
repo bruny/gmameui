@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -70,7 +70,7 @@ GmameuiAudit* gmameui_audit_new (void);
 void   mame_audit_start_full           (void);
 void   mame_audit_start_single         (gchar *romname);
 void   mame_audit_stop_full_audit      (GmameuiAudit *au);
-gchar* get_romset_name_from_audit_line (gchar *line);
+const gchar* get_romset_name_from_audit_line (gchar *line);
 
 G_END_DECLS
 
