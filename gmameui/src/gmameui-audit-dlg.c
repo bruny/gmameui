@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -20,6 +20,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  *
  */
+
+#include "common.h"
 
 #include <glade/glade.h>
 
@@ -423,7 +425,7 @@ on_romset_audited (GmameuiAudit *audit,
 	g_return_if_fail ((auditresult >= 0) && (auditresult < NUMBER_STATUS));
 	
 	if (auditresult != NOTROMSET) {
-		gchar *romname;
+		const gchar *romname;
 		MameRomEntry *tmprom;
 		
 		/* Write the audit details to the text buffer */

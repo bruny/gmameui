@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Apr 26 15:07:35 2009 -->
+<?xml version="1.0"?>
 <glade-interface>
+  <!-- interface-requires gtk+ 2.16 -->
+  <!-- interface-naming-policy toplevel-contextual -->
   <widget class="GtkWindow" id="window1">
     <child>
       <widget class="GtkVBox" id="vbox">
@@ -19,39 +19,19 @@
           <widget class="GtkHBox" id="tri_status_bar">
             <property name="visible">True</property>
             <child>
-              <widget class="GtkStatusbar" id="statusbar1">
-                <property name="visible">True</property>
-                <property name="spacing">2</property>
-              </widget>
-            </child>
-            <child>
-              <widget class="GtkStatusbar" id="statusbar2">
+              <widget class="GtkStatusbar" id="statusbar">
                 <property name="visible">True</property>
                 <property name="spacing">2</property>
               </widget>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <widget class="GtkStatusbar" id="statusbar3">
-                <property name="visible">True</property>
-                <property name="spacing">2</property>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="pack_type">GTK_PACK_END</property>
-                <property name="position">2</property>
+                <property name="position">0</property>
               </packing>
             </child>
           </widget>
           <packing>
             <property name="expand">False</property>
             <property name="fill">False</property>
-            <property name="pack_type">GTK_PACK_END</property>
+            <property name="pack_type">end</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -63,9 +43,9 @@
               <widget class="GtkScrolledWindow" id="scrolledwindowFilters">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
-                <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                <property name="shadow_type">GTK_SHADOW_IN</property>
+                <property name="hscrollbar_policy">never</property>
+                <property name="vscrollbar_policy">automatic</property>
+                <property name="shadow_type">in</property>
                 <child>
                   <placeholder/>
                 </child>
@@ -91,42 +71,45 @@
                         </child>
                         <child>
                           <widget class="GtkRadioButton" id="filter_btn_unavail">
+                            <property name="label" translatable="yes">Unavailable ROMs</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Unavailable ROMs</property>
-                            <property name="response_id">0</property>
+                            <property name="receives_default">False</property>
                             <property name="active">True</property>
+                            <property name="draw_indicator">False</property>
                             <property name="group">filter_btn_all</property>
                           </widget>
                           <packing>
-                            <property name="pack_type">GTK_PACK_END</property>
+                            <property name="pack_type">end</property>
                             <property name="position">4</property>
                           </packing>
                         </child>
                         <child>
                           <widget class="GtkRadioButton" id="filter_btn_avail">
+                            <property name="label" translatable="yes">Available ROMs</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">Available ROMs</property>
-                            <property name="response_id">0</property>
+                            <property name="receives_default">False</property>
                             <property name="active">True</property>
+                            <property name="draw_indicator">False</property>
                             <property name="group">filter_btn_all</property>
                           </widget>
                           <packing>
-                            <property name="pack_type">GTK_PACK_END</property>
+                            <property name="pack_type">end</property>
                             <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
                           <widget class="GtkRadioButton" id="filter_btn_all">
+                            <property name="label" translatable="yes">All ROMs</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="label" translatable="yes">All ROMs</property>
-                            <property name="response_id">0</property>
+                            <property name="receives_default">False</property>
                             <property name="active">True</property>
+                            <property name="draw_indicator">False</property>
                           </widget>
                           <packing>
-                            <property name="pack_type">GTK_PACK_END</property>
+                            <property name="pack_type">end</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
@@ -135,15 +118,16 @@
                         <property name="expand">False</property>
                         <property name="fill">False</property>
                         <property name="padding">6</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
                       <widget class="GtkScrolledWindow" id="scrolledwindowGames">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                        <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
-                        <property name="shadow_type">GTK_SHADOW_IN</property>
+                        <property name="hscrollbar_policy">automatic</property>
+                        <property name="vscrollbar_policy">automatic</property>
+                        <property name="shadow_type">in</property>
                         <child>
                           <placeholder/>
                         </child>
@@ -166,7 +150,7 @@
             </child>
           </widget>
           <packing>
-            <property name="pack_type">GTK_PACK_END</property>
+            <property name="pack_type">end</property>
             <property name="position">1</property>
           </packing>
         </child>

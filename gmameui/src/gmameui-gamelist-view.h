@@ -80,7 +80,7 @@ void on_column_hide_activate                (GtkMenuItem      *menuitem,
 
 MameRomEntry* gamelist_get_selected_game (void);
 
-void gmameui_gamelist_rebuild ();
+void gmameui_gamelist_rebuild (MameGamelistView *gamelist_view);
 gboolean adjustment_scrolled_delayed (MameGamelistView *gamelist_view);
 
 void mame_gamelist_view_scroll_to_selected_game (MameGamelistView *gamelist_view);

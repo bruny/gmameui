@@ -62,12 +62,6 @@ init_gui (void)
 
 	screenshot_type show_flyer;
 	
-#ifdef ENABLE_DEBUG
-	GTimer *mytimer;
-
-	mytimer = g_timer_new ();
-	g_timer_start (mytimer);
-#endif
 	tooltips = gtk_tooltips_new ();
 
 	/* Default Pixbuf once for all windows */
@@ -76,16 +70,11 @@ init_gui (void)
 	g_free (filename);
 
 	gmameui_icons_init ();	
-#ifdef ENABLE_DEBUG
-g_message (_("Time to initialise icons: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
-#endif
+
 	/* Create the main window */
 	MainWindow = create_MainWindow ();
 	if (!MainWindow)
 		return -1;
-#ifdef ENABLE_DEBUG
-g_message (_("Time to create main window, filters and gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
-#endif
 
 	/* Show and hence realize mainwindow so that MainWindow->window is available */
 	gtk_widget_show (MainWindow);
@@ -97,23 +86,15 @@ g_message (_("Time to create main window, filters and gamelist: %.02f seconds"),
 	/* Grab focus on the game list */
 	gtk_widget_grab_focus (GTK_WIDGET (main_gui.displayed_list));
 
-	g_signal_connect (G_OBJECT (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games))), "changed",
-	                  G_CALLBACK (adjustment_scrolled),
-	                  main_gui.displayed_list);
 	/* Invoked whenever the gamelist is scrolled up or down */
-	g_signal_connect (G_OBJECT (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games))), "value-changed",
+	g_signal_connect (G_OBJECT (gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games))),
+	                  "value-changed",
 	                  G_CALLBACK (adjustment_scrolled),
 	                  main_gui.displayed_list);
 
 	/* Need to set the notebook page here otherwise it segfault */
 	g_object_get (main_gui.gui_prefs, "show-flyer", &show_flyer, NULL);
 	gmameui_sidebar_set_current_page (main_gui.screenshot_hist_frame, show_flyer);
-	
-#ifdef ENABLE_DEBUG
-	g_timer_stop (mytimer);
-	g_message (_("Time to complete start of UI: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
-	g_timer_destroy (mytimer);
-#endif
 
 	return 0;
 }
@@ -154,7 +135,7 @@ set_current_executable (MameExec *new_exec)
 	
 	/* Rebuild the gamelist */
 	if (response == GTK_RESPONSE_YES) {
-		gmameui_gamelist_rebuild ();
+		gmameui_gamelist_rebuild (main_gui.displayed_list);
 	}
 }
 
@@ -394,7 +375,7 @@ get_icon_for_rom (MameRomEntry *rom,
 	/* Use the status icon if we are not using custom icons, or if the
 	   ROM status is not correct (want to emphasis incorrect ROMs) */
 	if (!usecustomicons || (mame_rom_entry_get_rom_status (rom) != CORRECT)) {
-		pixbuf = Status_Icons [mame_rom_entry_get_rom_status (rom)];
+		pixbuf = gdk_pixbuf_copy (Status_Icons [mame_rom_entry_get_rom_status (rom)]);
 		/* Return pixbuf here, since we don't need to scale/resize it */
 		return pixbuf;
 	} else {
@@ -767,7 +748,7 @@ select_game (MameRomEntry *rom)
 		GMAMEUI_DEBUG ("no games selected");
 		
 		/* update statusbar */
-		set_status_bar (_("No game selected"), "");
+		set_status_bar (_("No game selected"), NULL);
 
 		/* update screenshot panel */
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),

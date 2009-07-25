@@ -34,7 +34,7 @@ void on_list_tree_view_menu_activate (GtkCheckMenuItem *menuitem, gpointer user_
 void on_details_view_menu_activate (GtkCheckMenuItem *menuitem, gpointer user_data);
 void on_details_tree_view_menu_activate (GtkCheckMenuItem *menuitem, gpointer user_data);
 
-void on_view_type_changed (GtkRadioAction *action, gpointer user_data);
+void on_view_type_changed (GtkToggleAction *action, gpointer user_data);
 
 void set_status_bar (gchar *game_name, gchar *game_status);
 void show_progress_bar (void);
@@ -45,14 +45,8 @@ enum {
 	TOOLBAR_PLAYGAME,
 	TOOLBAR_VIEWFOLDERLIST,
 	TOOLBAR_VIEWSIDEBAR,
-	TOOLBAR_LISTVIEW,
-#ifdef TREESTORE
-	TOOLBAR_TREEVIEW,
-#endif
 	TOOLBAR_DETAILSLISTVIEW,
-#ifdef TREESTORE
-	TOOLBAR_DETAILSTREEVIEW,
-#endif
+
 	NUM_TOOLBAR_ITEMS
 };
 
@@ -69,17 +63,12 @@ struct _toolbar_item {
 /* Note - where these are used (particularly .label), need to prefix the use
    with a _(XXX) to enable gettext translation */
 static const toolbar_item toolbar_items [] = {
-	{ TOOLBAR_PLAYGAME, "/ToolBar/FilePlayGame", NULL, GTK_STOCK_NEW, N_("Play Game") },
+	{ TOOLBAR_PLAYGAME, "/ToolBar/FilePlayGame", NULL, GTK_STOCK_EXECUTE, N_("Play Game") },
 	{ TOOLBAR_VIEWFOLDERLIST, "/ToolBar/ViewFolderList", "gmameui-view-folders", 0, N_("Show Folders") },
 	{ TOOLBAR_VIEWSIDEBAR, "/ToolBar/ViewSidebarPanel", "gmameui-view-screenshot", 0, N_("Show Sidebar") },
-	{ TOOLBAR_LISTVIEW, "/ToolBar/ViewListView", "gmameui-view-list", 0, N_("List") },
-#ifdef TREESTORE
-	{ TOOLBAR_TREEVIEW, "/ToolBar/ViewTreeView", "gmameui-view-tree", 0, N_("List Tree") },
-#endif
+
 	{ TOOLBAR_DETAILSLISTVIEW, "/ToolBar/ViewDetailsListView", "gmameui-view-list", 0, N_("Details") },
-#ifdef TREESTORE
-	{ TOOLBAR_DETAILSTREEVIEW, "/ToolBar/ViewDetailsTreeView", "gmameui-view-tree", 0, N_("Details Tree") },
-#endif
+
 };
 
 /* Signal prototypes */

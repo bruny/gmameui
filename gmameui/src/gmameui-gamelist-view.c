@@ -687,14 +687,20 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, MameRom
 }
 
 static void
-set_status_bar_game_count (gint num_roms)
+set_status_bar_game_count (MameGamelistView *gamelist_view)
 {
 	gchar *message;
+
+	/* Count the number of rows displayed in the filter model (i.e. number
+	   displayed after filtering is applied, not the total).
+	   FIXME TODO Note we use visible_games here since it is used in so many
+	   other places to determine whether to perform specific actions. */
+	visible_games = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (gamelist_view->priv->filter_model), NULL);
+		
+	message = g_strdup_printf ("%d %s", visible_games, visible_games == 1 ? _("game") : _("games"));
 	
-	message = g_strdup_printf ("%d %s", num_roms, num_roms == 1 ? _("game") : _("games"));
-	
-	gtk_statusbar_pop (main_gui.statusbar3, 1);
-	gtk_statusbar_push (main_gui.statusbar3, 1, message);
+	gtk_statusbar_pop (main_gui.statusbar, 1);
+	gtk_statusbar_push (main_gui.statusbar, 1, message);
 	
 	g_free (message);
 }
@@ -711,9 +717,9 @@ g_timer_start (timer);
 	
 	g_object_get (main_gui.gui_prefs, "current-mode", &current_mode, NULL);
 	GMAMEUI_DEBUG ("  Creating the MameGameListView Model in mode %d", current_mode);
+	
 	/* Status Bar Message */
-	gtk_statusbar_pop (main_gui.statusbar3, 1);
-	gtk_statusbar_push (main_gui.statusbar3, 1, _("Wait..."));	
+	set_status_bar (_("Wait..."), NULL);
 	
 	/* Unset the tree model until it has been filled */
 	if ((gamelist_view) && (gamelist_view->priv->curr_model)) {
@@ -1209,16 +1215,6 @@ on_prefs_theprefix_toggled (MameGuiPrefs *prefs, gboolean theprefix, gpointer us
 				(gpointer) theprefix);
 }
 
-/* FIXME TODO In future, should listen for signal emitted on the RomEntry that
-   that it has been audited */
-static void
-on_romset_audited (GmameuiAudit *audit, gchar *audit_line, gint type, gint auditresult, gpointer user_data)
-{
-	MameGamelistView *gamelist_view = (MameGamelistView *) user_data;
-	
-	g_return_if_fail (gamelist_view != NULL);
-}
-
 /* Hide a column from the popup menu; changing the main_gui.gui_prefs setting
    triggers the callback on_prefs_column_shown_toggled, so there is no need to
    explicitly hide the column here */
@@ -1485,7 +1481,7 @@ populate_model_from_gamelist (MameGamelistView *gamelist_view, GtkTreeModel *mod
 		/* Set the pixbuf for the status icon - start as being the status icon,
 		   then look for the custom icon in the adjustment_scrolled_delayed
 		   callback since we don't want to load icons from zips for EVERY ROM */
-		pixbuf = Status_Icons [mame_rom_entry_get_rom_status (tmprom)];
+		pixbuf = gdk_pixbuf_copy (Status_Icons [mame_rom_entry_get_rom_status (tmprom)]);
 
 #ifdef TREESTORE
 		/* Determine if the row is a root */
@@ -1584,11 +1580,8 @@ populate_model_from_gamelist (MameGamelistView *gamelist_view, GtkTreeModel *mod
 		g_free (version);
 
 	}
-
-	/* Count the number of rows displayed in the filter model */
-	visible_games = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (gamelist_view->priv->filter_model), NULL);
 	
-	set_status_bar_game_count (visible_games);
+	set_status_bar_game_count (gamelist_view);
 
 }
 
@@ -1631,7 +1624,6 @@ void
 mame_gamelist_view_update_filter (MameGamelistView *gamelist_view)
 {
 	gint rom_filter_opt;
-	gint visible_games;
 	
 	g_return_if_fail (gamelist_view != NULL);	
 	
@@ -1642,31 +1634,114 @@ mame_gamelist_view_update_filter (MameGamelistView *gamelist_view)
 				foreach_update_filter,
 				(gpointer) rom_filter_opt);
 
-	/* Update the number of ROMs displayed in the list */
-	visible_games = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (gamelist_view->priv->filter_model),
-							NULL);
-	set_status_bar_game_count (visible_games);
+	set_status_bar_game_count (gamelist_view);
 
 }
 
-void
-gmameui_gamelist_rebuild ()
+static void
+on_romset_audited (GmameuiAudit *audit,
+		   gchar *audit_line,
+		   gint type,
+		   gint auditresult,
+		   gpointer user_data)
 {
+	MameGamelistView *gamelist_view;
+	MameRomEntry *rom;
+	const gchar *romname;
+	gchar *icondir, *iconzipfile;
+	gint rom_filter_opt;
+	gboolean prefercustomicons;
+
+	gamelist_view = (gpointer) user_data;
+
+	g_return_if_fail (gamelist_view != NULL);
+
+	g_object_get (main_gui.gui_prefs,
+		      "current-rom-filter", &rom_filter_opt,
+		      "dir-icons", &icondir,
+		      "prefercustomicons", &prefercustomicons,
+		      NULL);
+
+	iconzipfile = g_build_filename (icondir, "icons.zip", NULL);
+	
+	/* Get the name of the rom being audited so we can update the processing label */
+	romname = get_romset_name_from_audit_line (audit_line);
+	rom = get_rom_from_gamelist_by_name (gui_prefs.gl, romname);
+
+	g_return_if_fail (rom != NULL);
+
+	if (type == AUDIT_TYPE_ROM) {
+		GdkPixbuf *pixbuf = NULL;
+		GMAMEUI_DEBUG ("  Now processing ROM %s", mame_rom_entry_get_romname (rom));
+		g_object_set (rom, "has-roms", auditresult, NULL);
+		pixbuf = get_icon_for_rom (rom, ROM_ICON_SIZE, icondir, iconzipfile, prefercustomicons);
+		GtkTreeIter iter = mame_rom_entry_get_position (rom);
+
+		gtk_list_store_set (GTK_LIST_STORE (gamelist_view->priv->curr_model), &iter,
+				    FILTERED, game_filtered (rom, rom_filter_opt),
+		                    PIXBUF,   pixbuf,
+				    -1);
+
+		set_status_bar_game_count (gamelist_view);
+		
+		if (pixbuf)
+			g_object_unref (pixbuf);
+	}
+
+	g_free (icondir);
+	g_free (iconzipfile);
+
+}
+
+/*
+ * Invoked from the menu, or after the executable has been changed. Need to run
+ * mame -listxml to get all supported games. Since differing versions of MAME
+ * may support different ROMs, need to assume all ROMs are UNAVAILABLE.
+ * Clear the GtkTreeView, clear the gamelist, too.
+ * We also conduct an audit.
+ */
+void
+gmameui_gamelist_rebuild (MameGamelistView *gamelist_view)
+{
+
+g_return_if_fail (gamelist_view != NULL);
+	
 	gtk_widget_set_sensitive (main_gui.scrolled_window_games, FALSE);
 	UPDATE_GUI;
+
+	/* Set the GtkTreeView's model to NULL to clear the display */
+	gtk_tree_view_set_model (GTK_TREE_VIEW (gamelist_view), NULL);
 	
 	GMAMEUI_DEBUG ("Parsing MAME output to recreate game list...");
 	gamelist_parse (mame_exec_list_get_current_executable (main_gui.exec_list));
 
-	GMAMEUI_DEBUG ("Reloading everything...");
 	mame_gamelist_save (gui_prefs.gl);
 
+	GMAMEUI_DEBUG ("Reloading everything...");
 	load_games_ini ();
 	load_catver_ini ();
+
+	/* Repopulate the GtkTreeView with contents of the gamelist */
 	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
+
+	/* Set the GtkTreeView's model to the newly-populated model */
+	gtk_tree_view_set_model (GTK_TREE_VIEW (gamelist_view),
+	                         GTK_TREE_MODEL (gamelist_view->priv->sort_model));
+		
 	gtk_widget_set_sensitive (main_gui.scrolled_window_games, TRUE);
 	
 	GMAMEUI_DEBUG ("Done rebuilding gamelist");
+
+	GMAMEUI_DEBUG ("Auditing");
+	g_signal_connect (gui_prefs.audit, "romset-audited",
+			  G_CALLBACK (on_romset_audited), main_gui.displayed_list);
+	mame_audit_start_full ();
+	GMAMEUI_DEBUG ("Done auditing");
+
+	/* Update the filter, since all ROMs will now be marked in
+	   mame_audit_start_full as UNAVAILABLE until audited and we want to hide
+	   them until they are audited as meeting the current filter settings */
+	mame_gamelist_view_update_filter (main_gui.displayed_list);
 }
 
 /* This function is to set the game icon from the zip file for each visible game;
@@ -1675,9 +1750,7 @@ gboolean
 adjustment_scrolled_delayed (MameGamelistView *gamelist_view)
 {
 	GtkTreeIter iter;
-#ifdef TREESTORE
-	GtkTreeIter iter_child;
-#endif
+
 	GtkTreePath *tree_path;
 	guint i;
 	gboolean valid;
@@ -1692,9 +1765,6 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 	g_object_get (main_gui.gui_prefs,
 		      "dir-icons", &icondir,
 		      "prefercustomicons", &prefercustomicons,
-#ifdef TREESTORE
-		      "current-mode", &current_mode,
-#endif
 		      NULL);
 
 	g_return_val_if_fail (visible_games > 0, FALSE);
@@ -1712,34 +1782,6 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 	/* Get the first iter from the model */
 	valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gamelist_view->priv->sort_model), &iter);
 
-#ifdef TREESTORE
-		set_game_pixbuff_from_iter (gamelist_view, &iter,zip, (gint) (vadj->page_size));
-		i = 0;
-		while ((i < visible_games) && valid) {
-			tree_path = gtk_tree_model_get_path (GTK_TREE_MODEL (model), &iter);
-
-			* Set the icon for all children if the parent row is expanded *
-
-			if (gtk_tree_view_row_expanded (GTK_TREE_VIEW (main_gui.displayed_list), tree_path)) {
-				if (gtk_tree_model_iter_children (GTK_TREE_MODEL (model), &iter_child, &iter)) {
-					set_game_pixbuff_from_iter (gamelist_view, &iter_child,zip, (gint) (vadj->page_size));
-					while ((i < visible_games) && (gtk_tree_model_iter_next (GTK_TREE_MODEL (model), &iter_child)) ) {
-						set_game_pixbuff_from_iter (gamelist_view, &iter_child, zip, (gint) (vadj->page_size));
-						i++;
-					}
-				}
-			}
-
-			gtk_tree_path_free (tree_path);
-			if (i < visible_games) {
-				valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (model), &iter);
-				if (valid) {
-					set_game_pixbuff_from_iter (gamelist_view, &iter,zip, (gint) (vadj->page_size));
-					i++;
-				}
-			}
-		}
-#endif
 	i = 0;
 
 	MameRomEntry *tmprom;
@@ -1786,14 +1828,6 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 			gtk_tree_model_filter_convert_iter_to_child_iter (GTK_TREE_MODEL_FILTER (gamelist_view->priv->filter_model),
 						  &model_iter,
 						  &filter_iter);
-#ifdef TREESTORE
-			if ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))
-				gtk_tree_store_set (GTK_TREE_STORE (gamelist_view->priv->curr_model),
-						    &model_iter,
-						    PIXBUF, tmprom->icon_pixbuf,
-						    -1);
-			else
-#endif
 
 			/* Update the ROM in the list store with the icon from the zip file */
 			if (icon) {

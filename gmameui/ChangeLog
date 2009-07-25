@@ -1,3 +1,12 @@
+2009-07-25 15:50 adburton
+
+	* data/main_gui.glade, src/: callbacks.c, gmameui-audit-dlg.c,
+	  gmameui-gamelist-view.c, gmameui-gamelist-view.h, gmameui-ui.xml, gui.c,
+	  gui.h, interface.c, interface.h: Initiate audit after gamelist is rebuilt.
+	  UI changes: radio choice between ListView and ListDetailsView is now a
+	  toggle, replace Rebuild Game List with Refresh, remove current ROM name
+	  and status from statusbar
+
 2009-07-24 21:10 adburton
 
 	* src/: audit.c audit.h: Move ROMSET_AUDITED signal to the correct place,

@@ -185,16 +185,16 @@ on_status_bar_view_menu_activate       (GtkAction *action,
 	visible = gtk_toggle_action_get_active (GTK_TOGGLE_ACTION (action));
 
 	if (visible)
-		gtk_widget_show (GTK_WIDGET (main_gui.tri_status_bar));
+		gtk_widget_show (GTK_WIDGET (main_gui.statusbar));
 	else
-		gtk_widget_hide (GTK_WIDGET (main_gui.tri_status_bar));
+		gtk_widget_hide (GTK_WIDGET (main_gui.statusbar));
 
 	g_object_set (main_gui.gui_prefs, "show-statusbar", visible, NULL);
 }
 
-/* This function is called when the radio option defining the list mode is changed. */
+/* This function is called when the toggle action defining the list mode is changed. */
 void
-on_view_type_changed (GtkRadioAction *action, gpointer user_data)
+on_view_type_changed (GtkToggleAction *action, gpointer user_data)
 {
 	guint val;
 	ListMode current_mode;
@@ -205,7 +205,7 @@ on_view_type_changed (GtkRadioAction *action, gpointer user_data)
 		      "previous-mode", &previous_mode,
 		      NULL);
 	
-	val = gtk_radio_action_get_current_value (action);
+	val = gtk_toggle_action_get_active (action);
 
 	if (current_mode != val) {
 		previous_mode = current_mode;
@@ -215,54 +215,27 @@ on_view_type_changed (GtkRadioAction *action, gpointer user_data)
 			      "current-mode", current_mode,
 			      "previous-mode", previous_mode,
 			      NULL);
-#ifdef TREESTORE
-		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group,
-						(current_mode == LIST_TREE) ||
-						(current_mode == DETAILS_TREE));
-#endif
+
 		mame_gamelist_view_change_views (main_gui.displayed_list);
 
 	}	 
 }
 
 void
-gmameui_menu_set_view_mode_check (gint view_mode, gboolean state)
-{
-	GtkWidget *widget;
-	
-	switch (view_mode) {
-		case (LIST):
-			widget = gtk_ui_manager_get_widget (main_gui.manager,
-							    "/MenuBar/ViewMenu/ViewListViewMenu");
-			break;
-#ifdef TREESTORE
-		case (LIST_TREE):
-			widget = gtk_ui_manager_get_widget (main_gui.manager,
-							    "/MenuBar/ViewMenu/ViewTreeViewMenu");
-			break;
-#endif
-		case (DETAILS):
-			widget = gtk_ui_manager_get_widget (main_gui.manager,
-							    "/MenuBar/ViewMenu/ViewDetailsListViewMenu");
-			break;
-#ifdef TREESTORE
-		case (DETAILS_TREE):
-			widget = gtk_ui_manager_get_widget (main_gui.manager,
-							    "/MenuBar/ViewMenu/ViewDetailsTreeViewMenu");
-			break;
-#endif
-	}
-	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (widget), state);
-}
-
-void
 set_status_bar (gchar *game_name, gchar *game_status)
 {
-	gtk_statusbar_pop (main_gui.statusbar1, 1);
-	gtk_statusbar_push (main_gui.statusbar1, 1, game_name);
+/*DELETE	gchar *message;
 
-	gtk_statusbar_pop (main_gui.statusbar2, 1);
-	gtk_statusbar_push (main_gui.statusbar2, 1, game_status);
+	if (game_status)
+		message = g_strdup_printf ("%s (%s)", game_name, game_status);
+	else
+		message = g_strdup_printf ("%s", game_name);
+	
+	gtk_statusbar_pop (main_gui.statusbar1, 1);
+	gtk_statusbar_push (main_gui.statusbar1, 1, message);
+
+	g_free (message);
+*/
 }
 
 void
@@ -332,15 +305,13 @@ create_MainWindow (void)
 	
 	GtkWidget *main_window;
 	GtkWidget *vbox;
-	PangoFontDescription *fontdesc;
-	gint font_size;
 	
 	gint ui_width, ui_height;
 	gint xpos_filters, xpos_gamelist;
 	gint show_filters, show_screenshot, show_flyer;
 	gint show_statusbar, show_toolbar;
 	gint current_mode;
-
+GMAMEUI_DEBUG ("Setting up main window...");
 	g_object_get (main_gui.gui_prefs,
 		      "ui-width", &ui_width,
 		      "ui-height", &ui_height,
@@ -349,7 +320,7 @@ create_MainWindow (void)
 		      "show-flyer", &show_flyer,
 		      "show-statusbar", &show_statusbar,
 		      "show-toolbar", &show_toolbar,
-		      "current-mode", &current_mode,
+		      "current-mode", &current_mode,    /* FIXME TODO Rename to show-details */
 		      "xpos-filters", &xpos_filters,
 		      "xpos-gamelist", &xpos_gamelist,
 		      NULL);
@@ -365,16 +336,7 @@ create_MainWindow (void)
 	vbox = glade_xml_get_widget (xml, "vbox");
 	
 	/* Set up the status bar at the bottom */
-	main_gui.tri_status_bar = glade_xml_get_widget (xml, "tri_status_bar");
-	main_gui.statusbar1 = glade_xml_get_widget (xml, "statusbar1");
-	main_gui.statusbar2 = glade_xml_get_widget (xml, "statusbar2");
-	main_gui.statusbar3 = glade_xml_get_widget (xml, "statusbar3");
-	
-	fontdesc = pango_font_description_copy (GTK_WIDGET (main_gui.tri_status_bar)->style->font_desc);
-	font_size = pango_font_description_get_size (fontdesc);
-	
-	gtk_widget_set_size_request (GTK_WIDGET (main_gui.statusbar2), PANGO_PIXELS (font_size) * 20, -1);
-	gtk_widget_set_size_request (GTK_WIDGET (main_gui.statusbar3), PANGO_PIXELS (font_size) * 20, -1);
+	main_gui.statusbar = glade_xml_get_widget (xml, "statusbar");
 	
 	tooltips = gtk_tooltips_new ();
 	g_object_set_data (G_OBJECT (main_window), "tooltips", tooltips);
@@ -438,34 +400,13 @@ create_MainWindow (void)
 	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
 	g_object_unref (action_group);
 	main_gui.gmameui_favourite_action_group = action_group;
-#ifdef TREESTORE	
-	action_group = gtk_action_group_new ("GmameuiWindowViewActions");
-	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
-	gtk_action_group_add_actions (action_group,
-				      gmameui_view_expand_menu_entries,
-				      G_N_ELEMENTS (gmameui_view_expand_menu_entries),
-				      MainWindow);
-	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
-	g_object_unref (action_group);
-	main_gui.gmameui_view_action_group = action_group;
-#endif	
+	
 	action_group = gtk_action_group_new ("GmameuiWindowToggleActions");
 	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
 	gtk_action_group_add_toggle_actions (action_group,
 					     gmameui_view_toggle_menu_entries,
 					     G_N_ELEMENTS (gmameui_view_toggle_menu_entries),
 					     MainWindow);
-	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
-	g_object_unref (action_group);
-
-	action_group = gtk_action_group_new ("GmameuiWindowRadioActions");
-	gtk_action_group_set_translation_domain (action_group, GETTEXT_PACKAGE);
-	gtk_action_group_add_radio_actions (action_group,
-					    gmameui_view_radio_menu_entries,
-					    G_N_ELEMENTS (gmameui_view_radio_menu_entries),
-					    0,  /* TODO */
-					    G_CALLBACK (on_view_type_changed),
-					    MainWindow);
 	gtk_ui_manager_insert_action_group (main_gui.manager, action_group, 0);
 	g_object_unref (action_group);
 
@@ -515,22 +456,43 @@ create_MainWindow (void)
 		}
 		gtk_tool_button_set_label (GTK_TOOL_BUTTON (toolbar_widget), _(toolbar_items[z].label));
 	}
+
+	/* Set state of check menu and toolbar widgets */
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
+				      "/MenuBar/ViewMenu/ViewSidebarPanelMenu")),
+				      show_screenshot);
+
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
+				      "/MenuBar/ViewMenu/ViewFolderListMenu")),
+				      show_filters);
+
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
+				      "/MenuBar/ViewMenu/ViewStatusBarMenu")),
+				      show_statusbar);
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
+				      "/MenuBar/ViewMenu/ViewToolbarMenu")),
+				      show_toolbar);
+
+	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
+				      "/MenuBar/ViewMenu/ViewDetailsListViewMenu")),
+	                              current_mode);
 	
 	main_gui.hpanedLeft = glade_xml_get_widget (xml, "hpanedLeft");
 	main_gui.hpanedRight = glade_xml_get_widget (xml, "hpanedRight");
 	
 	/* Set up the search field */
-GMAMEUI_DEBUG ("Setting up search entry field...");
+GMAMEUI_DEBUG ("    Setting up search entry field...");
 	GtkWidget *search_box;
 	search_box = glade_xml_get_widget (xml, "filter_hbox");
 	main_gui.search_entry = mame_search_entry_new ();
+	
 	/* In order to pack before the filter buttons, their pack must be set to End */
 	gtk_box_pack_start (GTK_BOX (search_box), main_gui.search_entry, FALSE, FALSE, 6);
 	gtk_widget_show (main_gui.search_entry);
-GMAMEUI_DEBUG ("Setting up search entry field... done");
+GMAMEUI_DEBUG ("    Setting up search entry field... done");
 
 	/* Prepare the ROM availability filter buttons */
-GMAMEUI_DEBUG ("Setting up ROM availability filter buttons...");
+GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons...");
 	
 	GList *filter_btn_list, *list;
 	gint current_filter_btn;
@@ -553,36 +515,20 @@ GMAMEUI_DEBUG ("Setting up ROM availability filter buttons...");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (get_filter_btn_by_id (xml, current_filter_btn)),
 				      TRUE);
 
-GMAMEUI_DEBUG ("Setting up ROM availability filter buttons... done");	
+GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons... done");	
 	/* End ROM availability filter buttons */
-		
-/* FIXME TODO
-	combo_progress_bar = gtk_hbox_new (FALSE, 2);
-	gtk_widget_show (combo_progress_bar);
-	main_gui.combo_progress_bar = combo_progress_bar;
-	gtk_box_pack_start (GTK_BOX (vbox1), combo_progress_bar, FALSE, FALSE, 0);
-	 
-	status_progress_bar = gtk_statusbar_new ();
-	gtk_widget_show (status_progress_bar);
-	main_gui.status_progress_bar = GTK_STATUSBAR (status_progress_bar);
-	gtk_box_pack_start (GTK_BOX (combo_progress_bar), status_progress_bar, TRUE, TRUE, 0);
-	 
-	progress_progress_bar = gtk_progress_bar_new ();
-	gtk_widget_show (progress_progress_bar);
-	main_gui.progress_progress_bar = GTK_PROGRESS_BAR (progress_progress_bar);
-	gtk_box_pack_end (GTK_BOX (combo_progress_bar), progress_progress_bar, TRUE, TRUE, 0);
-	 
-	gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));*/
 	
 	/* Enable keyboard shortcuts defined in the UI Manager */
 	gtk_window_add_accel_group (GTK_WINDOW (main_window), accel_group);     /* FIXME TODO Is this one required? */
 	gtk_window_add_accel_group (GTK_WINDOW (main_window),
 				    gtk_ui_manager_get_accel_group (main_gui.manager));
-	
+
 	/* Add filter list on LHS */
+GMAMEUI_DEBUG ("    Setting up LHS filters list...");	
 	main_gui.filters_list = gmameui_filters_list_new ();
 	main_gui.scrolled_window_filters = glade_xml_get_widget (xml, "scrolledwindowFilters");
 	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_filters), GTK_WIDGET (main_gui.filters_list));
+GMAMEUI_DEBUG ("    Setting up LHS filters list... done");
 
 	/* Add placeholder for the games list in middle */
 	main_gui.scrolled_window_games = glade_xml_get_widget (xml, "scrolledwindowGames");
@@ -592,40 +538,22 @@ GMAMEUI_DEBUG ("Setting up ROM availability filter buttons... done");
 	main_gui.screenshot_hist_frame = GMAMEUI_SIDEBAR (sidebar);
 	gtk_paned_pack2 (main_gui.hpanedRight, GTK_WIDGET (sidebar), TRUE, TRUE);
 	
-	/* Set state of radio/check menu and toolbar widgets */
-	gmameui_menu_set_view_mode_check (current_mode, TRUE);
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
-								 "/MenuBar/ViewMenu/ViewSidebarPanelMenu")),
-				      show_screenshot);
-
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
-								 "/MenuBar/ViewMenu/ViewFolderListMenu")),
-				      show_filters);
-
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
-								 "/MenuBar/ViewMenu/ViewStatusBarMenu")),
-				      show_statusbar);
-	gtk_toggle_action_set_active (GTK_TOGGLE_ACTION (gtk_ui_manager_get_action (main_gui.manager,
-								 "/MenuBar/ViewMenu/ViewToolbarMenu")),
-				      show_toolbar);
-#ifdef TREESTORE
-	if (! ((current_mode == LIST_TREE) || (current_mode == DETAILS_TREE))) {
-		gtk_action_group_set_sensitive (main_gui.gmameui_view_action_group, FALSE);
-	}
-#endif
 	/* Create the UI of the Game List */
+GMAMEUI_DEBUG ("    Setting up gamelist view...");
 	main_gui.displayed_list = mame_gamelist_view_new ();
 	mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
 	
 	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_games), GTK_WIDGET (main_gui.displayed_list));
 	gtk_widget_show_all (main_gui.scrolled_window_games);
-	
+GMAMEUI_DEBUG ("    Setting up gamelist view... done");
+
 	gtk_paned_set_position (GTK_PANED (main_gui.hpanedLeft), xpos_filters);
 
 	/* Update UI if executables or entries in the MameGamelistView are
 	   not available */
 	gmameui_ui_set_items_sensitive ();
 
+	/* Set callbacks that trigger the position to be saved when moved */
 	g_signal_connect (G_OBJECT (main_gui.hpanedLeft), "notify::position",
 			  G_CALLBACK (on_hpaned_position_notify), NULL);
 	
@@ -640,7 +568,8 @@ GMAMEUI_DEBUG ("Setting up ROM availability filter buttons... done");
 	g_signal_connect (G_OBJECT (main_window), "configure_event",
 			  G_CALLBACK (on_main_window_moved_cb),
 			  NULL);
+
+GMAMEUI_DEBUG ("Setting up main window... done");
 	
 	return main_window;
 }
-

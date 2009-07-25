@@ -216,7 +216,7 @@ on_exit_activate (GtkMenuItem     *menuitem,
 {
 	exit_gmameui ();
 }
-
+/*DELETE
 static void
 quick_refresh_list (void)
 {
@@ -235,42 +235,42 @@ quick_refresh_list (void)
 	romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
 	
 // FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), FALSE);
-	/* remove all information concerning the presence of roms */
+	* remove all information concerning the presence of roms *
 	for (list_pointer = g_list_first (romlist); list_pointer; list_pointer = g_list_next (list_pointer)) {
 		rom = (MameRomEntry *) list_pointer->data;
 		g_object_set (rom, "has-roms", UNKNOWN, NULL);
 	}
 
-	/* Refresh the display */
+	* Refresh the display *
 	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
 
 	mame_gamelist_set_not_checked_list (gui_prefs.gl, romlist);
 
 	quick_check ();
 
-	/* Final refresh only if we are in AVAILABLE or UNAVAILABLE Folder*/
-/* DELETE Not using FolderID in new prefs
+	* Final refresh only if we are in AVAILABLE or UNAVAILABLE Folder*
+* DELETE Not using FolderID in new prefs
 	if ((gui_prefs.FolderID == AVAILABLE) || (gui_prefs.FolderID == UNAVAILABLE)) {
 		create_gamelist_content ();
 		GMAMEUI_DEBUG ("Final Refresh");
-	}*/
+	}*
 	quick_check_running = 0;
-// FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), TRUE);*/
-}
+// FIXME TODO	gtk_widget_set_sensitive (GTK_WIDGET (main_gui.refresh_menu), TRUE);*
+}*/
 
 void
 on_refresh_activate (GtkAction *action,
 		     gpointer  user_data)
 {
-	quick_refresh_list ();
+	gmameui_gamelist_rebuild (main_gui.displayed_list);
 }
-
+/*DELETE
 void
 on_rebuild_game_list_menu_activate     (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-	gmameui_gamelist_rebuild ();
-}
+	gmameui_gamelist_rebuild (main_gui.displayed_list);
+}*/
 
 void
 on_directories_menu_activate           (GtkMenuItem     *menuitem,

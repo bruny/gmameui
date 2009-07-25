@@ -61,13 +61,13 @@ static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
 	  N_("Play currently selected game"), G_CALLBACK (on_select_random_game_activate) },
 	{ "FileQuit", GTK_STOCK_QUIT, N_("_Quit"), "<control>Q",
 	  N_("Quit GMAMEUI"), G_CALLBACK (on_exit_activate) },
-	
+
 	/* View menu */
 	{ "ViewRefresh", GTK_STOCK_REFRESH, N_("Refresh"), "F5",
 	  N_("Refresh game list"), G_CALLBACK (on_refresh_activate) },
 
 	/* Option menu */
-	{ "OptionDirs", NULL, N_("_Directories..."), NULL,
+	{ "OptionDirs", GTK_STOCK_DIRECTORY, N_("_Directories..."), NULL,
 	  N_("Set directory configuration"), G_CALLBACK (on_directories_menu_activate) },  
 	{ "OptionPreferences", GTK_STOCK_PREFERENCES, N_("_GMAMEUI Preferences..."), NULL,
 	  N_("Set GMAMEUI preferences"), G_CALLBACK (on_preferences_activate) },  
@@ -84,7 +84,7 @@ static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
 static const GtkActionEntry gmameui_rom_and_exec_menu_entries[] =
 {
 	/* File menu */
-	{ "FilePlayGame", NULL, N_("Play"), NULL,
+	{ "FilePlayGame", GTK_STOCK_EXECUTE, N_("Play"), NULL,
 	  N_("Play currently selected game"), G_CALLBACK (on_play_activate) },
 	{ "FilePlayRecord", GTK_STOCK_SAVE, N_("Play and Record Input..."), NULL,
 	  N_("Record a game for later playback"), G_CALLBACK (on_play_and_record_input_activate) },
@@ -99,8 +99,8 @@ static const GtkActionEntry gmameui_exec_menu_entries[] =
 {
 	{ "FileAuditAllGames", NULL, N_("_Audit All Games"), NULL,
 	  N_("Audit ROM and sample sets"), G_CALLBACK (on_audit_all_games_activate) },
-	{ "OptionRebuildGameList", NULL, N_("_Rebuild Game List"), NULL,
-	  N_("Rebuild the game list from executable information"), G_CALLBACK (on_rebuild_game_list_menu_activate) },
+/*DELETE	{ "OptionRebuildGameList", NULL, N_("_Rebuild Game List"), NULL,
+	  N_("Rebuild the game list from executable information"), G_CALLBACK (on_rebuild_game_list_menu_activate) },*/
 	{ "OptionDefaultOpts", NULL, N_("Default _Options..."), NULL,
 	  N_("Set default game options"), G_CALLBACK (on_options_default_activate) },
 };
@@ -144,22 +144,10 @@ static const GtkToggleActionEntry gmameui_view_toggle_menu_entries[] =
 	{ "ViewSidebarPanel", NULL, N_("Scree_nshot Panel"), "<alt>N",
 	  N_("Show or hide the screenshot panel"),
 	  G_CALLBACK (on_screen_shot_activate), TRUE },   
-};
 
-static const GtkRadioActionEntry gmameui_view_radio_menu_entries[] =
-{
-	{ "ViewListView", NULL, N_("_List"), NULL,
-	  N_("Displays items in a list"), LIST },
-#ifdef TREESTORE
-	{ "ViewTreeView", NULL, N_("List _Tree"), NULL,
-	  N_("Displays items in a tree list with clones indented"), LIST_TREE },
-#endif
 	{ "ViewDetailsListView", NULL, N_("_Details"), NULL,
-	  N_("Displays detailed information about each item"), DETAILS },
-#ifdef TREESTORE
-	{ "ViewDetailsTreeView", NULL, N_("Detai_ls Tree"), NULL,
-	  N_("Displays detailed information about each item with clones indented"), DETAILS_TREE },
-#endif
+	  N_("Displays detailed information about each item"),
+	  G_CALLBACK (on_view_type_changed), TRUE },
 };
 
 static const GtkActionEntry gmameui_column_entries[] =
@@ -179,10 +167,8 @@ struct main_gui_struct {
 	GtkWidget *combo_progress_bar;
 	GtkStatusbar *status_progress_bar;
 	GtkProgressBar *progress_progress_bar;
-	GtkWidget *tri_status_bar;
-	GtkStatusbar *statusbar1;
-	GtkStatusbar *statusbar2;
-	GtkStatusbar *statusbar3;
+
+	GtkStatusbar *statusbar;
 
 	GtkPaned *hpanedLeft;
 	GtkPaned *hpanedRight;
@@ -203,9 +189,7 @@ struct main_gui_struct {
 	GtkActionGroup *gmameui_rom_exec_action_group;  /* Item entries that require both a ROM and an exec */
 	GtkActionGroup *gmameui_exec_action_group;  /* Item entries that require an exec */
 	GtkActionGroup *gmameui_favourite_action_group;
-#ifdef TREESTORE
-	GtkActionGroup *gmameui_view_action_group;
-#endif
+
 	GtkActionGroup *gmameui_exec_radio_action_group;	/* Executable radio buttons */
 	gint gmameui_exec_merge_id;
 	

@@ -26,23 +26,14 @@
       <menuitem name="ViewFolderListMenu" action="ViewFolderList"/>
       <menuitem name="ViewSidebarPanelMenu" action="ViewSidebarPanel"/>
       <separator/>
-      <menuitem name="ViewListViewMenu" action="ViewListView"/>
-<!--
-      <menuitem name="ViewTreeViewMenu" action="ViewTreeView"/>
--->
       <menuitem name="ViewDetailsListViewMenu" action="ViewDetailsListView"/>
-<!--
-      <menuitem name="ViewDetailsTreeViewMenu" action="ViewDetailsTreeView"/>
-      <separator/>
-      <menuitem name="ViewExpandAllMenu" action="ViewExpandAll"/>
-      <menuitem name="ViewCollapseAllMenu" action="ViewCollapseAll"/>
--->
+
       <separator/>
       <menuitem name="ViewRefreshMenu" action="ViewRefresh"/>
     </menu>
 
     <menu name="OptionsMenu" action="Options">
-      <menuitem name="OptionRebuildGameListMenu" action="OptionRebuildGameList"/>
+<!--      <menuitem name="OptionRebuildGameListMenu" action="OptionRebuildGameList"/>-->
       <menuitem name="OptionDirsMenu" action="OptionDirs"/>
       <menuitem name="OptionDefaultOptsMenu" action="OptionDefaultOpts"/>
       <menuitem name="OptionPreferencesMenu" action="OptionPreferences"/>
@@ -65,14 +56,7 @@
     <toolitem action="ViewFolderList"/>
     <toolitem action="ViewSidebarPanel"/>
     <separator/>
-    <toolitem action="ViewListView"/>
-<!--
-    <toolitem action="ViewTreeView"/>
--->
     <toolitem action="ViewDetailsListView"/>
-<!--
-    <toolitem action="ViewDetailsTreeView"/>
--->
   </toolbar>
   
   <popup name="GameListPopup" action="GameListPopupAction">
