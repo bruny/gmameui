@@ -58,23 +58,13 @@ GType mame_gamelist_view_get_type (void);
 MameGamelistView *mame_gamelist_view_new (void);
 
 guint visible_games;
-#ifdef TREESTORE
-void mame_gamelist_view_change_model        (MameGamelistView *gamelist_view);
-#endif
+
 void mame_gamelist_view_select_random_game  (MameGamelistView *gamelist_view,
                                              gint              i);
 void mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view,
                                              MameRomEntry     *tmprom);
-/*GtkTreeModel *
-mame_gamelist_view_get_data_model     (MameGamelistView *gamelist_view);*/
-void
-mame_gamelist_view_change_views (MameGamelistView *gamelist_view);
-#ifdef TREESTORE
-void on_collapse_all_activate               (GtkMenuItem      *menuitem,
-                                             gpointer          user_data);
-void on_expand_all_activate                 (GtkMenuItem      *menuitem,
-                                             gpointer          user_data);
-#endif
+void mame_gamelist_view_change_views (MameGamelistView *gamelist_view);
+
 void on_column_hide_activate                (GtkMenuItem      *menuitem,
                                              gpointer          user_data);
 

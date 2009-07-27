@@ -23,11 +23,6 @@
 #ifndef __CALLBACKS_H__
 #define __CALLBACKS_H__
 
-/*#include <gtk/gtkmenuitem.h>
-#include <gtk/gtktogglebutton.h>
-#include <gtk/gtktreeselection.h>
-#include <gtk/gtktreeviewcolumn.h>*/
-
 /* Main window menu: File */
 void     on_play_activate                       (GtkAction *action,
                                                  gpointer         user_data);
@@ -66,14 +61,8 @@ void     on_refresh_activate                    (GtkAction        *action,
                                                  gpointer         user_data);
 
 /* Main window menu: Option */
-void     on_rebuild_game_list_menu_activate     (GtkMenuItem     *menuitem,
-                                                 gpointer         user_data);
-
 void     on_directories_menu_activate           (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
-
-/*void     on_default_option_menu_activate        (GtkMenuItem	*menuitem,
-                                                 gpointer	 user_data);*/
 
 void     on_preferences_activate             (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);

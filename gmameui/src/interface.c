@@ -222,23 +222,6 @@ on_view_type_changed (GtkToggleAction *action, gpointer user_data)
 }
 
 void
-set_status_bar (gchar *game_name, gchar *game_status)
-{
-/*DELETE	gchar *message;
-
-	if (game_status)
-		message = g_strdup_printf ("%s (%s)", game_name, game_status);
-	else
-		message = g_strdup_printf ("%s", game_name);
-	
-	gtk_statusbar_pop (main_gui.statusbar1, 1);
-	gtk_statusbar_push (main_gui.statusbar1, 1, message);
-
-	g_free (message);
-*/
-}
-
-void
 show_progress_bar (void)
 {
 /* FIXME TODO Not currently implemented 
@@ -541,7 +524,6 @@ GMAMEUI_DEBUG ("    Setting up LHS filters list... done");
 	/* Create the UI of the Game List */
 GMAMEUI_DEBUG ("    Setting up gamelist view...");
 	main_gui.displayed_list = mame_gamelist_view_new ();
-	mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
 	
 	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_games), GTK_WIDGET (main_gui.displayed_list));
 	gtk_widget_show_all (main_gui.scrolled_window_games);

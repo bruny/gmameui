@@ -70,11 +70,32 @@ main (int argc, char *argv[])
 	bind_textdomain_codeset (PACKAGE, "UTF-8");
 #endif
 	gtk_init (&argc, &argv);
-	
-	gmameui_init ();
-	if (init_gui () == -1)
-return -1;
 
+	gmameui_init ();
+	
+	if (init_gui () == -1)
+		return -1;
+
+	if (!mame_gamelist_load (gui_prefs.gl)) {
+		g_message (_("gamelist not found, need to rebuild one"));
+		/* Loading the gamelist failed - prompt the user to recreate it */
+		gamelist_check (mame_exec_list_get_current_executable (main_gui.exec_list));
+	} else {
+
+		//g_message (_("Time to load gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+
+		if (!load_games_ini ())
+			g_message (_("games.ini not loaded, using default values"));
+
+		//g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
+
+		if (!load_catver_ini ())
+			g_message (_("catver not loaded, using default values"));
+	}
+mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
+mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
+
+	
 	/* Load the default options */
 	main_gui.options = mame_options_new ();
 	main_gui.legacy_options = mame_options_legacy_new ();
@@ -108,14 +129,6 @@ return -1;
 		
 	} 
 
-	/* only need to do a quick check and redisplay games if the not_checked_list is not empty */
-#ifdef QUICK_CHECK_ENABLED
-	if (game_list.not_checked_list) {
-GMAMEUI_DEBUG ("Processing not checked list");
-		quick_check ();
-		create_gamelist_content ();
-	}
-#endif
 	GMAMEUI_DEBUG ("init done, starting main loop");
 	gtk_main ();
 	return 0;
@@ -202,30 +215,10 @@ g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NUL
 	
 	/* Initialise the gamelist */
 	gui_prefs.gl = mame_gamelist_new ();
-	if (!mame_gamelist_load (gui_prefs.gl)) {
-		g_message (_("gamelist not found, need to rebuild one"));
-		/* Loading the gamelist failed - prompt the user to recreate it */
-		gamelist_check (mame_exec_list_get_current_executable (main_gui.exec_list));
-	} else {
-	
-#ifdef ENABLE_DEBUG
-g_message (_("Time to load gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
-#endif
-		if (!load_games_ini ())
-			g_message (_("games.ini not loaded, using default values"));
 
-#ifdef ENABLE_DEBUG
-g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
-#endif
-		if (!load_catver_ini ())
-			g_message (_("catver not loaded, using default values"));
-	}
-	
-#ifdef ENABLE_DEBUG
 	g_timer_stop (mytimer);
 	g_message (_("Time to initialise GMAMEUI: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 	g_timer_destroy (mytimer);
-#endif
 
 #ifdef ENABLE_JOYSTICK
 	gchar *joystick_device;

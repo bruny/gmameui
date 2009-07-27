@@ -36,7 +36,6 @@ void on_details_tree_view_menu_activate (GtkCheckMenuItem *menuitem, gpointer us
 
 void on_view_type_changed (GtkToggleAction *action, gpointer user_data);
 
-void set_status_bar (gchar *game_name, gchar *game_status);
 void show_progress_bar (void);
 void hide_progress_bar (void);
 void update_progress_bar (gfloat current_value);

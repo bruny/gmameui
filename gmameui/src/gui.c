@@ -77,7 +77,8 @@ init_gui (void)
 		return -1;
 
 	/* Show and hence realize mainwindow so that MainWindow->window is available */
-	gtk_widget_show (MainWindow);
+	gtk_widget_show_all (MainWindow);
+	UPDATE_GUI;
 	
 	/* Need to set the size here otherwise it move when we create the gamelist 
 	if (show_screenshot)
@@ -735,10 +736,6 @@ select_game (MameRomEntry *rom)
 	gui_prefs.current_game = rom;
 
 	if (rom != NULL) {
-		/* update statusbar */
-		set_status_bar (mame_rom_entry_get_list_name (rom),
-				_(rom_status_string_value [mame_rom_entry_get_rom_status (rom)]));
-
 		/* update screenshot panel */
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
 					      rom);
@@ -747,9 +744,6 @@ select_game (MameRomEntry *rom)
 
 		GMAMEUI_DEBUG ("no games selected");
 		
-		/* update statusbar */
-		set_status_bar (_("No game selected"), NULL);
-
 		/* update screenshot panel */
 		gmameui_sidebar_set_with_rom (GMAMEUI_SIDEBAR (main_gui.screenshot_hist_frame),
 					      NULL);

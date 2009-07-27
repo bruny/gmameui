@@ -150,6 +150,7 @@ GMAMEUI_DEBUG ("Freeing roms... done");
 		g_list_foreach (gl->priv->drivers, (GFunc) g_free, NULL);
 		g_list_free (gl->priv->drivers);
 	}
+
 #ifdef QUICK_CHECK_ENABLED
 	if (gl->priv->not_checked_list) {
 		g_list_foreach (gl->priv->not_checked_list, (GFunc) rom_entry_free, NULL);
@@ -632,20 +633,21 @@ GMAMEUI_DEBUG ("Saving gamelist... done");
 }
 
 /**
-* Checks the gamelist and if its needs to be build/rebuild
-* it asks the user and proceeds accordingly.
-*
-* Checks:
-* - Gamelist was read but it was a version we don't support.
-* - Gamelist is not available.
-* - Gamelist was read but it was created with a very old version of GMAMEUI.
-* - Gamelist does not match the current executable (and VersionCheck = TRUE)
-*/
+ * gamelist_check:
+ * @exec: the currently selected #MameExec
+ *
+ * Checks the gamelist and if it needs to be built/rebuilt, it asks the user and
+ * proceeds accordingly.
+ * The following checks are performed:
+ * - Gamelist was read but it was a version we don't support.
+ * - Gamelist is not available.
+ * - Gamelist was read but it was created with a very old version of GMAMEUI.
+ * - Gamelist does not match the current executable (and VersionCheck = TRUE)
+ */
 void
 gamelist_check (MameExec *exec)
 {
-	GtkWidget *dialog = NULL;
-
+	gchar *message = NULL;
 	gint result;
 	gboolean versioncheck;  /* Check the gamelist against the current executable */
 	gchar *gl_name, *gl_version;
@@ -657,83 +659,69 @@ gamelist_check (MameExec *exec)
 	g_object_get (gui_prefs.gl, "name", &gl_name, "version", &gl_version, NULL);
 	
 	if (!gl_version || !strcmp (gl_version, "unknown")) {
-		dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
-							GTK_DIALOG_MODAL,
-							GTK_MESSAGE_WARNING,
-							GTK_BUTTONS_YES_NO,
-							_("Could not recognise the gamelist version.\n"
-							  "Do you want to rebuild the gamelist?"));
+		message = g_strdup_printf (_("Could not recognise the gamelist version.\n"
+		                             "Do you want to rebuild the gamelist?"));
+
 
 	} else if (!strcmp (gl_version, "none")) {
+		message = g_strdup_printf (_("Gamelist not available,\n"
+		                             "Do you want to build the gamelist?"));
 
-		dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
-							GTK_DIALOG_MODAL,
-							GTK_MESSAGE_WARNING,
-							GTK_BUTTONS_YES_NO,
-							_("Gamelist not available,\n"
- 							  "Do you want to build the gamelist?"));
 
 	} else if (!strcmp (gl_version, "too old")) {
+		message = g_strdup_printf (_("Gamelist was created with an older version of GMAMEUI.\n"
+		                             "The gamelist is not supported.\n"
+		                             "Do you want to rebuild the gamelist?"));
 
-		dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
-							GTK_DIALOG_MODAL,
-							GTK_MESSAGE_WARNING,
-							GTK_BUTTONS_YES_NO,
-							_("Gamelist was created with an older version of GMAMEUI.\n"
-							  "The gamelist is not supported.\n"
-							  "Do you want to rebuild the gamelist?"));
 
 	} else if (versioncheck) {	/* AAA FIXME TODO Automatically do this */
 		if (strcmp (mame_exec_get_name (exec), gl_name) ||
 			strcmp (mame_exec_get_version (exec), gl_version))
 		{
-
-			dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
-							GTK_DIALOG_MODAL,
-							GTK_MESSAGE_WARNING,
-							GTK_BUTTONS_YES_NO,
-							_("The gamelist is from:\n"
-							  "%s %s\n"
-							  "and the current executable is:\n"
-							  "%s %s\n"
-							  "Do you want to rebuild the gamelist?"),
-							  gl_name,
-							  gl_version,
-							  mame_exec_get_name (exec),
-							  mame_exec_get_version (exec));
-
+			message = g_strdup_printf (_("The gamelist is from:\n"
+			                             "%s %s\n"
+			                             "and the current executable is:\n"
+			                             "%s %s\n"
+			                             "Do you want to rebuild the gamelist?"),
+			                           gl_name,
+			                           gl_version,
+			                           mame_exec_get_name (exec),
+			                           mame_exec_get_version (exec));
 		}
 	}
 
-	if (dialog) {
+	if (message) {
+		/* Create a new message dialog to prompt the user to create the
+		   gamelist */
+		GtkWidget *dialog = NULL;
+		dialog = gtk_message_dialog_new (GTK_WINDOW (MainWindow),
+		                                 GTK_DIALOG_MODAL,
+		                                 GTK_MESSAGE_WARNING,
+		                                 GTK_BUTTONS_NONE,
+		                                 _("The gamelist needs to be created"));
+		gtk_dialog_add_buttons (GTK_DIALOG (dialog),
+		                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+		                        _("Rebuild gamelist"), GTK_RESPONSE_YES,
+		                        NULL);
+		gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dialog),
+		                                          message);
 		result = gtk_dialog_run (GTK_DIALOG (dialog));
 		gtk_widget_destroy (dialog);
 
 		switch (result)
 		{
 			case GTK_RESPONSE_YES:
-					gtk_widget_set_sensitive (main_gui.scrolled_window_games, FALSE);
-					UPDATE_GUI;
-
-				save_games_ini ();
-
-				if (gamelist_parse (exec)) {
-					mame_gamelist_save (gui_prefs.gl);
-					load_games_ini ();
-					load_catver_ini ();
-					quick_check ();
-
-					mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
-				}
-
-				gtk_widget_set_sensitive (main_gui.scrolled_window_games, TRUE);
+				gmameui_gamelist_rebuild (main_gui.displayed_list);
 				break;
 		}
-		
+
+		g_free (message);
 	}		
 }
 
-MameRomEntry* get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname) {
+MameRomEntry*
+get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname)
+{
 	GList *listpointer;
 	MameRomEntry *tmprom;
 	
@@ -784,8 +772,10 @@ void mame_gamelist_add_manufacturer (MameGamelist *gl, gchar *manufacturer) {
 	glist_insert_unique (&gl->priv->manufacturers, manufacturer);
 }
 
+/*DELETE
 void mame_gamelist_set_not_checked_list (MameGamelist *gl, GList *source) {
 	g_return_if_fail (gl != NULL);
 	
 	gl->priv->not_checked_list = g_list_copy (source);
 }
+*/
