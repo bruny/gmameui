@@ -135,7 +135,8 @@ create_CreditsWindow (GtkWindow *parent)
 				      "Brazilian Portugese (pt_BR) - Alfredo Jr <junix@linuxinabox.org>\n"
 				      "Italian (it) - Ugo Viti <ugo.viti@initzero.it>\n"
 				      "Swedish (sv) - Daniel Nylander <dnylander@users.sourceforge.net>\n"
-				      "French (fr) - Loïc Martin <loic.martin3@gmail.com>"));
+				      "French (fr) - Loïc Martin <loic.martin3@gmail.com>\n
+	                              "Jarek Sobolewski <r@sledinmay.com>"));
 	gtk_widget_show (translators);
 	gtk_notebook_append_page (credits_notebook, translators, translators_label);
 
