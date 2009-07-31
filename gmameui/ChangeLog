@@ -1,3 +1,8 @@
+2009-07-27 18:24 adburton
+
+	* gmameui.desktop.in: Updated .desktop.in file to remove deprecated items as
+	  per Freedesktop specifications
+
 2009-07-27 18:05 adburton
 
 	* data/main_gui.glade: Delete redundant main window Glade file
