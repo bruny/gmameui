@@ -22,6 +22,7 @@ gmameui_SOURCES = \
 	about.c about.h \
 	audit.c audit.h \
 	gmameui-audit-dlg.c gmameui-audit-dlg.h \
+	gmameui-statusbar.c gmameui-statusbar.h \
 	gmameui-rominfo-dlg.c gmameui-rominfo-dlg.h \
 	gmameui-search-entry.c gmameui-search-entry.h \
 	options_string.c options_string.h \

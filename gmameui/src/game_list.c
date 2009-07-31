@@ -469,6 +469,11 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 				gl->priv->name = g_strdup (p);
 			}
 		}
+
+
+		/* Short term hack until we use g_io_watch () so the IO processing
+		   doesn't block the main loop */
+		UPDATE_GUI;
 	}
 	fclose (gamelist);
 
@@ -771,11 +776,3 @@ void mame_gamelist_add_manufacturer (MameGamelist *gl, gchar *manufacturer) {
 	
 	glist_insert_unique (&gl->priv->manufacturers, manufacturer);
 }
-
-/*DELETE
-void mame_gamelist_set_not_checked_list (MameGamelist *gl, GList *source) {
-	g_return_if_fail (gl != NULL);
-	
-	gl->priv->not_checked_list = g_list_copy (source);
-}
-*/

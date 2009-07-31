@@ -46,6 +46,7 @@
 #include "gmameui-gamelist-view.h"
 #include "mame-exec-list.h"
 #include "gmameui-gamelist-view.h"
+#include "gmameui-statusbar.h"
 
 /* The following menu entries are always enabled */
 static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
@@ -120,16 +121,6 @@ static const GtkActionEntry gmameui_favourite_menu_entries[] =
 	  N_("Remove this game from your 'Favorites' game folder"), G_CALLBACK (on_remove_from_favorites_activate) },
 };
 
-#ifdef TREESTORE
-/* The following menu entries are enabled when the view is changed to a tree view */
-static const GtkActionEntry gmameui_view_expand_menu_entries[] =
-{
-	{ "ViewExpandAll", NULL, N_("Expand All"), NULL,
-	  N_("Expand all rows"), G_CALLBACK (on_expand_all_activate) },
-	{ "ViewCollapseAll", NULL, N_("Collapse All"), NULL,
-	  N_("Collapse all rows"), G_CALLBACK (on_collapse_all_activate) },
-};
-#endif
 static const GtkToggleActionEntry gmameui_view_toggle_menu_entries[] = 
 {
 	{ "ViewToolbar", NULL, N_("_Toolbar"), "<alt>T",
@@ -156,8 +147,6 @@ static const GtkActionEntry gmameui_column_entries[] =
 	  N_("Hide Column"), G_CALLBACK (on_column_hide_activate) },
 };
 
-
-
 GtkWidget *MainWindow;
 
 struct main_gui_struct {
@@ -168,7 +157,7 @@ struct main_gui_struct {
 	GtkStatusbar *status_progress_bar;
 	GtkProgressBar *progress_progress_bar;
 
-	GtkStatusbar *statusbar;
+	GMAMEUIStatusbar *statusbar;
 
 	GtkPaned *hpanedLeft;
 	GtkPaned *hpanedRight;

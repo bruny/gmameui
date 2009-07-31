@@ -1,4 +1,15 @@
-2009-07-27 adburton
+2009-07-27 18:05 adburton
+
+	* data/main_gui.glade: Delete redundant main window Glade file
+	* data/: Makefile.am, filter_bar.glade: Add new Glade file to support the filter bar
+	* src/: Makefile.am, game_list.c, gmameui-gamelist-view.c,
+	  gmameui-statusbar.c, gmameui-statusbar.h, gmameui.c, gui.h, interface.c,
+	  interface.h, io.c: Add new object for statusbar, show progressbar in
+	  statusbar when loading gamelist from startup and auditing ROMs after
+	  gamelist rebuild
+	* po/POTFILES.in: Update source files for translations
+
+2009-07-27 21:00 adburton
 
 	* src/: callbacks.c, callbacks.h, game_list.c, game_list.h,
 	  gmameui-gamelist-view.c, gmameui-gamelist-view.h, gmameui.c, gui.c,

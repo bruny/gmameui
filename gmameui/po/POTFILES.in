@@ -11,6 +11,7 @@ src/gmameui.c
 src/gmameui-audit-dlg.c
 src/gmameui-gamelist-view.c
 src/gmameui-sidebar.c
+src/gmameui-statusbar.c
 src/gmameui-rominfo-dlg.c
 src/gmameui-search-entry.c
 src/gtkjoy.c
@@ -37,8 +38,8 @@ src/xmame_options.c
 src/gmameui-ui.xml
 data/audit_window.glade
 data/directories.glade
+data/filter_bar.glade
 data/gmameui_prefs.glade
-data/main_gui.glade
 data/options.glade
 data/options_legacy.glade
 data/properties.glade

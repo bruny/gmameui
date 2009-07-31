@@ -71,7 +71,7 @@ set_list_sortable_column     (MameGamelistView *gamelist_view);
 static void
 create_tree_model            (MameGamelistView *gamelist_view);
 static void
-populate_model_from_gamelist (MameGamelistView *gamelist_view, /*GtkTreeModel *model*/MameGamelist *gl);
+populate_model_from_gamelist (MameGamelistView *gamelist_view, MameGamelist *gl);
 static gboolean
 filter_func                  (GtkTreeModel *model,
 			      GtkTreeIter  *iter,
@@ -136,6 +136,10 @@ on_romset_audited             (GmameuiAudit *audit,
 			       gchar *audit_line,
 			       gint type,
 			       gint auditresult,
+			       gpointer user_data);
+/* Callbacks handling when the auditing finishes */
+static void
+on_audit_complete             (GmameuiAudit *audit,
 			       gpointer user_data);
 
 /* Boilerplate functions */
@@ -601,6 +605,7 @@ mame_gamelist_view_update_game_in_list (MameGamelistView *gamelist_view, MameRom
 
 }
 
+/* FIXME TODO Move this functionality to gmameui-statusbar.c */
 static void
 set_status_bar_game_count (MameGamelistView *gamelist_view)
 {
@@ -611,9 +616,9 @@ set_status_bar_game_count (MameGamelistView *gamelist_view)
 	   FIXME TODO Note we use visible_games here since it is used in so many
 	   other places to determine whether to perform specific actions. */
 	visible_games = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (gamelist_view->priv->filter_model), NULL);
-		
+
 	message = g_strdup_printf ("%d %s", visible_games, visible_games == 1 ? _("game") : _("games"));
-	
+
 	gtk_statusbar_pop (main_gui.statusbar, 1);
 	gtk_statusbar_push (main_gui.statusbar, 1, message);
 	
@@ -1338,7 +1343,7 @@ mame_gamelist_view_repopulate_contents (MameGamelistView *gamelist_view)
 {
 	g_return_if_fail (gamelist_view != NULL);
 
-	populate_model_from_gamelist (gamelist_view, /*DELETEgamelist_view->priv->curr_model*/gui_prefs.gl);
+	populate_model_from_gamelist (gamelist_view, gui_prefs.gl);
 }
 
 /* For each ROM in the model, recalculate whether it should be shown, based on the
@@ -1425,11 +1430,30 @@ on_romset_audited (GmameuiAudit *audit,
 			g_object_unref (pixbuf);
 	}
 
+
+	gtk_progress_bar_pulse (GTK_PROGRESS_BAR (main_gui.statusbar));
+
+	
 	g_free (icondir);
 	g_free (iconzipfile);
 
 }
 
+/**
+ * on_audit_complete:
+ * @user_data:
+ *
+ * Triggered when the audit has finished, so we can stop the progressbar and
+ * hide it.
+ */
+static void
+on_audit_complete (GmameuiAudit *audit, gpointer user_data)
+{
+	GMAMEUIStatusbar *sb = (gpointer) user_data;
+	
+	gmameui_statusbar_stop_pulse (sb);
+}
+	
 /**
  * gmameui_gamelist_rebuild:
  * @gamelist_view:
@@ -1451,10 +1475,17 @@ g_return_if_fail (gamelist_view != NULL);
 
 	/* Set the GtkTreeView's model to NULL to clear the display */
 	gtk_tree_view_set_model (GTK_TREE_VIEW (gamelist_view), NULL);
-	
+
 	GMAMEUI_DEBUG ("Parsing MAME output to recreate game list...");
 	gamelist_parse (mame_exec_list_get_current_executable (main_gui.exec_list));
 
+	/* Trigger the statusbar to show a progressbar */
+	/* FIXME TODO These should be controlled via g_signal_emit
+	   calls for loading the gamelist etc */
+	gmameui_statusbar_start_pulse (main_gui.statusbar);
+	gmameui_statusbar_set_progressbar_text (main_gui.statusbar,
+	                                        _("Auditing MAME ROMs..."));
+	
 	mame_gamelist_save (gui_prefs.gl);
 
 	GMAMEUI_DEBUG ("Reloading everything...");
@@ -1475,6 +1506,9 @@ g_return_if_fail (gamelist_view != NULL);
 	GMAMEUI_DEBUG ("Auditing");
 	g_signal_connect (gui_prefs.audit, "romset-audited",
 			  G_CALLBACK (on_romset_audited), main_gui.displayed_list);
+	g_signal_connect (gui_prefs.audit, "rom-audit-complete",
+			  G_CALLBACK (on_audit_complete), main_gui.statusbar);
+	
 	mame_audit_start_full ();
 	GMAMEUI_DEBUG ("Done auditing");
 
@@ -1482,6 +1516,7 @@ g_return_if_fail (gamelist_view != NULL);
 	   mame_audit_start_full as UNAVAILABLE until audited and we want to hide
 	   them until they are audited as meeting the current filter settings */
 	mame_gamelist_view_update_filter (main_gui.displayed_list);
+
 }
 
 /* This function is to set the game icon from the zip file for each visible game;

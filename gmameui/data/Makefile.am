@@ -7,6 +7,6 @@ glade_DATA =    audit_window.glade \
 		options.glade \
 		options_legacy.glade \
 		rom_info.glade \
-		main_gui.glade
+		filter_bar.glade 
 
 EXTRA_DIST = $(glade_DATA)

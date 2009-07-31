@@ -34,6 +34,7 @@
 #include "filters_list.h"
 #include "gmameui.h"    /* For gui_prefs */
 #include "gmameui-search-entry.h"
+#include "gmameui-statusbar.h"
 
 static void
 on_filter_btn_toggled (GtkWidget *widget, gpointer user_data);
@@ -99,7 +100,7 @@ static GtkWidget *
 get_filter_btn_by_id (GladeXML *xml, gint i)
 {
 	GtkWidget *radio = NULL;
-
+	
 	if (i == 0)
 		radio = glade_xml_get_widget (xml, "filter_btn_all");
 	else if (i == 1)
@@ -221,62 +222,9 @@ on_view_type_changed (GtkToggleAction *action, gpointer user_data)
 	}	 
 }
 
-void
-show_progress_bar (void)
-{
-/* FIXME TODO Not currently implemented 
-	if (gui_prefs.ShowStatusBar) {
-		gchar *displayed_message;
-		displayed_message = g_strdup_printf (_("Game search %i%% complete"), 0);
-		
-		gtk_widget_hide (GTK_WIDGET (main_gui.tri_status_bar));
-		gtk_statusbar_push (main_gui.status_progress_bar, 1, displayed_message);
-		gtk_widget_show (GTK_WIDGET (main_gui.combo_progress_bar));
-		g_free (displayed_message);
-	}	*/
-}
-
-void
-hide_progress_bar (void)
-{
-/* FIXME TODO Not currently implemented 
-	if (gui_prefs.ShowStatusBar) {
-		gtk_widget_hide (GTK_WIDGET (main_gui.combo_progress_bar));
-		gtk_statusbar_pop (main_gui.status_progress_bar, 1);
-		gtk_widget_show (GTK_WIDGET (main_gui.tri_status_bar));
-	}*/
-}
-
-void
-update_progress_bar (gfloat current_value)
-{
-/* FIXME TODO Not currently implemented 
-	static gint current_displayed_value;
-	gchar *displayed_message;
-
-	if (gui_prefs.ShowStatusBar == FALSE)
-		return;
-
-	if (current_displayed_value!= (gint) (current_value * 100)) {
-		current_displayed_value= (gint) (current_value * 100);
-		displayed_message = g_strdup_printf (_("Game search %i%% complete"), current_displayed_value);
-		gtk_statusbar_pop (main_gui.status_progress_bar, 1);
-		gtk_statusbar_push (main_gui.status_progress_bar, 1, displayed_message);
-		g_free (displayed_message);
-	}
-
-	gtk_progress_bar_set_fraction (GTK_PROGRESS_BAR (main_gui.progress_progress_bar), current_value);
-*/
-}
-
 GtkWidget *
 create_MainWindow (void)
 {
-
-	/* FIXME TODO
-	 GtkWidget *combo_progress_bar;
-	 GtkWidget *status_progress_bar;
-	 GtkWidget *progress_progress_bar;*/
 
 	GtkAccelGroup *accel_group;
 	GtkTooltips *tooltips;
@@ -308,18 +256,16 @@ GMAMEUI_DEBUG ("Setting up main window...");
 		      "xpos-gamelist", &xpos_gamelist,
 		      NULL);
 	
-	GladeXML *xml = glade_xml_new (GLADEDIR "main_gui.glade", "window1", GETTEXT_PACKAGE);
+	GladeXML *xml = glade_xml_new (GLADEDIR "filter_bar.glade", "filter_hbox", GETTEXT_PACKAGE);
 	if (!xml) {
-		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "main_gui.glade");
+		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "filter_bar.glade");
 		return NULL;
 	}
-	main_window = glade_xml_get_widget (xml, "window1");
+	main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	g_object_set_data (G_OBJECT (main_window), "MainWindow", main_window);
 	
-	vbox = glade_xml_get_widget (xml, "vbox");
-	
-	/* Set up the status bar at the bottom */
-	main_gui.statusbar = glade_xml_get_widget (xml, "statusbar");
+	vbox = gtk_vbox_new (FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (main_window), vbox);
 	
 	tooltips = gtk_tooltips_new ();
 	g_object_set_data (G_OBJECT (main_window), "tooltips", tooltips);
@@ -460,8 +406,8 @@ GMAMEUI_DEBUG ("Setting up main window...");
 				      "/MenuBar/ViewMenu/ViewDetailsListViewMenu")),
 	                              current_mode);
 	
-	main_gui.hpanedLeft = glade_xml_get_widget (xml, "hpanedLeft");
-	main_gui.hpanedRight = glade_xml_get_widget (xml, "hpanedRight");
+	main_gui.hpanedLeft = gtk_hpaned_new ();
+	main_gui.hpanedRight = gtk_hpaned_new ();
 	
 	/* Set up the search field */
 GMAMEUI_DEBUG ("    Setting up search entry field...");
@@ -476,13 +422,12 @@ GMAMEUI_DEBUG ("    Setting up search entry field... done");
 
 	/* Prepare the ROM availability filter buttons */
 GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons...");
-	
 	GList *filter_btn_list, *list;
 	gint current_filter_btn;
 	
 	filter_btn_list = glade_xml_get_widget_prefix (xml, "filter_btn_");
 	g_object_get (main_gui.gui_prefs, "current-rom-filter", &current_filter_btn, NULL);
-	
+
 	for (list = g_list_first (filter_btn_list);
 	     list != NULL;
 	     list = g_list_next (list)) {	
@@ -493,11 +438,11 @@ GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons...");
 		g_signal_connect (G_OBJECT (list->data), "toggled",
 				  G_CALLBACK (on_filter_btn_toggled), NULL);
 	}
-	
-	/* Set the button based on the preference */
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (get_filter_btn_by_id (xml, current_filter_btn)),
-				      TRUE);
 
+	/* Set the button based on the preference */
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (get_filter_btn_by_id (xml,
+	                                                                       current_filter_btn)),
+				      TRUE);
 GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons... done");	
 	/* End ROM availability filter buttons */
 	
@@ -508,13 +453,26 @@ GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons... done");
 
 	/* Add filter list on LHS */
 GMAMEUI_DEBUG ("    Setting up LHS filters list...");	
+	main_gui.scrolled_window_filters = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_filters),
+	                                GTK_POLICY_AUTOMATIC,
+	                                GTK_POLICY_AUTOMATIC);
 	main_gui.filters_list = gmameui_filters_list_new ();
-	main_gui.scrolled_window_filters = glade_xml_get_widget (xml, "scrolledwindowFilters");
 	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_filters), GTK_WIDGET (main_gui.filters_list));
 GMAMEUI_DEBUG ("    Setting up LHS filters list... done");
 
 	/* Add placeholder for the games list in middle */
-	main_gui.scrolled_window_games = glade_xml_get_widget (xml, "scrolledwindowGames");
+	main_gui.scrolled_window_games = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games),
+	                                     GTK_SHADOW_IN);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games),
+	                                GTK_POLICY_AUTOMATIC,
+	                                GTK_POLICY_AUTOMATIC);
+
+	GtkWidget *box2 = gtk_vbox_new (FALSE, 0);
+	gtk_paned_pack1 (GTK_PANED (main_gui.hpanedRight), box2, TRUE, TRUE);
+
+	gtk_box_pack_start (GTK_BOX (box2), search_box, FALSE, FALSE, 6);
 	
 	/* Add screenshot and history sidebar on RHS */
 	GtkWidget *sidebar = gmameui_sidebar_new ();
@@ -528,8 +486,19 @@ GMAMEUI_DEBUG ("    Setting up gamelist view...");
 	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_games), GTK_WIDGET (main_gui.displayed_list));
 	gtk_widget_show_all (main_gui.scrolled_window_games);
 GMAMEUI_DEBUG ("    Setting up gamelist view... done");
+	gtk_box_pack_start (GTK_BOX (box2), main_gui.scrolled_window_games, TRUE, TRUE, 6);
 
+	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (main_gui.hpanedLeft), TRUE, TRUE, 6);
+	gtk_paned_add1 (GTK_PANED (main_gui.hpanedLeft), main_gui.scrolled_window_filters);
+	gtk_paned_add2 (GTK_PANED (main_gui.hpanedLeft), GTK_WIDGET (main_gui.hpanedRight));
+	
 	gtk_paned_set_position (GTK_PANED (main_gui.hpanedLeft), xpos_filters);
+
+	/* Set up the status bar at the bottom */
+GMAMEUI_DEBUG ("    Setting up statusbar...");
+	main_gui.statusbar = gmameui_statusbar_new ();
+	gtk_box_pack_end (GTK_BOX (vbox), GTK_WIDGET (main_gui.statusbar), FALSE, FALSE, 0);
+GMAMEUI_DEBUG ("    Setting up statusbar... done");
 
 	/* Update UI if executables or entries in the MameGamelistView are
 	   not available */

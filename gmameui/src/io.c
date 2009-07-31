@@ -20,12 +20,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  *
  */
+#include "common.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <gtk/gtkmain.h>
-#include <gtk/gtkscrolledwindow.h>
 
 #include "gmameui.h"
 #include "io.h"
@@ -108,9 +107,9 @@ load_games_ini (void)
 		GMAMEUI_DEBUG ("Error loading games.ini file: %s", error->message);
 		g_error_free (error);
 		g_key_file_free (gameini_list);
-
+#ifdef QUICK_CHECK_ENABLED
 		mame_gamelist_set_not_checked_list (gui_prefs.gl, romlist);
-
+#endif
 		return FALSE;
 	}
 
@@ -150,7 +149,10 @@ load_games_ini (void)
 		} else {
 			GMAMEUI_DEBUG ("Could not find ROM in list for %s", gamelist[i]);
 		}
-		
+
+		/* Short term hack until we use g_io_watch () so the IO processing
+		   doesn't block the main loop */
+		UPDATE_GUI;
 	}
 
 	g_strfreev (gamelist);
@@ -365,12 +367,13 @@ check_samples_exists_as_file (gchar *samplename) {
 void
 quick_check (void)
 {
+#ifdef QUICK_CHECK_ENABLED
 	static gboolean quick_check_running = FALSE;
 	GList *list_pointer;
 	gint nb_rom_not_checked;
 	gfloat done;
 	MameRomEntry *rom;
-#ifdef QUICK_CHECK_ENABLED
+
 	GMAMEUI_DEBUG ("Running quick check.");
 	if (game_list.num_games == 0)
 		return;

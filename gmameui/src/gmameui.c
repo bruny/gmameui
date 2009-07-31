@@ -45,6 +45,7 @@
 #include "gtkjoy.h"
 #include "mame-exec.h"
 #include "directories.h"
+#include "gmameui-statusbar.h"
 
 #define BUFFER_SIZE 1000
 
@@ -69,6 +70,7 @@ main (int argc, char *argv[])
 	bindtextdomain (PACKAGE, PACKAGE_LOCALE_DIR);
 	bind_textdomain_codeset (PACKAGE, "UTF-8");
 #endif
+
 	gtk_init (&argc, &argv);
 
 	gmameui_init ();
@@ -76,14 +78,22 @@ main (int argc, char *argv[])
 	if (init_gui () == -1)
 		return -1;
 
+	/* Show a progress bar while the gamelist is being loaded */
+	/* FIXME TODO These should be controlled via g_signal_emit
+	   calls for loading the gamelist etc */
+	gmameui_statusbar_start_pulse (main_gui.statusbar);
+	gmameui_statusbar_set_progressbar_text (main_gui.statusbar,
+	                                        _("Loading gamelist..."));
+	
 	if (!mame_gamelist_load (gui_prefs.gl)) {
 		g_message (_("gamelist not found, need to rebuild one"));
 		/* Loading the gamelist failed - prompt the user to recreate it */
 		gamelist_check (mame_exec_list_get_current_executable (main_gui.exec_list));
 	} else {
-
 		//g_message (_("Time to load gamelist: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 
+		gmameui_statusbar_set_progressbar_text (main_gui.statusbar,
+	                                        _("Loading game data..."));
 		if (!load_games_ini ())
 			g_message (_("games.ini not loaded, using default values"));
 
@@ -92,9 +102,13 @@ main (int argc, char *argv[])
 		if (!load_catver_ini ())
 			g_message (_("catver not loaded, using default values"));
 	}
-mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
-mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
-
+	
+	/* FIXME TODO These should be controlled via g_signal_emit
+	   calls for loading the gamelist etc */
+	gmameui_statusbar_stop_pulse (main_gui.statusbar);
+	
+	mame_gamelist_view_repopulate_contents (main_gui.displayed_list);
+	mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
 	
 	/* Load the default options */
 	main_gui.options = mame_options_new ();
@@ -131,6 +145,7 @@ mame_gamelist_view_scroll_to_selected_game (main_gui.displayed_list);
 
 	GMAMEUI_DEBUG ("init done, starting main loop");
 	gtk_main ();
+	
 	return 0;
 }
 
@@ -847,6 +862,12 @@ exit_gmameui (void)
 	
 	g_object_unref (main_gui.gui_prefs);
 	main_gui.gui_prefs = NULL;
+
+/*
+	FIXME TODO
+	g_object_unref (main_gui.statusbar);
+	main_gui.statusbar = NULL;
+*/
 	
 	/* FIXME TODO gtk_widget_destroy (MainWindow);*/
 	
