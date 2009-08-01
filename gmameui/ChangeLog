@@ -1,3 +1,10 @@
+2009-08-01 19:35 adburton
+
+	* src/: mame_options_legacy.c, mame_options_legacy_dialog.c: Set default
+	  values for bufsize, flipx and flipy, set volume as an integer value not a
+	  float, load doubles using g_key_file_get_double, not _get_integer.
+	  All changes affect XMAME only.
+
 2009-08-01 16:40 adburton
 
 	* src/gmameui-gamelist-view.c: Remove redundant gtk_progressbar_pulse call

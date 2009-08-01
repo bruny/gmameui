@@ -21,10 +21,11 @@
  *
  */
 
+#include "common.h"
+
 #include <string.h>
 #include <stdlib.h>
 
-#include "common.h"
 #include <glade/glade.h>
 #include "mame_options_legacy_dialog.h"
 #include "mame_options_legacy.h"
@@ -314,8 +315,16 @@ update_property_on_change_double (GtkWidget *widget, gpointer user_data)
 	
 	GMAMEUI_DEBUG ("Callback received on widget for %s", key);
 	val = get_property_value_as_double (widget, key);
-	GMAMEUI_DEBUG ("Setting value of widget for %s to %.2f", key, val);
-	mame_legacy_options_set_dbl (main_gui.legacy_options, key, val);
+
+	if (g_ascii_strcasecmp (key, "Sound-volume") == 0) {
+		/* Volume is an integer value but we are using a GtkHScale which
+		   defaults to using doubles as the value. */
+		GMAMEUI_DEBUG ("Setting value of widget for %s to %d", key, val);
+		mame_legacy_options_set_int (main_gui.legacy_options, key, val);
+	} else {
+		GMAMEUI_DEBUG ("Setting value of widget for %s to %.2f", key, val);
+		mame_legacy_options_set_dbl (main_gui.legacy_options, key, val);
+	}
 }
 
 static GtkWidget *
@@ -417,6 +426,8 @@ set_property_value_as_string (GtkWidget *widget, gchar *value)
 	gdouble double_value;
 	gchar* values;
 	gint i; 
+
+/* FIXME TODO Should use the default value for the parameter, rather than 0 */
 	
 	if (GTK_IS_TOGGLE_BUTTON (widget)) {
 		if (value) 
@@ -438,7 +449,7 @@ set_property_value_as_string (GtkWidget *widget, gchar *value)
 		
 		gtk_spin_button_set_value (GTK_SPIN_BUTTON (widget), int_value);
 	} else if (GTK_IS_HSCALE (widget)) {
-		if (value) 
+		if (value)
 			double_value = atof (value);
 		else
 			double_value = 0.0;

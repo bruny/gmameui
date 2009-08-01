@@ -21,6 +21,8 @@
  *
  */
 
+#include "common.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <gtk/gtk.h>
@@ -201,6 +203,8 @@ static _MameSupportedOptionsLegacyInt MameSupportedOptionsLegacyInt[] =
 	{ LEGACY_OPTION_WIDTHSCALE, "Video", "widthscale", 1, 1, 8, { 0, } },    /* AKA ws */
 	{ LEGACY_OPTION_MAXAUTOFRAMESKIP, "Video", "maxautoframeskip", 1, 1, 12, { 0, } },    /* AKA mafs */
 	{ LEGACY_OPTION_GLTEXTURESIZE, "OpenGL", "gltexture_size", 0, 0, 2048, { 0, } },
+
+	{ LEGACY_OPTION_SOUND_VOLUME, "Sound", "volume", 0, -32, 0, { 0, } },       /* AKA v */
 };
 
 /* Boolean options. These options are prefixed by 'no' if the value is set off */
@@ -218,8 +222,8 @@ static _MameSupportedOptionsLegacyBool MameSupportedOptionsLegacyBool[] =
 	{ LEGACY_OPTION_ROL, "Video", "rol", FALSE, { 0, } },     /* AKA rol */
 	{ LEGACY_OPTION_AUTOROR, "Video", "autoror", TRUE, { 0, } },
 	{ LEGACY_OPTION_AUTOROL, "Video", "autorol", TRUE, { 0, } },
-	{ LEGACY_OPTION_FLIPX, "Video", "flipx", TRUE, { 0, } },  /* AKA fx */
-	{ LEGACY_OPTION_FLIPY, "Video", "flipy", TRUE, { 0, } },  /* AKA fy */
+	{ LEGACY_OPTION_FLIPX, "Video", "flipx", FALSE, { 0, } },  /* AKA fx */
+	{ LEGACY_OPTION_FLIPY, "Video", "flipy", FALSE, { 0, } },  /* AKA fy */
 	
 	/* Artwork */
 	{ LEGACY_OPTION_ARTWORK, "Artwork", "artwork", TRUE, { 0, } },  /* AKA art */
@@ -279,13 +283,12 @@ static _MameSupportedOptionsLegacyDbl MameSupportedOptionsLegacyDbl[] =
 	{ LEGACY_OPTION_BRIGHTNESS, "Video", "brightness", 1, 0.5, 2.0, { 0, } },    /* AKA brt */
 	{ LEGACY_OPTION_PAUSE_BRIGHTNESS, "Video", "pause_brightness", 1, 0.5, 2.0, { 0, } },    /* AKA pbrt */
 	{ LEGACY_OPTION_GAMMA, "Video", "gamma", 1, 0.5, 2.0, { 0, } },    /* AKA gc */
-	{ LEGACY_OPTION_BEAM, "Vector", "beam", 1, 1, 16, { 0, } },    /* AKA B */
-	{ LEGACY_OPTION_FLICKER, "Vector", "flicker", 0, 0, 1, { 0, } },    /* AKA f */
-	{ LEGACY_OPTION_INTENSITY, "Vector", "intensity", 1, 0, 1, { 0, } },
-	{ LEGACY_OPTION_SOUND_VOLUME, "Sound", "volume", 0, -32, 0, { 0, } },       /* AKA v */
-	{ LEGACY_OPTION_SOUND_BUFSIZE, "Sound", "bufsize", 1, 0, 5, { 0, } },   /* AKA bs */
+	{ LEGACY_OPTION_BEAM, "Vector", "beam", 1.0, 1.0, 16.0, { 0, } },    /* AKA B */
+	{ LEGACY_OPTION_FLICKER, "Vector", "flicker", 0.0, 0.0, 100.0, { 0, } },    /* AKA f */
+	{ LEGACY_OPTION_INTENSITY, "Vector", "intensity", 1.0, 0.5, 3.0, { 0, } },
+	{ LEGACY_OPTION_SOUND_BUFSIZE, "Sound", "bufsize", 3.0, 1.0, 30.0, { 0, } },   /* AKA bs */
 	
-	{ LEGACY_OPTION_GLBEAM, "OpenGL", "glbeam", 1, 0, 100, { 0, } },
+	{ LEGACY_OPTION_GLBEAM, "OpenGL", "glbeam", 1.0, 1.0, 16, { 0, } },
 };
 
 /* FIXME TODO Set default values for ALL options */
@@ -474,7 +477,7 @@ mame_options_legacy_save_string (MameOptionsLegacy *opts, GParamSpec *param, gpo
 //	gchar** stv;
 //	GValue *dbl_value;
 	_MameSupportedOptionsLegacyString *opt;
-	gchar *value;
+	const gchar *value;
 
 	g_return_if_fail (MAME_IS_OPTIONS_LEGACY (opts));
 	g_return_if_fail (param->name != NULL);
@@ -727,7 +730,7 @@ mame_legacy_options_get_dbl (MameOptionsLegacy *opts, const gchar *key)
 
 	ret_val = 0;
 	stv = g_strsplit (key, "-", 2);
-	ret_val = g_key_file_get_integer (opts->priv->options_file, stv[0], stv[1], &error);
+	ret_val = g_key_file_get_double (opts->priv->options_file, stv[0], stv[1], &error);
 
 	g_strfreev (stv);
 
