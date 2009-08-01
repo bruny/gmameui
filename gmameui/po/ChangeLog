@@ -1,5 +1,9 @@
 2009-07-31  adburton <adb@iinet.net.au>
 
+	* POTFILES.skip: Add network_game.c
+
+2009-07-31  adburton <adb@iinet.net.au>
+
 	* POTFILES.in: Updated list of source translatable files
 	* pl.po: New Polish translation (thanks Jarek Sobolewski)
 
