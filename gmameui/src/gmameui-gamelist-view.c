@@ -1429,10 +1429,6 @@ on_romset_audited (GmameuiAudit *audit,
 		if (pixbuf)
 			g_object_unref (pixbuf);
 	}
-
-
-	gtk_progress_bar_pulse (GTK_PROGRESS_BAR (main_gui.statusbar));
-
 	
 	g_free (icondir);
 	g_free (iconzipfile);

@@ -165,6 +165,37 @@ GMAMEUI_DEBUG ("Creating new directories dialog...");
 	/*GMAMEUI_DEBUG ("Storing a copy of the ROM paths value array with %d elements",
 		       priv->va_orig_rom_paths->n_values);*/
 
+	/* If no executables are set, look for a MAME executable in the path */
+	if (va_exec_paths->n_values == 0) {
+		gchar *foundexec;
+
+		GMAMEUI_DEBUG ("No executables found, looking in path...");
+	
+		foundexec = g_find_program_in_path ("sdlmame");
+
+		/* Check whether an executable was found in the path */
+		if (foundexec != NULL) {
+			MameExec *exec;
+
+			GMAMEUI_DEBUG ("Found %s", foundexec);
+			
+			/* Check whether any found executable is a valid MAME executable */
+			exec = mame_exec_new_from_path (foundexec);
+			if (exec != NULL) {
+				/* Add the executable to the list */
+				mame_exec_list_add (main_gui.exec_list, exec);
+
+				/* Update the preferences */
+				va_exec_paths = mame_exec_list_get_list_as_value_array (main_gui.exec_list);
+				g_object_set (main_gui.gui_prefs,
+					      "executable-paths", va_exec_paths,
+					      NULL);
+			}
+		
+			g_free (foundexec);
+		}
+	}
+	
 	/* XMame Exe List */
 	store = (GtkTreeModel *) gtk_list_store_new (1, G_TYPE_STRING);
 	if (va_exec_paths) {
