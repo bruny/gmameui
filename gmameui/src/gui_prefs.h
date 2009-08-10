@@ -134,13 +134,13 @@ enum {
 	DIR_CPANEL,
 	DIR_ICONS,
 	DIR_CTRLR,
-	DIR_HISCORE,	/* FIXME TODO Move this below */
 	FILE_CATVER,
 	FILE_CHEAT,
 	FILE_HISCORE,
 	FILE_HISTORY,
 	FILE_MAMEINFO,
 	DIR_CFG,
+	DIR_HISCORE,
 	DIR_NVRAM,
 	DIR_STATE,
 	DIR_INP,
@@ -152,27 +152,28 @@ enum {
 
 /* FIXME TODO - Have default value which is used if the key file is null - base it on io.c references when loading file */
 static const directory_config directory_prefs [] = {
-	{ PROP_DIR_ARTWORK, "dir-artwork", "/usr/lib/games/xmame/" },
-	{ PROP_DIR_SNAPSHOT, "dir-snapshot", "/usr/lib/games/xmame/"},
-	{ PROP_DIR_FLYER, "dir-flyer", "/usr/lib/games/xmame/" },
-	{ PROP_DIR_CABINET, "dir-cabinet", "/usr/lib/games/xmame/" },
-	{ PROP_DIR_MARQUEE, "dir-marquee", "/usr/lib/games/xmame/" },
-	{ PROP_DIR_TITLE, "dir-title", "/usr/lib/games/xmame/" },
-	{ PROP_DIR_CPANEL, "dir-cpanel", "/usr/lib/games/xmame/" },
-	{ PROP_DIR_ICONS, "dir-icons", "/usr/lib/games/xmame/" },
-	{ PROP_DIR_CTRLR, "dir-ctrlr", "/usr/lib/games/xmame/" },
-	{ PROP_DIR_HISCORE, "dir-hiscore", ".gmameui/hi/" },	/* FIXME TODO Move this below */
-	{ PROP_FILE_CATVER, "file-catver", "/usr/lib/games/xmame/catver.ini" },
-	{ PROP_FILE_CHEAT, "file-cheat", "/usr/lib/games/xmame/cheat.dat" },
-	{ PROP_FILE_HISCORE, "file-hiscore", "/usr/lib/games/xmame/hiscore.dat" },
-	{ PROP_FILE_HISTORY, "file-history", "/usr/lib/games/xmame/history.dat" },
-	{ PROP_FILE_MAMEINFO, "file-mameinfo", "/usr/lib/games/xmame/mameinfo.dat" },
+	{ PROP_DIR_ARTWORK, "dir-artwork", "artwork" },
+	{ PROP_DIR_SNAPSHOT, "dir-snapshot", "snap" },
+	{ PROP_DIR_FLYER, "dir-flyer", "flyers" },
+	{ PROP_DIR_CABINET, "dir-cabinet", "cabs" },
+	{ PROP_DIR_MARQUEE, "dir-marquee", "marquee" },
+	{ PROP_DIR_TITLE, "dir-title", "titles" },
+	{ PROP_DIR_CPANEL, "dir-cpanel", "cpanel" },
+	{ PROP_DIR_ICONS, "dir-icons", "icons" },
+	{ PROP_DIR_CTRLR, "dir-ctrlr", "ctrlr" },
+
+	{ PROP_FILE_CATVER, "file-catver", "catver.ini" },
+	{ PROP_FILE_CHEAT, "file-cheat", "cheat.dat" },
+	{ PROP_FILE_HISCORE, "file-hiscore", "hiscore.dat" },
+	{ PROP_FILE_HISTORY, "file-history", "history.dat" },
+	{ PROP_FILE_MAMEINFO, "file-mameinfo", "mameinfo.dat" },
 	
 	/* The following are per-user directories, and will not be user-configured. As a
 	   result, the default directory will be nested under ~/.gmameui/<dir>. The
 	   directory will be built when g_object_get is invoked. These properties
 	   deliberately do not have a g_object_set clause */
 	{ PROP_DIR_CFG, "dir-cfg", "cfg" },
+	{ PROP_DIR_HISCORE, "dir-hiscore", "hi" },
 	{ PROP_DIR_NVRAM, "dir-nvram", "nvram" },   /* Save game non-volatile RAM, e.g. for settings and hi-scores, dependant on driver support for each game */
 	{ PROP_DIR_STATE, "dir-state", "sta" },   /* Save and load the 'state' of the ROM upon quitting the game */
 	{ PROP_DIR_INP, "dir-inp", "inp" },

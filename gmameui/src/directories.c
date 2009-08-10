@@ -478,6 +478,90 @@ GMAMEUI_DEBUG ("Destroying mame directories dialog...");
 GMAMEUI_DEBUG ("Destroying mame directories dialog... done");
 }
 
+/**
+ * update_other_entries
+ * @dialog: the #MameDirectoriesDialog
+ * @filename: the selected path from the #GtkFileChooser
+ *
+ * This function is called whenever a user updates the value of a directory or file.
+ * It looks to see whether the parent folder is called MAME; if so, we look to see
+ * whether the parent folder has other subfolders (e.g. artwork, flyers, snap, etc)
+ * that can be set automatically.
+ *
+ * It also looks for expected files (e.g. cheat.dat, mameinfo.dat).
+ *
+ * FIXME TODO This should also be performed when a new ROM or Sample path is added
+ */
+static void update_other_entries (MameDirectoriesDialog *dialog, gchar *filename)
+{
+	GFile *folder, *parentfolder;
+	gchar *parentfoldername;
+	
+	/* Here we want to look for all the other files, as well. so check the parent folder */
+	folder = g_file_new_for_path (filename);
+	parentfolder = g_file_get_parent (folder);
+
+	g_return_if_fail (parentfolder != NULL);
+
+	/* Get the containing folder (in the case of a file) or the parent folder
+	   (in the case of a folder) */
+	parentfoldername = g_file_get_basename (parentfolder);
+
+	/* If the parent folder is "MAME", look inside to see which other folders it has */
+	if (g_ascii_strcasecmp (parentfoldername, "mame") == 0) {
+		int i;
+	
+		/* Look for other subfolders */
+		for (i = 0; i < G_N_ELEMENTS (directory_prefs); i++) {
+			GFile *tmpdir;
+			gchar *testname;
+			
+			GMAMEUI_DEBUG ("  Looking for directory/file at %d called %s", i, directory_prefs[i].default_dir);
+			
+			tmpdir = g_file_get_child (parentfolder, directory_prefs[i].default_dir);
+			testname = g_file_get_parse_name (tmpdir);
+
+			if (((g_ascii_strncasecmp (directory_prefs[i].name, "dir-", 4) == 0) && (g_file_test (testname, G_FILE_TEST_IS_DIR))) ||
+			    ((g_ascii_strncasecmp (directory_prefs[i].name, "file-", 5) == 0) && (g_file_test (testname, G_FILE_TEST_IS_REGULAR)))) {
+				gchar *val;
+			
+				GMAMEUI_DEBUG ("     Directory/file exists");
+
+				g_object_get (main_gui.gui_prefs, directory_prefs[i].name, &val, NULL);
+
+				/* If there is no existing value set, and the MAME/<dirname> directory
+				   exists, then update the preferences value and the widget */
+				if ((val == NULL) || (strlen (val) == 0)) {
+					GtkWidget *widget;
+					gchar *widgetname;
+
+					/* Update the preferences */
+					g_object_set (main_gui.gui_prefs, directory_prefs[i].name, testname, NULL);
+
+					/* Update the widget */
+					widgetname = g_strdup_printf ("entry_%s", directory_prefs[i].name);
+					widget = glade_xml_get_widget (dialog->priv->xml, widgetname);
+					if (widget)
+						gtk_entry_set_text (GTK_ENTRY (widget), testname);
+					g_free (widgetname);
+				
+				} else {
+					GMAMEUI_DEBUG ("       Pre-existing value is %s", val);
+				}
+			
+				if (val);
+					g_free (val);
+
+			 } else
+				GMAMEUI_DEBUG ("     Directory/file does not exist");
+			g_free (testname);
+		}
+	}
+	g_free (parentfoldername);
+	g_object_unref (folder);
+	g_object_unref (parentfolder);
+}
+
 /* Handle specifying a directory (excluding Exec, ROM or Sample directory).
    If a directory is chosen, update the associated GtkEntry, and update the
    associated preferences entry */
@@ -516,7 +600,10 @@ on_dir_browse_button_clicked (GtkWidget *widget, gpointer user_data)
 		
 		filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser));
 		gtk_entry_set_text (GTK_ENTRY (path_entry), filename);
-		g_object_set (main_gui.gui_prefs, name, filename, NULL);	
+		g_object_set (main_gui.gui_prefs, name, filename, NULL);
+
+		/* See if the other directories can also be set based on this choice */
+		update_other_entries (dialog, filename);
 		
 		g_free (filename);
 	}
@@ -564,6 +651,9 @@ on_file_browse_button_clicked (GtkWidget *widget, gpointer user_data)
 		gtk_entry_set_text (GTK_ENTRY (path_entry), path);
 		g_object_set (main_gui.gui_prefs, name, path, NULL);
 
+		/* See if the other files can also be set based on this choice */
+		update_other_entries (dialog, path);
+
 		g_free (path);
 	}
 	gtk_widget_destroy (filechooser);
@@ -571,8 +661,10 @@ on_file_browse_button_clicked (GtkWidget *widget, gpointer user_data)
 	g_free (widget_name);
 }
 
-/* Opens a file chooser for a directory and, if a directory is selected, adds it
-   to the corresponding treeview */
+/* Create a new file chooser to select a path for either ROMs or Samples. Once
+   selected, the executable is added to the corresponding TreeView widget for
+   the Directories Selection window. Note that it doesn't update the preferences
+   until the window is closed. */
 static void
 add_path_to_tree_view (GtkWidget *button, gpointer user_data)
 {
@@ -613,6 +705,7 @@ add_path_to_tree_view (GtkWidget *button, gpointer user_data)
 				gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 						    0, temp_text,
 						    -1);
+
 			}
 
 			g_free (temp_text);
@@ -871,7 +964,6 @@ mame_directories_dialog_save_changes (MameDirectoriesDialog *dialog)
 		g_object_set (main_gui.gui_prefs,
 			      "dir-ctrlr", gtk_editable_get_chars (GTK_EDITABLE (ctrlr_directory_entry), 0, -1),
 			      NULL);
-		load_options (NULL);
 	}*/
 	
 	/* Get sample paths from tree model */

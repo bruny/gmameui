@@ -1,6 +1,6 @@
 2009-08-10 20:22 adburton
 
-	* src/directories.c: When the user sets the value of a directory or file,
+	* src/directories.c, src/gui_prefs.h: When the user sets the value of a directory or file,
 	  if the parent directory is 'mame', apply the values for expected settings
 	  to unset values
 
