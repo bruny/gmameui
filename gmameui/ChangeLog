@@ -1,3 +1,10 @@
+2009-08-10 21:30 adburton
+
+	* src/: game_options.c, game_options.h, network_game.c, network_game.h,
+	  Makefile.am:
+	* data/: properties.glade, Makefile.am:
+	  Delete redundant files
+
 2009-08-10 20:22 adburton
 
 	* src/directories.c, src/gui_prefs.h: When the user sets the value of a directory or file,

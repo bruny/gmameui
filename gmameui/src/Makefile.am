@@ -44,10 +44,6 @@ gmameui_SOURCES = \
 	gossip-cell-renderer-expander.c gossip-cell-renderer-expander.h \
 	$(BUILT_SOURCES)
 
-REDUNDANT_FILES = \
-	network_game.h network_game.c \
-	game_options.h game_options.c 
-
 gmameui-marshaller.h: gmameui-marshallers.list 
 	glib-genmarshal --prefix=gmameui_marshaller --header $< > $@
 

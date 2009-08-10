@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-09 23:12+1000\n"
+"POT-Creation-Date: 2009-08-10 21:13+1000\n"
 "PO-Revision-Date: 2003-11-30 00:18+0800\n"
 "Last-Translator: Jouston Huang <jouston@i18n.linux.org.tw>\n"
 "Language-Team: Traditional Chinese <zh-l10n@linux.org.tw>\n"
@@ -62,7 +62,6 @@ msgstr ""
 
 #. Add each of the notebooks
 #: ../src/callbacks.c:136 ../src/mame_options_legacy_dialog.c:833
-#: ../data/properties.glade.h:75
 msgid "Display"
 msgstr "顯示"
 
@@ -73,7 +72,7 @@ msgstr "OpenGL選項"
 
 #. mame_options_legacy_dialog_add_page (dlg, "OpenGLVBox", _("OpenGL"), "gmameui-display-toolbar");
 #: ../src/callbacks.c:140 ../src/filters_list.c:289
-#: ../src/mame_options_legacy_dialog.c:835 ../data/properties.glade.h:136
+#: ../src/mame_options_legacy_dialog.c:835
 msgid "Sound"
 msgstr "音效"
 
@@ -87,7 +86,6 @@ msgstr ""
 
 #. mame_options_legacy_dialog_add_page (dlg, "PerformanceVBox", _("Performance"), "gmameui-general-toolbar");
 #: ../src/callbacks.c:146 ../src/mame_options_legacy_dialog.c:838
-#: ../data/properties.glade.h:115
 msgid "Miscellaneous"
 msgstr ""
 
@@ -156,22 +154,22 @@ msgid ""
 "you sure you want to close the window?"
 msgstr ""
 
-#: ../src/directories.c:583
+#: ../src/directories.c:588
 msgid "Browse for Folder"
 msgstr "瀏覽目錄"
 
-#: ../src/directories.c:632
+#: ../src/directories.c:637
 msgid "Browse for File"
 msgstr "瀏覽檔案"
 
 #. Create new directory file chooser
-#: ../src/directories.c:672
+#: ../src/directories.c:679
 #, fuzzy
 msgid "Select directory"
 msgstr "控制器目錄"
 
 #. Create new directory file chooser
-#: ../src/directories.c:724
+#: ../src/directories.c:732
 #, fuzzy
 msgid "Select MAME executable"
 msgstr "可執行檔"
@@ -304,7 +302,7 @@ msgid "Raster"
 msgstr "光柵繪圖"
 
 #: ../src/filters_list.c:280 ../data/options.glade.h:148
-#: ../data/options_legacy.glade.h:157 ../data/properties.glade.h:154
+#: ../data/options_legacy.glade.h:157
 msgid "Vector"
 msgstr "向量繪圖"
 
@@ -486,38 +484,38 @@ msgstr "找到 %s 搖桿"
 msgid "No Joystick found"
 msgstr "沒有找到任何搖桿"
 
-#: ../src/gmameui.c:476 ../src/gmameui.c:484
+#: ../src/gmameui.c:475 ../src/gmameui.c:483
 #, c-format
 msgid "Loading %s:"
 msgstr "正在載入 %s"
 
-#: ../src/gmameui.c:574
+#: ../src/gmameui.c:573
 #, c-format
 msgid "Error with MAME graphics creation: %s"
 msgstr ""
 
-#: ../src/gmameui.c:597
+#: ../src/gmameui.c:596
 msgid "GMAMEUI could not load the ROM"
 msgstr ""
 
-#: ../src/gmameui.c:598
+#: ../src/gmameui.c:597
 msgid "The following ROMs were not found:\n"
 msgstr ""
 
-#: ../src/gmameui.c:600
+#: ../src/gmameui.c:599
 msgid "MAME did not start successfully"
 msgstr ""
 
-#: ../src/gmameui.c:601
+#: ../src/gmameui.c:600
 msgid "The following errors were reported:\n"
 msgstr ""
 
-#: ../src/gmameui.c:791
+#: ../src/gmameui.c:789
 #, c-format
 msgid "Could not open '%s' as valid input file"
 msgstr "開啟輸入順序檔 '%s' 錯誤"
 
-#: ../src/gmameui.c:837
+#: ../src/gmameui.c:835
 #, fuzzy
 msgid "Exiting GMAMEUI..."
 msgstr "正在離開 GMAMEUI..."
@@ -528,7 +526,7 @@ msgstr "正在離開 GMAMEUI..."
 #. main_gui.statusbar = NULL;
 #.
 #. FIXME TODO gtk_widget_destroy (MainWindow);
-#: ../src/gmameui.c:876
+#: ../src/gmameui.c:874
 msgid "Finished cleaning up GMAMEUI"
 msgstr ""
 
@@ -972,7 +970,7 @@ msgid "Show Sidebar"
 msgstr "顯示過濾器"
 
 #: ../src/interface.h:65 ../data/audit_window.glade.h:10
-#: ../data/properties.glade.h:72 ../data/rom_info.glade.h:8
+#: ../data/rom_info.glade.h:8
 msgid "Details"
 msgstr "詳細資訊"
 
@@ -1387,7 +1385,7 @@ msgid ""
 "11025"
 msgstr ""
 
-#: ../data/options.glade.h:6 ../data/properties.glade.h:15
+#: ../data/options.glade.h:6
 #, fuzzy
 msgid "<b>Artwork</b>"
 msgstr "Artwork其他"
@@ -1413,7 +1411,6 @@ msgid "<b>Performance</b>"
 msgstr ""
 
 #: ../data/options.glade.h:12 ../data/options_legacy.glade.h:32
-#: ../data/properties.glade.h:38
 #, fuzzy
 msgid "<b>Rotation</b>"
 msgstr "旋轉"
@@ -1553,7 +1550,6 @@ msgid "Convert lightgun button 2 to offscreen support"
 msgstr ""
 
 #: ../data/options.glade.h:43 ../data/options_legacy.glade.h:57
-#: ../data/properties.glade.h:69
 msgid "Crop artwork"
 msgstr "Crop artwork"
 
@@ -1665,7 +1661,6 @@ msgid "Enable samples if available (-samples)"
 msgstr ""
 
 #: ../data/options.glade.h:68 ../data/options_legacy.glade.h:84
-#: ../data/properties.glade.h:86
 msgid "Enable sound"
 msgstr "使用音效"
 
@@ -1715,7 +1710,6 @@ msgid "Force power of two textures (gl_forcepow2texture)"
 msgstr ""
 
 #: ../data/options.glade.h:79 ../data/options_legacy.glade.h:103
-#: ../data/properties.glade.h:93
 #, fuzzy
 msgid "Frames to skip:"
 msgstr "要跳過的畫面:"
@@ -1742,7 +1736,7 @@ msgstr ""
 msgid "If this is selected, MAME will run in a window (-window)"
 msgstr ""
 
-#: ../data/options.glade.h:85 ../data/properties.glade.h:109
+#: ../data/options.glade.h:85
 #, fuzzy
 msgid "Keep aspect ratio"
 msgstr "維持外觀比例 "
@@ -1959,7 +1953,6 @@ msgid "Start in maximized window (-maximize)"
 msgstr ""
 
 #: ../data/options.glade.h:137 ../data/options_legacy.glade.h:149
-#: ../data/properties.glade.h:139
 msgid "Throttle"
 msgstr "速度調整(防止老遊戲速度過快)"
 
@@ -2019,7 +2012,7 @@ msgstr ""
 msgid "Video"
 msgstr "顯示模式"
 
-#: ../data/options.glade.h:152 ../data/properties.glade.h:155
+#: ../data/options.glade.h:152
 #, fuzzy
 msgid "Video mode:"
 msgstr "顯示模式"
@@ -2043,7 +2036,6 @@ msgid "YUV mode:"
 msgstr "YV12模式"
 
 #: ../data/options.glade.h:157 ../data/options_legacy.glade.h:161
-#: ../data/properties.glade.h:163
 msgid "dB"
 msgstr ""
 
@@ -2072,7 +2064,7 @@ msgid ""
 "yuy2x2"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:1 ../data/properties.glade.h:1
+#: ../data/options_legacy.glade.h:1
 msgid ""
 "/dev/dsp\n"
 "/dev/dsp0\n"
@@ -2083,7 +2075,7 @@ msgid ""
 "/dev/null"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:8 ../data/properties.glade.h:8
+#: ../data/options_legacy.glade.h:8
 msgid "/dev/mixer"
 msgstr ""
 
@@ -2112,7 +2104,7 @@ msgstr ""
 msgid "<b>Artwork options</b>"
 msgstr "Artwork解析度"
 
-#: ../data/options_legacy.glade.h:22 ../data/properties.glade.h:21
+#: ../data/options_legacy.glade.h:22
 #, fuzzy
 msgid "<b>Corrections</b>"
 msgstr "校正"
@@ -2121,37 +2113,37 @@ msgstr "校正"
 msgid "<b>Digital sound and mixer options</b>"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:24 ../data/properties.glade.h:22
+#: ../data/options_legacy.glade.h:24
 #, fuzzy
 msgid "<b>Display options</b>"
 msgstr "SDL"
 
-#: ../data/options_legacy.glade.h:25 ../data/properties.glade.h:23
+#: ../data/options_legacy.glade.h:25
 #, fuzzy
 msgid "<b>Effects</b>"
 msgstr "效果"
 
-#: ../data/options_legacy.glade.h:26 ../data/properties.glade.h:25
+#: ../data/options_legacy.glade.h:26
 #, fuzzy
 msgid "<b>Frame skipping</b>"
 msgstr "Frame skipping"
 
-#: ../data/options_legacy.glade.h:27 ../data/properties.glade.h:26
+#: ../data/options_legacy.glade.h:27
 #, fuzzy
 msgid "<b>General sound options</b>"
 msgstr "一般設定"
 
-#: ../data/options_legacy.glade.h:28 ../data/properties.glade.h:27
+#: ../data/options_legacy.glade.h:28
 #, fuzzy
 msgid "<b>Joystick</b>"
 msgstr "搖桿"
 
-#: ../data/options_legacy.glade.h:31 ../data/properties.glade.h:36
+#: ../data/options_legacy.glade.h:31
 #, fuzzy
 msgid "<b>Resolution</b>"
 msgstr "解析度"
 
-#: ../data/options_legacy.glade.h:33 ../data/properties.glade.h:43
+#: ../data/options_legacy.glade.h:33
 #, fuzzy
 msgid "<b>Vector options</b>"
 msgstr "網路選項"
@@ -2165,16 +2157,16 @@ msgstr ""
 msgid "Always use mouse"
 msgstr "使用滑鼠"
 
-#: ../data/options_legacy.glade.h:36 ../data/properties.glade.h:52
+#: ../data/options_legacy.glade.h:36
 msgid "Analog joystick"
 msgstr "類比式搖桿"
 
-#: ../data/options_legacy.glade.h:38 ../data/properties.glade.h:54
+#: ../data/options_legacy.glade.h:38
 #, fuzzy
 msgid "Artwork resolution:"
 msgstr "Artwork解析度"
 
-#: ../data/options_legacy.glade.h:39 ../data/properties.glade.h:55
+#: ../data/options_legacy.glade.h:39
 #, fuzzy
 msgid "Audio device:"
 msgstr "音效裝置 : "
@@ -2196,19 +2188,19 @@ msgid ""
 "High"
 msgstr "標準"
 
-#: ../data/options_legacy.glade.h:48 ../data/properties.glade.h:57
+#: ../data/options_legacy.glade.h:48
 msgid "Autodouble"
 msgstr "自動雙倍"
 
-#: ../data/options_legacy.glade.h:49 ../data/properties.glade.h:58
+#: ../data/options_legacy.glade.h:49
 msgid "Automatic"
 msgstr "自動"
 
-#: ../data/options_legacy.glade.h:50 ../data/properties.glade.h:59
+#: ../data/options_legacy.glade.h:50
 msgid "Backdrops"
 msgstr "Backdrops"
 
-#: ../data/options_legacy.glade.h:51 ../data/properties.glade.h:60
+#: ../data/options_legacy.glade.h:51
 msgid "Beam size"
 msgstr "Beam size"
 
@@ -2216,16 +2208,16 @@ msgstr "Beam size"
 msgid "Beam size for vector games"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:53 ../data/properties.glade.h:61
+#: ../data/options_legacy.glade.h:53
 msgid "Bezels"
 msgstr "Bezels"
 
-#: ../data/options_legacy.glade.h:54 ../data/properties.glade.h:63
+#: ../data/options_legacy.glade.h:54
 #, fuzzy
 msgid "Bit per pixels:"
 msgstr "Bit per pixels"
 
-#: ../data/options_legacy.glade.h:55 ../data/properties.glade.h:64
+#: ../data/options_legacy.glade.h:55
 msgid "Brightness correction"
 msgstr "白平衡校正"
 
@@ -2233,7 +2225,7 @@ msgstr "白平衡校正"
 msgid "Buffer size"
 msgstr "緩衝區容量"
 
-#: ../data/options_legacy.glade.h:58 ../data/properties.glade.h:70
+#: ../data/options_legacy.glade.h:58
 #, fuzzy
 msgid "DSP Plugin:"
 msgstr "DSP插件"
@@ -2243,11 +2235,11 @@ msgstr "DSP插件"
 msgid "Display Options"
 msgstr "SDL"
 
-#: ../data/options_legacy.glade.h:60 ../data/properties.glade.h:76
+#: ../data/options_legacy.glade.h:60
 msgid "Do not apply rotation"
 msgstr "不旋轉"
 
-#: ../data/options_legacy.glade.h:61 ../data/properties.glade.h:79
+#: ../data/options_legacy.glade.h:61
 msgid "Draw antialiased vectors"
 msgstr "繪出反鋸齒向量"
 
@@ -2268,11 +2260,11 @@ msgid ""
 "Skip 12 out of 12 frames"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:75 ../data/properties.glade.h:81
+#: ../data/options_legacy.glade.h:75
 msgid "Draw only changes"
 msgstr "只繪出改變"
 
-#: ../data/options_legacy.glade.h:76 ../data/properties.glade.h:82
+#: ../data/options_legacy.glade.h:76
 #, fuzzy
 msgid "Draw translucent vectors"
 msgstr "繪出tranlucencent向量"
@@ -2301,7 +2293,7 @@ msgstr "雙線性過濾"
 msgid "Enable double buffering"
 msgstr "雙重緩衝區"
 
-#: ../data/options_legacy.glade.h:82 ../data/properties.glade.h:85
+#: ../data/options_legacy.glade.h:82
 msgid "Enable game cheats"
 msgstr "啟用遊戲作弊檔"
 
@@ -2330,23 +2322,23 @@ msgid ""
 "Universe Bios v1.2 (hack)"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:99 ../data/properties.glade.h:87
+#: ../data/options_legacy.glade.h:99
 msgid "Fake sound"
 msgstr "模擬音效"
 
-#: ../data/options_legacy.glade.h:100 ../data/properties.glade.h:89
+#: ../data/options_legacy.glade.h:100
 msgid "Flicker"
 msgstr "Flicker"
 
-#: ../data/options_legacy.glade.h:101 ../data/properties.glade.h:90
+#: ../data/options_legacy.glade.h:101
 msgid "Flip screen left-right"
 msgstr "左右反轉螢幕"
 
-#: ../data/options_legacy.glade.h:102 ../data/properties.glade.h:91
+#: ../data/options_legacy.glade.h:102
 msgid "Flip screen upside-down"
 msgstr "上下反轉螢幕"
 
-#: ../data/options_legacy.glade.h:104 ../data/properties.glade.h:95
+#: ../data/options_legacy.glade.h:104
 msgid "Fullscreen"
 msgstr "全螢幕"
 
@@ -2355,44 +2347,44 @@ msgstr "全螢幕"
 msgid "GL Texture size"
 msgstr "材質大小"
 
-#: ../data/options_legacy.glade.h:106 ../data/properties.glade.h:98
+#: ../data/options_legacy.glade.h:106
 msgid "Gamma correction"
 msgstr "Gamma校正"
 
-#: ../data/options_legacy.glade.h:107 ../data/properties.glade.h:103
+#: ../data/options_legacy.glade.h:107
 #, fuzzy
 msgid "Height scale:"
 msgstr "畫面長的倍數"
 
-#: ../data/options_legacy.glade.h:108 ../data/properties.glade.h:106
+#: ../data/options_legacy.glade.h:108
 msgid "Intensity"
 msgstr "Intesity"
 
-#: ../data/options_legacy.glade.h:109 ../data/properties.glade.h:108
+#: ../data/options_legacy.glade.h:109
 #, fuzzy
 msgid "Joystick type:"
 msgstr "搖桿形式 : "
 
-#: ../data/options_legacy.glade.h:110 ../data/properties.glade.h:112
+#: ../data/options_legacy.glade.h:110
 msgid "Log debug info"
 msgstr "記錄除錯資訊"
 
-#: ../data/options_legacy.glade.h:111 ../data/properties.glade.h:113
+#: ../data/options_legacy.glade.h:111
 #, fuzzy
 msgid "Max frameskip:"
 msgstr "最大畫面跳過數 :"
 
-#: ../data/options_legacy.glade.h:112 ../data/properties.glade.h:116
+#: ../data/options_legacy.glade.h:112
 #, fuzzy
 msgid "Mixer device:"
 msgstr "混音器裝置 : "
 
-#: ../data/options_legacy.glade.h:113 ../data/properties.glade.h:117
+#: ../data/options_legacy.glade.h:113
 #, fuzzy
 msgid "Mixer plugin:"
 msgstr "混音器插件"
 
-#: ../data/options_legacy.glade.h:114 ../data/properties.glade.h:120
+#: ../data/options_legacy.glade.h:114
 #, fuzzy
 msgid "Neo-Geo Bios:"
 msgstr "Neo-Geo Bios :"
@@ -2428,7 +2420,7 @@ msgid ""
 "aRTS"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:132 ../data/properties.glade.h:122
+#: ../data/options_legacy.glade.h:132
 msgid "Overlays"
 msgstr "Overlays"
 
@@ -2436,16 +2428,16 @@ msgstr "Overlays"
 msgid "Pause brightness"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:134 ../data/properties.glade.h:125
+#: ../data/options_legacy.glade.h:134
 msgid "Rapid-fire"
 msgstr "支援連發"
 
-#: ../data/options_legacy.glade.h:137 ../data/properties.glade.h:130
+#: ../data/options_legacy.glade.h:137
 #, fuzzy
 msgid "Sample rate:"
 msgstr "取樣率 : "
 
-#: ../data/options_legacy.glade.h:138 ../data/properties.glade.h:131
+#: ../data/options_legacy.glade.h:138
 #, fuzzy
 msgid "Scale video to height:"
 msgstr "scale video to exactly this height"
@@ -2458,25 +2450,25 @@ msgstr ""
 msgid "Select mouse grabbing"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:141 ../data/properties.glade.h:132
+#: ../data/options_legacy.glade.h:141
 msgid "Show cursor"
 msgstr "顯示滑鼠游標"
 
-#: ../data/options_legacy.glade.h:142 ../data/properties.glade.h:133
+#: ../data/options_legacy.glade.h:142
 #, fuzzy
 msgid "Skip disclaimer info"
 msgstr "跳過宣告資訊畫面"
 
-#: ../data/options_legacy.glade.h:143 ../data/properties.glade.h:134
+#: ../data/options_legacy.glade.h:143
 #, fuzzy
 msgid "Skip game info"
 msgstr "跳過遊戲資訊畫面"
 
-#: ../data/options_legacy.glade.h:144 ../data/properties.glade.h:135
+#: ../data/options_legacy.glade.h:144
 msgid "Sleep when idle"
 msgstr "在暫停時睡眠"
 
-#: ../data/options_legacy.glade.h:145 ../data/properties.glade.h:137
+#: ../data/options_legacy.glade.h:145
 #, fuzzy
 msgid "Sound file name:"
 msgstr "音效檔案名稱 : "
@@ -2493,34 +2485,34 @@ msgstr ""
 msgid "Stdout logfile"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:150 ../data/properties.glade.h:140
+#: ../data/options_legacy.glade.h:150
 #, fuzzy
 msgid "Timer based audio"
 msgstr "timer based音效"
 
-#: ../data/options_legacy.glade.h:151 ../data/properties.glade.h:142
+#: ../data/options_legacy.glade.h:151
 #, fuzzy
 msgid "UGCI (tm) Coin/Play support"
 msgstr "UGCI(tm) 投幣機/遊戲搖桿 支援"
 
-#: ../data/options_legacy.glade.h:152 ../data/properties.glade.h:143
+#: ../data/options_legacy.glade.h:152
 msgid "USB PS Game Pads"
 msgstr "USB PS 搖桿"
 
-#: ../data/options_legacy.glade.h:153 ../data/properties.glade.h:145
+#: ../data/options_legacy.glade.h:153
 msgid "Use Scanlines"
 msgstr "使用Scanline(讓遊戲看起來更像大型電玩)"
 
-#: ../data/options_legacy.glade.h:154 ../data/properties.glade.h:146
+#: ../data/options_legacy.glade.h:154
 #, fuzzy
 msgid "Use additional game artwork:"
 msgstr "使用額外遊戲artwork"
 
-#: ../data/options_legacy.glade.h:155 ../data/properties.glade.h:150
+#: ../data/options_legacy.glade.h:155
 msgid "Use keyboard LEDs as game indicators"
 msgstr "使用鍵盤的LED燈號作為遊戲指示燈號"
 
-#: ../data/options_legacy.glade.h:156 ../data/properties.glade.h:153
+#: ../data/options_legacy.glade.h:156
 msgid "Use samples"
 msgstr "使用樣本"
 
@@ -2529,414 +2521,14 @@ msgstr "使用樣本"
 msgid "Vector resolution:"
 msgstr "Artwork解析度"
 
-#: ../data/options_legacy.glade.h:160 ../data/properties.glade.h:156
+#: ../data/options_legacy.glade.h:160
 #, fuzzy
 msgid "Width scale:"
 msgstr "畫面寬的倍數"
 
-#: ../data/options_legacy.glade.h:162 ../data/properties.glade.h:164
+#: ../data/options_legacy.glade.h:162
 msgid "frames"
 msgstr "frames"
-
-#: ../data/properties.glade.h:9
-msgid "1:"
-msgstr ""
-
-#: ../data/properties.glade.h:10
-msgid "2:"
-msgstr ""
-
-#: ../data/properties.glade.h:11
-msgid "3:"
-msgstr ""
-
-#: ../data/properties.glade.h:12
-msgid "4:"
-msgstr ""
-
-#: ../data/properties.glade.h:13
-#, fuzzy
-msgid "<b>Advanced options</b>"
-msgstr "SVGA選項"
-
-#: ../data/properties.glade.h:14
-#, fuzzy
-msgid "<b>Alsa sound system options</b>"
-msgstr "ALSA音效系統選項"
-
-#: ../data/properties.glade.h:16
-#, fuzzy
-msgid "<b>Buffer size</b>"
-msgstr "緩衝區容量"
-
-#: ../data/properties.glade.h:17
-msgid "<b>CPU:</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:18
-#, fuzzy
-msgid "<b>Clone of:</b>"
-msgstr "從... clone"
-
-#: ../data/properties.glade.h:19
-#, fuzzy
-msgid "<b>Colors:</b>"
-msgstr "Clones"
-
-#: ../data/properties.glade.h:20
-#, fuzzy
-msgid "<b>Control Panel</b>"
-msgstr "控制器面板"
-
-#: ../data/properties.glade.h:24
-#, fuzzy
-msgid "<b>FX (Glide) options</b>"
-msgstr "FX (Glide) 選項"
-
-#: ../data/properties.glade.h:28
-#, fuzzy
-msgid "<b>Key mapping</b>"
-msgstr "鍵盤對應"
-
-#: ../data/properties.glade.h:29
-#, fuzzy
-msgid "<b>Keyboard</b>"
-msgstr "鍵盤"
-
-#: ../data/properties.glade.h:30
-#, fuzzy
-msgid "<b>Manufacturer:</b>"
-msgstr "製造商"
-
-#: ../data/properties.glade.h:31
-#, fuzzy
-msgid "<b>Mouse / Trackball</b>"
-msgstr "滑鼠 / 軌跡球"
-
-#: ../data/properties.glade.h:32
-#, fuzzy
-msgid "<b>OpenGL options</b>"
-msgstr "OpenGL選項"
-
-#: ../data/properties.glade.h:33
-#, fuzzy
-msgid "<b>Other options</b>"
-msgstr "其他選項"
-
-#: ../data/properties.glade.h:34
-#, fuzzy
-msgid "<b>Photon options</b>"
-msgstr "Photon選項"
-
-#: ../data/properties.glade.h:35
-#, fuzzy
-msgid "<b>QNX options</b>"
-msgstr "QNX選項"
-
-#: ../data/properties.glade.h:37
-msgid "<b>Rom check:</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:39
-#, fuzzy
-msgid "<b>SDL options</b>"
-msgstr "SDL"
-
-#: ../data/properties.glade.h:40
-#, fuzzy
-msgid "<b>Sample Check:</b>"
-msgstr "樣本檢查:"
-
-#: ../data/properties.glade.h:41
-#, fuzzy
-msgid "<b>Screen:</b>"
-msgstr "全螢幕"
-
-#: ../data/properties.glade.h:42
-#, fuzzy
-msgid "<b>Sound:</b>"
-msgstr "音效:"
-
-#: ../data/properties.glade.h:44
-#, fuzzy
-msgid "<b>Video mode</b>"
-msgstr "顯示模式"
-
-#: ../data/properties.glade.h:45
-#, fuzzy
-msgid "<b>Volume attenuation</b>"
-msgstr "Volume attenuation"
-
-#: ../data/properties.glade.h:46
-#, fuzzy
-msgid "<b>X11 options</b>"
-msgstr "X11選項"
-
-#: ../data/properties.glade.h:47
-#, fuzzy
-msgid "<b>Xinput joystick</b>"
-msgstr "Xinput搖桿"
-
-#: ../data/properties.glade.h:48
-#, fuzzy
-msgid "<b>Xinput trackball</b>"
-msgstr "Xinput軌跡球"
-
-#: ../data/properties.glade.h:49
-msgid "<b>Year:</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:50
-#, fuzzy
-msgid "<b>aRts options</b>"
-msgstr "aRts選項"
-
-#: ../data/properties.glade.h:51
-msgid "Alphablending"
-msgstr "Alphablending"
-
-#: ../data/properties.glade.h:53
-msgid "Antialiasing"
-msgstr "反鋸齒"
-
-#: ../data/properties.glade.h:56
-msgid "Auto Resolution"
-msgstr "自動解析度調整"
-
-#: ../data/properties.glade.h:62
-msgid "Bilinear filtering"
-msgstr "雙線性過濾"
-
-#: ../data/properties.glade.h:65
-#, fuzzy
-msgid "Cabinet model:"
-msgstr "Cabinet model : "
-
-#: ../data/properties.glade.h:66
-#, fuzzy
-msgid "Card ID:"
-msgstr "卡ID : "
-
-#: ../data/properties.glade.h:67
-msgid "Color modulation"
-msgstr "Color modulation"
-
-#: ../data/properties.glade.h:68
-#, fuzzy
-msgid "Controller:"
-msgstr "控制器: "
-
-#: ../data/properties.glade.h:71
-#, fuzzy
-msgid "Debug windows (for developers)"
-msgstr "除錯視窗(開發者專用)"
-
-#: ../data/properties.glade.h:73
-#, fuzzy
-msgid "Device #:"
-msgstr "裝置 # : "
-
-#: ../data/properties.glade.h:74
-#, fuzzy
-msgid "Disable mode:"
-msgstr "關閉模式 : "
-
-#: ../data/properties.glade.h:77
-#, fuzzy
-msgid "Double Buffering"
-msgstr "雙重緩衝區"
-
-#: ../data/properties.glade.h:78
-msgid "Double buffering"
-msgstr "雙重緩衝區"
-
-#: ../data/properties.glade.h:80
-msgid "Draw bitmap"
-msgstr "繪出點陣圖"
-
-#: ../data/properties.glade.h:83
-#, fuzzy
-msgid "Effect to use:"
-msgstr "效果"
-
-#: ../data/properties.glade.h:84
-msgid "Enable Windows keys"
-msgstr "啟用視窗鍵"
-
-#: ../data/properties.glade.h:88
-#, fuzzy
-msgid "File:"
-msgstr "檔案 : "
-
-#: ../data/properties.glade.h:92
-msgid "Force YUV mode:"
-msgstr ""
-
-#: ../data/properties.glade.h:94
-msgid "Full Screen"
-msgstr "全螢幕"
-
-#: ../data/properties.glade.h:96
-msgid "GL extension #78"
-msgstr "GL extension #78"
-
-#: ../data/properties.glade.h:97
-#, fuzzy
-msgid "GLU library:"
-msgstr "GLU 函式庫 : "
-
-#: ../data/properties.glade.h:99
-msgid "General"
-msgstr "一般"
-
-#: ../data/properties.glade.h:100
-#, fuzzy
-msgid "Geometry:"
-msgstr "解析度 : "
-
-#: ../data/properties.glade.h:101
-msgid "Grab keyboard"
-msgstr "擷取鍵盤"
-
-#: ../data/properties.glade.h:102
-msgid "Grab mouse"
-msgstr "擷取滑鼠"
-
-#: ../data/properties.glade.h:104
-msgid "HotRod SE support"
-msgstr "苦力帽SE支援"
-
-#: ../data/properties.glade.h:105
-msgid "HotRod support"
-msgstr "苦力帽支援"
-
-#: ../data/properties.glade.h:107
-#, fuzzy
-msgid "Joystick device prefix:"
-msgstr "搖桿裝置前置字元 : "
-
-#: ../data/properties.glade.h:110
-#, fuzzy
-msgid "Keep aspect ratio:"
-msgstr "維持外觀比例 "
-
-#: ../data/properties.glade.h:111
-#, fuzzy
-msgid "Keyboard Layout type:"
-msgstr "鍵盤排列形式 : "
-
-#: ../data/properties.glade.h:114
-#, fuzzy
-msgid "Method:"
-msgstr "模式 :"
-
-#: ../data/properties.glade.h:118
-#, fuzzy
-msgid ""
-"Name of pad device:\n"
-"(FM townpad)"
-msgstr ""
-"搖桿裝置名稱 :\n"
-"(FM townpad)"
-
-#: ../data/properties.glade.h:121
-#, fuzzy
-msgid "OpenGL library:"
-msgstr "OpenGL函式庫 : "
-
-#: ../data/properties.glade.h:123
-#, fuzzy
-msgid "PCM:"
-msgstr "PCM : "
-
-#: ../data/properties.glade.h:124
-msgid "Private colormap"
-msgstr "Private分色圖"
-
-#: ../data/properties.glade.h:126
-msgid "Rendering"
-msgstr "繪圖選項"
-
-#: ../data/properties.glade.h:127
-msgid "Resolution"
-msgstr "解析度"
-
-#: ../data/properties.glade.h:128
-#, fuzzy
-msgid "Resolution:"
-msgstr "解析度"
-
-#: ../data/properties.glade.h:129
-#, fuzzy
-msgid "SDL modes:"
-msgstr "SDL模式:"
-
-#: ../data/properties.glade.h:138
-#, fuzzy
-msgid "Texture size:"
-msgstr "材質大小"
-
-#: ../data/properties.glade.h:141
-msgid "True color blitter"
-msgstr "True color blitter"
-
-#: ../data/properties.glade.h:144
-#, fuzzy
-msgid "Use MIT shared memory"
-msgstr "使用MIT shared memory"
-
-#: ../data/properties.glade.h:147
-#, fuzzy
-msgid "Use additional options:"
-msgstr "使用額外的資訊"
-
-#: ../data/properties.glade.h:148
-#, fuzzy
-msgid "Use config name:"
-msgstr "使用設定檔名稱 :"
-
-#: ../data/properties.glade.h:149
-#, fuzzy
-msgid "Use fixed resolution:"
-msgstr "使用固定解析度"
-
-#: ../data/properties.glade.h:151
-#, fuzzy
-msgid "Use mouse"
-msgstr "使用滑鼠"
-
-#: ../data/properties.glade.h:152
-#, fuzzy
-msgid "Use preferred device"
-msgstr "使用偏好的裝置"
-
-#: ../data/properties.glade.h:157
-#, fuzzy
-msgid "Window size:"
-msgstr "視窗大小 : "
-
-#: ../data/properties.glade.h:158
-msgid "X Synch"
-msgstr "X同步"
-
-#: ../data/properties.glade.h:159
-#, fuzzy
-msgid "X-based device:"
-msgstr "X 裝置"
-
-#: ../data/properties.glade.h:160
-#, fuzzy
-msgid "XIL multi-threading"
-msgstr "多執行緒"
-
-#: ../data/properties.glade.h:161
-msgid "XIL scaling"
-msgstr "使用 XIL 調整比例"
-
-#: ../data/properties.glade.h:162
-#, fuzzy
-msgid "aRts buffer delay time:"
-msgstr "aRts緩衝區延遲時間 : "
 
 #: ../data/rom_info.glade.h:1
 msgid "<b>About this ROM</b>"

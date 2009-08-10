@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: GMAMEUI\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-09 23:15+1000\n"
+"POT-Creation-Date: 2009-08-10 21:13+1000\n"
 "PO-Revision-Date: 2005-02-27 05:36+0200\n"
 "Last-Translator: anarxia <anarxia@gmx.net>\n"
 "Language-Team: Greek <nls@tux.hellug.gr>\n"
@@ -62,7 +62,6 @@ msgstr ""
 
 #. Add each of the notebooks
 #: ../src/callbacks.c:136 ../src/mame_options_legacy_dialog.c:833
-#: ../data/properties.glade.h:75
 msgid "Display"
 msgstr "Εμφάνιση"
 
@@ -73,7 +72,7 @@ msgstr "Επιλογές OpenGL"
 
 #. mame_options_legacy_dialog_add_page (dlg, "OpenGLVBox", _("OpenGL"), "gmameui-display-toolbar");
 #: ../src/callbacks.c:140 ../src/filters_list.c:289
-#: ../src/mame_options_legacy_dialog.c:835 ../data/properties.glade.h:136
+#: ../src/mame_options_legacy_dialog.c:835
 msgid "Sound"
 msgstr "Ήχος"
 
@@ -87,7 +86,6 @@ msgstr ""
 
 #. mame_options_legacy_dialog_add_page (dlg, "PerformanceVBox", _("Performance"), "gmameui-general-toolbar");
 #: ../src/callbacks.c:146 ../src/mame_options_legacy_dialog.c:838
-#: ../data/properties.glade.h:115
 msgid "Miscellaneous"
 msgstr ""
 
@@ -156,22 +154,22 @@ msgid ""
 "you sure you want to close the window?"
 msgstr ""
 
-#: ../src/directories.c:583
+#: ../src/directories.c:588
 msgid "Browse for Folder"
 msgstr "Εξερεύνηση για Φάκελο"
 
-#: ../src/directories.c:632
+#: ../src/directories.c:637
 msgid "Browse for File"
 msgstr "Εξερεύνηση για Αρχείο"
 
 #. Create new directory file chooser
-#: ../src/directories.c:672
+#: ../src/directories.c:679
 #, fuzzy
 msgid "Select directory"
 msgstr "Κατάλογος"
 
 #. Create new directory file chooser
-#: ../src/directories.c:724
+#: ../src/directories.c:732
 #, fuzzy
 msgid "Select MAME executable"
 msgstr "Εκτελέσιμο"
@@ -305,7 +303,7 @@ msgid "Raster"
 msgstr ""
 
 #: ../src/filters_list.c:280 ../data/options.glade.h:148
-#: ../data/options_legacy.glade.h:157 ../data/properties.glade.h:154
+#: ../data/options_legacy.glade.h:157
 msgid "Vector"
 msgstr ""
 
@@ -388,6 +386,7 @@ msgstr ""
 "Θέλετε να δημιουργηθέι καινουρία;"
 
 #: ../src/game_list.c:677
+#, c-format
 msgid ""
 "Gamelist was created with an older version of GMAMEUI.\n"
 "The gamelist is not supported.\n"
@@ -484,38 +483,38 @@ msgstr "Βρέθηκε ο μοχλός %s"
 msgid "No Joystick found"
 msgstr "Δεν βρέθηκε κανένας μοχλός"
 
-#: ../src/gmameui.c:476 ../src/gmameui.c:484
+#: ../src/gmameui.c:475 ../src/gmameui.c:483
 #, c-format
 msgid "Loading %s:"
 msgstr "Φόρτωμα %s:"
 
-#: ../src/gmameui.c:574
+#: ../src/gmameui.c:573
 #, c-format
 msgid "Error with MAME graphics creation: %s"
 msgstr ""
 
-#: ../src/gmameui.c:597
+#: ../src/gmameui.c:596
 msgid "GMAMEUI could not load the ROM"
 msgstr ""
 
-#: ../src/gmameui.c:598
+#: ../src/gmameui.c:597
 msgid "The following ROMs were not found:\n"
 msgstr ""
 
-#: ../src/gmameui.c:600
+#: ../src/gmameui.c:599
 msgid "MAME did not start successfully"
 msgstr ""
 
-#: ../src/gmameui.c:601
+#: ../src/gmameui.c:600
 msgid "The following errors were reported:\n"
 msgstr ""
 
-#: ../src/gmameui.c:791
+#: ../src/gmameui.c:789
 #, c-format
 msgid "Could not open '%s' as valid input file"
 msgstr "Δεν μπόρεσα να ανοίξω το αρχείο '%s'"
 
-#: ../src/gmameui.c:837
+#: ../src/gmameui.c:835
 #, fuzzy
 msgid "Exiting GMAMEUI..."
 msgstr "Έξοδος από το GMAMEUI"
@@ -526,7 +525,7 @@ msgstr "Έξοδος από το GMAMEUI"
 #. main_gui.statusbar = NULL;
 #.
 #. FIXME TODO gtk_widget_destroy (MainWindow);
-#: ../src/gmameui.c:876
+#: ../src/gmameui.c:874
 msgid "Finished cleaning up GMAMEUI"
 msgstr ""
 
@@ -963,7 +962,7 @@ msgid "Show Sidebar"
 msgstr "Εμφάνιση Φακέλων"
 
 #: ../src/interface.h:65 ../data/audit_window.glade.h:10
-#: ../data/properties.glade.h:72 ../data/rom_info.glade.h:8
+#: ../data/rom_info.glade.h:8
 msgid "Details"
 msgstr "Λεπτομέριες"
 
@@ -1367,7 +1366,7 @@ msgid ""
 "11025"
 msgstr ""
 
-#: ../data/options.glade.h:6 ../data/properties.glade.h:15
+#: ../data/options.glade.h:6
 msgid "<b>Artwork</b>"
 msgstr ""
 
@@ -1392,7 +1391,6 @@ msgid "<b>Performance</b>"
 msgstr ""
 
 #: ../data/options.glade.h:12 ../data/options_legacy.glade.h:32
-#: ../data/properties.glade.h:38
 #, fuzzy
 msgid "<b>Rotation</b>"
 msgstr "Περιστροφή"
@@ -1529,7 +1527,6 @@ msgid "Convert lightgun button 2 to offscreen support"
 msgstr ""
 
 #: ../data/options.glade.h:43 ../data/options_legacy.glade.h:57
-#: ../data/properties.glade.h:69
 msgid "Crop artwork"
 msgstr ""
 
@@ -1639,7 +1636,6 @@ msgid "Enable samples if available (-samples)"
 msgstr ""
 
 #: ../data/options.glade.h:68 ../data/options_legacy.glade.h:84
-#: ../data/properties.glade.h:86
 msgid "Enable sound"
 msgstr "Ενεργοποίηση ήχου"
 
@@ -1687,7 +1683,6 @@ msgid "Force power of two textures (gl_forcepow2texture)"
 msgstr ""
 
 #: ../data/options.glade.h:79 ../data/options_legacy.glade.h:103
-#: ../data/properties.glade.h:93
 msgid "Frames to skip:"
 msgstr ""
 
@@ -1712,7 +1707,7 @@ msgstr ""
 msgid "If this is selected, MAME will run in a window (-window)"
 msgstr ""
 
-#: ../data/options.glade.h:85 ../data/properties.glade.h:109
+#: ../data/options.glade.h:85
 msgid "Keep aspect ratio"
 msgstr ""
 
@@ -1925,7 +1920,6 @@ msgid "Start in maximized window (-maximize)"
 msgstr ""
 
 #: ../data/options.glade.h:137 ../data/options_legacy.glade.h:149
-#: ../data/properties.glade.h:139
 msgid "Throttle"
 msgstr ""
 
@@ -1982,7 +1976,7 @@ msgstr ""
 msgid "Video"
 msgstr "Video mode"
 
-#: ../data/options.glade.h:152 ../data/properties.glade.h:155
+#: ../data/options.glade.h:152
 msgid "Video mode:"
 msgstr "Video mode:"
 
@@ -2005,7 +1999,6 @@ msgid "YUV mode:"
 msgstr "Video mode:"
 
 #: ../data/options.glade.h:157 ../data/options_legacy.glade.h:161
-#: ../data/properties.glade.h:163
 msgid "dB"
 msgstr ""
 
@@ -2034,7 +2027,7 @@ msgid ""
 "yuy2x2"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:1 ../data/properties.glade.h:1
+#: ../data/options_legacy.glade.h:1
 msgid ""
 "/dev/dsp\n"
 "/dev/dsp0\n"
@@ -2045,7 +2038,7 @@ msgid ""
 "/dev/null"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:8 ../data/properties.glade.h:8
+#: ../data/options_legacy.glade.h:8
 msgid "/dev/mixer"
 msgstr ""
 
@@ -2074,7 +2067,7 @@ msgstr ""
 msgid "<b>Artwork options</b>"
 msgstr "Ανάλυση artwork:"
 
-#: ../data/options_legacy.glade.h:22 ../data/properties.glade.h:21
+#: ../data/options_legacy.glade.h:22
 #, fuzzy
 msgid "<b>Corrections</b>"
 msgstr "Διορθώσεις"
@@ -2083,36 +2076,36 @@ msgstr "Διορθώσεις"
 msgid "<b>Digital sound and mixer options</b>"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:24 ../data/properties.glade.h:22
+#: ../data/options_legacy.glade.h:24
 #, fuzzy
 msgid "<b>Display options</b>"
 msgstr "Ρυθμίσεις Εμφάνισης"
 
-#: ../data/options_legacy.glade.h:25 ../data/properties.glade.h:23
+#: ../data/options_legacy.glade.h:25
 #, fuzzy
 msgid "<b>Effects</b>"
 msgstr "Έφε"
 
-#: ../data/options_legacy.glade.h:26 ../data/properties.glade.h:25
+#: ../data/options_legacy.glade.h:26
 msgid "<b>Frame skipping</b>"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:27 ../data/properties.glade.h:26
+#: ../data/options_legacy.glade.h:27
 #, fuzzy
 msgid "<b>General sound options</b>"
 msgstr "Γενικές ρυθμίσεις ήχου"
 
-#: ../data/options_legacy.glade.h:28 ../data/properties.glade.h:27
+#: ../data/options_legacy.glade.h:28
 #, fuzzy
 msgid "<b>Joystick</b>"
 msgstr "Μοχλός"
 
-#: ../data/options_legacy.glade.h:31 ../data/properties.glade.h:36
+#: ../data/options_legacy.glade.h:31
 #, fuzzy
 msgid "<b>Resolution</b>"
 msgstr "Ανάλυση"
 
-#: ../data/options_legacy.glade.h:33 ../data/properties.glade.h:43
+#: ../data/options_legacy.glade.h:33
 #, fuzzy
 msgid "<b>Vector options</b>"
 msgstr "Ρυθμίσεις vector"
@@ -2126,15 +2119,15 @@ msgstr ""
 msgid "Always use mouse"
 msgstr "Χρήση ποντικού"
 
-#: ../data/options_legacy.glade.h:36 ../data/properties.glade.h:52
+#: ../data/options_legacy.glade.h:36
 msgid "Analog joystick"
 msgstr "Αναλογικός μοχλός"
 
-#: ../data/options_legacy.glade.h:38 ../data/properties.glade.h:54
+#: ../data/options_legacy.glade.h:38
 msgid "Artwork resolution:"
 msgstr "Ανάλυση artwork:"
 
-#: ../data/options_legacy.glade.h:39 ../data/properties.glade.h:55
+#: ../data/options_legacy.glade.h:39
 msgid "Audio device:"
 msgstr "Συσκευή ήχου:"
 
@@ -2155,19 +2148,19 @@ msgid ""
 "High"
 msgstr "Κανονική"
 
-#: ../data/options_legacy.glade.h:48 ../data/properties.glade.h:57
+#: ../data/options_legacy.glade.h:48
 msgid "Autodouble"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:49 ../data/properties.glade.h:58
+#: ../data/options_legacy.glade.h:49
 msgid "Automatic"
 msgstr "Αυτόματο"
 
-#: ../data/options_legacy.glade.h:50 ../data/properties.glade.h:59
+#: ../data/options_legacy.glade.h:50
 msgid "Backdrops"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:51 ../data/properties.glade.h:60
+#: ../data/options_legacy.glade.h:51
 msgid "Beam size"
 msgstr ""
 
@@ -2175,15 +2168,15 @@ msgstr ""
 msgid "Beam size for vector games"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:53 ../data/properties.glade.h:61
+#: ../data/options_legacy.glade.h:53
 msgid "Bezels"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:54 ../data/properties.glade.h:63
+#: ../data/options_legacy.glade.h:54
 msgid "Bit per pixels:"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:55 ../data/properties.glade.h:64
+#: ../data/options_legacy.glade.h:55
 msgid "Brightness correction"
 msgstr "Διόρθωση φωτεινότητας"
 
@@ -2191,7 +2184,7 @@ msgstr "Διόρθωση φωτεινότητας"
 msgid "Buffer size"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:58 ../data/properties.glade.h:70
+#: ../data/options_legacy.glade.h:58
 msgid "DSP Plugin:"
 msgstr ""
 
@@ -2200,11 +2193,11 @@ msgstr ""
 msgid "Display Options"
 msgstr "Ρυθμίσεις Εμφάνισης"
 
-#: ../data/options_legacy.glade.h:60 ../data/properties.glade.h:76
+#: ../data/options_legacy.glade.h:60
 msgid "Do not apply rotation"
 msgstr "Μη εφαρμογή περιστροφής"
 
-#: ../data/options_legacy.glade.h:61 ../data/properties.glade.h:79
+#: ../data/options_legacy.glade.h:61
 msgid "Draw antialiased vectors"
 msgstr ""
 
@@ -2225,11 +2218,11 @@ msgid ""
 "Skip 12 out of 12 frames"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:75 ../data/properties.glade.h:81
+#: ../data/options_legacy.glade.h:75
 msgid "Draw only changes"
 msgstr "Σχεδιασμός αλλαγών μόνο"
 
-#: ../data/options_legacy.glade.h:76 ../data/properties.glade.h:82
+#: ../data/options_legacy.glade.h:76
 msgid "Draw translucent vectors"
 msgstr ""
 
@@ -2254,7 +2247,7 @@ msgstr ""
 msgid "Enable double buffering"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:82 ../data/properties.glade.h:85
+#: ../data/options_legacy.glade.h:82
 msgid "Enable game cheats"
 msgstr "Ενεργοποίηση cheat"
 
@@ -2283,23 +2276,23 @@ msgid ""
 "Universe Bios v1.2 (hack)"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:99 ../data/properties.glade.h:87
+#: ../data/options_legacy.glade.h:99
 msgid "Fake sound"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:100 ../data/properties.glade.h:89
+#: ../data/options_legacy.glade.h:100
 msgid "Flicker"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:101 ../data/properties.glade.h:90
+#: ../data/options_legacy.glade.h:101
 msgid "Flip screen left-right"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:102 ../data/properties.glade.h:91
+#: ../data/options_legacy.glade.h:102
 msgid "Flip screen upside-down"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:104 ../data/properties.glade.h:95
+#: ../data/options_legacy.glade.h:104
 msgid "Fullscreen"
 msgstr "Πλήρης Οθόνη"
 
@@ -2307,39 +2300,39 @@ msgstr "Πλήρης Οθόνη"
 msgid "GL Texture size"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:106 ../data/properties.glade.h:98
+#: ../data/options_legacy.glade.h:106
 msgid "Gamma correction"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:107 ../data/properties.glade.h:103
+#: ../data/options_legacy.glade.h:107
 msgid "Height scale:"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:108 ../data/properties.glade.h:106
+#: ../data/options_legacy.glade.h:108
 msgid "Intensity"
 msgstr "Ένταση"
 
-#: ../data/options_legacy.glade.h:109 ../data/properties.glade.h:108
+#: ../data/options_legacy.glade.h:109
 msgid "Joystick type:"
 msgstr "Είδος μοχλού:"
 
-#: ../data/options_legacy.glade.h:110 ../data/properties.glade.h:112
+#: ../data/options_legacy.glade.h:110
 msgid "Log debug info"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:111 ../data/properties.glade.h:113
+#: ../data/options_legacy.glade.h:111
 msgid "Max frameskip:"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:112 ../data/properties.glade.h:116
+#: ../data/options_legacy.glade.h:112
 msgid "Mixer device:"
 msgstr "Συσκευή mixer:"
 
-#: ../data/options_legacy.glade.h:113 ../data/properties.glade.h:117
+#: ../data/options_legacy.glade.h:113
 msgid "Mixer plugin:"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:114 ../data/properties.glade.h:120
+#: ../data/options_legacy.glade.h:114
 msgid "Neo-Geo Bios:"
 msgstr "BIOS για Neo Geo:"
 
@@ -2374,7 +2367,7 @@ msgid ""
 "aRTS"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:132 ../data/properties.glade.h:122
+#: ../data/options_legacy.glade.h:132
 msgid "Overlays"
 msgstr ""
 
@@ -2382,15 +2375,15 @@ msgstr ""
 msgid "Pause brightness"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:134 ../data/properties.glade.h:125
+#: ../data/options_legacy.glade.h:134
 msgid "Rapid-fire"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:137 ../data/properties.glade.h:130
+#: ../data/options_legacy.glade.h:137
 msgid "Sample rate:"
 msgstr "Συχνότητα Sample:"
 
-#: ../data/options_legacy.glade.h:138 ../data/properties.glade.h:131
+#: ../data/options_legacy.glade.h:138
 msgid "Scale video to height:"
 msgstr ""
 
@@ -2402,23 +2395,23 @@ msgstr ""
 msgid "Select mouse grabbing"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:141 ../data/properties.glade.h:132
+#: ../data/options_legacy.glade.h:141
 msgid "Show cursor"
 msgstr "Εμφάνιση δρομέα"
 
-#: ../data/options_legacy.glade.h:142 ../data/properties.glade.h:133
+#: ../data/options_legacy.glade.h:142
 msgid "Skip disclaimer info"
 msgstr "Παράκαμψη disclaimer"
 
-#: ../data/options_legacy.glade.h:143 ../data/properties.glade.h:134
+#: ../data/options_legacy.glade.h:143
 msgid "Skip game info"
 msgstr "Παράκαμψη πληροφόριων παιχνιδιού"
 
-#: ../data/options_legacy.glade.h:144 ../data/properties.glade.h:135
+#: ../data/options_legacy.glade.h:144
 msgid "Sleep when idle"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:145 ../data/properties.glade.h:137
+#: ../data/options_legacy.glade.h:145
 msgid "Sound file name:"
 msgstr "Αρχείο ήχου:"
 
@@ -2434,31 +2427,31 @@ msgstr ""
 msgid "Stdout logfile"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:150 ../data/properties.glade.h:140
+#: ../data/options_legacy.glade.h:150
 msgid "Timer based audio"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:151 ../data/properties.glade.h:142
+#: ../data/options_legacy.glade.h:151
 msgid "UGCI (tm) Coin/Play support"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:152 ../data/properties.glade.h:143
+#: ../data/options_legacy.glade.h:152
 msgid "USB PS Game Pads"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:153 ../data/properties.glade.h:145
+#: ../data/options_legacy.glade.h:153
 msgid "Use Scanlines"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:154 ../data/properties.glade.h:146
+#: ../data/options_legacy.glade.h:154
 msgid "Use additional game artwork:"
 msgstr "Χρήση επιπρόσθετων επιλογών:"
 
-#: ../data/options_legacy.glade.h:155 ../data/properties.glade.h:150
+#: ../data/options_legacy.glade.h:155
 msgid "Use keyboard LEDs as game indicators"
 msgstr "Χρήση LED πληκτρολογιού ως ενδείκτες παιχνιδιού"
 
-#: ../data/options_legacy.glade.h:156 ../data/properties.glade.h:153
+#: ../data/options_legacy.glade.h:156
 msgid "Use samples"
 msgstr "Χρήση samples"
 
@@ -2467,377 +2460,12 @@ msgstr "Χρήση samples"
 msgid "Vector resolution:"
 msgstr "Ανάλυση artwork:"
 
-#: ../data/options_legacy.glade.h:160 ../data/properties.glade.h:156
+#: ../data/options_legacy.glade.h:160
 msgid "Width scale:"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:162 ../data/properties.glade.h:164
+#: ../data/options_legacy.glade.h:162
 msgid "frames"
-msgstr ""
-
-#: ../data/properties.glade.h:9
-msgid "1:"
-msgstr ""
-
-#: ../data/properties.glade.h:10
-msgid "2:"
-msgstr ""
-
-#: ../data/properties.glade.h:11
-msgid "3:"
-msgstr ""
-
-#: ../data/properties.glade.h:12
-msgid "4:"
-msgstr ""
-
-#: ../data/properties.glade.h:13
-#, fuzzy
-msgid "<b>Advanced options</b>"
-msgstr "Ρυθμίσεις για προχωριμένους"
-
-#: ../data/properties.glade.h:14
-#, fuzzy
-msgid "<b>Alsa sound system options</b>"
-msgstr "Ρυθμίσεις για το σύστημα ήχου ALSA"
-
-#: ../data/properties.glade.h:16
-msgid "<b>Buffer size</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:17
-msgid "<b>CPU:</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:18
-#, fuzzy
-msgid "<b>Clone of:</b>"
-msgstr "Κλώνος του"
-
-#: ../data/properties.glade.h:19
-#, fuzzy
-msgid "<b>Colors:</b>"
-msgstr "Χρώματα"
-
-#: ../data/properties.glade.h:20
-#, fuzzy
-msgid "<b>Control Panel</b>"
-msgstr "Ταμπλώ ελέγχου"
-
-#: ../data/properties.glade.h:24
-#, fuzzy
-msgid "<b>FX (Glide) options</b>"
-msgstr "Ρυθμίσεις FX (Glide)"
-
-#: ../data/properties.glade.h:28
-msgid "<b>Key mapping</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:29
-#, fuzzy
-msgid "<b>Keyboard</b>"
-msgstr "Πληκτρολόγιο"
-
-#: ../data/properties.glade.h:30
-#, fuzzy
-msgid "<b>Manufacturer:</b>"
-msgstr "Κατασκευαστής"
-
-#: ../data/properties.glade.h:31
-#, fuzzy
-msgid "<b>Mouse / Trackball</b>"
-msgstr "Ποντίκι / Trackball"
-
-#: ../data/properties.glade.h:32
-#, fuzzy
-msgid "<b>OpenGL options</b>"
-msgstr "Επιλογές OpenGL"
-
-#: ../data/properties.glade.h:33
-#, fuzzy
-msgid "<b>Other options</b>"
-msgstr "Άλλες Επιλογές:"
-
-#: ../data/properties.glade.h:34
-#, fuzzy
-msgid "<b>Photon options</b>"
-msgstr "Ρυθμίσεις Photon"
-
-#: ../data/properties.glade.h:35
-#, fuzzy
-msgid "<b>QNX options</b>"
-msgstr "Ρυθμίσεις QNX"
-
-#: ../data/properties.glade.h:37
-msgid "<b>Rom check:</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:39
-#, fuzzy
-msgid "<b>SDL options</b>"
-msgstr "Ρυθμίσεις SDL"
-
-#: ../data/properties.glade.h:40
-#, fuzzy
-msgid "<b>Sample Check:</b>"
-msgstr "Έλεγχος Sample"
-
-#: ../data/properties.glade.h:41
-#, fuzzy
-msgid "<b>Screen:</b>"
-msgstr "Οθόνη"
-
-#: ../data/properties.glade.h:42
-#, fuzzy
-msgid "<b>Sound:</b>"
-msgstr "Επεξεργαστές Ήχου:"
-
-#: ../data/properties.glade.h:44
-#, fuzzy
-msgid "<b>Video mode</b>"
-msgstr "Video mode"
-
-#: ../data/properties.glade.h:45
-msgid "<b>Volume attenuation</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:46
-#, fuzzy
-msgid "<b>X11 options</b>"
-msgstr "Επιλογές X11"
-
-#: ../data/properties.glade.h:47
-#, fuzzy
-msgid "<b>Xinput joystick</b>"
-msgstr "Μοχλός Xinput"
-
-#: ../data/properties.glade.h:48
-msgid "<b>Xinput trackball</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:49
-msgid "<b>Year:</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:50
-#, fuzzy
-msgid "<b>aRts options</b>"
-msgstr "Ρυθμίσεις aRts"
-
-#: ../data/properties.glade.h:51
-msgid "Alphablending"
-msgstr ""
-
-#: ../data/properties.glade.h:53
-msgid "Antialiasing"
-msgstr ""
-
-#: ../data/properties.glade.h:56
-msgid "Auto Resolution"
-msgstr "Αυτόματη ανάλυση"
-
-#: ../data/properties.glade.h:62
-msgid "Bilinear filtering"
-msgstr ""
-
-#: ../data/properties.glade.h:65
-msgid "Cabinet model:"
-msgstr "Καμπίνα:"
-
-#: ../data/properties.glade.h:66
-msgid "Card ID:"
-msgstr ""
-
-#: ../data/properties.glade.h:67
-msgid "Color modulation"
-msgstr ""
-
-#: ../data/properties.glade.h:68
-msgid "Controller:"
-msgstr "Ταμπλώ ελέγχου:"
-
-#: ../data/properties.glade.h:71
-msgid "Debug windows (for developers)"
-msgstr ""
-
-#: ../data/properties.glade.h:73
-msgid "Device #:"
-msgstr "αριθμός συσκευής:"
-
-#: ../data/properties.glade.h:74
-msgid "Disable mode:"
-msgstr "Απενεργοποίηση τρόπου:"
-
-#: ../data/properties.glade.h:77
-msgid "Double Buffering"
-msgstr ""
-
-#: ../data/properties.glade.h:78
-msgid "Double buffering"
-msgstr ""
-
-#: ../data/properties.glade.h:80
-msgid "Draw bitmap"
-msgstr ""
-
-#: ../data/properties.glade.h:83
-#, fuzzy
-msgid "Effect to use:"
-msgstr "Έφε"
-
-#: ../data/properties.glade.h:84
-msgid "Enable Windows keys"
-msgstr "Ενεργοποίηση πλήκτρων Windows"
-
-#: ../data/properties.glade.h:88
-msgid "File:"
-msgstr "Αρχέιο:"
-
-#: ../data/properties.glade.h:92
-msgid "Force YUV mode:"
-msgstr ""
-
-#: ../data/properties.glade.h:94
-msgid "Full Screen"
-msgstr "Πλήρης Οθόνη"
-
-#: ../data/properties.glade.h:96
-msgid "GL extension #78"
-msgstr "επέκταση GL #78"
-
-#: ../data/properties.glade.h:97
-msgid "GLU library:"
-msgstr "Βιβλιοθήκη GLU:"
-
-#: ../data/properties.glade.h:99
-msgid "General"
-msgstr "Γενικά"
-
-#: ../data/properties.glade.h:100
-msgid "Geometry:"
-msgstr "Γεομετρία:"
-
-#: ../data/properties.glade.h:101
-msgid "Grab keyboard"
-msgstr "Αρπαγή πληκτρολογίου"
-
-#: ../data/properties.glade.h:102
-msgid "Grab mouse"
-msgstr "Αρπαγή ποντικού"
-
-#: ../data/properties.glade.h:104
-msgid "HotRod SE support"
-msgstr "Υποστήριξη μοχλού HotRod SE"
-
-#: ../data/properties.glade.h:105
-msgid "HotRod support"
-msgstr "Υποστήριξη μοχλού HotRod"
-
-#: ../data/properties.glade.h:107
-msgid "Joystick device prefix:"
-msgstr "Πρόθεμα συσκευής μοχλού :"
-
-#: ../data/properties.glade.h:110
-msgid "Keep aspect ratio:"
-msgstr ""
-
-#: ../data/properties.glade.h:111
-msgid "Keyboard Layout type:"
-msgstr "Διάταξη πληκτρολογίου:"
-
-#: ../data/properties.glade.h:114
-msgid "Method:"
-msgstr "Μέθοδος:"
-
-#: ../data/properties.glade.h:118
-msgid ""
-"Name of pad device:\n"
-"(FM townpad)"
-msgstr ""
-
-#: ../data/properties.glade.h:121
-msgid "OpenGL library:"
-msgstr "Βιβλιοθήκη OpenGL:"
-
-#: ../data/properties.glade.h:123
-msgid "PCM:"
-msgstr ""
-
-#: ../data/properties.glade.h:124
-msgid "Private colormap"
-msgstr ""
-
-#: ../data/properties.glade.h:126
-msgid "Rendering"
-msgstr ""
-
-#: ../data/properties.glade.h:127
-msgid "Resolution"
-msgstr "Ανάλυση"
-
-#: ../data/properties.glade.h:128
-msgid "Resolution:"
-msgstr "Ανάλυση:"
-
-#: ../data/properties.glade.h:129
-#, fuzzy
-msgid "SDL modes:"
-msgstr "Τρόποι SDL:"
-
-#: ../data/properties.glade.h:138
-msgid "Texture size:"
-msgstr ""
-
-#: ../data/properties.glade.h:141
-msgid "True color blitter"
-msgstr ""
-
-#: ../data/properties.glade.h:144
-msgid "Use MIT shared memory"
-msgstr ""
-
-#: ../data/properties.glade.h:147
-msgid "Use additional options:"
-msgstr "Χρήση επιπρόσθετων επιλογών:"
-
-#: ../data/properties.glade.h:148
-msgid "Use config name:"
-msgstr ""
-
-#: ../data/properties.glade.h:149
-msgid "Use fixed resolution:"
-msgstr "Χρήση σταθερής ανάλυσης:"
-
-#: ../data/properties.glade.h:151
-msgid "Use mouse"
-msgstr "Χρήση ποντικού"
-
-#: ../data/properties.glade.h:152
-msgid "Use preferred device"
-msgstr "Χρήση προτεινόμενης συσκευής"
-
-#: ../data/properties.glade.h:157
-msgid "Window size:"
-msgstr "Μέγεθος Παραθύρου:"
-
-#: ../data/properties.glade.h:158
-msgid "X Synch"
-msgstr ""
-
-#: ../data/properties.glade.h:159
-msgid "X-based device:"
-msgstr "X-based·device:"
-
-#: ../data/properties.glade.h:160
-msgid "XIL multi-threading"
-msgstr ""
-
-#: ../data/properties.glade.h:161
-msgid "XIL scaling"
-msgstr ""
-
-#: ../data/properties.glade.h:162
-msgid "aRts buffer delay time:"
 msgstr ""
 
 #: ../data/rom_info.glade.h:1

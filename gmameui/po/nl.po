@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nl\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-08-09 23:14+1000\n"
+"POT-Creation-Date: 2009-08-10 21:13+1000\n"
 "PO-Revision-Date: 2003-11-28 22:28+0100\n"
 "Last-Translator: Francois Duprez <duprez@planet.nl>\n"
 "Language-Team: Netherlands <nl@li.org>\n"
@@ -59,7 +59,6 @@ msgstr ""
 
 #. Add each of the notebooks
 #: ../src/callbacks.c:136 ../src/mame_options_legacy_dialog.c:833
-#: ../data/properties.glade.h:75
 msgid "Display"
 msgstr "Scherm"
 
@@ -70,7 +69,7 @@ msgstr "OpenGL opties"
 
 #. mame_options_legacy_dialog_add_page (dlg, "OpenGLVBox", _("OpenGL"), "gmameui-display-toolbar");
 #: ../src/callbacks.c:140 ../src/filters_list.c:289
-#: ../src/mame_options_legacy_dialog.c:835 ../data/properties.glade.h:136
+#: ../src/mame_options_legacy_dialog.c:835
 msgid "Sound"
 msgstr "Geluid"
 
@@ -84,7 +83,6 @@ msgstr ""
 
 #. mame_options_legacy_dialog_add_page (dlg, "PerformanceVBox", _("Performance"), "gmameui-general-toolbar");
 #: ../src/callbacks.c:146 ../src/mame_options_legacy_dialog.c:838
-#: ../data/properties.glade.h:115
 msgid "Miscellaneous"
 msgstr ""
 
@@ -153,22 +151,22 @@ msgid ""
 "you sure you want to close the window?"
 msgstr ""
 
-#: ../src/directories.c:583
+#: ../src/directories.c:588
 msgid "Browse for Folder"
 msgstr "Blader voor Folder"
 
-#: ../src/directories.c:632
+#: ../src/directories.c:637
 msgid "Browse for File"
 msgstr "Blader voor Bestand"
 
 #. Create new directory file chooser
-#: ../src/directories.c:672
+#: ../src/directories.c:679
 #, fuzzy
 msgid "Select directory"
 msgstr "Bestuurder Directorie"
 
 #. Create new directory file chooser
-#: ../src/directories.c:724
+#: ../src/directories.c:732
 #, fuzzy
 msgid "Select MAME executable"
 msgstr "Uitvoerder"
@@ -301,7 +299,7 @@ msgid "Raster"
 msgstr "Raster"
 
 #: ../src/filters_list.c:280 ../data/options.glade.h:148
-#: ../data/options_legacy.glade.h:157 ../data/properties.glade.h:154
+#: ../data/options_legacy.glade.h:157
 msgid "Vector"
 msgstr "Vector"
 
@@ -484,38 +482,38 @@ msgstr "Joystick %s gevonden"
 msgid "No Joystick found"
 msgstr "Geen Joystick gevonden"
 
-#: ../src/gmameui.c:476 ../src/gmameui.c:484
+#: ../src/gmameui.c:475 ../src/gmameui.c:483
 #, c-format
 msgid "Loading %s:"
 msgstr "%s aan het laden"
 
-#: ../src/gmameui.c:574
+#: ../src/gmameui.c:573
 #, c-format
 msgid "Error with MAME graphics creation: %s"
 msgstr ""
 
-#: ../src/gmameui.c:597
+#: ../src/gmameui.c:596
 msgid "GMAMEUI could not load the ROM"
 msgstr ""
 
-#: ../src/gmameui.c:598
+#: ../src/gmameui.c:597
 msgid "The following ROMs were not found:\n"
 msgstr ""
 
-#: ../src/gmameui.c:600
+#: ../src/gmameui.c:599
 msgid "MAME did not start successfully"
 msgstr ""
 
-#: ../src/gmameui.c:601
+#: ../src/gmameui.c:600
 msgid "The following errors were reported:\n"
 msgstr ""
 
-#: ../src/gmameui.c:791
+#: ../src/gmameui.c:789
 #, c-format
 msgid "Could not open '%s' as valid input file"
 msgstr "Kon '%s' niet openen als een geschikte invoer bestand"
 
-#: ../src/gmameui.c:837
+#: ../src/gmameui.c:835
 msgid "Exiting GMAMEUI..."
 msgstr "GMAMEUI aan het verlaten..."
 
@@ -525,7 +523,7 @@ msgstr "GMAMEUI aan het verlaten..."
 #. main_gui.statusbar = NULL;
 #.
 #. FIXME TODO gtk_widget_destroy (MainWindow);
-#: ../src/gmameui.c:876
+#: ../src/gmameui.c:874
 msgid "Finished cleaning up GMAMEUI"
 msgstr ""
 
@@ -967,7 +965,7 @@ msgid "Show Sidebar"
 msgstr "Laat Filters Zien"
 
 #: ../src/interface.h:65 ../data/audit_window.glade.h:10
-#: ../data/properties.glade.h:72 ../data/rom_info.glade.h:8
+#: ../data/rom_info.glade.h:8
 msgid "Details"
 msgstr "Details"
 
@@ -1382,7 +1380,7 @@ msgid ""
 "11025"
 msgstr ""
 
-#: ../data/options.glade.h:6 ../data/properties.glade.h:15
+#: ../data/options.glade.h:6
 #, fuzzy
 msgid "<b>Artwork</b>"
 msgstr "Kunstwerk Anders"
@@ -1408,7 +1406,6 @@ msgid "<b>Performance</b>"
 msgstr ""
 
 #: ../data/options.glade.h:12 ../data/options_legacy.glade.h:32
-#: ../data/properties.glade.h:38
 #, fuzzy
 msgid "<b>Rotation</b>"
 msgstr "Rotatie"
@@ -1549,7 +1546,6 @@ msgid "Convert lightgun button 2 to offscreen support"
 msgstr ""
 
 #: ../data/options.glade.h:43 ../data/options_legacy.glade.h:57
-#: ../data/properties.glade.h:69
 msgid "Crop artwork"
 msgstr "Groep kunstwerk"
 
@@ -1661,7 +1657,6 @@ msgid "Enable samples if available (-samples)"
 msgstr ""
 
 #: ../data/options.glade.h:68 ../data/options_legacy.glade.h:84
-#: ../data/properties.glade.h:86
 msgid "Enable sound"
 msgstr "Schakel geluid in"
 
@@ -1711,7 +1706,6 @@ msgid "Force power of two textures (gl_forcepow2texture)"
 msgstr ""
 
 #: ../data/options.glade.h:79 ../data/options_legacy.glade.h:103
-#: ../data/properties.glade.h:93
 #, fuzzy
 msgid "Frames to skip:"
 msgstr "Beelden om over te slaan :"
@@ -1738,7 +1732,7 @@ msgstr ""
 msgid "If this is selected, MAME will run in a window (-window)"
 msgstr ""
 
-#: ../data/options.glade.h:85 ../data/properties.glade.h:109
+#: ../data/options.glade.h:85
 #, fuzzy
 msgid "Keep aspect ratio"
 msgstr "Houd veronderstelde verhouding"
@@ -1956,7 +1950,6 @@ msgid "Start in maximized window (-maximize)"
 msgstr ""
 
 #: ../data/options.glade.h:137 ../data/options_legacy.glade.h:149
-#: ../data/properties.glade.h:139
 msgid "Throttle"
 msgstr "Gas"
 
@@ -2016,7 +2009,7 @@ msgstr ""
 msgid "Video"
 msgstr "Video Mode"
 
-#: ../data/options.glade.h:152 ../data/properties.glade.h:155
+#: ../data/options.glade.h:152
 #, fuzzy
 msgid "Video mode:"
 msgstr "Video Mode"
@@ -2040,7 +2033,6 @@ msgid "YUV mode:"
 msgstr "YV12 mode"
 
 #: ../data/options.glade.h:157 ../data/options_legacy.glade.h:161
-#: ../data/properties.glade.h:163
 msgid "dB"
 msgstr ""
 
@@ -2069,7 +2061,7 @@ msgid ""
 "yuy2x2"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:1 ../data/properties.glade.h:1
+#: ../data/options_legacy.glade.h:1
 msgid ""
 "/dev/dsp\n"
 "/dev/dsp0\n"
@@ -2080,7 +2072,7 @@ msgid ""
 "/dev/null"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:8 ../data/properties.glade.h:8
+#: ../data/options_legacy.glade.h:8
 msgid "/dev/mixer"
 msgstr ""
 
@@ -2109,7 +2101,7 @@ msgstr ""
 msgid "<b>Artwork options</b>"
 msgstr "Kunstwerk resolutie"
 
-#: ../data/options_legacy.glade.h:22 ../data/properties.glade.h:21
+#: ../data/options_legacy.glade.h:22
 #, fuzzy
 msgid "<b>Corrections</b>"
 msgstr "Correcties"
@@ -2118,37 +2110,37 @@ msgstr "Correcties"
 msgid "<b>Digital sound and mixer options</b>"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:24 ../data/properties.glade.h:22
+#: ../data/options_legacy.glade.h:24
 #, fuzzy
 msgid "<b>Display options</b>"
 msgstr "SDL opties"
 
-#: ../data/options_legacy.glade.h:25 ../data/properties.glade.h:23
+#: ../data/options_legacy.glade.h:25
 #, fuzzy
 msgid "<b>Effects</b>"
 msgstr "Effecten"
 
-#: ../data/options_legacy.glade.h:26 ../data/properties.glade.h:25
+#: ../data/options_legacy.glade.h:26
 #, fuzzy
 msgid "<b>Frame skipping</b>"
 msgstr "Beeld overslaan"
 
-#: ../data/options_legacy.glade.h:27 ../data/properties.glade.h:26
+#: ../data/options_legacy.glade.h:27
 #, fuzzy
 msgid "<b>General sound options</b>"
 msgstr "Open GL opties"
 
-#: ../data/options_legacy.glade.h:28 ../data/properties.glade.h:27
+#: ../data/options_legacy.glade.h:28
 #, fuzzy
 msgid "<b>Joystick</b>"
 msgstr "Joystick"
 
-#: ../data/options_legacy.glade.h:31 ../data/properties.glade.h:36
+#: ../data/options_legacy.glade.h:31
 #, fuzzy
 msgid "<b>Resolution</b>"
 msgstr "Resolutie"
 
-#: ../data/options_legacy.glade.h:33 ../data/properties.glade.h:43
+#: ../data/options_legacy.glade.h:33
 #, fuzzy
 msgid "<b>Vector options</b>"
 msgstr "Netwerk opties"
@@ -2162,16 +2154,16 @@ msgstr ""
 msgid "Always use mouse"
 msgstr "gebruik muis"
 
-#: ../data/options_legacy.glade.h:36 ../data/properties.glade.h:52
+#: ../data/options_legacy.glade.h:36
 msgid "Analog joystick"
 msgstr "Analoge joystick"
 
-#: ../data/options_legacy.glade.h:38 ../data/properties.glade.h:54
+#: ../data/options_legacy.glade.h:38
 #, fuzzy
 msgid "Artwork resolution:"
 msgstr "Kunstwerk resolutie"
 
-#: ../data/options_legacy.glade.h:39 ../data/properties.glade.h:55
+#: ../data/options_legacy.glade.h:39
 #, fuzzy
 msgid "Audio device:"
 msgstr "Audio apparaat : "
@@ -2193,19 +2185,19 @@ msgid ""
 "High"
 msgstr "Standaard"
 
-#: ../data/options_legacy.glade.h:48 ../data/properties.glade.h:57
+#: ../data/options_legacy.glade.h:48
 msgid "Autodouble"
 msgstr "Verdubbel automatisch"
 
-#: ../data/options_legacy.glade.h:49 ../data/properties.glade.h:58
+#: ../data/options_legacy.glade.h:49
 msgid "Automatic"
 msgstr "Automatisch"
 
-#: ../data/options_legacy.glade.h:50 ../data/properties.glade.h:59
+#: ../data/options_legacy.glade.h:50
 msgid "Backdrops"
 msgstr "Achtergrond"
 
-#: ../data/options_legacy.glade.h:51 ../data/properties.glade.h:60
+#: ../data/options_legacy.glade.h:51
 msgid "Beam size"
 msgstr "Straal grote"
 
@@ -2213,16 +2205,16 @@ msgstr "Straal grote"
 msgid "Beam size for vector games"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:53 ../data/properties.glade.h:61
+#: ../data/options_legacy.glade.h:53
 msgid "Bezels"
 msgstr "Kasten"
 
-#: ../data/options_legacy.glade.h:54 ../data/properties.glade.h:63
+#: ../data/options_legacy.glade.h:54
 #, fuzzy
 msgid "Bit per pixels:"
 msgstr "Bit per pixels"
 
-#: ../data/options_legacy.glade.h:55 ../data/properties.glade.h:64
+#: ../data/options_legacy.glade.h:55
 msgid "Brightness correction"
 msgstr "Helderheid correctie"
 
@@ -2230,7 +2222,7 @@ msgstr "Helderheid correctie"
 msgid "Buffer size"
 msgstr "Buffer formaat"
 
-#: ../data/options_legacy.glade.h:58 ../data/properties.glade.h:70
+#: ../data/options_legacy.glade.h:58
 #, fuzzy
 msgid "DSP Plugin:"
 msgstr "DSP plugin : "
@@ -2240,11 +2232,11 @@ msgstr "DSP plugin : "
 msgid "Display Options"
 msgstr "SDL opties"
 
-#: ../data/options_legacy.glade.h:60 ../data/properties.glade.h:76
+#: ../data/options_legacy.glade.h:60
 msgid "Do not apply rotation"
 msgstr "Pas rotatie niet toe"
 
-#: ../data/options_legacy.glade.h:61 ../data/properties.glade.h:79
+#: ../data/options_legacy.glade.h:61
 msgid "Draw antialiased vectors"
 msgstr "Teken antialiased vectors"
 
@@ -2265,11 +2257,11 @@ msgid ""
 "Skip 12 out of 12 frames"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:75 ../data/properties.glade.h:81
+#: ../data/options_legacy.glade.h:75
 msgid "Draw only changes"
 msgstr "Teken alleen veranderingen"
 
-#: ../data/options_legacy.glade.h:76 ../data/properties.glade.h:82
+#: ../data/options_legacy.glade.h:76
 #, fuzzy
 msgid "Draw translucent vectors"
 msgstr "Teken tranlucencent vectors"
@@ -2298,7 +2290,7 @@ msgstr "Bilinear filteren"
 msgid "Enable double buffering"
 msgstr "Double buffering"
 
-#: ../data/options_legacy.glade.h:82 ../data/properties.glade.h:85
+#: ../data/options_legacy.glade.h:82
 msgid "Enable game cheats"
 msgstr "Schakel spel cheats in"
 
@@ -2327,23 +2319,23 @@ msgid ""
 "Universe Bios v1.2 (hack)"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:99 ../data/properties.glade.h:87
+#: ../data/options_legacy.glade.h:99
 msgid "Fake sound"
 msgstr "Vervals geluid"
 
-#: ../data/options_legacy.glade.h:100 ../data/properties.glade.h:89
+#: ../data/options_legacy.glade.h:100
 msgid "Flicker"
 msgstr "Flikker"
 
-#: ../data/options_legacy.glade.h:101 ../data/properties.glade.h:90
+#: ../data/options_legacy.glade.h:101
 msgid "Flip screen left-right"
 msgstr "Draai scherm links-rechts"
 
-#: ../data/options_legacy.glade.h:102 ../data/properties.glade.h:91
+#: ../data/options_legacy.glade.h:102
 msgid "Flip screen upside-down"
 msgstr "Draai scherm onderste boven"
 
-#: ../data/options_legacy.glade.h:104 ../data/properties.glade.h:95
+#: ../data/options_legacy.glade.h:104
 msgid "Fullscreen"
 msgstr "Volledig scherm"
 
@@ -2352,44 +2344,44 @@ msgstr "Volledig scherm"
 msgid "GL Texture size"
 msgstr "texture size"
 
-#: ../data/options_legacy.glade.h:106 ../data/properties.glade.h:98
+#: ../data/options_legacy.glade.h:106
 msgid "Gamma correction"
 msgstr "Gamma correctie"
 
-#: ../data/options_legacy.glade.h:107 ../data/properties.glade.h:103
+#: ../data/options_legacy.glade.h:107
 #, fuzzy
 msgid "Height scale:"
 msgstr "Hoogte schaal"
 
-#: ../data/options_legacy.glade.h:108 ../data/properties.glade.h:106
+#: ../data/options_legacy.glade.h:108
 msgid "Intensity"
 msgstr "Intensiteit"
 
-#: ../data/options_legacy.glade.h:109 ../data/properties.glade.h:108
+#: ../data/options_legacy.glade.h:109
 #, fuzzy
 msgid "Joystick type:"
 msgstr "Joystick type : "
 
-#: ../data/options_legacy.glade.h:110 ../data/properties.glade.h:112
+#: ../data/options_legacy.glade.h:110
 msgid "Log debug info"
 msgstr "Log debug info"
 
-#: ../data/options_legacy.glade.h:111 ../data/properties.glade.h:113
+#: ../data/options_legacy.glade.h:111
 #, fuzzy
 msgid "Max frameskip:"
 msgstr "Maximaal aan beelden om over te slaan"
 
-#: ../data/options_legacy.glade.h:112 ../data/properties.glade.h:116
+#: ../data/options_legacy.glade.h:112
 #, fuzzy
 msgid "Mixer device:"
 msgstr "Mixer apparaat : "
 
-#: ../data/options_legacy.glade.h:113 ../data/properties.glade.h:117
+#: ../data/options_legacy.glade.h:113
 #, fuzzy
 msgid "Mixer plugin:"
 msgstr "Mixer plugin : "
 
-#: ../data/options_legacy.glade.h:114 ../data/properties.glade.h:120
+#: ../data/options_legacy.glade.h:114
 #, fuzzy
 msgid "Neo-Geo Bios:"
 msgstr "Neo-Geo Bios :"
@@ -2425,7 +2417,7 @@ msgid ""
 "aRTS"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:132 ../data/properties.glade.h:122
+#: ../data/options_legacy.glade.h:132
 msgid "Overlays"
 msgstr "Bekleding"
 
@@ -2433,16 +2425,16 @@ msgstr "Bekleding"
 msgid "Pause brightness"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:134 ../data/properties.glade.h:125
+#: ../data/options_legacy.glade.h:134
 msgid "Rapid-fire"
 msgstr "Snel vuren"
 
-#: ../data/options_legacy.glade.h:137 ../data/properties.glade.h:130
+#: ../data/options_legacy.glade.h:137
 #, fuzzy
 msgid "Sample rate:"
 msgstr "Samplerate : "
 
-#: ../data/options_legacy.glade.h:138 ../data/properties.glade.h:131
+#: ../data/options_legacy.glade.h:138
 #, fuzzy
 msgid "Scale video to height:"
 msgstr "Schaal video tot exact deze hoogte"
@@ -2455,25 +2447,25 @@ msgstr ""
 msgid "Select mouse grabbing"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:141 ../data/properties.glade.h:132
+#: ../data/options_legacy.glade.h:141
 msgid "Show cursor"
 msgstr "Laat cursor zien"
 
-#: ../data/options_legacy.glade.h:142 ../data/properties.glade.h:133
+#: ../data/options_legacy.glade.h:142
 #, fuzzy
 msgid "Skip disclaimer info"
 msgstr "Sla Vorderingen Over"
 
-#: ../data/options_legacy.glade.h:143 ../data/properties.glade.h:134
+#: ../data/options_legacy.glade.h:143
 #, fuzzy
 msgid "Skip game info"
 msgstr "Sla Spel informatie over"
 
-#: ../data/options_legacy.glade.h:144 ../data/properties.glade.h:135
+#: ../data/options_legacy.glade.h:144
 msgid "Sleep when idle"
 msgstr "Slapen wanneer niet in gebruik"
 
-#: ../data/options_legacy.glade.h:145 ../data/properties.glade.h:137
+#: ../data/options_legacy.glade.h:145
 #, fuzzy
 msgid "Sound file name:"
 msgstr "Geluid bestands naam : "
@@ -2490,34 +2482,34 @@ msgstr ""
 msgid "Stdout logfile"
 msgstr ""
 
-#: ../data/options_legacy.glade.h:150 ../data/properties.glade.h:140
+#: ../data/options_legacy.glade.h:150
 #, fuzzy
 msgid "Timer based audio"
 msgstr "timer gebaseerd geluid"
 
-#: ../data/options_legacy.glade.h:151 ../data/properties.glade.h:142
+#: ../data/options_legacy.glade.h:151
 #, fuzzy
 msgid "UGCI (tm) Coin/Play support"
 msgstr "UGCI(tm) Munt/Spel support"
 
-#: ../data/options_legacy.glade.h:152 ../data/properties.glade.h:143
+#: ../data/options_legacy.glade.h:152
 msgid "USB PS Game Pads"
 msgstr "USB PS game pads"
 
-#: ../data/options_legacy.glade.h:153 ../data/properties.glade.h:145
+#: ../data/options_legacy.glade.h:153
 msgid "Use Scanlines"
 msgstr "Gebruik Scanlines"
 
-#: ../data/options_legacy.glade.h:154 ../data/properties.glade.h:146
+#: ../data/options_legacy.glade.h:154
 #, fuzzy
 msgid "Use additional game artwork:"
 msgstr "Gebruik extra spel kunstwerk"
 
-#: ../data/options_legacy.glade.h:155 ../data/properties.glade.h:150
+#: ../data/options_legacy.glade.h:155
 msgid "Use keyboard LEDs as game indicators"
 msgstr "Gebruik toetsenbord LED's als spel indicator"
 
-#: ../data/options_legacy.glade.h:156 ../data/properties.glade.h:153
+#: ../data/options_legacy.glade.h:156
 msgid "Use samples"
 msgstr "Gebruik voorbeelden"
 
@@ -2526,414 +2518,14 @@ msgstr "Gebruik voorbeelden"
 msgid "Vector resolution:"
 msgstr "Kunstwerk resolutie"
 
-#: ../data/options_legacy.glade.h:160 ../data/properties.glade.h:156
+#: ../data/options_legacy.glade.h:160
 #, fuzzy
 msgid "Width scale:"
 msgstr "Breedte schaal"
 
-#: ../data/options_legacy.glade.h:162 ../data/properties.glade.h:164
+#: ../data/options_legacy.glade.h:162
 msgid "frames"
 msgstr "beelden"
-
-#: ../data/properties.glade.h:9
-msgid "1:"
-msgstr ""
-
-#: ../data/properties.glade.h:10
-msgid "2:"
-msgstr ""
-
-#: ../data/properties.glade.h:11
-msgid "3:"
-msgstr ""
-
-#: ../data/properties.glade.h:12
-msgid "4:"
-msgstr ""
-
-#: ../data/properties.glade.h:13
-#, fuzzy
-msgid "<b>Advanced options</b>"
-msgstr "SVGA opties"
-
-#: ../data/properties.glade.h:14
-#, fuzzy
-msgid "<b>Alsa sound system options</b>"
-msgstr "Alsa Sound System Opties"
-
-#: ../data/properties.glade.h:16
-#, fuzzy
-msgid "<b>Buffer size</b>"
-msgstr "Buffer formaat"
-
-#: ../data/properties.glade.h:17
-msgid "<b>CPU:</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:18
-#, fuzzy
-msgid "<b>Clone of:</b>"
-msgstr "Kloon van"
-
-#: ../data/properties.glade.h:19
-#, fuzzy
-msgid "<b>Colors:</b>"
-msgstr "Klonen"
-
-#: ../data/properties.glade.h:20
-#, fuzzy
-msgid "<b>Control Panel</b>"
-msgstr "Kontrole paneel"
-
-#: ../data/properties.glade.h:24
-#, fuzzy
-msgid "<b>FX (Glide) options</b>"
-msgstr "FX (Glide) opties"
-
-#: ../data/properties.glade.h:28
-#, fuzzy
-msgid "<b>Key mapping</b>"
-msgstr "Toets bindingen"
-
-#: ../data/properties.glade.h:29
-#, fuzzy
-msgid "<b>Keyboard</b>"
-msgstr "Toetsenbord"
-
-#: ../data/properties.glade.h:30
-#, fuzzy
-msgid "<b>Manufacturer:</b>"
-msgstr "Fabrikant"
-
-#: ../data/properties.glade.h:31
-#, fuzzy
-msgid "<b>Mouse / Trackball</b>"
-msgstr "Muis / Trackball"
-
-#: ../data/properties.glade.h:32
-#, fuzzy
-msgid "<b>OpenGL options</b>"
-msgstr "OpenGL opties"
-
-#: ../data/properties.glade.h:33
-#, fuzzy
-msgid "<b>Other options</b>"
-msgstr "Andere opties"
-
-#: ../data/properties.glade.h:34
-#, fuzzy
-msgid "<b>Photon options</b>"
-msgstr "Foton opties"
-
-#: ../data/properties.glade.h:35
-#, fuzzy
-msgid "<b>QNX options</b>"
-msgstr "QNX opties"
-
-#: ../data/properties.glade.h:37
-msgid "<b>Rom check:</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:39
-#, fuzzy
-msgid "<b>SDL options</b>"
-msgstr "SDL opties"
-
-#: ../data/properties.glade.h:40
-#, fuzzy
-msgid "<b>Sample Check:</b>"
-msgstr "Voorbeeld controle:"
-
-#: ../data/properties.glade.h:41
-#, fuzzy
-msgid "<b>Screen:</b>"
-msgstr "Volledig scherm"
-
-#: ../data/properties.glade.h:42
-#, fuzzy
-msgid "<b>Sound:</b>"
-msgstr "Geluid:"
-
-#: ../data/properties.glade.h:44
-#, fuzzy
-msgid "<b>Video mode</b>"
-msgstr "Video Mode"
-
-#: ../data/properties.glade.h:45
-#, fuzzy
-msgid "<b>Volume attenuation</b>"
-msgstr "Verminder volume"
-
-#: ../data/properties.glade.h:46
-#, fuzzy
-msgid "<b>X11 options</b>"
-msgstr "x11 opties"
-
-#: ../data/properties.glade.h:47
-#, fuzzy
-msgid "<b>Xinput joystick</b>"
-msgstr "Xinput joystick"
-
-#: ../data/properties.glade.h:48
-#, fuzzy
-msgid "<b>Xinput trackball</b>"
-msgstr "Xinput trackball"
-
-#: ../data/properties.glade.h:49
-msgid "<b>Year:</b>"
-msgstr ""
-
-#: ../data/properties.glade.h:50
-#, fuzzy
-msgid "<b>aRts options</b>"
-msgstr "aRts opties"
-
-#: ../data/properties.glade.h:51
-msgid "Alphablending"
-msgstr "Alphablending"
-
-#: ../data/properties.glade.h:53
-msgid "Antialiasing"
-msgstr "Antialiasing"
-
-#: ../data/properties.glade.h:56
-msgid "Auto Resolution"
-msgstr "Auto resolutie"
-
-#: ../data/properties.glade.h:62
-msgid "Bilinear filtering"
-msgstr "Bilinear filteren"
-
-#: ../data/properties.glade.h:65
-#, fuzzy
-msgid "Cabinet model:"
-msgstr "Kast model : "
-
-#: ../data/properties.glade.h:66
-#, fuzzy
-msgid "Card ID:"
-msgstr "Kaart ID : "
-
-#: ../data/properties.glade.h:67
-msgid "Color modulation"
-msgstr "Kleur regeling"
-
-#: ../data/properties.glade.h:68
-#, fuzzy
-msgid "Controller:"
-msgstr "Bestuurder:"
-
-#: ../data/properties.glade.h:71
-#, fuzzy
-msgid "Debug windows (for developers)"
-msgstr "debug venster (voor ontwikkelaars)"
-
-#: ../data/properties.glade.h:73
-#, fuzzy
-msgid "Device #:"
-msgstr "apparaat # : "
-
-#: ../data/properties.glade.h:74
-#, fuzzy
-msgid "Disable mode:"
-msgstr "Schakel mode uit : "
-
-#: ../data/properties.glade.h:77
-#, fuzzy
-msgid "Double Buffering"
-msgstr "Double buffering"
-
-#: ../data/properties.glade.h:78
-msgid "Double buffering"
-msgstr "Double buffering"
-
-#: ../data/properties.glade.h:80
-msgid "Draw bitmap"
-msgstr "Teken plaatje"
-
-#: ../data/properties.glade.h:83
-#, fuzzy
-msgid "Effect to use:"
-msgstr "Effecten"
-
-#: ../data/properties.glade.h:84
-msgid "Enable Windows keys"
-msgstr "Schakel Windows toetsen in"
-
-#: ../data/properties.glade.h:88
-#, fuzzy
-msgid "File:"
-msgstr "Bestand : "
-
-#: ../data/properties.glade.h:92
-msgid "Force YUV mode:"
-msgstr ""
-
-#: ../data/properties.glade.h:94
-msgid "Full Screen"
-msgstr "Volledig scherm"
-
-#: ../data/properties.glade.h:96
-msgid "GL extension #78"
-msgstr "GL extensies #78"
-
-#: ../data/properties.glade.h:97
-#, fuzzy
-msgid "GLU library:"
-msgstr "GLU Bibliotheek : "
-
-#: ../data/properties.glade.h:99
-msgid "General"
-msgstr "Algemeen"
-
-#: ../data/properties.glade.h:100
-#, fuzzy
-msgid "Geometry:"
-msgstr "Geometrie : "
-
-#: ../data/properties.glade.h:101
-msgid "Grab keyboard"
-msgstr "Pak toetsenbord"
-
-#: ../data/properties.glade.h:102
-msgid "Grab mouse"
-msgstr "Pak muis"
-
-#: ../data/properties.glade.h:104
-msgid "HotRod SE support"
-msgstr "HotRod SE support"
-
-#: ../data/properties.glade.h:105
-msgid "HotRod support"
-msgstr "HotRod support"
-
-#: ../data/properties.glade.h:107
-#, fuzzy
-msgid "Joystick device prefix:"
-msgstr "Joystick device prefix : "
-
-#: ../data/properties.glade.h:110
-#, fuzzy
-msgid "Keep aspect ratio:"
-msgstr "Houd veronderstelde verhouding"
-
-#: ../data/properties.glade.h:111
-#, fuzzy
-msgid "Keyboard Layout type:"
-msgstr "Type toetsenbord indeling:"
-
-#: ../data/properties.glade.h:114
-#, fuzzy
-msgid "Method:"
-msgstr "Methode :"
-
-#: ../data/properties.glade.h:118
-#, fuzzy
-msgid ""
-"Name of pad device:\n"
-"(FM townpad)"
-msgstr ""
-"Naam van pad apparaat :\n"
-"(FM townpad)"
-
-#: ../data/properties.glade.h:121
-#, fuzzy
-msgid "OpenGL library:"
-msgstr "OpenGL Bibliotheek : "
-
-#: ../data/properties.glade.h:123
-#, fuzzy
-msgid "PCM:"
-msgstr "PCM : "
-
-#: ../data/properties.glade.h:124
-msgid "Private colormap"
-msgstr "Eigen kleurmap"
-
-#: ../data/properties.glade.h:126
-msgid "Rendering"
-msgstr "Renderen"
-
-#: ../data/properties.glade.h:127
-msgid "Resolution"
-msgstr "Resolutie"
-
-#: ../data/properties.glade.h:128
-#, fuzzy
-msgid "Resolution:"
-msgstr "Resolutie"
-
-#: ../data/properties.glade.h:129
-#, fuzzy
-msgid "SDL modes:"
-msgstr "SDL modes"
-
-#: ../data/properties.glade.h:138
-#, fuzzy
-msgid "Texture size:"
-msgstr "texture size"
-
-#: ../data/properties.glade.h:141
-msgid "True color blitter"
-msgstr "True color blitter"
-
-#: ../data/properties.glade.h:144
-#, fuzzy
-msgid "Use MIT shared memory"
-msgstr "Gebruik MIT gedeeld geheugen"
-
-#: ../data/properties.glade.h:147
-#, fuzzy
-msgid "Use additional options:"
-msgstr "Gebruik bijkomende opties"
-
-#: ../data/properties.glade.h:148
-#, fuzzy
-msgid "Use config name:"
-msgstr "Gebruik configuratie naam :"
-
-#: ../data/properties.glade.h:149
-#, fuzzy
-msgid "Use fixed resolution:"
-msgstr "Gebruik vaste resolutie"
-
-#: ../data/properties.glade.h:151
-#, fuzzy
-msgid "Use mouse"
-msgstr "gebruik muis"
-
-#: ../data/properties.glade.h:152
-#, fuzzy
-msgid "Use preferred device"
-msgstr "gebruik geprefereerd apparaat"
-
-#: ../data/properties.glade.h:157
-#, fuzzy
-msgid "Window size:"
-msgstr "Venster formaat : "
-
-#: ../data/properties.glade.h:158
-msgid "X Synch"
-msgstr "X Synch"
-
-#: ../data/properties.glade.h:159
-#, fuzzy
-msgid "X-based device:"
-msgstr "X-gebaseerd apparaat"
-
-#: ../data/properties.glade.h:160
-#, fuzzy
-msgid "XIL multi-threading"
-msgstr "multi threading"
-
-#: ../data/properties.glade.h:161
-msgid "XIL scaling"
-msgstr "XIL voor schalen"
-
-#: ../data/properties.glade.h:162
-#, fuzzy
-msgid "aRts buffer delay time:"
-msgstr "aRts buffer vertraag tijd : "
 
 #: ../data/rom_info.glade.h:1
 msgid "<b>About this ROM</b>"

@@ -42,7 +42,6 @@ data/filter_bar.glade
 data/gmameui_prefs.glade
 data/options.glade
 data/options_legacy.glade
-data/properties.glade
 data/rom_info.glade
 data/sidebar.glade
 gmameui.desktop.in

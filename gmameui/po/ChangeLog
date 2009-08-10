@@ -1,5 +1,11 @@
 2009-08-10  adburton <adb@iinet.net.au>
 
+	* POTFILES.in POTFILES.skip gmameui.pot de.po el.po es.po nl.po zh_CN.po
+	  zh_TW.po: Delete redundant files, and remove from template for translated
+	  strings
+
+2009-08-10  adburton <adb@iinet.net.au>
+
 	* LINGUAS de.po el.po es.po nl.po zh_CN.po zh_TW.po: Add new
 	  translations from GXMame which were not originally migrated
 	* gmameui.pot: Update translation template
