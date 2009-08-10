@@ -1,3 +1,8 @@
+2009-08-10 20:05 adburton
+
+	* AUTHORS, src/about.c: Update translator-credits string, add entry to
+	  AUTHORS for translations migrated from GXMame
+
 2009-08-01 19:35 adburton
 
 	* src/: mame_options_legacy.c, mame_options_legacy_dialog.c: Set default

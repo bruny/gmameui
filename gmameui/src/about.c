@@ -37,7 +37,7 @@ about_window_show (void)
 	GdkPixbuf *pixbuf;
 	
 	const char *authors [] = {
-		"Andrew Burton <adb@iinet.net.au",
+		"Andrew Burton <adb@iinet.net.au>",
 		"Based on GXMame",
 		"Stephane Pontier <shadow_walker@users.sourceforge.net>",
 		"Benoit Dumont <vertigo17@users.sourceforge.net>",
@@ -130,15 +130,7 @@ create_CreditsWindow (GtkWindow *parent)
 
 	gtk_notebook_append_page (credits_notebook, developers, developers_label);
 
-	translators_label = gtk_label_new (_("Translators"));
-	translators = gtk_label_new(_("The following people translated GMAMEUI:\n"
-				      "Brazilian Portugese (pt_BR) - Alfredo Jr <junix@linuxinabox.org>\n"
-				      "Italian (it) - Ugo Viti <ugo.viti@initzero.it>\n"
-				      "Swedish (sv) - Daniel Nylander <dnylander@users.sourceforge.net>\n"
-				      "French (fr) - Loïc Martin <loic.martin3@gmail.com>\n
-	                              "Jarek Sobolewski <r@sledinmay.com>"));
-	gtk_widget_show (translators);
-	gtk_notebook_append_page (credits_notebook, translators, translators_label);
+	gtk_about_dialog_set_translator_credits (about, _("translator-credits"));
 
 	g_signal_connect (G_OBJECT (creditsWindow), "delete_event",
 			  G_CALLBACK (on_CreditsWindow_delete_event),
