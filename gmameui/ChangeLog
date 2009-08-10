@@ -1,3 +1,9 @@
+2009-08-10 20:22 adburton
+
+	* src/directories.c: When the user sets the value of a directory or file,
+	  if the parent directory is 'mame', apply the values for expected settings
+	  to unset values
+
 2009-08-10 20:05 adburton
 
 	* AUTHORS, src/about.c: Update translator-credits string, add entry to
