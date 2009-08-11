@@ -30,10 +30,6 @@
 #include "io.h"
 #include "gui.h"
 
-#ifndef XMAME_ROOT
-#define XMAME_ROOT "/usr/lib/games/xmame"
-#endif
-
 /*
 converts a float to a string with precission 5.
 this is locale independent.
@@ -59,22 +55,29 @@ my_dtostr (char * buf, gdouble d)
 
 /* Custom function to save the keyfile to disk. If the file does not exist,
    it will be created */
-gboolean g_key_file_save_to_file(GKeyFile *kf, const gchar *file, GError **error)
+gboolean g_key_file_save_to_file(GKeyFile *kf, const gchar *file)
 {
+	GError *error = NULL;
 	gsize length, nr;
-	char *data = g_key_file_to_data(kf, &length, error);
+	
+	char *data = g_key_file_to_data(kf, &length, &error);
 	GIOChannel *gio;
 
 	if (!data)
 		return FALSE;
 
-	gio = g_io_channel_new_file(file, "w+", error);
+	gio = g_io_channel_new_file(file, "w+", &error);
 	if (!gio) {
+		GMAMEUI_DEBUG ("Could not save key file %s: %s", file, error->message);
+		g_error_free (error);
+		error = NULL;
+		
 		g_free(data);
+		
 		return FALSE;
 	}
 	
-	g_io_channel_write_chars(gio, data, length, &nr, error);
+	g_io_channel_write_chars(gio, data, length, &nr, &error);
 
 	g_free(data);
 
@@ -92,7 +95,8 @@ load_games_ini (void)
 		
 	GMAMEUI_DEBUG ("Loading games.ini");
 	
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "games.ini", NULL);
+	//filename = g_build_filename (g_get_home_dir (), ".gmameui", "games.ini", NULL);
+	filename = g_build_filename (g_get_user_config_dir (), "gmameui", "games.ini", NULL);
 	if (!filename)
 		return FALSE;
 	
@@ -173,7 +177,8 @@ save_games_ini (void)
 	
 	GMAMEUI_DEBUG ("Saving games.ini");
 
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "games.ini", NULL);
+	//filename = g_build_filename (g_get_home_dir (), ".gmameui", "games.ini", NULL);
+	filename = g_build_filename (g_get_user_config_dir (), "gmameui", "games.ini", NULL);
 	game_ini_file = fopen (filename, "w");
 	g_free (filename);
 	if (!game_ini_file)

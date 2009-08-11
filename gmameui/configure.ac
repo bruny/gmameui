@@ -95,11 +95,6 @@ fi
 
 AM_CONDITIONAL(DISABLE_DOC, test ${enable_doc} = no)
 
-AC_ARG_WITH([xmame-dir],
-  AC_HELP_STRING([--with-xmame-dir=DIR],[default path for xmame files]),
-  AC_DEFINE_UNQUOTED(XMAME_ROOT, "$withval", [Path to xmame data files]),
-  AC_DEFINE(XMAME_ROOT, "/usr/lib/games/xmame",[Path to xmame data files]))
-
 AC_ARG_ENABLE([debug], 
   AC_HELP_STRING([--enable-debug],[compile with debugging support (default: no)])
   ,,enable_debug=no)

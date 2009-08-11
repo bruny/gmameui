@@ -33,7 +33,7 @@ const gchar *
 my_dtostr(char* buf, gdouble d);
 
 gboolean
-g_key_file_save_to_file(GKeyFile *kf, const gchar *file, GError **error);
+g_key_file_save_to_file(GKeyFile *kf, const gchar *file);
 
 gboolean
 load_games_ini(void);

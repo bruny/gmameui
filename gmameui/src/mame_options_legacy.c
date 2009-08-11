@@ -491,7 +491,7 @@ mame_options_legacy_save_string (MameOptionsLegacy *opts, GParamSpec *param, gpo
 	g_key_file_set_string (opts->priv->options_file, opt->category, opt->key, value);
 //	g_strfreev (stv);
 	
-	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename, NULL);
+	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename);
 }
 
 static void
@@ -518,7 +518,7 @@ mame_options_legacy_save_double (MameOptionsLegacy *opts, GParamSpec *param, gpo
 	g_key_file_set_double (opts->priv->options_file, opt->category, opt->key, value);
 //	g_strfreev (stv);
 	
-	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename, NULL);
+	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename);
 }
 
 static void
@@ -545,7 +545,7 @@ mame_options_legacy_save_int (MameOptionsLegacy *opts, GParamSpec *param, gpoint
 	g_key_file_set_integer (opts->priv->options_file, opt->category, opt->key, value);
 //	g_strfreev (stv);
 	
-	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename, NULL);
+	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename);
 }
 
 static void
@@ -572,34 +572,8 @@ mame_options_legacy_save_bool (MameOptionsLegacy *opts, GParamSpec *param, gpoin
 	g_key_file_set_boolean (opts->priv->options_file, opt->category, opt->key, value);
 //	g_strfreev (stv);
 	
-	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename, NULL);
+	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename);
 }
-/*DELETE
-static void
-mame_options_legacy_save_bool_old (MameOptionsLegacy *opts, GParamSpec *param, gpointer user_data)
-{
-	GMAMEUI_DEBUG ("mame_options_save_bool: %s", param->name);
-
-	* param->name will be of the form Category-Key, e.g. Video-beam *
-	
-	gchar** stv;
-	GValue *bool_value;
-	gboolean value;
-
-	g_return_if_fail (MAME_IS_OPTIONS_LEGACY (opts));
-	g_return_if_fail (param->name != NULL);
-	
-	bool_value = (GValue *) user_data;
-	g_return_if_fail (bool_value != NULL);
-	
-	value = g_value_get_boolean (bool_value);
-	
-	stv = g_strsplit (param->name, "-", 2); * Split only on the first '-', so keys with a '-' are ignored *
-	g_key_file_set_boolean (opts->priv->options_file, stv[0], stv[1], value);
-	g_strfreev (stv);
-	
-	g_key_file_save_to_file (opts->priv->options_file, opts->priv->filename, NULL);
-}*/
 
 /* Gets the value from the keyfile for the specified key, which should be of the
    format category.key, i.e. Sound-volume */
@@ -1135,8 +1109,9 @@ mame_options_legacy_init (MameOptionsLegacy *opts)
 	/* This gets called from mame_options_new. From that function, also pass in a RomEntry
 	   If RomEntry is NULL, get default options, otherwise get the options
 	   for a specific ROM */
-	opts->priv->filename = g_build_filename (g_get_home_dir (),
-					       ".gmameui", "options", "default_legacy.ini", NULL);
+	opts->priv->filename = g_build_filename (g_get_user_config_dir (),
+	                                         "gmameui", "options",
+	                                         "default_legacy.ini", NULL);
 	opts->priv->options_file = g_key_file_new ();
 	GError *error = NULL;
 	g_key_file_load_from_file (opts->priv->options_file,

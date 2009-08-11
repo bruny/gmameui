@@ -337,7 +337,7 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 
 	g_return_val_if_fail (gl != NULL, FALSE);
 	
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "gamelist", NULL);
+	filename = g_build_filename (g_get_user_config_dir (), "gmameui", "gamelist", NULL);
 
 	g_message (_("Loading gamelist %s"), filename);
 	
@@ -586,7 +586,7 @@ GMAMEUI_DEBUG ("Saving gamelist");
 	
 	g_return_val_if_fail (gl != NULL, FALSE);
 	
-	gchar *filename = g_build_filename (g_get_home_dir (), ".gmameui", "gamelist", NULL);
+	gchar *filename = g_build_filename (g_get_user_config_dir (), "gmameui", "gamelist", NULL);
   
 	gamelist = fopen (filename, "w");
 	g_free (filename);

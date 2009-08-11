@@ -19,10 +19,6 @@
  *
  */
 
-
-/* Set in Glade file, add new property, add get handler, add set handler, add support in gui_prefs_dialog,
-   add load in init, add cleanup in finalise */
-
 #include "common.h"
 
 #include <string.h>
@@ -55,6 +51,8 @@ static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param,
 static gboolean mame_gui_prefs_get_bool_property_from_key_file (MameGuiPrefs *pr, gchar *property);
 static gint mame_gui_prefs_get_int_property_from_key_file (MameGuiPrefs *pr, gchar *property);
 static gchar* mame_gui_prefs_get_string_property_from_key_file (MameGuiPrefs *pr, gchar *property);
+static GValueArray* mame_gui_prefs_get_stringlist_property_from_key_file (MameGuiPrefs *pr, gchar *category, gchar *property);
+static gchar* get_gmameui_config_dir ();
 
 G_DEFINE_TYPE (MameGuiPrefs, mame_gui_prefs, G_TYPE_OBJECT)
 
@@ -99,7 +97,6 @@ struct _MameGuiPrefsPrivate {
 	gint sort_col_direction;
 		
 	/* Startup preferences */
-	//gint GameCheck;
 	gboolean GameCheck;		/* Check for new games on startup FIXME NOT USED? */
 	gboolean VersionCheck;		/* Check for new version of MAME on startup */
 	gboolean use_xmame_options;     /* Use MAME options, or options set within GMAMEUI */
@@ -112,7 +109,6 @@ struct _MameGuiPrefsPrivate {
 	/* Miscellaneous option preferences */
 	gboolean theprefix;
 
-	//RomEntry *current_rom;
 	gchar *current_rom_name;
 	gchar *current_executable_name;
 	
@@ -203,7 +199,6 @@ mame_gui_prefs_set_property (GObject *object,
 				       prefs->priv->theprefix);
 			break;
 		case PROP_CURRENT_ROM:
-			//prefs->priv->current_rom = g_value_get_object (value);
 			prefs->priv->current_rom_name = g_strdup (g_value_get_string (value));
 			break;
 		case PROP_CURRENT_EXECUTABLE:
@@ -278,12 +273,12 @@ mame_gui_prefs_get_property (GObject *object,
 	if ((prop_id < NUM_PROPERTIES) && (prop_id >= PROP_DIR_CFG)) {
 		/* This clause deals with the non-configurable user directories */
 		gchar *dir;
-		dir = g_build_filename (g_get_home_dir (), ".gmameui",
+		dir = g_build_filename (g_get_user_config_dir (), "mame",
 					prefs->priv->directories[prop_id - PROP_DIR_ARTWORK],
 					NULL);
-					
-		GMAMEUI_DEBUG ("Getting the directory value at %d with value %s",
-			       (prop_id - PROP_DIR_ARTWORK), dir);
+
+		GMAMEUI_DEBUG ("Getting the directory value at %d with value %s (%s)",
+			       (prop_id - PROP_DIR_ARTWORK), dir, prefs->priv->directories[prop_id - PROP_DIR_ARTWORK]);
 			       
 		g_value_set_string (value, dir);
 		g_free (dir);
@@ -549,7 +544,7 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 		/*GMAMEUI_DEBUG ("Installing new property %s with id %d", directory_prefs[i].name, directory_prefs[i].prop_id);*/
 		g_object_class_install_property (object_class,
 						 directory_prefs[i].prop_id,
-						 g_param_spec_string (directory_prefs[i].name, "", "", "", G_PARAM_READWRITE));
+						 g_param_spec_string (directory_prefs[i].name, "", "", directory_prefs[i].default_dir, G_PARAM_READWRITE));
 	}
 
 	/* Signal emitted when a column is toggled */
@@ -588,9 +583,7 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 {
 	gboolean load_result;
 	gint *int_array;
-	gchar **str_array;
 	gsize columnsize;
-	gsize paths;	/* FIXME Define max number of rom/sample dirs */
 	guint i;
 	
 	GMAMEUI_DEBUG ("Creating GUI prefs object");	
@@ -604,8 +597,11 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	pr->priv->executable_paths = g_value_array_new (4);     /* FIXME TODO MAX_EXECUTABLES */
 	pr->priv->rom_paths = g_value_array_new (4);    /* FIXME TODO - define max number */
 	pr->priv->sample_paths = g_value_array_new (4); /* FIXME TODO - define max number */
-	
-	pr->priv->filename = g_build_filename (g_get_home_dir (), ".gmameui", "gmameui.ini", NULL);
+
+	/* The gmameui.ini pref file should be stored in the following locations:
+	     ~/.config/gmameui (on Linux)
+	 */
+	pr->priv->filename = g_build_filename (get_gmameui_config_dir (), "gmameui.ini", NULL);
 
 	pr->priv->prefs_ini_file = g_key_file_new ();
 	GError *error = NULL;
@@ -683,56 +679,14 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	pr->priv->current_executable_name = mame_gui_prefs_get_string_property_from_key_file (pr, "current-executable");
 
 	/* Load the executable paths */
-	str_array = g_key_file_get_string_list (pr->priv->prefs_ini_file, "Preferences", "executable-paths", &paths, &error);
-	for (i = 0; i < paths; i++) {
-		GValue val = { 0, };
-		
-		g_value_init (&val, G_TYPE_STRING);
-		if ((str_array) && (str_array[i] != NULL))
-			g_value_set_string (&val, str_array[i]);	/* If not available, default to NULL */
-		GMAMEUI_DEBUG ("Value for executable-paths at %d is %s", i, g_value_get_string (&val));
-		g_value_array_append (pr->priv->executable_paths, &val);
-	}
-	if (error) {
-		GMAMEUI_DEBUG ("Error retrieving executable-paths: %s", error->message);
-		g_error_free (error);
-		error = NULL;
-	}
+	pr->priv->executable_paths = mame_gui_prefs_get_stringlist_property_from_key_file (pr, "Preferences", "executable-paths");
 	
 	/* Load the ROM paths */
-	str_array = g_key_file_get_string_list (pr->priv->prefs_ini_file, "Preferences", "rom-paths", &paths, &error);
-	for (i = 0; i < paths; i++) {
-		GValue val = { 0, };
-		
-		g_value_init (&val, G_TYPE_STRING);
-		if ((str_array) && (str_array[i] != NULL))
-			g_value_set_string (&val, str_array[i]);	/* If not available, default to NULL */
-		GMAMEUI_DEBUG ("Value for rom-paths at %d is %s", i, g_value_get_string (&val));
-		g_value_array_append (pr->priv->rom_paths, &val);
-	}
-	if (error) {
-		GMAMEUI_DEBUG ("Error retrieving rom-paths: %s", error->message);
-		g_error_free (error);
-		error = NULL;
-	}
+	pr->priv->rom_paths = mame_gui_prefs_get_stringlist_property_from_key_file (pr, "Preferences", "rom-paths");
 	
 	/* Load the Samples paths */
-	str_array = g_key_file_get_string_list (pr->priv->prefs_ini_file, "Preferences", "sample-paths", &paths, &error);
-	for (i = 0; i < paths; i++) {
-		GValue val = { 0, };
-		
-		g_value_init (&val, G_TYPE_STRING);
-		if ((str_array) && (str_array[i] != NULL))
-			g_value_set_string (&val, str_array[i]);	/* If not available, default to NULL */
-		GMAMEUI_DEBUG ("Value for sample-paths at %d is %s", i, g_value_get_string (&val));
-		g_value_array_append (pr->priv->sample_paths, &val);
-	}
-	if (error) {
-		GMAMEUI_DEBUG ("Error retrieving sample-paths: %s", error->message);
-		g_error_free (error);
-		error = NULL;
-	}
-	
+	pr->priv->sample_paths = mame_gui_prefs_get_stringlist_property_from_key_file (pr, "Preferences", "sample-paths");
+
 	/* Directory preferences */
 	GMAMEUI_DEBUG ("Reading directories preferences from file");
 	for (i = 0; i < NUM_DIRS; i++) {
@@ -743,10 +697,10 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 			pr->priv->directories[i] = g_strdup (directory_prefs[i].default_dir);   /* strdup, since we free in finalize */
 		GMAMEUI_DEBUG ("Setting directory %d (%s) to %s", i, directory_prefs[i].name, pr->priv->directories[i]);
 		
-		/* If directory does not exist (and it exists under $HOME/.gmameui), create it */
-		if (i >= PROP_DIR_CFG) {
+		/* If directory does not exist under $HOME/.config/mame, create it */
+		if (i >= DIR_CFG) {
 			gchar *dir;
-			dir = g_build_filename (g_get_home_dir (), ".gmameui", directory_prefs[i].default_dir, NULL);
+			dir = g_build_filename (g_get_user_config_dir (), "mame", directory_prefs[i].default_dir, NULL);
 			if (!g_file_test (dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
 				GMAMEUI_DEBUG ("Directory %s does not exist, creating it", dir);
 				g_mkdir (dir, S_IRWXU);
@@ -807,7 +761,6 @@ static void mame_gui_prefs_save_int (MameGuiPrefs *pr, GParamSpec *param, gpoint
 {
 	gchar *key;
 	gint value;
-	GError *error = NULL;
 
 	g_return_if_fail (pr->priv->prefs_ini_file != NULL);
 	g_return_if_fail (pr->priv->filename != NULL);
@@ -823,12 +776,7 @@ static void mame_gui_prefs_save_int (MameGuiPrefs *pr, GParamSpec *param, gpoint
 
 	/* Set the value and save the file */
 	g_key_file_set_integer (pr->priv->prefs_ini_file, "Preferences", key, value);
-	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename, &error);
-	
-	if (error) {
-		GMAMEUI_DEBUG ("Error saving %s - %s", pr->priv->filename, error->message);
-		g_error_free (error);
-	}
+	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename);
 	
 	g_free (key);
 	
@@ -844,7 +792,6 @@ static void mame_gui_prefs_save_int_arr (MameGuiPrefs *pr, GParamSpec *param, gp
 	GValueArray *va;
 	gint *value;
 	int i;
-	GError *error = NULL;
 
 	g_return_if_fail (pr->priv->prefs_ini_file != NULL);
 	g_return_if_fail (pr->priv->filename != NULL);
@@ -871,13 +818,8 @@ static void mame_gui_prefs_save_int_arr (MameGuiPrefs *pr, GParamSpec *param, gp
 
 	/* Set the value and save the file */
 	g_key_file_set_integer_list (pr->priv->prefs_ini_file, "Preferences", key, value, NUMBER_COLUMN);
-	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename, &error);
-	
-	if (error) {
-		GMAMEUI_DEBUG ("Error saving %s - %s", pr->priv->filename, error->message);
-		g_error_free (error);
-	}
-	
+	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename);
+		
 	g_free (key);
 	
 	/* FIXME TODO Preferences is a temporary group name - need to find a way to
@@ -888,7 +830,6 @@ static void mame_gui_prefs_save_bool (MameGuiPrefs *pr, GParamSpec *param, gpoin
 {
 	gchar *key;
 	gboolean value;
-	GError *error = NULL;
 
 	g_return_if_fail (pr->priv->prefs_ini_file != NULL);
 	g_return_if_fail (pr->priv->filename != NULL);
@@ -904,13 +845,8 @@ static void mame_gui_prefs_save_bool (MameGuiPrefs *pr, GParamSpec *param, gpoin
 
 	/* Set the value and save the file */
 	g_key_file_set_boolean (pr->priv->prefs_ini_file, "Preferences", key, value);
-	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename, &error);
-	
-	if (error) {
-		GMAMEUI_DEBUG ("Error saving %s - %s", pr->priv->filename, error->message);
-		g_error_free (error);
-	}
-	
+	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename);
+		
 	g_free (key);
 	
 	/* FIXME TODO Preferences is a temporary group name - need to find a way to
@@ -921,7 +857,6 @@ static void mame_gui_prefs_save_string (MameGuiPrefs *pr, GParamSpec *param, gpo
 {
 	gchar *key;
 	gchar *value;
-	GError *error = NULL;
 
 	g_return_if_fail (pr->priv->prefs_ini_file != NULL);
 	g_return_if_fail (pr->priv->filename != NULL);
@@ -937,12 +872,7 @@ static void mame_gui_prefs_save_string (MameGuiPrefs *pr, GParamSpec *param, gpo
 
 	/* Set the value and save the file */
 	g_key_file_set_string (pr->priv->prefs_ini_file, "Preferences", key, value);
-	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename, &error);
-	
-	if (error) {
-		GMAMEUI_DEBUG ("Error saving %s - %s", pr->priv->filename, error->message);
-		g_error_free (error);
-	}
+	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename);
 	
 	g_free (key);
 	
@@ -954,14 +884,14 @@ static void mame_gui_prefs_save_string (MameGuiPrefs *pr, GParamSpec *param, gpo
 
 /* This function is used to handle the string arrays representing the ROM
    and sample paths */
-static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param, gpointer user_data)
+static void
+mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param, gpointer user_data)
 {
 	gchar *key;
 	GValueArray *va;
 	gchar **value;
 	guint n_va;
 	guint i;
-	GError *error = NULL;
 
 	g_return_if_fail (pr->priv->prefs_ini_file != NULL);
 	g_return_if_fail (pr->priv->filename != NULL);
@@ -998,13 +928,8 @@ static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param,
 		/* Set the value and save the file */
 		g_key_file_set_string_list (pr->priv->prefs_ini_file, "Preferences", key, value, n_va);
 	}
-	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename, &error);
-	
-	if (error) {
-		GMAMEUI_DEBUG ("Error saving %s - %s", pr->priv->filename, error->message);
-		g_error_free (error);
-	}
-	
+	g_key_file_save_to_file (pr->priv->prefs_ini_file, pr->priv->filename);
+		
 	GMAMEUI_DEBUG ("Saving string array %s... done", key);
 	
 	g_free (key);
@@ -1017,7 +942,8 @@ static void mame_gui_prefs_save_string_arr (MameGuiPrefs *pr, GParamSpec *param,
 /* Retrieve a boolean property from the preferences ini file. If an error occurs (usually because
    the preferences file does not exist, or the key value is not present, then the default value
    in the g_param_spec is used instead */
-static gboolean mame_gui_prefs_get_bool_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
+static gboolean
+mame_gui_prefs_get_bool_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
 	GError *error = NULL;
 	gboolean val;
 	
@@ -1047,7 +973,8 @@ static gboolean mame_gui_prefs_get_bool_property_from_key_file (MameGuiPrefs *pr
 /* Retrieve an integer property from the preferences ini file. If an error occurs (usually because
    the preferences file does not exist, or the key value is not present, then the default value
    in the g_param_spec is used instead */
-static gint mame_gui_prefs_get_int_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
+static gint
+mame_gui_prefs_get_int_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
 	GError *error = NULL;
 	gint val;
 	
@@ -1076,7 +1003,8 @@ static gint mame_gui_prefs_get_int_property_from_key_file (MameGuiPrefs *pr, gch
 /* Retrieve a gchar* property from the preferences ini file. If an error occurs (usually because
    the preferences file does not exist, or the key value is not present, then the default value
    in the g_param_spec is used instead */
-static gchar* mame_gui_prefs_get_string_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
+static gchar*
+mame_gui_prefs_get_string_property_from_key_file (MameGuiPrefs *pr, gchar *property) {
 	GError *error = NULL;
 	gchar* val;
 	
@@ -1101,3 +1029,53 @@ static gchar* mame_gui_prefs_get_string_property_from_key_file (MameGuiPrefs *pr
 	
 	return val;
 }
+
+/* Retrieve a GValueArray property from the preferences ini file. If an error occurs (usually because
+   the preferences file does not exist, or the key value is not present, then NULL is returned */
+static GValueArray*
+mame_gui_prefs_get_stringlist_property_from_key_file (MameGuiPrefs *pr, gchar *category, gchar *property) {
+
+	GError *error = NULL;
+	gchar **str_array;
+	GValueArray *va;
+	gsize paths;	/* FIXME Define max number of rom/sample dirs */
+	guint i;
+
+	va = g_value_array_new (4); /* FIXME TODO - define max number */
+
+	GMAMEUI_DEBUG ("Retrieving string array for category %s, property %s", category, property);
+
+	str_array = g_key_file_get_string_list (pr->priv->prefs_ini_file, category, property, &paths, &error);
+	for (i = 0; i < paths; i++) {
+		GValue val = { 0, };
+		
+		g_value_init (&val, G_TYPE_STRING);
+		if ((str_array) && (str_array[i] != NULL))
+			g_value_set_string (&val, str_array[i]);	/* If not available, default to NULL */
+		GMAMEUI_DEBUG ("  Value for %s at %d is %s", property, i, g_value_get_string (&val));
+		va = g_value_array_append (va, &val);
+	}
+	if (error) {
+		GMAMEUI_DEBUG ("  Error retrieving %s: %s", property, error->message);
+		g_error_free (error);
+		error = NULL;
+	}
+
+	return va;
+}
+
+static gchar *
+get_gmameui_config_dir ()
+{
+	gchar *dir;
+
+	dir = g_build_filename (g_get_user_config_dir (), "gmameui", NULL);
+	
+	if (!g_file_test (dir, G_FILE_TEST_IS_DIR)) {
+		GMAMEUI_DEBUG ("Creating GMAMEUI config dir: %s", dir);
+		g_mkdir (dir, S_IRWXU); /* FIXME TODO Check result */
+	}
+
+	return dir;
+}
+

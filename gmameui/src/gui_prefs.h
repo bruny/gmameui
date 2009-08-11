@@ -108,13 +108,13 @@ enum
 	PROP_DIR_CPANEL,
 	PROP_DIR_ICONS,
 	PROP_DIR_CTRLR,
-	PROP_DIR_HISCORE,   /* FIXME TODO Move this below */
 	PROP_FILE_CATVER,
 	PROP_FILE_CHEAT,
 	PROP_FILE_HISCORE,
 	PROP_FILE_HISTORY,
 	PROP_FILE_MAMEINFO,
 	PROP_DIR_CFG,
+	PROP_DIR_HISCORE,
 	PROP_DIR_NVRAM,
 	PROP_DIR_STATE,
 	PROP_DIR_INP,
@@ -169,7 +169,7 @@ static const directory_config directory_prefs [] = {
 	{ PROP_FILE_MAMEINFO, "file-mameinfo", "mameinfo.dat" },
 	
 	/* The following are per-user directories, and will not be user-configured. As a
-	   result, the default directory will be nested under ~/.gmameui/<dir>. The
+	   result, the default directory will be nested under ~/.config/mame/<dir>. The
 	   directory will be built when g_object_get is invoked. These properties
 	   deliberately do not have a g_object_set clause */
 	{ PROP_DIR_CFG, "dir-cfg", "cfg" },

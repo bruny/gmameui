@@ -1,3 +1,12 @@
+2009-08-11 21:09 adburton
+
+	* src/: game_list.c, gmameui.c, gui_prefs.c, gui_prefs.h, io.c, io.h,
+	  mame_options.c, mame_options_legacy.c: Use XDG standard for config dirs;
+	  GMAMEUI config moved to ~/.config/gmameui, MAME config moved to
+	  ~/.config/mame
+	* configure.ac: Remove redundant setting
+	
+
 2009-08-10 21:30 adburton
 
 	* src/: game_options.c, game_options.h, network_game.c, network_game.h,

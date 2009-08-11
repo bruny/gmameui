@@ -164,17 +164,10 @@ gmameui_init (void)
 	g_timer_start (mytimer);
 #endif
 
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", NULL);
-	if (!g_file_test (filename, G_FILE_TEST_IS_DIR)) {
-		GMAMEUI_DEBUG ("no initial directory creating one");
-		mkdir (filename, S_IRWXU);
-	}
-	g_free (filename);
-
-	filename = g_build_filename (g_get_home_dir (), ".gmameui", "options", NULL);
+	filename = g_build_filename (g_get_user_config_dir (), "gmameui", "options", NULL);
 	if (!g_file_test (filename, G_FILE_TEST_IS_DIR)) {
 		GMAMEUI_DEBUG ("no options directory creating one");
-		mkdir (filename, S_IRWXU);
+		g_mkdir (filename, S_IRWXU);
 	}
 	g_free (filename);
 

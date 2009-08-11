@@ -331,7 +331,7 @@ mame_options_set (MameOptions *pr, const gchar *key,
 	{
 		/*GMAMEUI_DEBUG ("Setting MAME option %s with value %s", stv[0], stv[1]);*/
 		g_key_file_set_string (pr->priv->options_file, stv[0], stv[1], value);
-		g_key_file_save_to_file (pr->priv->options_file, pr->priv->filename, NULL);
+		g_key_file_save_to_file (pr->priv->options_file, pr->priv->filename);
 		
 		/* Update option in list */
 		add_option_to_option_list (pr, key, value);
@@ -378,7 +378,7 @@ mame_options_set_int (MameOptions *pr, const gchar *key,
 	g_key_file_set_integer (pr->priv->options_file, stv[0], stv[1], value);
 	g_strfreev (stv);
 	
-	g_key_file_save_to_file (pr->priv->options_file, pr->priv->filename, NULL);
+	g_key_file_save_to_file (pr->priv->options_file, pr->priv->filename);
 	
 	gchar *val = g_strdup_printf("%i", value);
 	add_option_to_option_list (pr, key, val);
@@ -398,7 +398,7 @@ mame_options_set_double (MameOptions *pr, const gchar *key,
 	g_key_file_set_double (pr->priv->options_file, stv[0], stv[1], value);
 	g_strfreev (stv);
 	
-	g_key_file_save_to_file (pr->priv->options_file, pr->priv->filename, NULL);
+	g_key_file_save_to_file (pr->priv->options_file, pr->priv->filename);
 	
 	gchar *val = g_strdup_printf("%f", value);
 	add_option_to_option_list (pr, key, val);
@@ -1402,8 +1402,9 @@ mame_options_instance_init (MameOptions *pr)
 	/* This gets called from mame_options_new. From that function, also pass in a RomEntry
 	   If RomEntry is NULL, get default options, otherwise get the options
 	   for a specific ROM */
-	pr->priv->filename = g_build_filename (g_get_home_dir (),
-					       ".gmameui", "options", "default_new", NULL);
+	pr->priv->filename = g_build_filename (g_get_user_config_dir (),
+					       "gmameui", "options",
+	                                       "default.ini", NULL);
 	pr->priv->options_file = g_key_file_new ();
 	GError *error = NULL;
 	g_key_file_load_from_file (pr->priv->options_file,
