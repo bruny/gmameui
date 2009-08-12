@@ -33,6 +33,7 @@
 #include <signal.h>
 #include <glib/gprintf.h>
 #include <glib/gutils.h>
+#include <glib/gstdio.h>	/* For g_mkdir */
 #include <gtk/gtkmain.h>
 #include <gtk/gtkfilesel.h>
 
@@ -223,10 +224,11 @@ g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NUL
 	
 	/* Initialise the gamelist */
 	gui_prefs.gl = mame_gamelist_new ();
-
+#ifdef ENABLE_DEBUG
 	g_timer_stop (mytimer);
 	g_message (_("Time to initialise GMAMEUI: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 	g_timer_destroy (mytimer);
+#endif
 
 #ifdef ENABLE_JOYSTICK
 	gchar *joystick_device;
@@ -582,8 +584,8 @@ launch_emulation (MameRomEntry    *rom,
 	if (error_rom || error_mame) {
 		/* There was an error during the load. Create a dialog to present the errors */
 		GtkWidget *dialog;
-		gchar *title;
-		gchar *secmessage;
+		gchar *title = NULL;
+		gchar *secmessage = NULL;
 		
 		if (error_rom) {
 			title = g_strdup (_("GMAMEUI could not load the ROM"));

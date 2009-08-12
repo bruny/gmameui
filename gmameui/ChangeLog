@@ -1,3 +1,7 @@
+2009-08-12 19:32 adburton
+
+	* src/gmameui.c: Fix compilation errors and warnings
+
 2009-08-11 21:09 adburton
 
 	* src/: game_list.c, gmameui.c, gui_prefs.c, gui_prefs.h, io.c, io.h,
