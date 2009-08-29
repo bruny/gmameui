@@ -1,3 +1,7 @@
+2009-08-29 18:30 adburton
+
+	* configure.ac, NEWS: Tagged for new release
+
 2009-08-29 17:40 adburton
 
 	* src/gui.c: Fix translation of "No executables" message

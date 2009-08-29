@@ -1,3 +1,39 @@
+Overview of changes in GMAMEUI 0.2.11
+=====================================
+
+* Automatically search for sdlmame in the user's $PATH and add it
+
+* When adding a MAME directory, GMAMEUI will now automatically look for related
+  directories and add them
+
+* Show progress bar when loading the gamelist at startup
+
+* Rebuilding the gamelist now automatically triggers an audit afterwards
+
+* Move all GMAMEUI config files to ~/.config/gmameui and ~/.config/mame to
+  comply with XDG standards
+
+* Improve speed of switching between filters on the LHS and the filter buttons
+  at the top of the gamelist
+
+* Remove items from the gamelist file that are not required on startup and only
+  load them when opening the ROM Properties dialog (this requires a gamelist
+  rebuild)
+
+* Improve speed of switching between filters on the LHS and the filter buttons
+  at the top of the gamelist
+
+* Prompt user to rebuild gamelist if it is out of date or missing at startup
+
+* Update some XMAME default values
+
+* Add processing of individual ROMs and SHA1 values
+
+* Redundant source code files have been removed
+
+* Completely updated translations for French (fr), German (de), Polish (pl) and
+  Traditional Chinese (zh_TW) - thanks to all who contributed!
+
 Overview of changes in GMAMEUI 0.2.10
 =====================================
 
