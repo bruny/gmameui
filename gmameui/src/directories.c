@@ -517,7 +517,7 @@ static void update_other_entries (MameDirectoriesDialog *dialog, gchar *filename
 			gchar *testname;
 			
 			GMAMEUI_DEBUG ("  Looking for directory/file at %d called %s", i, directory_prefs[i].default_dir);
-			
+
 			tmpdir = g_file_get_child (parentfolder, directory_prefs[i].default_dir);
 			testname = g_file_get_parse_name (tmpdir);
 
@@ -529,9 +529,10 @@ static void update_other_entries (MameDirectoriesDialog *dialog, gchar *filename
 
 				g_object_get (main_gui.gui_prefs, directory_prefs[i].name, &val, NULL);
 
-				/* If there is no existing value set, and the MAME/<dirname> directory
-				   exists, then update the preferences value and the widget */
-				if ((val == NULL) || (strlen (val) == 0)) {
+				/* If there is no existing value set (or if there is but it
+				   is invalid), and the MAME/<dirname> directory exists,
+				   then update the preferences value and the widget */
+				if ((val == NULL) || (strlen (val) == 0) || (g_file_test (val, G_FILE_TEST_EXISTS) == FALSE)) {
 					GtkWidget *widget;
 					gchar *widgetname;
 
@@ -553,7 +554,7 @@ static void update_other_entries (MameDirectoriesDialog *dialog, gchar *filename
 					g_free (val);
 
 			 } else
-				GMAMEUI_DEBUG ("     Directory/file does not exist");
+				GMAMEUI_DEBUG ("     Directory/file %s does not exist", testname);
 			g_free (testname);
 		}
 	}
