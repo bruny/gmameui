@@ -201,6 +201,7 @@ add_exec_menu (void)
 	GtkActionGroup *exec_radio_action_group;
 	GSList *radio_group = NULL;
 	exec_radio_action_group = gtk_action_group_new ("GmameuiWindowRadioExecActions");
+	gtk_action_group_set_translation_domain (exec_radio_action_group, GETTEXT_PACKAGE);
 	gtk_ui_manager_insert_action_group (main_gui.manager, exec_radio_action_group, 0);
 	
 	num_execs = mame_exec_list_size (main_gui.exec_list);
@@ -211,11 +212,12 @@ add_exec_menu (void)
 	if (num_execs == 0) {
 		GtkAction *action;
 			
-		action = g_object_new (GTK_TYPE_ACTION,
-				       "name", "execs-empty",
-				       "label", N_("No executables"),
-				       "sensitive", FALSE,
-				       NULL);
+		action = gtk_action_new ("execs-empty",
+		                         _("No executables"),
+		                         NULL,
+		                         NULL);
+		gtk_action_set_sensitive (action, FALSE);
+		                         
 		gtk_action_group_add_action (exec_radio_action_group, action);
 		g_object_unref (action);
 		

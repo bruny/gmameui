@@ -2,14 +2,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # Jouston Huang <jouston@jouston.no-ip.com>, 2003
-# Jouston Huang <jouston@i18n.linux.org.tw>, 2003
 #
+# Jouston Huang <jouston@i18n.linux.org.tw>, 2003, 2009.
 msgid ""
 msgstr ""
 "Project-Id-Version: zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2009-08-10 21:13+1000\n"
-"PO-Revision-Date: 2003-11-30 00:18+0800\n"
+"PO-Revision-Date: 2009-08-26 02:15+0800\n"
 "Last-Translator: Jouston Huang <jouston@i18n.linux.org.tw>\n"
 "Language-Team: Traditional Chinese <zh-l10n@linux.org.tw>\n"
 "MIME-Version: 1.0\n"
@@ -19,15 +19,15 @@ msgstr ""
 
 #: ../src/about.c:50 ../src/about.c:133
 msgid "translator-credits"
-msgstr "翻譯者"
+msgstr "翻譯者的榮耀"
 
 #: ../src/about.c:58 ../src/about.c:230
 msgid "Copyright (c) 2007-2009 Andrew Burton"
-msgstr ""
+msgstr "版權所有 (c) 2007-2009 Andrew Burton"
 
 #: ../src/about.c:60 ../src/about.c:226
 msgid "A program to play MAME under Linux"
-msgstr ""
+msgstr "在 Linux 下玩 MAME 的程式"
 
 #: ../src/about.c:105 ../src/about.c:200
 msgid "Credits"
@@ -47,18 +47,25 @@ msgid ""
 "Priit Laes <x-laes@users.sourceforge.net>\n"
 "William Jon McCann <mccann@jhu.edu>\n"
 msgstr ""
+"Andrew Burton\n"
+"程式碼基於 GXMame\n"
+"Stephane Pontier <shadow_walker@users.sourceforge.net>\n"
+"Benoit Dumont <vertigo17@users.sourceforge.net>\n"
+"Nicos Panayides <anarxia@gmx.net>\n"
+"Priit Laes <x-laes@users.sourceforge.net>\n"
+"William Jon McCann <mccann@jhu.edu>\n"
 
 #: ../src/about.c:196
 msgid "About GMAMEUI"
-msgstr "關於GMAMEUI"
+msgstr "關於 GMAMEUI"
 
 #: ../src/about.c:218
 msgid "GMAMEUI"
-msgstr ""
+msgstr "GMAMEUI"
 
 #: ../src/audit.c:556
 msgid "Don't know how to verify roms with this version of xmame."
-msgstr ""
+msgstr "不知該如何在此版本 xmame 驗證 ROM"
 
 #. Add each of the notebooks
 #: ../src/callbacks.c:136 ../src/mame_options_legacy_dialog.c:833
@@ -66,9 +73,8 @@ msgid "Display"
 msgstr "顯示"
 
 #: ../src/callbacks.c:138 ../data/options_legacy.glade.h:131
-#, fuzzy
 msgid "OpenGL"
-msgstr "OpenGL選項"
+msgstr "OpenGL"
 
 #. mame_options_legacy_dialog_add_page (dlg, "OpenGLVBox", _("OpenGL"), "gmameui-display-toolbar");
 #: ../src/callbacks.c:140 ../src/filters_list.c:289
@@ -78,57 +84,59 @@ msgstr "音效"
 
 #: ../src/callbacks.c:142 ../src/mame_options_legacy_dialog.c:836
 msgid "Input"
-msgstr ""
+msgstr "輸入"
 
 #: ../src/callbacks.c:144
 msgid "Performance"
-msgstr ""
+msgstr "效能"
 
 #. mame_options_legacy_dialog_add_page (dlg, "PerformanceVBox", _("Performance"), "gmameui-general-toolbar");
 #: ../src/callbacks.c:146 ../src/mame_options_legacy_dialog.c:838
 msgid "Miscellaneous"
-msgstr ""
+msgstr "其他"
 
 #. FIXME: Make the debugging page last
 #: ../src/callbacks.c:148 ../src/mame_options_dialog.c:129
 #: ../src/mame_options_dialog.c:132 ../src/mame_options_legacy_dialog.c:732
 #: ../src/mame_options_legacy_dialog.c:735
 msgid "Debugging"
-msgstr ""
+msgstr "除錯"
 
 #: ../src/callbacks.c:200
 msgid "No xmame executables defined"
-msgstr "尚未定義xmame執行檔"
+msgstr "尚未定義 xmame 執行檔"
 
 #: ../src/callbacks.c:278
 msgid "GMAMEUI Help could not be started"
-msgstr ""
+msgstr "無法啟動 GMAMEUI 幫助"
 
 #: ../src/callbacks.c:280
 msgid ""
 "The Help file could not be opened. This will happen if the version of GTK is "
 "not at least 2.13 and libgnome support has not been compiled in."
 msgstr ""
+"無法開啟 幫助. 通常這發生在 GTK 版本低於 2.13 以及 libgnome 支援未在編譯時啟"
+"用"
 
 #: ../src/callbacks.c:291
 msgid "There was an error opening the Help file"
-msgstr ""
+msgstr "開啟 幫助 時發生錯誤"
 
 #: ../src/cell-renderer-captioned-image.c:215
 msgid "Text"
-msgstr ""
+msgstr "文字"
 
 #: ../src/cell-renderer-captioned-image.c:216
 msgid "Text to render"
-msgstr ""
+msgstr "要繪圖的文字"
 
 #: ../src/cell-renderer-captioned-image.c:222
 msgid "Pixbuf Object"
-msgstr ""
+msgstr "Pixbuf 物件"
 
 #: ../src/cell-renderer-captioned-image.c:223
 msgid "The pixbuf to render."
-msgstr ""
+msgstr "要繪圖的 pixbuf"
 
 #: ../src/directories.c:369 ../data/directories.glade.h:12
 msgid "Directories Selection"
@@ -136,23 +144,23 @@ msgstr "目錄選擇"
 
 #: ../src/directories.c:405
 msgid "No MAME executables have been chosen"
-msgstr ""
+msgstr "尚未選取 MAME 執行檔"
 
 #: ../src/directories.c:408
 msgid ""
 "Without a MAME executable, you will not be able to emulate any ROMs. Are you "
 "sure you want to close the window?"
-msgstr ""
+msgstr "若無 MAME 執行檔，你將無法遊玩任何遊戲. 你確定要關閉此視窗嗎?"
 
 #: ../src/directories.c:419
 msgid "No ROM directories have been chosen"
-msgstr ""
+msgstr "尚未選取 ROM 目錄"
 
 #: ../src/directories.c:422
 msgid ""
 "Without any ROM directories, you will not be able to emulate any ROMs. Are "
 "you sure you want to close the window?"
-msgstr ""
+msgstr "若無任何 ROM 目錄, 你將無法遊玩任何遊戲. 你確定要關閉此視窗嗎?"
 
 #: ../src/directories.c:588
 msgid "Browse for Folder"
@@ -164,20 +172,18 @@ msgstr "瀏覽檔案"
 
 #. Create new directory file chooser
 #: ../src/directories.c:679
-#, fuzzy
 msgid "Select directory"
-msgstr "控制器目錄"
+msgstr "選擇目錄"
 
 #. Create new directory file chooser
 #: ../src/directories.c:732
-#, fuzzy
 msgid "Select MAME executable"
-msgstr "可執行檔"
+msgstr "選擇 MAME 執行檔"
 
 #. Now add the categories
 #: ../src/filters_list.c:221 ../src/filters_list.c:255
 msgid "Available"
-msgstr "ROM存在"
+msgstr "存在"
 
 #: ../src/filters_list.c:222 ../src/filters_list.c:260
 #: ../src/filters_list.c:261 ../src/filters_list.c:262
@@ -190,16 +196,15 @@ msgstr "狀態"
 #: ../src/filters_list.c:270 ../src/filters_list.c:271
 #: ../src/filters_list.c:272
 msgid "Architecture"
-msgstr ""
+msgstr "架構"
 
 #: ../src/filters_list.c:224 ../src/filters_list.c:275
 #: ../src/filters_list.c:276 ../src/filters_list.c:277
 #: ../src/filters_list.c:278 ../src/filters_list.c:279
 #: ../src/filters_list.c:280 ../src/filters_list.c:283
 #: ../src/filters_list.c:284
-#, fuzzy
 msgid "Game Details"
-msgstr "詳細資訊"
+msgstr "遊戲資訊"
 
 #: ../src/filters_list.c:225 ../src/filters_list.c:293
 #: ../src/filters_list.c:294
@@ -210,7 +215,7 @@ msgstr "自訂"
 #: ../src/filters_list.c:288 ../src/filters_list.c:289
 #: ../src/filters_list.c:290
 msgid "Imperfect"
-msgstr ""
+msgstr "不完美"
 
 #: ../src/filters_list.c:227 ../src/filters_list.c:357
 #: ../src/gmameui-gamelist-view.c:446 ../src/mame_options_dialog.c:80
@@ -226,25 +231,23 @@ msgstr "版本"
 #. Availability-related filters
 #: ../src/filters_list.c:255 ../data/filter_bar.glade.h:1
 msgid "All ROMs"
-msgstr ""
+msgstr "所有 ROM"
 
 #. { HAS_ROMS, FILTER_AVAILABLE, _("Available"), FALSE, NULL, NOT_AVAIL, TRUE, NULL, _("Available") },
 #. { HAS_ROMS, FILTER_UNAVAILABLE, _("Unavailable"), TRUE, NULL, NOT_AVAIL, TRUE, "gmameui-emblem-unavailable", _("Available") },
 #. Status-related filters
 #: ../src/filters_list.c:260 ../src/rom_entry.h:94
-#, fuzzy
 msgid "Correct"
-msgstr "正確:"
+msgstr "正確"
 
 #: ../src/filters_list.c:261 ../src/rom_entry.h:97
-#, fuzzy
 msgid "Best Available"
-msgstr "已存在最好的"
+msgstr "最佳遊戲"
 
 #: ../src/filters_list.c:262 ../src/gmameui-rominfo-dlg.c:103
 #: ../src/rom_entry.h:93
 msgid "Incorrect"
-msgstr "錯誤"
+msgstr "不正確"
 
 #. Architecture-related filters
 #: ../src/filters_list.c:265
@@ -265,19 +268,19 @@ msgstr "CPS3"
 
 #: ../src/filters_list.c:269
 msgid "Sega System 16"
-msgstr ""
+msgstr "世嘉 System 16"
 
 #: ../src/filters_list.c:270
 msgid "Sega Model 2"
-msgstr ""
+msgstr "世嘉 Model 2"
 
 #: ../src/filters_list.c:271
 msgid "Namco System 22"
-msgstr ""
+msgstr "拿姆科 System 22"
 
 #: ../src/filters_list.c:272 ../src/gmameui-gamelist-view.c:452
 msgid "BIOS"
-msgstr ""
+msgstr "BIOS"
 
 #. Game Details filters
 #: ../src/filters_list.c:275
@@ -286,12 +289,12 @@ msgstr "原始"
 
 #: ../src/filters_list.c:276
 msgid "Clones"
-msgstr "Clones"
+msgstr "衍生版本"
 
 #: ../src/filters_list.c:277 ../src/gmameui-gamelist-view.c:414
 #: ../data/directories.glade.h:24 ../data/gmameui_prefs.glade.h:16
 msgid "Samples"
-msgstr "樣本"
+msgstr "音效樣本"
 
 #: ../src/filters_list.c:278
 msgid "Stereo"
@@ -314,21 +317,21 @@ msgstr "軌跡球搖桿"
 
 #: ../src/filters_list.c:284
 msgid "Lightgun"
-msgstr ""
+msgstr "光線槍"
 
 #. Imperfect filters
 #: ../src/filters_list.c:287 ../src/gmameui-gamelist-view.c:426
 #: ../data/gmameui_prefs.glade.h:8
 msgid "Driver"
-msgstr "ROM"
+msgstr "驅動程式"
 
 #: ../src/filters_list.c:288
 msgid "Colors"
-msgstr ""
+msgstr "色彩"
 
 #: ../src/filters_list.c:290
 msgid "Graphics"
-msgstr ""
+msgstr "影像"
 
 #. Custom filters
 #: ../src/filters_list.c:293
@@ -340,18 +343,17 @@ msgid "Played"
 msgstr "曾玩過"
 
 #: ../src/game_list.c:342
-#, fuzzy, c-format
+#, c-format
 msgid "Loading gamelist %s"
-msgstr "載入遊戲清單"
+msgstr "載入遊戲清單 %s"
 
 #: ../src/game_list.c:374
-#, fuzzy
 msgid "Game list is corrupted."
-msgstr "遊戲清單字型"
+msgstr "遊戲清單毀損"
 
 #: ../src/game_list.c:386
 msgid "Out of memory while loading gamelist"
-msgstr "在載入遊戲清單時記憶體不足"
+msgstr "載入遊戲清單時記憶體不足"
 
 #: ../src/game_list.c:481
 #, c-format
@@ -361,44 +363,43 @@ msgstr "已載入的 %d roms 共有 %d 家製造商, 總共 %d 年份"
 #: ../src/game_list.c:483
 #, c-format
 msgid "with %d games supporting samples."
-msgstr "有 %d 個遊戲支援樣本s."
+msgstr "有 %d 個遊戲支援音效樣本."
 
 #: ../src/game_list.c:585
-#, fuzzy
 msgid "Saving gamelist."
-msgstr "載入遊戲清單"
+msgstr "正在儲存遊戲清單."
 
 #: ../src/game_list.c:667
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Could not recognise the gamelist version.\n"
 "Do you want to rebuild the gamelist?"
 msgstr ""
-"無法辨識遊戲清單\n"
-"你可能需要重新建立新的遊戲清單."
+"無法辨識遊戲清單版本\n"
+"你可能需要重建新遊戲清單."
 
 #: ../src/game_list.c:672
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Gamelist not available,\n"
 "Do you want to build the gamelist?"
 msgstr ""
 "無法取得遊戲清單,\n"
-"你需要重建一個新的\n"
-"請到選項(O)重建一個遊戲清單"
+"你想要重建一個新的遊戲清單嗎?"
 
 #: ../src/game_list.c:677
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Gamelist was created with an older version of GMAMEUI.\n"
 "The gamelist is not supported.\n"
 "Do you want to rebuild the gamelist?"
 msgstr ""
-"無法辨識遊戲清單\n"
-"你可能需要重新建立新的遊戲清單."
+"此遊戲清單由舊版 GMAMEUI 產生\n"
+"該遊戲清單已不支援\n"
+"你想要重建遊戲清單嗎?"
 
 #: ../src/game_list.c:686
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "The gamelist is from:\n"
 "%s %s\n"
@@ -408,72 +409,68 @@ msgid ""
 msgstr ""
 "這個遊戲清單來自於:\n"
 "%s %s\n"
-"目前的模擬器是:\n"
+"目前的執行檔是:\n"
 "%s %s\n"
-"你可能需要重建遊戲清單"
+"你想要重建遊戲清單嗎?"
 
 #: ../src/game_list.c:706
 msgid "The gamelist needs to be created"
-msgstr ""
+msgstr "需要新建遊戲清單"
 
 #: ../src/game_list.c:709 ../src/gui.c:123
-#, fuzzy
 msgid "Rebuild gamelist"
-msgstr "重建遊戲清單(R)"
+msgstr "重建遊戲清單"
 
 #: ../src/gmameui.c:86
-#, fuzzy
 msgid "Loading gamelist..."
-msgstr "載入遊戲清單"
+msgstr "正在載入遊戲清單..."
 
 #: ../src/gmameui.c:89
 msgid "gamelist not found, need to rebuild one"
-msgstr "沒有找到遊戲清單, 需要重新建立遊戲清單"
+msgstr "未找到遊戲清單, 需要重新建立"
 
 #: ../src/gmameui.c:96
-#, fuzzy
 msgid "Loading game data..."
-msgstr "載入遊戲清單"
+msgstr "正在載入遊戲資料..."
 
 #: ../src/gmameui.c:98
 msgid "games.ini not loaded, using default values"
-msgstr "games.ini未載入, 使用預設值"
+msgstr "games.ini 未載入, 使用預設值"
 
 #: ../src/gmameui.c:103
 msgid "catver not loaded, using default values"
-msgstr "catver未載入, 使用預設值"
+msgstr "分類檔未載入, 使用預設值"
 
 #: ../src/gmameui.c:132
-#, fuzzy
 msgid "No MAME executables were found"
-msgstr "沒有找到xmame執行檔"
+msgstr "未找到 MAME 執行檔"
 
 #: ../src/gmameui.c:134
 msgid "Do you want to locate a MAME executable now?"
-msgstr ""
+msgstr "你想要現在尋找 MAME 執行檔?"
 
 #: ../src/gmameui.c:184
 msgid "Initialising list of possible MAME executable options"
-msgstr ""
+msgstr "正在初始化可能 MAME 執行檔選項"
 
 #: ../src/gmameui.c:187
 msgid "Initialising MAME executables"
-msgstr ""
+msgstr "正在初始化 MAME 執行檔"
 
 #: ../src/gmameui.c:202
 #, c-format
 msgid "Adding executable from preferences file: %s"
-msgstr ""
+msgstr "正新增執行檔... 由設定檔: %s "
 
 #: ../src/gmameui.c:225
 #, c-format
 msgid "Time to initialise: %.02f seconds"
-msgstr ""
+msgstr "初始化所需時間: %.02f 秒"
 
 #: ../src/gmameui.c:235
 #, c-format
 msgid "Time to initialise GMAMEUI: %.02f seconds"
-msgstr ""
+msgstr "初始化 GMAMEUI 所需時間: %.02f 秒"
 
 #: ../src/gmameui.c:249
 #, c-format
@@ -487,28 +484,28 @@ msgstr "沒有找到任何搖桿"
 #: ../src/gmameui.c:475 ../src/gmameui.c:483
 #, c-format
 msgid "Loading %s:"
-msgstr "正在載入 %s"
+msgstr "正在載入 %s:"
 
 #: ../src/gmameui.c:573
 #, c-format
 msgid "Error with MAME graphics creation: %s"
-msgstr ""
+msgstr "MAME 開啟影像錯誤: %s"
 
 #: ../src/gmameui.c:596
 msgid "GMAMEUI could not load the ROM"
-msgstr ""
+msgstr "GMAMEUI 無法載入指定 ROM"
 
 #: ../src/gmameui.c:597
 msgid "The following ROMs were not found:\n"
-msgstr ""
+msgstr "找不到以下 ROM:\n"
 
 #: ../src/gmameui.c:599
 msgid "MAME did not start successfully"
-msgstr ""
+msgstr "MAME 啟動失敗"
 
 #: ../src/gmameui.c:600
 msgid "The following errors were reported:\n"
-msgstr ""
+msgstr "以下錯誤被回報:\n"
 
 #: ../src/gmameui.c:789
 #, c-format
@@ -516,7 +513,6 @@ msgid "Could not open '%s' as valid input file"
 msgstr "開啟輸入順序檔 '%s' 錯誤"
 
 #: ../src/gmameui.c:835
-#, fuzzy
 msgid "Exiting GMAMEUI..."
 msgstr "正在離開 GMAMEUI..."
 
@@ -528,34 +524,33 @@ msgstr "正在離開 GMAMEUI..."
 #. FIXME TODO gtk_widget_destroy (MainWindow);
 #: ../src/gmameui.c:874
 msgid "Finished cleaning up GMAMEUI"
-msgstr ""
+msgstr "完成 GMAMEUI 清理"
 
 #: ../src/gmameui-audit-dlg.c:223 ../data/audit_window.glade.h:5
 msgid "Auditing MAME ROMs"
-msgstr ""
+msgstr "正在稽核 MAME ROM"
 
 #: ../src/gmameui-audit-dlg.c:276 ../data/audit_window.glade.h:6
 msgid "Auditing ROMs"
-msgstr ""
+msgstr "正稽核 ROM"
 
 #: ../src/gmameui-audit-dlg.c:318
 msgid "Audit Stopped"
-msgstr "稽核暫停"
+msgstr "稽核停止"
 
 #: ../src/gmameui-audit-dlg.c:319
-#, fuzzy
 msgid "Stopped"
-msgstr "稽核暫停"
+msgstr "停止"
 
 #: ../src/gmameui-audit-dlg.c:446
 #, c-format
 msgid "Auditing romset %s"
-msgstr ""
+msgstr "正在稽核 romset %s"
 
 #: ../src/gmameui-audit-dlg.c:457
-#, fuzzy, c-format
+#, c-format
 msgid "Auditing sampleset %s"
-msgstr "稽核ROM和樣本"
+msgstr "正在稽核音效樣本 %s"
 
 #: ../src/gmameui-audit-dlg.c:509 ../src/gmameui-audit-dlg.c:512
 msgid "Audit done"
@@ -587,7 +582,7 @@ msgstr "年份"
 
 #: ../src/gmameui-gamelist-view.c:424 ../data/gmameui_prefs.glade.h:6
 msgid "Clone of"
-msgstr "從... clone"
+msgstr "從... 衍生"
 
 #: ../src/gmameui-gamelist-view.c:428
 msgid "Rom of"
@@ -599,17 +594,15 @@ msgstr "驅動程式狀態"
 
 #: ../src/gmameui-gamelist-view.c:434
 msgid "Driver Colors"
-msgstr ""
+msgstr "色彩驅動程式"
 
 #: ../src/gmameui-gamelist-view.c:436
-#, fuzzy
 msgid "Driver Sound"
-msgstr "驅動程式狀態"
+msgstr "音效驅動程式"
 
 #: ../src/gmameui-gamelist-view.c:438
-#, fuzzy
 msgid "Driver Graphics"
-msgstr "驅動程式狀態"
+msgstr "影像驅動程式"
 
 #: ../src/gmameui-gamelist-view.c:440
 msgid "Players"
@@ -650,7 +643,7 @@ msgstr "隱藏 \"%s\" 欄"
 
 #: ../src/gmameui-gamelist-view.c:1483
 msgid "Auditing MAME ROMs..."
-msgstr ""
+msgstr "正在稽核 MAME ROMs"
 
 #: ../src/gmameui-rominfo-dlg.c:68 ../src/gmameui-rominfo-dlg.c:71
 msgid "Can't audit game"
@@ -658,11 +651,11 @@ msgstr "無法稽核遊戲"
 
 #: ../src/gmameui-rominfo-dlg.c:73 ../src/gmameui-rominfo-dlg.c:307
 msgid "None required"
-msgstr "沒有需要的"
+msgstr "缺乏所需的"
 
 #: ../src/gmameui-rominfo-dlg.c:104
 msgid "Passed"
-msgstr "合格"
+msgstr "通過"
 
 #: ../src/gmameui-rominfo-dlg.c:105 ../src/io.c:252 ../src/io.c:255
 #: ../src/rom_entry.c:497 ../src/rom_entry.c:500 ../src/rom_entry.c:578
@@ -675,14 +668,13 @@ msgid "Best available"
 msgstr "已存在最好的"
 
 #: ../src/gmameui-rominfo-dlg.c:108
-#, fuzzy
 msgid "Not available"
-msgstr "使用不可"
+msgstr "不存在"
 
 #: ../src/gmameui-rominfo-dlg.c:276
 #, c-format
 msgid "%i colors"
-msgstr ""
+msgstr "%i 色彩"
 
 #: ../src/gmameui-rominfo-dlg.c:304
 msgid "Checking..."
@@ -690,15 +682,11 @@ msgstr "正在檢查..."
 
 #: ../src/gmameui-search-entry.c:128
 msgid "Clear the search text"
-msgstr ""
+msgstr "清除搜尋"
 
 #: ../src/gui.c:119
-#, fuzzy
 msgid "Do you want to rebuild the gamelist?"
-msgstr ""
-"無法取得遊戲清單,\n"
-"你需要重建一個新的\n"
-"請到選項(O)重建一個遊戲清單"
+msgstr "你想要重建遊戲清單嗎?"
 
 #: ../src/gui.c:121
 msgid ""
@@ -706,32 +694,29 @@ msgid ""
 "have changed. It is recommended that you rebuild the gamelist. Do you want "
 "to rebuild now?"
 msgstr ""
+"已選 MAME 執行檔改變過, 所以支援的 ROM 將會改變. 建議你重建遊戲清單. 你想要現"
+"在重建嗎?"
 
 #: ../src/gui.c:129
-#, fuzzy
 msgid "Executable is not valid MAME executable... skipping"
-msgstr "%s 執行檔不正常"
+msgstr "執行檔不是合法 MAME 執行檔... 跳過"
 
 #: ../src/gui.c:216
-#, fuzzy
 msgid "No executables"
-msgstr "Xmame執行檔"
+msgstr "無執行檔"
 
 #: ../src/gui.c:775
 msgid "Choose inp file to play"
-msgstr "選擇要播放的inp檔案"
+msgstr "選擇要播放的 inp 檔案"
 
 #: ../src/gui.c:804
-#, fuzzy
 msgid "File exists"
-msgstr "目錄清單(E)"
+msgstr "檔案已存在"
 
 #: ../src/gui.c:806
-#, fuzzy, c-format
+#, c-format
 msgid "A file named '%s' already exists. Do you want to overwrite it?"
-msgstr ""
-"有個叫做 '%s' 的檔案已經存在\n"
-"你確定要複寫它嗎?"
+msgstr "'%s' 的檔案已存在. 你確定要覆蓋它嗎?"
 
 #. Toplevel
 #: ../src/gui.h:55
@@ -743,37 +728,34 @@ msgid "_View"
 msgstr "檢視(V)"
 
 #: ../src/gui.h:57
-#, fuzzy
 msgid "_Options"
 msgstr "選項(O)"
 
 #: ../src/gui.h:58
 msgid "_Help"
-msgstr "求救(H)"
+msgstr "幫助(H)"
 
 #. File menu
 #: ../src/gui.h:61
 msgid "_Select Random Game"
-msgstr "隨意選擇遊戲(S)"
+msgstr "隨機選擇遊戲(S)"
 
 #: ../src/gui.h:62 ../src/gui.h:89
 msgid "Play currently selected game"
 msgstr "執行目前選擇的遊戲"
 
 #: ../src/gui.h:63
-#, fuzzy
 msgid "_Quit"
-msgstr "清單(L)"
+msgstr "離開(Q)"
 
 #: ../src/gui.h:64
 msgid "Quit GMAMEUI"
-msgstr ""
+msgstr "離開 GMAMEUI"
 
 #. View menu
 #: ../src/gui.h:67
-#, fuzzy
 msgid "Refresh"
-msgstr "重新整理(R)"
+msgstr "重新整理"
 
 #: ../src/gui.h:68
 msgid "Refresh game list"
@@ -786,43 +768,41 @@ msgstr "目錄設定...(D)"
 
 #: ../src/gui.h:72
 msgid "Set directory configuration"
-msgstr "設定遊戲的路徑設定"
+msgstr "設定路徑設定"
 
 #: ../src/gui.h:73
 msgid "_GMAMEUI Preferences..."
-msgstr ""
+msgstr "GMAMEUI 偏好設定(G)"
 
 #: ../src/gui.h:74
 msgid "Set GMAMEUI preferences"
-msgstr ""
+msgstr "設定 GMAMEUI 偏好設定"
 
 #. Help menu
 #: ../src/gui.h:77
-#, fuzzy
 msgid "_Contents"
-msgstr "Clones"
+msgstr "內容(C)"
 
 #: ../src/gui.h:78
 msgid "Open the GMAMEUI manual"
-msgstr ""
+msgstr "開啟 GMAMEUI 手冊"
 
 #: ../src/gui.h:80
-#, fuzzy
 msgid "About this application"
-msgstr "離開應用程式"
+msgstr "關於此程式"
 
 #. File menu
 #: ../src/gui.h:88
 msgid "Play"
-msgstr "執行遊戲"
+msgstr "遊玩"
 
 #: ../src/gui.h:90
 msgid "Play and Record Input..."
-msgstr "執行遊戲並紀錄"
+msgstr "遊玩並紀錄..."
 
 #: ../src/gui.h:91
 msgid "Record a game for later playback"
-msgstr "紀錄遊戲進行過程以便之後播放"
+msgstr "紀錄遊戲輸入以便之後播放"
 
 #: ../src/gui.h:92
 msgid "Playback Input..."
@@ -830,31 +810,27 @@ msgstr "播放紀錄檔..."
 
 #: ../src/gui.h:93
 msgid "Playback a recorded game"
-msgstr "播放一個已經紀錄下來的遊戲"
+msgstr "播放一個已紀錄遊戲"
 
 #: ../src/gui.h:94
-#, fuzzy
 msgid "Options"
-msgstr "選項(O)"
+msgstr "選項"
 
 #: ../src/gui.h:95
-#, fuzzy
 msgid "Change the options of the selected game"
-msgstr "顯示選擇遊戲的偏好設定"
+msgstr "修改選擇遊戲的偏好設定"
 
 #: ../src/gui.h:101
 msgid "_Audit All Games"
-msgstr "稽核所有的遊戲(A)"
+msgstr "稽核所有遊戲(A)"
 
 #: ../src/gui.h:102
-#, fuzzy
 msgid "Audit ROM and sample sets"
-msgstr "稽核ROM和樣本"
+msgstr "稽核 ROM 和音效樣本"
 
 #. DELETE	{ "OptionRebuildGameList", NULL, N_("_Rebuild Game List"), NULL,
 #. N_("Rebuild the game list from executable information"), G_CALLBACK (on_rebuild_game_list_menu_activate) },
 #: ../src/gui.h:105
-#, fuzzy
 msgid "Default _Options..."
 msgstr "預設設定...(O)"
 
@@ -868,23 +844,23 @@ msgstr "設定"
 
 #: ../src/gui.h:113
 msgid "Display the properties of the selected game"
-msgstr "顯示選擇遊戲的偏好設定"
+msgstr "顯示已選遊戲設定"
 
 #: ../src/gui.h:118
 msgid "Add to 'Favorites'"
-msgstr "增加到'我的最愛'"
+msgstr "加到 '我的最愛'"
 
 #: ../src/gui.h:119
 msgid "Add this game to your 'Favorites' game folder"
-msgstr "將這個遊戲增加到'我的最愛'目錄"
+msgstr "將這個遊戲增加到 '我的最愛' 目錄"
 
 #: ../src/gui.h:120
 msgid "Remove from 'Favorites'"
-msgstr "從'我的最愛'中移除"
+msgstr "從 '我的最愛' 中移除"
 
 #: ../src/gui.h:121
 msgid "Remove this game from your 'Favorites' game folder"
-msgstr "從'我的最愛'目錄中移除"
+msgstr "從 '我的最愛' 目錄中移除"
 
 #: ../src/gui.h:126
 msgid "_Toolbar"
@@ -892,7 +868,7 @@ msgstr "工具列(T)"
 
 #: ../src/gui.h:127
 msgid "Show or hide the toolbar"
-msgstr "顯示或是隱藏工具列"
+msgstr "顯示或隱藏工具列"
 
 #: ../src/gui.h:129
 msgid "_Status Bar"
@@ -900,7 +876,7 @@ msgstr "狀態列(S)"
 
 #: ../src/gui.h:130
 msgid "Show or hide the status bar"
-msgstr "顯示或是隱藏狀態列"
+msgstr "顯示或隱藏狀態列"
 
 #: ../src/gui.h:132
 msgid "Fold_er List"
@@ -908,7 +884,7 @@ msgstr "目錄清單(E)"
 
 #: ../src/gui.h:133
 msgid "Show or hide the folder list"
-msgstr "顯示或是隱藏目錄清單"
+msgstr "顯示或隱藏目錄清單"
 
 #: ../src/gui.h:135
 msgid "Scree_nshot Panel"
@@ -916,14 +892,13 @@ msgstr "螢幕快照面板(N)"
 
 #: ../src/gui.h:136
 msgid "Show or hide the screenshot panel"
-msgstr "顯示或是隱藏螢幕快照面板"
+msgstr "顯示或隱藏螢幕快照面板"
 
 #: ../src/gui.h:139
 msgid "_Details"
 msgstr "詳細資料(D)"
 
 #: ../src/gui.h:140
-#, fuzzy
 msgid "Displays detailed information about each item"
 msgstr "在視窗內顯示每個項目的詳細資料"
 
@@ -934,40 +909,37 @@ msgstr "隱藏欄位"
 #: ../src/gui_prefs.c:1041
 #, c-format
 msgid "Retrieving default boolean value for %s: %i"
-msgstr ""
+msgstr "正在下載預設是否值 %s: %i"
 
 #: ../src/gui_prefs.c:1070
 #, c-format
 msgid "Retrieving default integer value for %s: %i"
-msgstr ""
+msgstr "正在下載整數值 %s: %i"
 
 #: ../src/gui_prefs.c:1099 ../src/mame_options_legacy.c:638
 #, c-format
 msgid "Retrieving default string value for %s: %s"
-msgstr ""
+msgstr "正在下載字串值 %s: %s"
 
 #: ../src/gui_prefs_dialog.c:243 ../data/gmameui_prefs.glade.h:10
 msgid "GMAMEUI Preferences"
-msgstr ""
+msgstr "GMAMEUI 偏好設定"
 
 #: ../src/interface.c:275
 msgid "GMAMEUI Arcade Machine Emulator"
-msgstr ""
+msgstr "GMAMEUI 大型電玩模擬器"
 
 #: ../src/interface.h:61
-#, fuzzy
 msgid "Play Game"
-msgstr "曾玩過"
+msgstr "遊玩"
 
 #: ../src/interface.h:62
-#, fuzzy
 msgid "Show Folders"
-msgstr "顯示過濾器"
+msgstr "顯示目錄"
 
 #: ../src/interface.h:63
-#, fuzzy
 msgid "Show Sidebar"
-msgstr "顯示過濾器"
+msgstr "顯示側欄"
 
 #: ../src/interface.h:65 ../data/audit_window.glade.h:10
 #: ../data/rom_info.glade.h:8
@@ -976,44 +948,43 @@ msgstr "詳細資訊"
 
 #: ../src/io.c:392
 msgid "Performing quick check, please wait:"
-msgstr "正在進行快速檢查, 請稍後."
+msgstr "正在進行快速檢查, 請稍候:"
 
 #: ../src/keyboard.c:79
 msgid "French Layout"
-msgstr "法國排列"
+msgstr "法式排列"
 
 #: ../src/keyboard.c:80
 msgid "German Layout"
-msgstr "德國排列"
+msgstr "德式排列"
 
 #: ../src/mame-exec.c:1200
 #, c-format
 msgid "Getting list of valid MAME options using parameter %s"
-msgstr ""
+msgstr "正在於參數 %s 取得合法 MAME 選項"
 
 #. Note: Newer versions of MAME do not report the type
 #: ../src/mame-exec.c:1219
 #, c-format
 msgid "Found option: %s %s%s (%s)"
-msgstr ""
+msgstr "找到選項: %s %s%s (%s)"
 
 #: ../src/mame-exec.c:1224
 #, c-format
 msgid "Description: \"%s\""
-msgstr ""
+msgstr "說明: \"%s\""
 
 #: ../src/mame-exec.c:1228
 msgid "Possible values: "
-msgstr ""
+msgstr "可設定值: "
 
 #: ../src/mameio.c:567 ../src/mameio.c:730
 msgid "Creating game list..."
 msgstr "正在建立遊戲清單..."
 
 #: ../src/mameio.c:568
-#, fuzzy
 msgid "Creating game list, please wait"
-msgstr "正在建立遊戲清單, 請稍後."
+msgstr "正在建立遊戲清單, 請稍候."
 
 #: ../src/mameio.c:602 ../src/mameio.c:758
 #, c-format
@@ -1022,78 +993,74 @@ msgstr "正在建立遊戲清單 (%d 個遊戲)..."
 
 #: ../src/mameio.c:733
 msgid "receiving data, please wait"
-msgstr "正在取得資料, 請稍後."
+msgstr "正在取得資料, 請稍候."
 
 #: ../src/mameio.c:756
 msgid "creating game list, Please wait:"
-msgstr "正在建立遊戲清單, 請稍後."
+msgstr "正在建立遊戲清單, 請稍候:"
 
 #: ../src/mameio.c:1025
 msgid "xmame not found"
-msgstr "沒有找到xmame:"
+msgstr "未找到 xmame"
 
 #: ../src/mameio.c:1044
 msgid "I don't know how to generate a gamelist for this version of MAME!"
-msgstr ""
+msgstr "我不知道要怎麼樣用此版本 MAME 生成遊戲清單!"
 
 #. Check that the selected version of MAME supports this option
 #: ../src/mame_options.c:237
 #, c-format
 msgid "Checking that MAME supports the option %s..."
-msgstr ""
+msgstr "正在檢查 MAME 支援選項 %s..."
 
 #: ../src/mame_options.c:239
-#, fuzzy
 msgid "...it does"
-msgstr "稽核完成"
+msgstr "... 可以"
 
 #: ../src/mame_options.c:243
 #, c-format
 msgid "Error retrieving options value for key %s in category %s: %s"
-msgstr ""
+msgstr "下載選項鍵值 %s 於類別 %s: %s"
 
 #: ../src/mame_options.c:284
 msgid "...it doesn't"
-msgstr ""
+msgstr "...不可"
 
 #: ../src/mame_options.c:1247 ../src/mame_options_legacy_dialog.c:600
 #, c-format
 msgid "The option %s is not supported by MAME %s"
-msgstr ""
+msgstr "此選項 %s 不被 MAME %s 支援"
 
 #: ../src/mame_options_dialog.c:225
-#, fuzzy
 msgid "MAME Options"
-msgstr "SVGA選項"
+msgstr "MAME 選項"
 
 #: ../src/mame_options_legacy.c:714
 #, c-format
 msgid "Retrieving default int value for %s: %d"
-msgstr ""
+msgstr "正在為 %s: %d 下載預設 int 值"
 
 #: ../src/mame_options_legacy.c:752
 #, c-format
 msgid "Retrieving default double value for %s: %.2f"
-msgstr ""
+msgstr "正在下載雙倍值 %s: %.2f"
 
 #: ../src/mame_options_legacy.c:790
 #, c-format
 msgid "Retrieving default boolean value for %s: %d"
-msgstr ""
+msgstr "正在下載是否值 %s: %d"
 
 #: ../src/mame_options_legacy_dialog.c:848
 msgid "MAME Legacy Options"
-msgstr ""
+msgstr "MAME 傳統選項"
 
 #: ../src/progression_window.c:75
-#, fuzzy
 msgid "Progress Window"
 msgstr "進度視窗"
 
 #: ../src/progression_window.c:88
-#, fuzzy
 msgid "Loading Game..."
-msgstr "載入遊戲清單"
+msgstr "正在載入遊戲..."
 
 #: ../src/progression_window.c:100
 msgid "rom"
@@ -1101,49 +1068,45 @@ msgstr "rom"
 
 #: ../src/rom_entry.c:1067
 msgid " (sound)"
-msgstr "(音效)"
+msgstr " (音效)"
 
 #: ../src/rom_entry.h:96
 msgid "Problems"
-msgstr ""
+msgstr "問題"
 
 #: ../src/rom_entry.h:98
 msgid "Not Available"
-msgstr "使用不可"
+msgstr "不可使用"
 
 #: ../src/rom_entry.h:99
-#, fuzzy
 msgid "Not a valid set"
-msgstr "使用不可"
+msgstr "不是有效組"
 
 #: ../src/gmameui-zip-utils.c:45
 msgid "Loaded pixbuf"
-msgstr ""
+msgstr "已載入 pixbuf"
 
 #: ../data/audit_window.glade.h:1
 msgid "0"
-msgstr ""
+msgstr "0"
 
 #: ../data/audit_window.glade.h:2
-#, fuzzy
 msgid "<b>Details</b>"
-msgstr "詳細資訊"
+msgstr "<b>詳細資訊</b>"
 
 #: ../data/audit_window.glade.h:3
 msgid "<b>ROMs</b>"
-msgstr ""
+msgstr "<b>ROM</b>"
 
 #: ../data/audit_window.glade.h:4
-#, fuzzy
 msgid "<b>Samples</b>"
-msgstr "樣本"
+msgstr "<b>音效樣本</b>"
 
 #: ../data/audit_window.glade.h:7
 msgid "Best available:"
 msgstr "檔案存在中最好的:"
 
 #: ../data/audit_window.glade.h:8
-#, fuzzy
 msgid "Checking Games"
 msgstr "檢查遊戲中"
 
@@ -1155,7 +1118,7 @@ msgstr "正確:"
 msgid ""
 "GMAMEUI is now auditing the ROMs in the specified ROM paths. This may take "
 "some time."
-msgstr ""
+msgstr "GMAMEUI 正在 ROM 目錄中稽核 ROM. 這需要一些時間"
 
 #: ../data/audit_window.glade.h:12
 msgid "Incorrect:"
@@ -1163,7 +1126,7 @@ msgstr "錯誤:"
 
 #: ../data/audit_window.glade.h:13
 msgid "Not found:"
-msgstr "沒有找到:"
+msgstr "未找到:"
 
 #: ../data/audit_window.glade.h:14
 msgid "Total:"
@@ -1171,211 +1134,180 @@ msgstr "總共:"
 
 #: ../data/audit_window.glade.h:15 ../data/gmameui_prefs.glade.h:22
 #: ../data/rom_info.glade.h:15
-#, fuzzy
 msgid "gtk-close"
-msgstr "逆時針"
+msgstr "gtk-close"
 
 #: ../data/audit_window.glade.h:16
 msgid "gtk-stop"
-msgstr ""
+msgstr "gtk-stop"
 
 #: ../data/directories.glade.h:1
 msgid " "
-msgstr ""
+msgstr " "
 
 #: ../data/directories.glade.h:2
-#, fuzzy
 msgid "<b>MAME Executables</b>"
-msgstr "可執行檔"
+msgstr "<b>MAME 執行檔</b>"
 
 #: ../data/directories.glade.h:3
 msgid "<b>MAME Paths</b>"
-msgstr ""
+msgstr "<b>MAME 路徑</b>"
 
 #: ../data/directories.glade.h:4
 msgid "<b>MAME Support Files</b>"
-msgstr ""
+msgstr "<b>MAME 支援檔案</b>"
 
 #: ../data/directories.glade.h:5
-#, fuzzy
 msgid "Artwork:"
-msgstr "Artwork其他"
+msgstr "遊戲裝飾:"
 
 #: ../data/directories.glade.h:6
 msgid "Browse..."
 msgstr "瀏覽..."
 
 #: ../data/directories.glade.h:7
-#, fuzzy
 msgid "Cabinets:"
-msgstr "外觀路徑"
+msgstr "筐體:"
 
 #: ../data/directories.glade.h:8
-#, fuzzy
 msgid "Catver file:"
-msgstr "作弊檔案"
+msgstr "分類檔案"
 
 #: ../data/directories.glade.h:9
-#, fuzzy
 msgid "Cheat file:"
-msgstr "作弊檔案"
+msgstr "作弊檔案:"
 
 #: ../data/directories.glade.h:10
-#, fuzzy
 msgid "Control panels:"
-msgstr "控制器面板"
+msgstr "控制器面板:"
 
 #: ../data/directories.glade.h:11
-#, fuzzy
 msgid "Controller directory:"
-msgstr "控制器目錄"
+msgstr "控制器目錄:"
 
 #: ../data/directories.glade.h:13
-#, fuzzy
 msgid "Flyers:"
-msgstr "海報"
+msgstr "海報:"
 
 #: ../data/directories.glade.h:14
-#, fuzzy
 msgid "High score file:"
-msgstr "最高分記錄檔案"
+msgstr "最高分記錄檔案:"
 
 #: ../data/directories.glade.h:15
-#, fuzzy
 msgid "History file:"
-msgstr "歷史記錄檔案"
+msgstr "歷史記錄檔案:"
 
 #: ../data/directories.glade.h:16
-#, fuzzy
 msgid "Icons directory:"
-msgstr "控制器目錄"
+msgstr "圖標目錄:"
 
 #: ../data/directories.glade.h:17
 msgid "MAME Main Paths"
-msgstr ""
+msgstr "MAME 主路徑"
 
 #: ../data/directories.glade.h:18
 msgid "MAME Paths"
-msgstr ""
+msgstr "MAME 路徑"
 
 #: ../data/directories.glade.h:19
 msgid "MAME Support Files"
-msgstr ""
+msgstr "MAME 支援檔案"
 
 #: ../data/directories.glade.h:20
-#, fuzzy
 msgid "MAME executables"
-msgstr "可執行檔"
+msgstr "MAME 執行檔"
 
 #: ../data/directories.glade.h:21
-#, fuzzy
 msgid "MAME info file:"
-msgstr "Mame資訊檔案"
+msgstr "MAME 資訊檔案:"
 
 #: ../data/directories.glade.h:22
-#, fuzzy
 msgid "Marquees:"
-msgstr "Marquee"
+msgstr "橫幅:"
 
 #: ../data/directories.glade.h:25
-#, fuzzy
 msgid "Snapshots:"
-msgstr "螢幕快照路徑"
+msgstr "截圖:"
 
 #: ../data/directories.glade.h:26
-#, fuzzy
 msgid "Title screenshots:"
-msgstr "Title快照路徑"
+msgstr "主畫面:"
 
 #: ../data/directories.glade.h:27
 msgid "gtk-add"
-msgstr ""
+msgstr "gtk-add"
 
 #: ../data/directories.glade.h:28
-#, fuzzy
 msgid "gtk-cancel"
-msgstr "取消"
+msgstr "gtk-cancel"
 
 #: ../data/directories.glade.h:29
 msgid "gtk-ok"
-msgstr ""
+msgstr "gtk-ok"
 
 #: ../data/directories.glade.h:30
-#, fuzzy
 msgid "gtk-remove"
-msgstr "移除"
+msgstr "gtk-remove"
 
 #: ../data/filter_bar.glade.h:2
-#, fuzzy
 msgid "Available ROMs"
 msgstr "ROM存在"
 
 #: ../data/filter_bar.glade.h:3
-#, fuzzy
 msgid "Unavailable ROMs"
 msgstr "ROM不存在"
 
 #: ../data/gmameui_prefs.glade.h:1
-#, fuzzy
 msgid "'The' as a prefix"
-msgstr "The Prefix(P)"
+msgstr "'The' 作為前置值"
 
 #: ../data/gmameui_prefs.glade.h:2
-#, fuzzy
 msgid "<b>Startup Options</b>"
-msgstr "啟動設定"
+msgstr "<b>啟動設定</b>"
 
 #: ../data/gmameui_prefs.glade.h:3
 msgid "<b>User Interface Options</b>"
-msgstr ""
+msgstr "<b>使用者介面選項</b>"
 
 #: ../data/gmameui_prefs.glade.h:4
-#, fuzzy
 msgid "Allow game selection with a joystick"
-msgstr "允許使用搖桿選擇遊戲(J)"
+msgstr "允許搖桿選擇遊戲"
 
 #: ../data/gmameui_prefs.glade.h:9
-#, fuzzy
 msgid "Enable version mismatch warning"
-msgstr "啟用版本不相容警告(E)"
+msgstr "啟用版本不合警告"
 
 #: ../data/gmameui_prefs.glade.h:11
-#, fuzzy
 msgid "Game Name"
-msgstr "遊戲"
+msgstr "遊戲名稱"
 
 #: ../data/gmameui_prefs.glade.h:12
-#, fuzzy
 msgid "Joystick device:"
-msgstr "搖桿裝置 :"
+msgstr "搖桿裝置:"
 
 #: ../data/gmameui_prefs.glade.h:14
-#, fuzzy
 msgid "Playcount"
-msgstr "執行遊戲"
+msgstr "遊玩次數"
 
 #: ../data/gmameui_prefs.glade.h:15
 msgid "Prefer custom icons over status icons"
-msgstr ""
+msgstr "偏好客製而非狀態圖標"
 
 #: ../data/gmameui_prefs.glade.h:17
-#, fuzzy
 msgid "Search for new games"
-msgstr "搜尋新遊戲(S)"
+msgstr "搜尋新遊戲"
 
 #: ../data/gmameui_prefs.glade.h:18
-#, fuzzy
 msgid "Use MAME default options"
-msgstr "設定遊戲的預設值"
+msgstr "採用遊戲的預設值"
 
 #: ../data/gmameui_prefs.glade.h:20
-#, fuzzy
 msgid "Visible columns"
-msgstr "可使用的欄"
+msgstr "可見欄"
 
 #: ../data/options.glade.h:1
 msgid "1"
-msgstr ""
+msgstr "1"
 
 #: ../data/options.glade.h:2
 msgid ""
@@ -1384,366 +1316,337 @@ msgid ""
 "22050\n"
 "11025"
 msgstr ""
+"48000\n"
+"44100\n"
+"22050\n"
+"11025"
 
 #: ../data/options.glade.h:6
-#, fuzzy
 msgid "<b>Artwork</b>"
-msgstr "Artwork其他"
+msgstr "<b>遊戲裝飾</b>"
 
 #: ../data/options.glade.h:7
 msgid "<b>Debugging</b>"
-msgstr ""
+msgstr "<b>除錯</b>"
 
 #: ../data/options.glade.h:8
 msgid "<b>Input</b>"
-msgstr ""
+msgstr "<b>輸入</b>"
 
 #: ../data/options.glade.h:9 ../data/options_legacy.glade.h:29
 msgid "<b>Miscellaneous Options</b>"
-msgstr ""
+msgstr "<b>其他選項</b>"
 
 #: ../data/options.glade.h:10 ../data/options_legacy.glade.h:30
 msgid "<b>OpenGL</b>"
-msgstr ""
+msgstr "<b>OpenGL</b>"
 
 #: ../data/options.glade.h:11
 msgid "<b>Performance</b>"
-msgstr ""
+msgstr "<b>效能</b>"
 
 #: ../data/options.glade.h:12 ../data/options_legacy.glade.h:32
-#, fuzzy
 msgid "<b>Rotation</b>"
-msgstr "旋轉"
+msgstr "<b>旋轉</b>"
 
 #: ../data/options.glade.h:13
-#, fuzzy
 msgid "<b>Screen</b>"
-msgstr "全螢幕"
+msgstr "<b>螢幕</b>"
 
 #: ../data/options.glade.h:14
 msgid "<b>Sound</b>"
-msgstr ""
+msgstr "<b>音效</b>"
 
 #: ../data/options.glade.h:15
 msgid "<b>State and Playback Options</b>"
-msgstr ""
+msgstr "<b>狀態及紀錄播放選項</b>"
 
 #: ../data/options.glade.h:16
-#, fuzzy
 msgid "<b>Vector</b>"
-msgstr "向量繪圖"
+msgstr "<b>向量繪圖</b>"
 
 #: ../data/options.glade.h:17
 msgid "<b>Video</b>"
-msgstr ""
+msgstr "<b>影像</b>"
 
 #: ../data/options.glade.h:18
 msgid ""
 "Adjust gameplay speed to keep refresh rate lower than the screen (-"
 "refreshspeed)"
-msgstr ""
+msgstr "調整遊戲速度使更新率低於螢幕更新率 (-refreshspeed)"
 
 #: ../data/options.glade.h:19
 msgid "Allow non-integer stretch factors (-unevenstretch)"
-msgstr ""
+msgstr "允許非整數放大參數 (-unevenstretch)"
 
 #: ../data/options.glade.h:20
 msgid "Allow uneven stretching"
-msgstr ""
+msgstr "允許非整數放大"
 
 #: ../data/options.glade.h:21
-#, fuzzy
 msgid "Antialias"
 msgstr "反鋸齒"
 
 #: ../data/options.glade.h:22 ../data/options_legacy.glade.h:37
-#, fuzzy
 msgid "Artwork"
-msgstr "Artwork其他"
+msgstr "遊戲裝飾"
 
 #: ../data/options.glade.h:23
-#, fuzzy
 msgid "Audio latency"
-msgstr "音效裝置 : "
+msgstr "音效延遲"
 
 #: ../data/options.glade.h:24
-#, fuzzy
 msgid "Automatic Rotation"
-msgstr "自動"
+msgstr "自動旋轉"
 
 #: ../data/options.glade.h:25
-#, fuzzy
 msgid "Automatic frameskip"
-msgstr "最大畫面跳過數 :"
+msgstr "自動畫面忽略率"
 
 #: ../data/options.glade.h:26
 msgid "Automatically save and load state"
-msgstr ""
+msgstr "自動儲存和載入狀態"
 
 #: ../data/options.glade.h:27
 msgid "Automatically save and load the current state (-autosave)"
-msgstr ""
+msgstr "自動儲存和載入狀態 (-autosave)"
 
 #: ../data/options.glade.h:28
 msgid "Automatically skip frames (-autoframeskip)"
-msgstr ""
+msgstr "自動畫面忽略 (-autoframeskip)"
 
 #: ../data/options.glade.h:29
 msgid "BIOS name"
-msgstr ""
+msgstr "BIOS 名稱"
 
 #: ../data/options.glade.h:30
 msgid "Beam width:"
-msgstr ""
+msgstr "Beam 寬度:"
 
 #: ../data/options.glade.h:31
-#, fuzzy
 msgid "Brightness"
-msgstr "白平衡校正"
+msgstr "亮度"
 
 #: ../data/options.glade.h:32
-#, fuzzy
 msgid "Brightness correction (-brightness)"
-msgstr "白平衡校正"
+msgstr "亮度校正 (-brightness)"
 
 #: ../data/options.glade.h:33
 msgid "Brightness when paused (-pause_brightness)"
-msgstr ""
+msgstr "暫停時亮度 (-pause_brightness)"
 
 #: ../data/options.glade.h:34
 msgid "Centre horizontally (-centerh)"
-msgstr ""
+msgstr "水平置中 (-centerh)"
 
 #: ../data/options.glade.h:35
 msgid "Centre vertically (-centerv)"
-msgstr ""
+msgstr "垂直置中 (-centerv)"
 
 #: ../data/options.glade.h:36
-#, fuzzy
 msgid "Centre:"
-msgstr "X軸中央 : "
+msgstr "中央 : "
 
 #: ../data/options.glade.h:37
 msgid "Constrain to the proper aspect ratio (-keepaspect)"
-msgstr ""
+msgstr "保持正確長寬比例 (-keepaspect)"
 
 #: ../data/options.glade.h:38
-#, fuzzy
 msgid "Contrast"
-msgstr "控制器"
+msgstr "反差"
 
 #: ../data/options.glade.h:39
 msgid "Contrast correction (-contrast)"
-msgstr ""
+msgstr "反差校正 (-contrast)"
 
 #: ../data/options.glade.h:40
 msgid "Control speed of gameplay; lower values are slower (-speed)"
-msgstr ""
+msgstr "控制遊戲速度; 值愈低愈慢 (-speed)"
 
 #: ../data/options.glade.h:41
-#, fuzzy
 msgid "Controller directory"
 msgstr "控制器目錄"
 
 #: ../data/options.glade.h:42
 msgid "Convert lightgun button 2 to offscreen support"
-msgstr ""
+msgstr "將光線槍按鈕 2 改為支援螢幕外射擊"
 
 #: ../data/options.glade.h:43 ../data/options_legacy.glade.h:57
 msgid "Crop artwork"
-msgstr "Crop artwork"
+msgstr "壓縮遊戲裝飾"
 
 #: ../data/options.glade.h:44
 msgid "Crop artwork to game screen size (-artwork_crop)"
-msgstr ""
+msgstr "壓縮遊戲裝飾至遊戲視窗大小 (-artwork_crop)"
 
 #: ../data/options.glade.h:45
 msgid "Debug script:"
-msgstr ""
+msgstr "除錯工序:"
 
 #: ../data/options.glade.h:46
 msgid "Disable OpenGL GL_ARB_texture_rectangle"
-msgstr ""
+msgstr "關閉 OpenGL GL_ARB_texture_rectangle"
 
 #: ../data/options.glade.h:47
 msgid "Disable OpenGL GL_ARB_texture_rectangle (-gl_notexturerect)"
-msgstr ""
+msgstr "關閉 OpenGL GL_ARB_texture_rectangle (-gl_notexturerect)"
 
 #: ../data/options.glade.h:48
 msgid "Display additional diagnostic information (-verbose)"
-msgstr ""
+msgstr "顯示額外診斷資訊 (-verbose)"
 
 #: ../data/options.glade.h:49
-#, fuzzy
 msgid "Effect name:"
-msgstr "效果"
+msgstr "效果名稱:"
 
 #: ../data/options.glade.h:50
 msgid "Enable OpenGL GLSL"
-msgstr ""
+msgstr "啟用 OpenGL GLSL"
 
 #: ../data/options.glade.h:51
 msgid "Enable OpenGL GLSL filtering if available (-gl_glsl)"
-msgstr ""
+msgstr "若 OpenGL GLSL 濾鏡存在則啟用 (-gl_glsl)"
 
 #: ../data/options.glade.h:52
 msgid ""
 "Enable OpenGL GLSL handling of brightness and contrast (-gl_glsl_vid_attr)"
-msgstr ""
+msgstr "啟用 OpenGL GLSL 亮度及反差控制 (-gl_glsl_vid_attr)"
 
 #: ../data/options.glade.h:53
 msgid "Enable OpenGL PBO if available (-gl_pbo)"
-msgstr ""
+msgstr "若 OpenGL PBO 存在則啟用 (-gl_pbo)"
 
 #: ../data/options.glade.h:54
 msgid "Enable OpenGL VBO"
-msgstr ""
+msgstr "啟用 OpenGL VBO"
 
 #: ../data/options.glade.h:55
 msgid "Enable OpenGL VBO if available (-gl_vbo)"
-msgstr ""
+msgstr "若 OpenGL VBO 存在則啟用 (-gl_vbo)"
 
 #: ../data/options.glade.h:56
-#, fuzzy
 msgid "Enable bilinear filtering (-filter)"
-msgstr "雙線性過濾"
+msgstr "啟用雙線性濾鏡 (-filter)"
 
 #: ../data/options.glade.h:57
-#, fuzzy
 msgid "Enable cheat mode"
 msgstr "啟用遊戲作弊檔"
 
 #: ../data/options.glade.h:58
-#, fuzzy
 msgid "Enable cheats in games (-cheat)"
-msgstr "啟用遊戲作弊檔"
+msgstr "啟用遊戲作弊檔 (-cheat)"
 
 #: ../data/options.glade.h:59
 msgid "Enable debugger"
-msgstr ""
+msgstr "啟用除錯器"
 
 #: ../data/options.glade.h:60
 msgid "Enable input from multiple connected devices"
-msgstr ""
+msgstr "啟用多連接輸入裝置"
 
 #: ../data/options.glade.h:61
-#, fuzzy
 msgid "Enable joystick"
-msgstr "類比式搖桿"
+msgstr "啟用搖桿"
 
 #: ../data/options.glade.h:62
-#, fuzzy
 msgid "Enable lightgun"
-msgstr "使用音效"
+msgstr "使用光線槍"
 
 #: ../data/options.glade.h:63
-#, fuzzy
 msgid "Enable logging"
-msgstr "使用音效"
+msgstr "使用紀錄"
 
 #: ../data/options.glade.h:64
-#, fuzzy
 msgid "Enable mouse"
-msgstr "使用音效"
+msgstr "啟用滑鼠"
 
 #: ../data/options.glade.h:65
-#, fuzzy
 msgid "Enable multithreading"
-msgstr "多執行緒"
+msgstr "採用多執行緒"
 
 #: ../data/options.glade.h:66
-#, fuzzy
 msgid "Enable samples"
-msgstr "使用樣本"
+msgstr "啟用音效樣本"
 
 #: ../data/options.glade.h:67
 msgid "Enable samples if available (-samples)"
-msgstr ""
+msgstr "若音效樣本存在則啟用 (-samples)"
 
 #: ../data/options.glade.h:68 ../data/options_legacy.glade.h:84
 msgid "Enable sound"
-msgstr "使用音效"
+msgstr "啟用音效"
 
 #: ../data/options.glade.h:69
-#, fuzzy
 msgid "Enable sound output (-sound)"
-msgstr "一般設定"
+msgstr "啟用音效輸出 (-sound)"
 
 #: ../data/options.glade.h:70 ../data/options_legacy.glade.h:85
 msgid "Enable steadykey support"
-msgstr ""
+msgstr "啟用穩定鍵支援"
 
 #: ../data/options.glade.h:71
 msgid "Enable/disable debugger (-debug)"
-msgstr ""
+msgstr "啟用/關閉除錯器 (-debug)"
 
 #: ../data/options.glade.h:72
-#, fuzzy
 msgid "Filter"
-msgstr "過濾器"
+msgstr "濾鏡"
 
 #: ../data/options.glade.h:73
-#, fuzzy
 msgid "Flicker:"
-msgstr "Flicker"
+msgstr "閃爍"
 
 #: ../data/options.glade.h:74
 msgid "Flip"
-msgstr ""
+msgstr "翻轉"
 
 #: ../data/options.glade.h:75
-#, fuzzy
 msgid "Flip screen left-right (-flipx)"
-msgstr "左右反轉螢幕"
+msgstr "左右反轉螢幕 (-flipx)"
 
 #: ../data/options.glade.h:76
-#, fuzzy
 msgid "Flip screen upside-down (-flipy)"
-msgstr "上下反轉螢幕"
+msgstr "上下反轉螢幕 (-flipy)"
 
 #: ../data/options.glade.h:77
 msgid "Force power of two textures"
-msgstr ""
+msgstr "強迫使用雙材質"
 
 #: ../data/options.glade.h:78
 msgid "Force power of two textures (gl_forcepow2texture)"
-msgstr ""
+msgstr "強迫使用雙材質 (gl_forcepow2texture)"
 
 #: ../data/options.glade.h:79 ../data/options_legacy.glade.h:103
-#, fuzzy
 msgid "Frames to skip:"
-msgstr "要跳過的畫面:"
+msgstr "要忽略的畫面數:"
 
 #: ../data/options.glade.h:80
-#, fuzzy
 msgid "Gamma"
-msgstr "遊戲"
+msgstr "伽瑪"
 
 #: ../data/options.glade.h:81
-#, fuzzy
 msgid "Gamma correction (-gamma)"
-msgstr "Gamma校正"
+msgstr "伽瑪校正"
 
 #: ../data/options.glade.h:82
 msgid "Generate an error.log file (-log)"
-msgstr ""
+msgstr "產生 error.log 檔案 (-log)"
 
 #: ../data/options.glade.h:83
 msgid "Horizontal"
-msgstr ""
+msgstr "水平"
 
 #: ../data/options.glade.h:84
 msgid "If this is selected, MAME will run in a window (-window)"
-msgstr ""
+msgstr "如果選擇此選項, MAME 將會在視窗內顯示 (-window)"
 
 #: ../data/options.glade.h:85
-#, fuzzy
 msgid "Keep aspect ratio"
-msgstr "維持外觀比例 "
+msgstr "維持外觀比例"
 
 #: ../data/options.glade.h:86
 msgid "Keep calling video updates whilst paused (-update_in_pause)"
-msgstr ""
+msgstr "當暫停時持續螢幕更新 (-update_in_pause)"
 
 #: ../data/options.glade.h:87
 msgid "Keyboard"
@@ -1751,25 +1654,25 @@ msgstr "鍵盤"
 
 #: ../data/options.glade.h:88
 msgid "Left-right"
-msgstr ""
+msgstr "左-右"
 
 #: ../data/options.glade.h:89
 msgid "Let OpenGL manage brightness and contrast"
-msgstr ""
+msgstr "讓 OpenGL 管理亮度和反差"
 
 #: ../data/options.glade.h:90
 msgid "Maximize"
-msgstr ""
+msgstr "最大化"
 
 #: ../data/options.glade.h:91
 msgid "Mouse"
-msgstr ""
+msgstr "滑鼠"
 
 #: ../data/options.glade.h:92
 msgid ""
 "Name of a .png file in the Artwork directory to use for scanlines effect (-"
 "effect)"
-msgstr ""
+msgstr "遊戲裝飾目錄作為掃描線效果使用的 .png 檔案 (-effect)"
 
 #: ../data/options.glade.h:93
 msgid ""
@@ -1777,271 +1680,260 @@ msgid ""
 "Bilinear\n"
 "Gaussian blur"
 msgstr ""
+"無濾鏡\n"
+"雙線性濾鏡\n"
+"高斯模糊"
 
 #: ../data/options.glade.h:96
 msgid "Number of screens to create - MAME only supports 1 (-numscreens)"
-msgstr ""
+msgstr "螢幕數量 - MAME 只支援 1 個 (-numscreens)"
 
 #: ../data/options.glade.h:97
-#, fuzzy
 msgid "Number of screens:"
-msgstr "玩家人數 : "
+msgstr "螢幕數 :"
 
 #: ../data/options.glade.h:98
-#, fuzzy
 msgid "Other options"
 msgstr "其他選項"
 
 #: ../data/options.glade.h:99
 msgid "Output error.log data to debugger"
-msgstr ""
+msgstr "輸出 error.log 資料到除錯器"
 
 #: ../data/options.glade.h:100
 msgid "Output error.log data to the system debugger (-oslog)"
-msgstr ""
+msgstr "輸出 error.log 資料到系統除錯器 (-oslog)"
 
 #: ../data/options.glade.h:101
 msgid "Pause Brightness"
-msgstr ""
+msgstr "暫停亮度"
 
 #: ../data/options.glade.h:102
 msgid "Perform rendering and blitting on a separate thread (-multithreading)"
-msgstr ""
+msgstr "在另外的執行緒 render 和 blit (-multithreading)"
 
 #: ../data/options.glade.h:103
 msgid "Prescale"
-msgstr ""
+msgstr "預放大"
 
 #: ../data/options.glade.h:104
 msgid "Record AVI"
-msgstr ""
+msgstr "錄製 AVI"
 
 #: ../data/options.glade.h:105
 msgid "Record MNG"
-msgstr ""
+msgstr "錄製 MNG"
 
 #: ../data/options.glade.h:106
 msgid "Record WAV"
-msgstr ""
+msgstr "錄製 WAV"
 
 #: ../data/options.glade.h:107
 msgid "Records a .avi movie to the Snapshot directory (-recordavi)"
-msgstr ""
+msgstr "錄製 .avi 影片並儲存於 螢幕截圖 目錄 (-recordavi)"
 
 #: ../data/options.glade.h:108
 msgid "Records a .mng movie to the Snapshot directory (-recordmng)"
-msgstr ""
+msgstr "錄製 .mng 影片並儲存於 螢幕截圖 目錄 (-recordmng)"
 
 #: ../data/options.glade.h:109
 msgid "Records a .wav sound file to the Snapshot directory (-recordwav)"
-msgstr ""
+msgstr "錄製 .wav 音樂並儲存於 螢幕截圖 目錄 (-recordwav)"
 
 #: ../data/options.glade.h:110
 msgid "Reduce tearing effects"
-msgstr ""
+msgstr "減少撕裂效果"
 
 #: ../data/options.glade.h:111
-#, fuzzy
 msgid "Refresh speed"
-msgstr "重新整理(R)"
+msgstr "重新整理速率"
 
 #: ../data/options.glade.h:112 ../data/options_legacy.glade.h:135
 msgid "Rotate left"
-msgstr ""
+msgstr "向左旋轉"
 
 #: ../data/options.glade.h:113 ../data/options_legacy.glade.h:136
-#, fuzzy
 msgid "Rotate right"
-msgstr "旋轉"
+msgstr "向右旋轉"
 
 #: ../data/options.glade.h:114
 msgid "Rotate screen anticlockwise 90 degrees (-rol)"
-msgstr ""
+msgstr "逆時針旋轉螢幕 90 度 (-rol)"
 
 #: ../data/options.glade.h:115
 msgid "Rotate screen clockwise 90 degrees (-ror)"
-msgstr ""
+msgstr "順時針旋轉螢幕 90 度 (-ror)"
 
 #: ../data/options.glade.h:116
 msgid "Rotation"
-msgstr "旋轉"
+msgstr "旋轉螢幕"
 
 #: ../data/options.glade.h:117
 msgid "Run in window"
-msgstr ""
+msgstr "在視窗內顯示"
 
 #: ../data/options.glade.h:118
-#, fuzzy
 msgid "Sample rate"
-msgstr "取樣率 : "
+msgstr "取樣率"
 
 #: ../data/options.glade.h:119
 msgid "Scale game graphics before rendering (-prescale)"
-msgstr ""
+msgstr "Render 前放大影像 (-prescale)"
 
 #: ../data/options.glade.h:120
 msgid "Scale mode (-scalemode)"
-msgstr ""
+msgstr "放大模式 (-scalemode)"
 
 #: ../data/options.glade.h:121
-#, fuzzy
 msgid "Screen"
-msgstr "全螢幕"
+msgstr "螢幕"
 
 #: ../data/options.glade.h:122
 msgid "Script for debugger (-debugscript)"
-msgstr ""
+msgstr "除錯器工序 (-debugscript)"
 
 #: ../data/options.glade.h:123
 msgid ""
 "Set audio latency (increase to reduce glitches, decrease for responsiveness "
 "(-audio_latency)"
-msgstr ""
+msgstr "設定音效延遲 (增加可以減少破音, 減少可以加快反應 (-audio_latency)"
 
 #: ../data/options.glade.h:124
 msgid "Set vector beam width (-beam)"
-msgstr ""
+msgstr "設定向量繪圖 beam 寬度 (-beam)"
 
 #: ../data/options.glade.h:125
 msgid "Set vector flicker effect (-flicker)"
-msgstr ""
+msgstr "設定向量繪圖閃爍效果 (-flicker)"
 
 #: ../data/options.glade.h:126
-#, fuzzy
 msgid "Show FPS"
-msgstr "顯示螢幕快照"
+msgstr "顯示 FPS"
 
 #: ../data/options.glade.h:127
 msgid "Show the Frames per Second count (-sdlvideofps)"
-msgstr ""
+msgstr "顯示每秒畫面刷新率 (-sdlvideofps)"
 
 #: ../data/options.glade.h:128
-#, fuzzy
 msgid "Skip gameinfo"
-msgstr "跳過遊戲資訊畫面"
+msgstr "跳過遊戲資訊"
 
 #: ../data/options.glade.h:129
 msgid "Skip the ROM information screen on launch (-skip_gameinfo)"
-msgstr ""
+msgstr "遊玩時跳過 ROM 資訊畫面 (-skip_gameinfo)"
 
 #: ../data/options.glade.h:130
 msgid "Sleep"
-msgstr ""
+msgstr "休眠"
 
 #: ../data/options.glade.h:131
-#, fuzzy
 msgid "Sleeping when idle (-sleep)"
-msgstr "在暫停時睡眠"
+msgstr "在暫停時休眠 (-sleep)"
 
 #: ../data/options.glade.h:132
 msgid ""
 "Software\n"
 "OpenGL"
 msgstr ""
+"軟體繪圖\n"
+"OpenGL"
 
 #: ../data/options.glade.h:134
 msgid "Sound volume in decibels (-volume)"
-msgstr ""
+msgstr "音量分貝 (-volume)"
 
 #: ../data/options.glade.h:135
-#, fuzzy
 msgid "Speed:"
-msgstr "稽核暫停"
+msgstr "速度:"
 
 #: ../data/options.glade.h:136
 msgid "Start in maximized window (-maximize)"
-msgstr ""
+msgstr "啟動時最大化視窗 (-maximize)"
 
 #: ../data/options.glade.h:137 ../data/options_legacy.glade.h:149
 msgid "Throttle"
-msgstr "速度調整(防止老遊戲速度過快)"
+msgstr "速度調整"
 
 #: ../data/options.glade.h:138
 msgid "Throttle game in sync with real time (-throttle)"
-msgstr ""
+msgstr "調整即時遊戲速率 (-throttle)"
 
 #: ../data/options.glade.h:139
 msgid "Up-down"
-msgstr ""
+msgstr "上下"
 
 #: ../data/options.glade.h:140
 msgid "Update in pause"
-msgstr ""
+msgstr "暫停時更新"
 
 #: ../data/options.glade.h:141
 msgid "Use antialias when drawing vectors (-antialias)"
-msgstr ""
+msgstr "繪製向量時啟用反鋸齒 (-antialias)"
 
 #: ../data/options.glade.h:142
-#, fuzzy
 msgid "Use backdrops"
-msgstr "Backdrops"
+msgstr "啟用遊戲背景"
 
 #: ../data/options.glade.h:143
 msgid "Use backdrops if artwork is enabled and available (-use_backdrops)"
-msgstr ""
+msgstr "若啟用遊戲裝飾則啟用遊戲背景 (-use_backdrops)"
 
 #: ../data/options.glade.h:144
-#, fuzzy
 msgid "Use bezels"
-msgstr "Bezels"
+msgstr "啟用裝飾外框"
 
 #: ../data/options.glade.h:145
 msgid "Use bezels if artwork is enabled and available (-use_bezels)"
-msgstr ""
+msgstr "若啟用遊戲裝飾則啟用裝飾外框 (-use_bezels)"
 
 #: ../data/options.glade.h:146
-#, fuzzy
 msgid "Use overlays"
-msgstr "Overlays"
+msgstr "重疊"
 
 #: ../data/options.glade.h:147
 msgid "Use overlays if artwork is enabled and available (-use_overlays)"
-msgstr ""
+msgstr "若啟用由戲裝飾則啟用重疊 (-use_overlays)"
 
 #: ../data/options.glade.h:149
 msgid "Verbose logging"
-msgstr ""
+msgstr "冗長紀錄"
 
 #: ../data/options.glade.h:150
 msgid "Vertical"
-msgstr ""
+msgstr "垂直"
 
 #: ../data/options.glade.h:151
-#, fuzzy
 msgid "Video"
-msgstr "顯示模式"
+msgstr "影像"
 
 #: ../data/options.glade.h:152
-#, fuzzy
 msgid "Video mode:"
-msgstr "顯示模式"
+msgstr "影像模式"
 
 #: ../data/options.glade.h:153 ../data/options_legacy.glade.h:159
 msgid "Volume"
-msgstr ""
+msgstr "音量"
 
 #: ../data/options.glade.h:154
 msgid "Wait for VBLANK before flipping screens factors (-waitvsync)"
-msgstr ""
+msgstr "翻轉螢幕前等待 VBLANK (-waitvsync)"
 
 #: ../data/options.glade.h:155
 msgid ""
 "Whether software (soft) or hardware (OpenGL) acceleration is used (-video)"
-msgstr ""
+msgstr "不管是軟體 (軟體繪圖) 或硬體 (OpenGL), 啟用加速 (-video)"
 
 #: ../data/options.glade.h:156
-#, fuzzy
 msgid "YUV mode:"
-msgstr "YV12模式"
+msgstr "YV12模式:"
 
 #: ../data/options.glade.h:157 ../data/options_legacy.glade.h:161
 msgid "dB"
-msgstr ""
+msgstr "dB"
 
 #: ../data/options.glade.h:158
 msgid "gl_glsl_filter"
-msgstr ""
+msgstr "gl_glsl_filter"
 
 #: ../data/options.glade.h:159
 msgid ""
@@ -2053,6 +1945,13 @@ msgid ""
 "aperture4x6\n"
 "scanlines"
 msgstr ""
+"無\n"
+"aperture1x2rb\n"
+"aperture1x3rb\n"
+"aperture2x4bg\n"
+"aperture2x4rb\n"
+"aperture4x6\n"
+"掃描線"
 
 #: ../data/options.glade.h:166
 msgid ""
@@ -2063,6 +1962,12 @@ msgid ""
 "yv12x2\n"
 "yuy2x2"
 msgstr ""
+"無\n"
+"非同步\n"
+"yv12\n"
+"yuy2\n"
+"yv12x2\n"
+"yuy2x2"
 
 #: ../data/options_legacy.glade.h:1
 msgid ""
@@ -2074,10 +1979,17 @@ msgid ""
 "/dev/audio\n"
 "/dev/null"
 msgstr ""
+"/dev/dsp\n"
+"/dev/dsp0\n"
+"/dev/dsp1\n"
+"/dev/dsp2\n"
+"/dev/dsp3\n"
+"/dev/audio\n"
+"/dev/null"
 
 #: ../data/options_legacy.glade.h:8
 msgid "/dev/mixer"
-msgstr ""
+msgstr "/dev/mixer"
 
 #: ../data/options_legacy.glade.h:9
 msgid ""
@@ -2088,6 +2000,12 @@ msgid ""
 "1280x1024\n"
 "1600x1200"
 msgstr ""
+"320x200\n"
+"640x480\n"
+"800x600\n"
+"1024x768\n"
+"1280x1024\n"
+"1600x1200"
 
 #: ../data/options_legacy.glade.h:15
 msgid ""
@@ -2098,78 +2016,72 @@ msgid ""
 "44100\n"
 "48000"
 msgstr ""
+"8000\n"
+"11025\n"
+"16000\n"
+"22050\n"
+"44100\n"
+"48000"
 
 #: ../data/options_legacy.glade.h:21
-#, fuzzy
 msgid "<b>Artwork options</b>"
-msgstr "Artwork解析度"
+msgstr "<b>遊戲裝飾選項</b>"
 
 #: ../data/options_legacy.glade.h:22
-#, fuzzy
 msgid "<b>Corrections</b>"
-msgstr "校正"
+msgstr "<b>校正</b>"
 
 #: ../data/options_legacy.glade.h:23
 msgid "<b>Digital sound and mixer options</b>"
-msgstr ""
+msgstr "<b>數位音效及混音器選項</b>"
 
 #: ../data/options_legacy.glade.h:24
-#, fuzzy
 msgid "<b>Display options</b>"
-msgstr "SDL"
+msgstr "<b>顯示選項</b>"
 
 #: ../data/options_legacy.glade.h:25
-#, fuzzy
 msgid "<b>Effects</b>"
-msgstr "效果"
+msgstr "<b>效果</b>"
 
 #: ../data/options_legacy.glade.h:26
-#, fuzzy
 msgid "<b>Frame skipping</b>"
-msgstr "Frame skipping"
+msgstr "<b>螢幕忽略率</b>"
 
 #: ../data/options_legacy.glade.h:27
-#, fuzzy
 msgid "<b>General sound options</b>"
-msgstr "一般設定"
+msgstr "<b>一般音效選項</b>"
 
 #: ../data/options_legacy.glade.h:28
-#, fuzzy
 msgid "<b>Joystick</b>"
-msgstr "搖桿"
+msgstr "<b>搖桿</b>"
 
 #: ../data/options_legacy.glade.h:31
-#, fuzzy
 msgid "<b>Resolution</b>"
-msgstr "解析度"
+msgstr "<b>解析度</b>"
 
 #: ../data/options_legacy.glade.h:33
-#, fuzzy
 msgid "<b>Vector options</b>"
-msgstr "網路選項"
+msgstr "<b>向量繪圖選項</b>"
 
 #: ../data/options_legacy.glade.h:34
 msgid "<b>X11-input</b>"
-msgstr ""
+msgstr "<b>X11 輸入</b>"
 
 #: ../data/options_legacy.glade.h:35
-#, fuzzy
 msgid "Always use mouse"
-msgstr "使用滑鼠"
+msgstr "永遠啟用滑鼠"
 
 #: ../data/options_legacy.glade.h:36
 msgid "Analog joystick"
-msgstr "類比式搖桿"
+msgstr "類比搖桿"
 
 #: ../data/options_legacy.glade.h:38
-#, fuzzy
 msgid "Artwork resolution:"
-msgstr "Artwork解析度"
+msgstr "遊戲裝飾解析度"
 
 #: ../data/options_legacy.glade.h:39
-#, fuzzy
 msgid "Audio device:"
-msgstr "音效裝置 : "
+msgstr "音效裝置:"
 
 #: ../data/options_legacy.glade.h:40
 msgid ""
@@ -2179,14 +2091,21 @@ msgid ""
 "16 bits\n"
 "32 bits"
 msgstr ""
+"自動\n"
+"8 位元\n"
+"15 位元\n"
+"16 位元\n"
+"32 位元"
 
 #: ../data/options_legacy.glade.h:45
-#, fuzzy
 msgid ""
 "Auto\n"
 "Standard\n"
 "High"
-msgstr "標準"
+msgstr ""
+"自動\n"
+"標準\n"
+"高"
 
 #: ../data/options_legacy.glade.h:48
 msgid "Autodouble"
@@ -2198,42 +2117,39 @@ msgstr "自動"
 
 #: ../data/options_legacy.glade.h:50
 msgid "Backdrops"
-msgstr "Backdrops"
+msgstr "遊戲背景"
 
 #: ../data/options_legacy.glade.h:51
 msgid "Beam size"
-msgstr "Beam size"
+msgstr "Beam 值"
 
 #: ../data/options_legacy.glade.h:52
 msgid "Beam size for vector games"
-msgstr ""
+msgstr "向量遊戲的 beam 值"
 
 #: ../data/options_legacy.glade.h:53
 msgid "Bezels"
-msgstr "Bezels"
+msgstr "裝飾外框"
 
 #: ../data/options_legacy.glade.h:54
-#, fuzzy
 msgid "Bit per pixels:"
-msgstr "Bit per pixels"
+msgstr "每像素位元數:"
 
 #: ../data/options_legacy.glade.h:55
 msgid "Brightness correction"
-msgstr "白平衡校正"
+msgstr "亮度校正"
 
 #: ../data/options_legacy.glade.h:56
 msgid "Buffer size"
 msgstr "緩衝區容量"
 
 #: ../data/options_legacy.glade.h:58
-#, fuzzy
 msgid "DSP Plugin:"
-msgstr "DSP插件"
+msgstr "DSP 插件:"
 
 #: ../data/options_legacy.glade.h:59
-#, fuzzy
 msgid "Display Options"
-msgstr "SDL"
+msgstr "顯示選項"
 
 #: ../data/options_legacy.glade.h:60
 msgid "Do not apply rotation"
@@ -2241,7 +2157,7 @@ msgstr "不旋轉"
 
 #: ../data/options_legacy.glade.h:61
 msgid "Draw antialiased vectors"
-msgstr "繪出反鋸齒向量"
+msgstr "繪製反鋸齒向量"
 
 #: ../data/options_legacy.glade.h:62
 msgid ""
@@ -2259,52 +2175,59 @@ msgid ""
 "Skip 11 out of 12 frames\n"
 "Skip 12 out of 12 frames"
 msgstr ""
+"繪製每張畫面\n"
+"每 12 張忽略 1 張\n"
+"每 12 張忽略 2 張\n"
+"每 12 張忽略 3 張\n"
+"每 12 張忽略 4 張\n"
+"每 12 張忽略 5 張\n"
+"每 12 張忽略 6 張\n"
+"每 12 張忽略 7 張\n"
+"每 12 張忽略 8 張\n"
+"每 12 張忽略 9 張\n"
+"每 12 張忽略 10 張\n"
+"每 12 張忽略 11 張\n"
+"每 12 張忽略 12 張"
 
 #: ../data/options_legacy.glade.h:75
 msgid "Draw only changes"
-msgstr "只繪出改變"
+msgstr "只繪製改變"
 
 #: ../data/options_legacy.glade.h:76
-#, fuzzy
 msgid "Draw translucent vectors"
-msgstr "繪出tranlucencent向量"
+msgstr "繪製半透明向量"
 
 #: ../data/options_legacy.glade.h:77
-#, fuzzy
 msgid "Effects & Corrections"
-msgstr "校正"
+msgstr "效果及校正"
 
 #: ../data/options_legacy.glade.h:78
-#, fuzzy
 msgid "Enable antialiasing"
-msgstr "反鋸齒"
+msgstr "啟用反鋸齒"
 
 #: ../data/options_legacy.glade.h:79
 msgid "Enable automatic save/restore"
-msgstr ""
+msgstr "啟用自動存檔/讀檔"
 
 #: ../data/options_legacy.glade.h:80
-#, fuzzy
 msgid "Enable bilinear filtering"
-msgstr "雙線性過濾"
+msgstr "啟用雙線性濾鏡"
 
 #: ../data/options_legacy.glade.h:81
-#, fuzzy
 msgid "Enable double buffering"
-msgstr "雙重緩衝區"
+msgstr "啟用雙重緩衝區"
 
 #: ../data/options_legacy.glade.h:82
 msgid "Enable game cheats"
 msgstr "啟用遊戲作弊檔"
 
 #: ../data/options_legacy.glade.h:83
-#, fuzzy
 msgid "Enable mapping of Windows keys"
 msgstr "啟用視窗鍵"
 
 #: ../data/options_legacy.glade.h:86
 msgid "Enable vector antialiasing"
-msgstr ""
+msgstr "啟用向量反鋸齒"
 
 #: ../data/options_legacy.glade.h:87
 msgid ""
@@ -2321,6 +2244,18 @@ msgid ""
 "AES Console (Asia?) Bios\n"
 "Universe Bios v1.2 (hack)"
 msgstr ""
+"歐版, 1 Slot (也有 4 slot 版)\n"
+"歐版, 4 Slot\n"
+"美版, 2 Slot\n"
+"美版, 6 Slot (第 5 版?)\n"
+"亞版 S3 第 6 版\n"
+"日版, 第 6 版對戰 Bios\n"
+"日版, 早期\n"
+"國際 Bios v1.0 (改)\n"
+"國際 Bios v1.1 (改)\n"
+"除錯 (開發) Bios\n"
+"AES Console (亞版?) Bios\n"
+"國際 Bios v1.2 (改)"
 
 #: ../data/options_legacy.glade.h:99
 msgid "Fake sound"
@@ -2328,7 +2263,7 @@ msgstr "模擬音效"
 
 #: ../data/options_legacy.glade.h:100
 msgid "Flicker"
-msgstr "Flicker"
+msgstr "閃爍"
 
 #: ../data/options_legacy.glade.h:101
 msgid "Flip screen left-right"
@@ -2343,58 +2278,52 @@ msgid "Fullscreen"
 msgstr "全螢幕"
 
 #: ../data/options_legacy.glade.h:105
-#, fuzzy
 msgid "GL Texture size"
-msgstr "材質大小"
+msgstr "GL 材質大小"
 
 #: ../data/options_legacy.glade.h:106
 msgid "Gamma correction"
-msgstr "Gamma校正"
+msgstr "伽瑪校正"
 
 #: ../data/options_legacy.glade.h:107
-#, fuzzy
 msgid "Height scale:"
-msgstr "畫面長的倍數"
+msgstr "畫面高度倍數"
 
 #: ../data/options_legacy.glade.h:108
 msgid "Intensity"
-msgstr "Intesity"
+msgstr "密度"
 
 #: ../data/options_legacy.glade.h:109
-#, fuzzy
 msgid "Joystick type:"
-msgstr "搖桿形式 : "
+msgstr "搖桿形式 :"
 
 #: ../data/options_legacy.glade.h:110
 msgid "Log debug info"
 msgstr "記錄除錯資訊"
 
 #: ../data/options_legacy.glade.h:111
-#, fuzzy
 msgid "Max frameskip:"
-msgstr "最大畫面跳過數 :"
+msgstr "最大繪製忽略數:"
 
 #: ../data/options_legacy.glade.h:112
-#, fuzzy
 msgid "Mixer device:"
-msgstr "混音器裝置 : "
+msgstr "混音器裝置:"
 
 #: ../data/options_legacy.glade.h:113
-#, fuzzy
 msgid "Mixer plugin:"
-msgstr "混音器插件"
+msgstr "混音器插件:"
 
 #: ../data/options_legacy.glade.h:114
-#, fuzzy
 msgid "Neo-Geo Bios:"
-msgstr "Neo-Geo Bios :"
+msgstr "Neo-Geo Bios:"
 
 #: ../data/options_legacy.glade.h:115
-#, fuzzy
 msgid ""
 "No joystick\n"
 "SDL joystick"
-msgstr "沒有搖桿"
+msgstr ""
+"無搖桿\n"
+"SDL 搖桿"
 
 #: ../data/options_legacy.glade.h:117
 msgid ""
@@ -2408,10 +2337,19 @@ msgid ""
 "Deluxe Scanlines\n"
 "Black Scanlines"
 msgstr ""
+"無\n"
+"柔化放大效果\n"
+"低品質濾鏡\n"
+"高品質濾鏡\n"
+"具螢幕高度掃描線之 6 點濾鏡\n"
+"亮掃描線\n"
+"RGB 掃描線\n"
+"豪華掃描線\n"
+"黑掃描線"
 
 #: ../data/options_legacy.glade.h:126
 msgid "OSS\n"
-msgstr ""
+msgstr "OSS\n"
 
 #: ../data/options_legacy.glade.h:128
 msgid ""
@@ -2419,81 +2357,77 @@ msgid ""
 "SDL\n"
 "aRTS"
 msgstr ""
+"OSS\n"
+"SDL\n"
+"aRTS"
 
 #: ../data/options_legacy.glade.h:132
 msgid "Overlays"
-msgstr "Overlays"
+msgstr "重疊"
 
 #: ../data/options_legacy.glade.h:133
 msgid "Pause brightness"
-msgstr ""
+msgstr "暫停亮度"
 
 #: ../data/options_legacy.glade.h:134
 msgid "Rapid-fire"
-msgstr "支援連發"
+msgstr "連發"
 
 #: ../data/options_legacy.glade.h:137
-#, fuzzy
 msgid "Sample rate:"
-msgstr "取樣率 : "
+msgstr "取樣率:"
 
 #: ../data/options_legacy.glade.h:138
-#, fuzzy
 msgid "Scale video to height:"
-msgstr "scale video to exactly this height"
+msgstr "放大影像至螢幕高度:"
 
 #: ../data/options_legacy.glade.h:139
 msgid "Select keyboard grabbing"
-msgstr ""
+msgstr "擷取鍵盤"
 
 #: ../data/options_legacy.glade.h:140
 msgid "Select mouse grabbing"
-msgstr ""
+msgstr "擷取滑鼠"
 
 #: ../data/options_legacy.glade.h:141
 msgid "Show cursor"
-msgstr "顯示滑鼠游標"
+msgstr "顯示游標"
 
 #: ../data/options_legacy.glade.h:142
-#, fuzzy
 msgid "Skip disclaimer info"
-msgstr "跳過宣告資訊畫面"
+msgstr "跳過版權宣告"
 
 #: ../data/options_legacy.glade.h:143
-#, fuzzy
 msgid "Skip game info"
-msgstr "跳過遊戲資訊畫面"
+msgstr "跳過遊戲資訊"
 
 #: ../data/options_legacy.glade.h:144
 msgid "Sleep when idle"
-msgstr "在暫停時睡眠"
+msgstr "暫停時休眠"
 
 #: ../data/options_legacy.glade.h:145
-#, fuzzy
 msgid "Sound file name:"
-msgstr "音效檔案名稱 : "
+msgstr "音效檔案名稱:"
 
 #: ../data/options_legacy.glade.h:146
 msgid "Start in cabinet view"
-msgstr ""
+msgstr "以筐體檢視開始"
 
 #: ../data/options_legacy.glade.h:147
 msgid "Stderr logfile"
-msgstr ""
+msgstr "標準錯誤 紀錄檔"
 
 #: ../data/options_legacy.glade.h:148
 msgid "Stdout logfile"
-msgstr ""
+msgstr "標準輸出 紀錄檔"
 
 #: ../data/options_legacy.glade.h:150
-#, fuzzy
 msgid "Timer based audio"
-msgstr "timer based音效"
+msgstr "Timer based 音效"
 
 #: ../data/options_legacy.glade.h:151
-#, fuzzy
 msgid "UGCI (tm) Coin/Play support"
-msgstr "UGCI(tm) 投幣機/遊戲搖桿 支援"
+msgstr "UGCI(tm) 投幣機/搖桿 支援"
 
 #: ../data/options_legacy.glade.h:152
 msgid "USB PS Game Pads"
@@ -2501,103 +2435,91 @@ msgstr "USB PS 搖桿"
 
 #: ../data/options_legacy.glade.h:153
 msgid "Use Scanlines"
-msgstr "使用Scanline(讓遊戲看起來更像大型電玩)"
+msgstr "啟用掃描線"
 
 #: ../data/options_legacy.glade.h:154
-#, fuzzy
 msgid "Use additional game artwork:"
-msgstr "使用額外遊戲artwork"
+msgstr "啟用額外遊戲裝飾"
 
 #: ../data/options_legacy.glade.h:155
 msgid "Use keyboard LEDs as game indicators"
-msgstr "使用鍵盤的LED燈號作為遊戲指示燈號"
+msgstr "啟用鍵盤的 LED 燈號作為遊戲指示燈"
 
 #: ../data/options_legacy.glade.h:156
 msgid "Use samples"
-msgstr "使用樣本"
+msgstr "使用音效樣本"
 
 #: ../data/options_legacy.glade.h:158
-#, fuzzy
 msgid "Vector resolution:"
-msgstr "Artwork解析度"
+msgstr "向量解析度:"
 
 #: ../data/options_legacy.glade.h:160
-#, fuzzy
 msgid "Width scale:"
-msgstr "畫面寬的倍數"
+msgstr "畫面寬倍數:"
 
 #: ../data/options_legacy.glade.h:162
 msgid "frames"
-msgstr "frames"
+msgstr "頁框"
 
 #: ../data/rom_info.glade.h:1
 msgid "<b>About this ROM</b>"
-msgstr ""
+msgstr "<b>關於這個 ROM</b>"
 
 #: ../data/rom_info.glade.h:2
 msgid "<b>Audit Details</b>"
-msgstr ""
+msgstr "<b>稽核詳細資訊</b>"
 
 #: ../data/rom_info.glade.h:3
 msgid "<b>Screen Details</b>"
-msgstr ""
+msgstr "<b>螢幕詳細資訊</b>"
 
 #: ../data/rom_info.glade.h:4
 msgid "<b>Technical Details</b>"
-msgstr ""
+msgstr "<b>技術詳細資訊</b>"
 
 #: ../data/rom_info.glade.h:5
-#, fuzzy
 msgid "CPU:"
 msgstr "CPU:"
 
 #: ../data/rom_info.glade.h:6
-#, fuzzy
 msgid "Clone of:"
-msgstr "從... clone"
+msgstr "從...衍生:"
 
 #: ../data/rom_info.glade.h:7
-#, fuzzy
 msgid "Colors:"
-msgstr "Clones"
+msgstr "色彩:"
 
 #: ../data/rom_info.glade.h:9
-#, fuzzy
 msgid "Manufacturer:"
-msgstr "製造商"
+msgstr "製造商:"
 
 #: ../data/rom_info.glade.h:10
-#, fuzzy
 msgid "Rom check:"
-msgstr "ROM檢查:"
+msgstr "ROM 檢查:"
 
 #: ../data/rom_info.glade.h:11
-#, fuzzy
 msgid "Sample Check:"
-msgstr "樣本檢查:"
+msgstr "音效樣本檢查:"
 
 #: ../data/rom_info.glade.h:12
-#, fuzzy
 msgid "Screen:"
-msgstr "全螢幕"
+msgstr "螢幕:"
 
 #: ../data/rom_info.glade.h:13
 msgid "Sound:"
 msgstr "音效:"
 
 #: ../data/rom_info.glade.h:14
-#, fuzzy
 msgid "Year:"
-msgstr "年份"
+msgstr "年份:"
 
 #: ../data/rom_info.glade.h:16
 msgid "label"
-msgstr ""
+msgstr "標籤"
 
 #: ../data/sidebar.glade.h:1
-#, fuzzy
 msgid "Cabinet"
-msgstr "外觀路徑"
+msgstr "筐體"
 
 #: ../data/sidebar.glade.h:2
 msgid "Control Panel"
@@ -2609,26 +2531,24 @@ msgstr "海報"
 
 #: ../data/sidebar.glade.h:4
 msgid "Marquee"
-msgstr "Marquee"
+msgstr "橫幅"
 
 #: ../data/sidebar.glade.h:5
-#, fuzzy
 msgid "Snapshot"
-msgstr "螢幕快照路徑"
+msgstr "截圖"
 
 #: ../data/sidebar.glade.h:6
 msgid "Title Snapshot"
-msgstr ""
+msgstr "主畫面"
 
 #: ../gmameui.desktop.in.h:1
 msgid "Arcade Machine Emulator Frontend"
-msgstr ""
+msgstr "大型電玩模擬器介面"
 
 #: ../gmameui.desktop.in.h:2
 msgid "GMAMEUI Arcade Machine Emulator Frontend"
-msgstr ""
+msgstr "GMAMEUI 大型電玩模擬器介面"
 
 #: ../gmameui.desktop.in.h:3
-#, fuzzy
 msgid "Play and browse classic arcade games"
-msgstr "播放一個已經紀錄下來的遊戲"
+msgstr "遊玩並瀏覽經典大型電玩遊戲"
