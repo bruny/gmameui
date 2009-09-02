@@ -51,9 +51,10 @@ gmameui-marshaller.c: gmameui-marshallers.list
 	echo "#include \"gmameui-marshaller.h\"" > $@ && \
 	glib-genmarshal --prefix=gmameui_marshaller --body $< >> $@
 
-gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(GNOME_LIBS) $(ARCHIVE_LIBS) $(INTLLIBS) 
+gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(VTE_LIBS) $(GNOME_LIBS) $(ARCHIVE_LIBS) $(INTLLIBS) 
 
-AM_CPPFLAGS = -g -Wall $(GTK_CFLAGS) $(GLADE2_CFLAGS) $(GNOME_CFLAGS) \
+AM_CPPFLAGS = -g -Wall $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
+		$(VTE_CFLAGS) $(GNOME_CFLAGS) \
 		-I$(top_srcdir)/include \
 		-DDATADIR=\""$(datadir)"\" \
 		-DGLADEDIR=\"${datadir}/gmameui/glade/\" \

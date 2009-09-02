@@ -587,13 +587,6 @@ mame_rom_entry_init (MameRomEntry *rom)
 	
 	rom->priv = g_new0 (MameRomEntryPrivate, 1);
 	
-	/* Set the details for the games.ini file 
-	don't keep this within each rom!!
-	pr->priv->filename = g_build_filename (g_get_home_dir (), ".gmameui", "games.ini", NULL);
-
-	pr->priv->rom_ini_file = g_key_file_new ();
-	GError *error = NULL;*/
-	
 /* FIXME TODO
 	 for (i = 0; i < NB_CPU; i++) {
 		rom->priv->cpu_info[i].name = g_strdup ("-");
@@ -1133,5 +1126,26 @@ GtkTreeIter
 mame_rom_entry_get_position (MameRomEntry *rom)
 {
 	return rom->priv->position;
+}
+
+/* Get a list of ROMs sharing the same driver using the -listbrothers option */
+gchar **
+mame_rom_entry_get_brothers (MameRomEntry *rom)
+{
+	/* FIXME TODO */
+	
+	return NULL;
+}
+
+/* Get a list of clones of this ROM using the -listclones option */
+gchar **
+mame_rom_entry_get_clones (MameRomEntry *rom)
+{
+	g_return_val_if_fail (rom != NULL, NULL);
+	
+	if (mame_rom_entry_is_clone (rom))
+		return NULL;
+
+	/* FIXME TODO */
 }
 

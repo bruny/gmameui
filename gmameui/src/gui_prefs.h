@@ -189,6 +189,7 @@ static const directory_config directory_prefs [] = {
 GType mame_gui_prefs_get_type (void);
 MameGuiPrefs* mame_gui_prefs_new (void);
 
+/* FIXME TODO Move to gui_prefs_dialog.c */
 GtkWidget *
 create_gui_prefs_window (void);
 

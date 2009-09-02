@@ -1,3 +1,11 @@
+2009-09-02 22:02 adburton
+
+	* configure.ac, po/POTFILES.in:
+	  data/: Makefile.am, rom_info.builder:
+	  src/: Makefile.am, gmameui-rominfo-dlg.c, gmameui.h, gui_prefs.h,
+	  rom_entry.c, rom_entry.h, xmame_options.c:
+	  Add additional information to ROM info dialog, migrate to GtkBuilder
+
 2009-08-29 19:05 adburton
 
 	* src/directories.c: Overwrite invalid default values with MAME subdirs

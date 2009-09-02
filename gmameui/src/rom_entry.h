@@ -81,13 +81,18 @@ typedef enum {
 	NUM_DRIVER_STATUS
 } DriverStatus;
 
-/*
-gchar *driver_status_str[NUM_DRIVER_STATUS] = {
-	"Good",
-	"Imperfect",
-	"Preliminary",
-	"Unknown"
-};*/
+static const gchar* driver_status_string_value[NUM_DRIVER_STATUS] = {
+	N_("Good"),
+	N_("Imperfect"),
+	N_("Preliminary"),
+	N_("Unknown")
+};
+
+static const gchar* control_type_string_value[NUM_CONTROL_TYPE] = {
+	N_("Joystick"),
+	N_("Trackball"),
+	N_("Lightgun")
+};
 
 static gchar* rom_status_string_value[NUMBER_STATUS] = {
 	N_("Incorrect"),
@@ -216,6 +221,9 @@ GdkPixbuf * mame_rom_entry_get_icon (MameRomEntry *rom);
 GtkTreeIter mame_rom_entry_get_position (MameRomEntry *rom);
 
 gchar **mame_rom_entry_get_manufacturers (MameRomEntry * rom);
+
+gchar **mame_rom_entry_get_brothers (MameRomEntry *rom);
+gchar **mame_rom_entry_get_clones (MameRomEntry *rom);
 
 void mame_rom_entry_add_rom (MameRomEntry *rom);
 void mame_rom_entry_add_sample (MameRomEntry *rom);

@@ -248,6 +248,8 @@ xmame_options_init (void)
 	ADD_OPTION ("keyboard_leds");
 	ADD_OPTION ("linear");
 	ADD_OPTION ("list");
+	ADD_OPTION ("listclones");
+	ADD_OPTION ("listbrothers");
 	ADD_OPTION ("listdetails");
 	ADD_OPTION ("listfull");
 	ADD_OPTION ("listgames");

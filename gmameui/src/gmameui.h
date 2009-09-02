@@ -93,6 +93,16 @@ typedef enum  {
 	NUM_GMAMEUI_PICTURE_TYPES
 } screenshot_type;
 
+static const gchar *
+screenshot_labels [NUM_GMAMEUI_PICTURE_TYPES] = {
+	N_("Snapshot"),
+	N_("Flyer"),
+	N_("Cabinet"),
+	N_("Marquee"),
+	N_("Title"),
+	N_("Control Panel"),
+};
+
 typedef enum  {
 	/* Availability */
 	FILTER_ALL,

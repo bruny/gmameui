@@ -20,10 +20,15 @@ dnl AC_DEFINE(GTK_DISABLE_DEPRECATED,,Do not support deprecated GTK+ widgets)
 dnl AC_DEFINE(GDK_DISABLE_DEPRECATED,,Do not support deprecated GDK widgets) 
 dnl AC_DEFINE(GDK_PIXBUF_DISABLE_DEPRECATED,,Do not support deprecated GDK-pixbuf widgets) 
 
-AM_PATH_GTK_2_0(2.4.0, , AC_MSG_ERROR(Cannot find GTK2))
+dnl Require at least GTK 2.12 for GtkBuilder support
+AM_PATH_GTK_2_0(2.12.0, , AC_MSG_ERROR(Cannot find GTK2))
 
 dnl Check if the version of GTK supports gtk_show_uri for spawning Help
 AM_PATH_GTK_2_0(2.13.4,AC_DEFINE(ENABLE_GTKSHOWURI, 1, Enable gtk_show_uri to spawn Help),AC_MSG_WARN(Version of GTK does not support gtk_show_uri))
+
+PKG_CHECK_MODULES(VTE, vte, [], AC_MSG_ERROR([libvte-dev not found!]))
+AC_SUBST(VTE_CFLAGS)
+AC_SUBST(VTE_LIBS)
 
 PKG_CHECK_MODULES(GLADE2, libglade-2.0, [], AC_MSG_ERROR([*** libglade2 not found!]))
 AC_SUBST(GLADE2_CFLAGS)
