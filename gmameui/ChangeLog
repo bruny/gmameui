@@ -1,3 +1,11 @@
+2009-09-03 21:23 adburton
+
+	* src/: directories.c, gmameui-rominfo-dlg.c, callbacks.c, mame_options.c:
+	  Fix compilation errors, segfaults (SF Bug 2848961)
+	* src/game_list.c: Use locale-sensitive function strtod to compare
+	  against the gamelist while we use a version with a decimal point
+	  (SF Bug 2847787)
+
 2009-09-02 22:02 adburton
 
 	* configure.ac, po/POTFILES.in:

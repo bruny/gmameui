@@ -434,14 +434,18 @@ gboolean mame_gamelist_load (MameGamelist *gl)
 				fclose (gamelist);
 				return FALSE;
 			}
-			if (g_ascii_strtod (tmp_array[2], NULL) < GAMELIST_DEFINED_VERSION)
+			/* While we use a gamelist version number with a decimal
+			   point, we need to use the locale-sensitive strtod,
+			   rather than g_ascii_strtod so that locales using a
+			   comma for the decimal point work correctly */
+			if (strtod (tmp_array[2], NULL) < GAMELIST_DEFINED_VERSION)
 			{
 				gl->priv->version = g_strdup ("too old");
 				g_strfreev (tmp_array);
 				fclose (gamelist);
 				return FALSE;
 			}
-			if (g_ascii_strtod (tmp_array[2], NULL) > GAMELIST_DEFINED_VERSION)
+			if (strtod (tmp_array[2], NULL) > GAMELIST_DEFINED_VERSION)
 			{
 				gl->priv->version = g_strdup ("unknown");
 				g_strfreev (tmp_array);

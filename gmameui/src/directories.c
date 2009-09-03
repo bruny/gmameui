@@ -24,6 +24,7 @@
 #include "common.h"
 
 #include <glade/glade.h>
+#include <gio/gio.h>
 
 #include "gui.h"
 #include "directories.h"

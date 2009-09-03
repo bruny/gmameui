@@ -22,7 +22,10 @@
  */
 
 #include "common.h"
+
 #include <vte/vte.h>
+#include <gio/gio.h>
+
 #include "gmameui-rominfo-dlg.h"
 
 #include <unistd.h>

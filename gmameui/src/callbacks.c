@@ -125,6 +125,7 @@ show_properties_dialog (gchar *rom_name)
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	
 	g_return_if_fail (exec != NULL);
+	g_return_if_fail (rom_name != NULL);
 	
 	/* SDLMAME uses a different set of options to XMAME. If we are running
 	   XMAME, then use the legacy GXMAME method of maintaining the options */

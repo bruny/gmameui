@@ -440,6 +440,8 @@ on_preferences_dialog_destroyed (GtkWidget *preferencess_dialog, MameOptions *pr
 GtkWidget *
 mame_options_get_dialog (MameOptions *pr)
 {
+	g_return_if_fail (pr != NULL);
+	
 	if (pr->priv->prefs_dialog)
 		return pr->priv->prefs_dialog;
 	else
