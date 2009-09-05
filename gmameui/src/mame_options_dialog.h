@@ -1,9 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
- * based on Anjuta code
- * Copyright (C) 2002 Dave Camp
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +30,7 @@ G_BEGIN_DECLS
 #define MAME_OPTIONS_DIALOG_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST((k), MAME_TYPE_OPTIONS_DIALOG, MameOptionsDialogClass))
 #define MAME_IS_OPTIONS_DIALOG(o)       (G_TYPE_CHECK_INSTANCE_TYPE ((o), MAME_TYPE_OPTIONS_DIALOG))
 #define MAME_IS_OPTIONS_DIALOG_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), MAME_TYPE_OPTIONS_DIALOG))
+#define MAME_OPTIONS_DIALOG_GET_CLASS(o)	(G_TYPE_INSTANCE_GET_CLASS ((o), MAME_TYPE_OPTIONS_DIALOG, MameOptionsDialogClass))
 
 typedef struct _MameOptionsDialog        MameOptionsDialog;
 typedef struct _MameOptionsDialogClass   MameOptionsDialogClass;
@@ -50,13 +49,6 @@ struct _MameOptionsDialogClass {
 GType mame_options_dialog_get_type (void);
 
 GtkWidget *mame_options_dialog_new (void);
-
-void
-mame_options_dialog_add_page (MameOptionsDialog *dlg,
-							  const gchar *name,
-							  const gchar *title,
-							  GdkPixbuf *icon,
-							  GtkWidget *page);
 
 G_END_DECLS
 

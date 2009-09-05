@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtkvbox.h>
+#include <glade/glade.h>
 #include <glib-object.h>	/* For GParamSpec */
 
 #include "callbacks.h"

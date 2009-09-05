@@ -2,9 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
- * based on Anjuta code for AnjutaPreferencesDialog object
- * Copyright (C) 2002 Dave Camp
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +20,20 @@
  */
 
 #include "common.h"
+
+#include <string.h>
+#include <stdlib.h>
+#include <glib/gstdio.h>
+
+#include <glade/glade.h>
 #include "mame_options_dialog.h"
+#include "mame_options.h"
 #include "cell-renderer-captioned-image.h"
+#include "gui.h"
 
 struct _MameOptionsDialogPrivate {
+	GladeXML *xml;
+	
 	GtkWidget *treeview;	/* This is for functionality of the sidebar */
 	GtkListStore *store;	/* This is for functionality of the sidebar */
 
@@ -40,35 +48,688 @@ enum {
 	LAST_COL
 };  /* Columns in the liststore */
 
-static void mame_options_dialog_class_init    (MameOptionsDialogClass *class);
-static void mame_options_dialog_init (MameOptionsDialog      *dlg);
+#define MAME_OPTIONS_DIALOG_GET_PRIVATE(o)  (MAME_OPTIONS_DIALOG (o)->priv)
 
-G_DEFINE_TYPE (MameOptionsDialog, mame_options_dialog,
-			   GTK_TYPE_DIALOG)
+#define PREFERENCE_PROPERTY_PREFIX "preferences_"
+
+G_DEFINE_TYPE (MameOptionsDialog, mame_options_dialog, GTK_TYPE_DIALOG)
+
+/* Function prototypes */
+static void
+mame_options_dialog_response             (GtkDialog *dialog, gint response);
+static void
+mame_options_dialog_destroy              (GtkObject *object);
 
 static void
-mame_options_dialog_finalize (GObject *obj)
-{
-	MameOptionsDialog *dlg = MAME_OPTIONS_DIALOG (obj);	
+mame_options_dialog_add_page (MameOptionsDialog *dlg, const gchar *widget_name,
+			      const gchar *title, const gchar *icon_filename);
 
-	if (dlg->priv->store) {
-		g_object_unref (dlg->priv->store);
-		dlg->priv->store = NULL;
+
+/* Functions to split a key and return either the category or the field */
+static gchar *
+get_key_category (gchar *key);
+
+static gchar *
+get_key_field (gchar *key);
+
+static gchar *
+get_scanlines ();
+
+typedef struct {
+	gchar *parent;		/* Widget that, when changed, causes state of dependent widget to change */
+	gchar *dependent;       /* Dependent widget */
+	gchar *relationship;    /* Value that parent needs to be for child to be enabled */
+} WidgetRelationship;
+
+static const WidgetRelationship widget_relationships[] =
+{
+	{ "Video.video", "Video.scalemode", "soft" },
+	{ "Video-autoframeskip", "Video-frameskip", "0" },	
+	{ "Sound.sound", "Sound.samples", "1" },
+	{ "Sound.sound", "Sound.samplerate", "1" },
+	{ "Sound.sound", "Sound.volume", "1" },
+	{ "Sound.sound", "Sound.audio_latency", "1" },
+	{ "Performance.autoframeskip", "Performance.frameskip", "0" },
+	{ "Debugging.log", "Debugging.verbose", "1" },
+	{ "Debugging.debug", "Debugging.debugscript", "1" },
+	{ "Debugging.debug", "Debugging.oslog", "1" },
+};
+
+/* List of functions for handling custom functions. The key is defined in the
+   combo_links struct for the Combo widgets, and is used
+   to determine which function is invoked to populate the widget.
+   Currently this is used to support the -effect property only */
+typedef struct {
+	gchar * (*fn)();	/* The functions will take no parameters, and return a gchar* */
+	const char* key;
+} fnc_lookup;
+
+static fnc_lookup custom_function_lookup_table[] = {
+	{ &get_scanlines, "get_scanlines" },
+};
+
+
+typedef struct {
+	gchar *prop_name;       /* e.g. Video.bpp, must match preferences_Video.bpp from Glade */
+	gchar *recorded_values;	/* Values to record and line up against the Items */
+} _combo_link;
+
+static _combo_link combo_links[] = {
+	{ "Video-video", "soft:opengl" },
+	{ "Video-effect", "function:get_scanlines" },   /* Use custom function */
+	{ "Video-scalemode", "none:async:yv12:yuy2:yv12x2:yuy2x2" },
+	{ "Sound-samplerate", "48000:44100:22050:11025:0" },
+	{ "OpenGL-gl_glsl_filter", "0:1:2" },
+};
+
+static gchar *
+get_key_category (gchar *key)
+{
+	gchar **stv;
+	gchar *category;
+	
+	/* LHS of first "-" is the category */
+	stv = g_strsplit (key, "-", 2);
+	category = g_strdup (stv[0]);
+	g_strfreev (stv);
+	
+	return category;
+}
+
+static gchar *
+get_key_field (gchar *key)
+{
+	gchar **stv;
+	gchar *field;
+	
+	/* RHS of first "-" is the key */
+	stv = g_strsplit (key, "-", 2);
+	field = g_strdup (stv[1]);
+	g_strfreev (stv);
+	
+	return field;
+}
+
+/* Get all the available effect files and add them to a ':'-delimited string
+   suitable for processing in the GtkCombobox. Effect files are .png files
+   in the MAME artwork directory */
+static gchar *
+get_scanlines ()
+{
+	GDir *dir;
+	gchar *artworkdir;
+	const gchar *current_file;
+	gchar *scans;
+	
+	g_object_get (main_gui.gui_prefs, "dir-artwork", &artworkdir, NULL);
+
+	g_return_val_if_fail (artworkdir != NULL, NULL);
+	
+	dir = g_dir_open (artworkdir, 0, NULL); /* FIXME TODO GError handling */
+
+	scans = g_strdup ("none");
+
+	current_file = g_dir_read_name (dir);
+	while (current_file != NULL) {
+
+		/* If file is .png, add to the list */
+		if (g_str_has_suffix (g_utf8_strdown (current_file, -1), ".png")) {
+			gchar **s;
+			s = g_strsplit (current_file, ".", 0);  /* Want the name, but not the suffix */
+			scans = g_strconcat (scans, ":", s[0], NULL);
+			GMAMEUI_DEBUG ("SCANLINES IS NOW %s", scans);
+			g_strfreev (s);
+		}
+		
+		current_file = g_dir_read_name (dir);
 	}
-	
-	g_free (dlg->priv);
-	
-	((GObjectClass *) mame_options_dialog_parent_class)->finalize (obj);
+
+	GMAMEUI_DEBUG ("SCANLINES IS %s", scans);
+	return scans;
+}
+
+/* Boilerplate functions */
+static GObject *
+mame_options_dialog_constructor (GType                  type,
+				guint                  n_construct_properties,
+				GObjectConstructParam *construct_properties)
+{
+	GObject          *obj;
+	MameOptionsDialog *dialog;
+
+	obj = G_OBJECT_CLASS (mame_options_dialog_parent_class)->constructor (type,
+									     n_construct_properties,
+									     construct_properties);
+
+	dialog = MAME_OPTIONS_DIALOG (obj);
+
+	return obj;
 }
 
 static void
 mame_options_dialog_class_init (MameOptionsDialogClass *class)
 {
-	GObjectClass *object_class = G_OBJECT_CLASS (class);
+	GObjectClass *gobject_class = G_OBJECT_CLASS (class);
+	GtkObjectClass *gtkobject_class = GTK_OBJECT_CLASS (class);
+	GtkDialogClass *gtkdialog_class = GTK_DIALOG_CLASS (class);
+	
+	gobject_class->constructor = mame_options_dialog_constructor;
+/*	gobject_class->get_property = mame_options_dialog_get_property;
+	gobject_class->set_property = mame_options_dialog_set_property;*/
 
-	object_class->finalize = mame_options_dialog_finalize;
+	gtkobject_class->destroy = mame_options_dialog_destroy;
+	gtkdialog_class->response = mame_options_dialog_response;
+
+	g_type_class_add_private (class,
+				  sizeof (MameOptionsDialogPrivate));
+
+	/* Signals and properties go here */
 }
 
+static gchar*
+get_property_value_as_string (GtkWidget *widget, gchar *key)
+{
+	gint  int_value;
+	gdouble double_value;
+	gchar* values;
+	gchar *text_value = NULL;
+
+	if (GTK_IS_TOGGLE_BUTTON (widget)) {
+		int_value = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (widget));
+		text_value = g_strdup_printf ("%d", int_value);
+	} else if (GTK_IS_SPIN_BUTTON (widget)) {
+		int_value = gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (widget));
+		text_value = g_strdup_printf ("%d", int_value);
+	} else if (GTK_IS_HSCALE (widget)) {
+		double_value = gtk_range_get_value (GTK_RANGE (widget));
+		text_value = g_strdup_printf ("%.2f", double_value);
+	} else if (GTK_IS_COMBO_BOX (widget)) {
+		/* Note that some options (e.g. effect) that are displayed using
+		   ComboBoxes are string options even though the value sent to MAME
+		   is an integer; MAME accepts the integer in quotes. */
+		gint idx;
+		gchar **values_arr;
+		
+		values = g_object_get_data (G_OBJECT (widget), "untranslated");
+		values_arr = g_strsplit (values, ":", -1);
+		idx = gtk_combo_box_get_active (GTK_COMBO_BOX (widget));
+		if ((idx > -1) && (values_arr[idx] != NULL))
+			text_value = g_strdup (values_arr[idx]);
+	} else
+		GMAMEUI_DEBUG ("get_property_value_as_string: Unsupported widget: %s", key);
+/*	switch (prop->object_type)
+	{
+
+	case GMAMEUI_PROPERTY_OBJECT_TYPE_ENTRY:
+		text_value = gtk_editable_get_chars (GTK_EDITABLE (prop->object), 0, -1);
+		break;
+	case GMAMEUI_PROPERTY_OBJECT_TYPE_TEXT:
+	case GMAMEUI_PROPERTY_OBJECT_TYPE_FOLDER:
+	*case GMAMEUI_PROPERTY_OBJECT_TYPE_FILE:*
+		* Haven't catered for these yet
+		   Folder:
+		    text_value = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (prop->object));
+		   File:
+		    text_value = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (prop->object));
+		*
+		g_assert_not_reached ();
+		break;
+	}*/
+	
+	if (text_value && (strlen (text_value) == 0))
+	{
+		g_free (text_value);
+		text_value = NULL;
+	}
+	return text_value;
+}
+
+static gint
+get_property_value_as_int (GtkWidget *widget, gchar *key)
+{
+	gint  int_value;
+	gchar *text_value;
+	text_value = get_property_value_as_string (widget, key);
+	int_value = atoi (text_value);
+	g_free (text_value);	
+	return int_value;
+}	
+
+static gdouble
+get_property_value_as_double (GtkWidget *widget, gchar *key)
+{
+	gdouble  double_value;
+	gchar *text_value;
+	text_value = get_property_value_as_string (widget, key);
+	double_value = atof (text_value);
+	g_free (text_value);	
+	return double_value;
+}
+
+static void
+update_property_on_change_int (GtkWidget *widget, gpointer user_data)
+{
+	gchar *key;
+	gint val;
+	
+	key = (gchar *) user_data;
+	
+	g_return_if_fail (key != NULL);
+	
+	GMAMEUI_DEBUG ("Callback received on integer widget for %s", key);
+	val = get_property_value_as_int (widget, key);
+	GMAMEUI_DEBUG ("Setting integer value of widget for %s to %d", key, val);
+	mame_options_set_int (main_gui.options, key, val);
+}
+
+static void
+update_property_on_change_str (GtkWidget *widget, gpointer user_data)
+{
+	gchar *key;
+	gchar *val;
+	
+	key = (gchar *) user_data;
+	
+	g_return_if_fail (key != NULL);
+	
+	GMAMEUI_DEBUG ("Callback received on widget for %s", key);
+	val = get_property_value_as_string (widget, key);
+	GMAMEUI_DEBUG ("Setting value of widget for %s to %s", key, val);
+	mame_options_set_string (main_gui.options, key, val);
+}
+
+static void
+update_property_on_change_double (GtkWidget *widget, gpointer user_data)
+{
+	gchar *key;
+	gdouble val;
+	
+	key = (gchar *) user_data;
+	
+	g_return_if_fail (key != NULL);
+	
+	GMAMEUI_DEBUG ("Callback received on widget for %s", key);
+	val = get_property_value_as_double (widget, key);
+
+	if (g_ascii_strcasecmp (key, "Sound-volume") == 0) {
+		/* Volume is an integer value but we are using a GtkHScale which
+		   defaults to using doubles as the value. */
+		GMAMEUI_DEBUG ("Setting value of widget for %s to %.2f", key, val);
+		mame_options_set_int (main_gui.options, key, val);
+	} else {
+		GMAMEUI_DEBUG ("Setting value of widget for %s to %.2f", key, val);
+		mame_options_set_dbl (main_gui.options, key, val);
+	}
+}
+
+static GtkWidget *
+get_widget_with_suffix (GladeXML *gxml, gchar *suffix)
+{
+	GList *widgets;
+	GList *node;
+	
+	g_return_val_if_fail (gxml != NULL, NULL);
+	g_return_val_if_fail (suffix != NULL, NULL);
+	
+	widgets = glade_xml_get_widget_prefix (gxml, PREFERENCE_PROPERTY_PREFIX);
+	node = widgets;
+
+	while (node)
+	{
+		const gchar *name;
+		GtkWidget *widget;
+		
+		widget = node->data;
+		
+		name = glade_get_widget_name (widget);
+
+		if (g_str_has_suffix (name, suffix)) 
+			return widget;
+
+		node = g_list_next (node);
+	}
+
+	return NULL;
+}
+
+/* When a widget changes value, check to see whether there are any dependent
+   widgets that need to have their state set correspondingly */
+static void
+parent_widget_clicked (GtkWidget *widget, gpointer user_data)
+{
+	GtkWidget *child;
+	guint i;
+	
+	MameOptionsDialog *dlg;
+	gchar *key;
+	
+	dlg = MAME_OPTIONS_DIALOG (g_object_get_data (G_OBJECT (widget), "MameOptionsDialog"));
+	key = (gchar *) user_data;
+		
+	/* Process each of the widget relationships for the parent */
+	for (i = 0; i < G_N_ELEMENTS (widget_relationships); i++) {
+
+		if (strcmp (key, widget_relationships[i].parent) == 0) {
+			child = get_widget_with_suffix (dlg->priv->xml, widget_relationships[i].dependent);
+			
+			/* Set the state of the children based on the value of the parent */
+			gchar *parent_val = get_property_value_as_string (widget, key);
+
+			if (strcmp (parent_val, widget_relationships[i].relationship) == 0) {
+				gtk_widget_set_sensitive (child, TRUE);
+				/* FIXME TODO Also turn off the option */
+			} else {
+				gtk_widget_set_sensitive (child, FALSE);
+				/* FIXME TODO Also turn on the option */
+			}
+		}
+	}
+}
+
+static void
+register_callbacks (MameOptionsDialog *dlg, GtkWidget *widget, gchar *key)
+{
+	/* Set the dialog as data against the widget, so the callback can
+	   use the dialog's priv struct, e.g. for the keyfile etc */
+	g_object_set_data (G_OBJECT (widget), "MameOptionsDialog", dlg);
+	
+	GMAMEUI_DEBUG ("Registering callback for widget associated with %s", key);
+
+	if (GTK_IS_TOGGLE_BUTTON (widget)) {
+		g_signal_connect (G_OBJECT(widget), "toggled",
+				  G_CALLBACK (update_property_on_change_int), key);
+		g_signal_connect (G_OBJECT (widget), "toggled",
+				  G_CALLBACK (parent_widget_clicked), key);
+	} else if (GTK_IS_SPIN_BUTTON (widget)) {
+		g_signal_connect (G_OBJECT(widget), "value-changed",
+				  G_CALLBACK (update_property_on_change_int), key);
+	} else if (GTK_IS_HSCALE (widget)) {
+		g_signal_connect (G_OBJECT(widget), "value-changed",
+				  G_CALLBACK (update_property_on_change_double), key);
+	} else if (GTK_IS_COMBO_BOX (widget)) {
+		g_signal_connect (G_OBJECT (widget), "changed",
+				  G_CALLBACK (update_property_on_change_str), key);
+		g_signal_connect (G_OBJECT (widget), "changed",
+				  G_CALLBACK (parent_widget_clicked), key);
+	}
+}
+
+static void
+set_property_value_as_string (GtkWidget *widget, gchar *value)
+{
+	gint  int_value;
+	gdouble double_value;
+	gchar* values;
+	gint i; 
+
+/* FIXME TODO Should use the default value for the parameter, rather than 0 */
+	
+	if (GTK_IS_TOGGLE_BUTTON (widget)) {
+		if (value) 
+			int_value = atoi (value);
+		else
+			int_value = 0;
+		// AAA FIXME TODO HACK HACK HACK
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget),
+			                      int_value);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget),
+			                      !int_value);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (widget),
+			                      int_value);
+	} else if (GTK_IS_SPIN_BUTTON (widget)) {
+		if (value) 
+			int_value = atoi (value);
+		else
+			int_value = 0;
+		
+		gtk_spin_button_set_value (GTK_SPIN_BUTTON (widget), int_value);
+	} else if (GTK_IS_HSCALE (widget)) {
+		if (value)
+			double_value = atof (value);
+		else
+			double_value = 0.0;
+		
+		gtk_range_set_value (GTK_RANGE (widget), double_value);
+	} else if (GTK_IS_COMBO_BOX (widget)) {
+		gchar **values_arr;
+		
+		values = g_object_get_data (G_OBJECT (widget), "untranslated");
+		g_return_if_fail (values != NULL);
+
+		values_arr = g_strsplit (values, ":", -1);
+		if (value != NULL)
+		{
+			for (i=0; values_arr[i] != NULL; i++)
+			{
+				if (strcmp(value, values_arr[i]) == 0)
+				{
+					gtk_combo_box_set_active (GTK_COMBO_BOX (widget), i);
+					break;
+				}
+			}
+		}	
+	} else if (GTK_IS_ENTRY (widget)) {
+		if (value)
+			gtk_entry_set_text (GTK_ENTRY (widget), value);
+		else
+			gtk_entry_set_text (GTK_ENTRY (widget), "");
+	}
+
+}
+
+static void
+connect_prop_to_object (MameOptionsDialog *dlg, GtkWidget *object, const gchar *key)
+{
+	guint i;
+	int int_value;
+	gdouble dbl_value;
+	gchar *value;
+	
+	if (GTK_IS_TOGGLE_BUTTON (object))
+	{	
+		int_value = mame_options_get_bool (main_gui.options, key);
+		value = g_strdup_printf ("%d", int_value);
+		set_property_value_as_string (object, value);
+		g_free (value);
+	} else if (GTK_IS_SPIN_BUTTON (object)) {
+		int_value = mame_options_get_int (main_gui.options, key);
+		value = g_strdup_printf ("%d", int_value);
+		set_property_value_as_string (object, value);
+		g_free (value);
+	} else if (GTK_IS_HSCALE (object)) {
+		dbl_value = mame_options_get_dbl (main_gui.options, key);
+		value = g_strdup_printf ("%f", dbl_value);
+		set_property_value_as_string (object, value);
+		g_free (value);
+	} else if (GTK_IS_COMBO_BOX (object)) {
+		/* Find the associated internal entries (corresponding with the
+		   display entries and link it to the widget */
+		for (i = 0; i < G_N_ELEMENTS (combo_links); i++) {
+			GMAMEUI_DEBUG ("Comparing %s against %s", combo_links[i].prop_name, key);
+			if (g_ascii_strcasecmp (combo_links[i].prop_name, key) == 0) {
+				
+				if (g_ascii_strncasecmp (combo_links[i].recorded_values, "function:", 9) == 0) {
+					guint j;
+					gchar *func_name;
+					gchar *vals;
+					gchar **vals_arr;
+					/* Handle custom function */
+					func_name = g_strdup (combo_links[i].recorded_values);
+					func_name += 9; /* Skip "function:" to get the function to invoke */
+
+					/* Find and invoke the relevant function */
+					for (j = 0; j < G_N_ELEMENTS (custom_function_lookup_table); j++) {
+						if (g_ascii_strcasecmp (custom_function_lookup_table[j].key, func_name) == 0) {
+							vals = (*(custom_function_lookup_table[ j ].fn))();
+							GMAMEUI_DEBUG ("VALS IS %s", vals);
+							g_object_set_data (G_OBJECT(object), "untranslated",
+							                   vals);
+						}
+					}
+
+					/* Create a model to display the values. Need to do this
+					   since we are dynamically generating the contents */
+					GtkListStore *model;
+					model = gtk_list_store_new (1, G_TYPE_STRING);
+
+					if (vals)
+						vals_arr = g_strsplit (vals, ":", 0);
+
+					for (j = 0; vals_arr[j] != NULL; j++) {
+						GtkTreeIter iter;
+						gtk_list_store_append (model, &iter);
+						gtk_list_store_set (model, &iter, 0, vals_arr[j], -1);
+					}
+					if (vals_arr)
+						g_strfreev (vals_arr);
+					
+					gtk_combo_box_set_model (GTK_COMBO_BOX (object), GTK_TREE_MODEL (model));
+					
+				} else {
+					/* Set data based on what is defined in combo_links,
+					   i.e. the majority of combo values */
+					g_object_set_data (G_OBJECT(object), "untranslated",
+							   combo_links[i].recorded_values);
+				}
+			}
+		}
+		
+		value = mame_options_get (main_gui.options, key);
+		set_property_value_as_string (object, value);
+		g_free (value);
+	} else
+		GMAMEUI_DEBUG ("Connect_prop_to_object: Unhandled widget: %s", key);
+}
+
+/**
+ * mame_options_register_property_raw:
+ * @pr: a #MameOptions object
+ * @object: Widget to register
+ * @key: Property key
+ * @default_value: Default value of the key
+ * @flags: Flags
+ * @object_type: Object type of widget
+ * @data_type: Data type of the property
+ *
+ * This also registers only one widget, but instead of supplying the property
+ * parameters as a single parsable string (as done in previous method), it
+ * takes them separately.
+ * 
+ * Return value: TRUE if sucessful.
+ */
+static gboolean
+mame_options_register_property_raw (MameOptionsDialog *dlg,
+					   GtkWidget *object,
+					   const gchar *key)
+{
+	g_return_val_if_fail (MAME_IS_OPTIONS_DIALOG (dlg), FALSE);
+	g_return_val_if_fail (GTK_IS_WIDGET (object), FALSE);
+	g_return_val_if_fail (key != NULL, FALSE);
+	g_return_val_if_fail (strlen(key) > 0, FALSE);
+	
+	register_callbacks (dlg, object, key);
+
+	connect_prop_to_object (dlg, object, key);
+	
+	return TRUE;
+}
+
+/**
+ * mame_options_register_property_from_string:
+ * @pr: a #MameOptions object
+ * @object: Widget to register
+ * @property_desc: Property description (in form #Category.#Key)
+ *
+ * This registers only one widget. The widget could be shown elsewhere.
+ * the property_description should be of the form described before.
+ * 
+ * Return value: TRUE if sucessful.
+ */
+static gboolean
+mame_options_register_property_from_string (MameOptionsDialog *dlg,
+						   GtkWidget *widget,
+						   const gchar *property_desc)
+{
+	gchar *key;
+	MameExec *exec;
+	
+	g_return_val_if_fail (MAME_IS_OPTIONS_DIALOG(dlg), FALSE);
+	g_return_val_if_fail ((GTK_IS_WIDGET (widget)), FALSE);
+	g_return_val_if_fail (property_desc != NULL, FALSE);
+	
+	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
+	g_return_val_if_fail (exec != NULL, FALSE);
+	
+	key = g_strdup (property_desc);	
+
+	/* Disable the widget and update the tooltip if this option is not
+	   supported by MAME */
+	if (!g_str_has_suffix (key, "_toggle")) {       /* Exclude non-options */
+		gchar *key_field;
+		key_field = get_key_field (key);
+
+		if (!mame_has_option (exec, key_field)) {
+			gchar *text;
+			
+			GMAMEUI_DEBUG ("Option %s not supported by this version of MAME", key_field);
+		
+			gtk_widget_set_sensitive (widget, FALSE);
+			text = g_strdup_printf (_("The option %s is not supported by MAME %s"),
+						key_field, mame_exec_get_version (exec));
+			gtk_widget_set_tooltip_text (widget, text);
+			g_free (text);
+		}
+		g_free (key_field);
+	}
+	
+	mame_options_register_property_raw (dlg, widget, key);
+
+	//g_free (key); // FIXME TODO Free'ing this segfaults in the callbacks for the various widgets
+	
+	return TRUE;
+}
+
+/**
+ * mame_options_register_all_properties_from_glade_xml:
+ * @pr: a #MameOptions Object
+ * @gxml: GladeXML object containing the properties widgets.
+ *
+ * This will register all the properties names of the format described above
+ * without considering the UI. Useful if you have the widgets shown elsewhere
+ * but you want them to be part of preferences system.
+ */
+static void
+mame_options_dialog_register_all_properties_from_glade_xml (MameOptionsDialog *dlg)
+{
+	GList *widgets;
+	GList *node;
+	
+	g_return_if_fail (MAME_IS_OPTIONS_DIALOG (dlg));
+	g_return_if_fail (dlg->priv->xml != NULL);
+	
+	widgets = glade_xml_get_widget_prefix (dlg->priv->xml, PREFERENCE_PROPERTY_PREFIX);
+	node = widgets;
+
+	while (node)
+	{
+		const gchar *name;
+		GtkWidget *widget;
+		
+		widget = node->data;
+				
+		name = glade_get_widget_name (widget);
+
+		if (strncmp (name, PREFERENCE_PROPERTY_PREFIX,
+                     strlen (PREFERENCE_PROPERTY_PREFIX)) == 0)
+		{
+			const gchar *property = &name[strlen (PREFERENCE_PROPERTY_PREFIX)];
+			mame_options_register_property_from_string (dlg, widget, property);
+		}
+		node = g_list_next (node);
+	}
+}
+
+/* Function to create the sidebar */
 static void
 add_category_columns (MameOptionsDialog *dlg)
 {
@@ -149,8 +810,20 @@ mame_options_dialog_init (MameOptionsDialog *dlg)
 	GtkWidget *btn_close;
 	GtkTreeSelection *selection;
 	GtkTreeSortable *sortable;
+
+	MameOptionsDialogPrivate *priv;
+
+	priv = G_TYPE_INSTANCE_GET_PRIVATE (dlg,
+					    MAME_TYPE_OPTIONS_DIALOG,
+					    MameOptionsDialogPrivate);
 	
-	dlg->priv = g_new0 (MameOptionsDialogPrivate, 1);
+	dlg->priv = priv;
+
+	priv->xml = glade_xml_new (GLADEDIR "options.glade", NULL, GETTEXT_PACKAGE);
+	if (!priv->xml) {
+		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "options.glade");
+		return;
+	}
 	
 	/* Now set up the dialog */
 	hbox = gtk_hbox_new (FALSE, 0);	
@@ -200,7 +873,6 @@ mame_options_dialog_init (MameOptionsDialog *dlg)
 	gtk_box_pack_start (GTK_BOX (hbox), dlg->priv->notebook,
 			    TRUE, TRUE, 0);
 
-
 	selection = gtk_tree_view_get_selection 
 		(GTK_TREE_VIEW (dlg->priv->treeview));
 
@@ -210,10 +882,21 @@ mame_options_dialog_init (MameOptionsDialog *dlg)
 			  G_CALLBACK (selection_changed_cb), dlg);
 
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dlg)->vbox), hbox,
-			    TRUE, TRUE, 0);
+			    TRUE, TRUE, 6);
 	
 	btn_close = gtk_dialog_add_button (GTK_DIALOG (dlg), GTK_STOCK_CLOSE, -7);
 	gtk_widget_grab_default (btn_close);
+	
+	/* Add each of the notebooks */
+	mame_options_dialog_add_page (dlg, "DisplayVBox", _("Display"), "gmameui-display-toolbar");
+	mame_options_dialog_add_page (dlg, "OpenGLVBox", _("OpenGL"), "gmameui-display-toolbar");
+	mame_options_dialog_add_page (dlg, "SoundVBox", _("Sound"), "gmameui-sound-toolbar");
+	mame_options_dialog_add_page (dlg, "InputVBox", _("Input"), "gmameui-joystick-toolbar");
+	mame_options_dialog_add_page (dlg, "PerformanceVBox", _("Performance"), "gmameui-general-toolbar");
+	mame_options_dialog_add_page (dlg, "MiscVBox", _("Miscellaneous"), "gmameui-general-toolbar");
+	mame_options_dialog_add_page (dlg, "DebuggingVBox", _("Debugging"), "gmameui-rom");
+
+	mame_options_dialog_register_all_properties_from_glade_xml (dlg);
 	
 	gtk_widget_show (hbox);
 }
@@ -226,31 +909,107 @@ mame_options_dialog_new (void)
 				 NULL);
 }
 
-void
-mame_options_dialog_add_page (MameOptionsDialog *dlg,
-									const gchar *name,
-									const gchar *title,
-									GdkPixbuf *icon,
-									GtkWidget *page)
+static void
+mame_options_dialog_response (GtkDialog *dialog, gint response)
+{
+	MameOptionsDialogPrivate *priv;
+	
+	priv = G_TYPE_INSTANCE_GET_PRIVATE (MAME_OPTIONS_DIALOG (dialog),
+					    MAME_TYPE_OPTIONS_DIALOG,
+					    MameOptionsDialogPrivate);
+	
+	switch (response)
+	{
+		case GTK_RESPONSE_CLOSE:
+			/* Close button clicked */
+			gtk_widget_destroy (GTK_WIDGET (dialog));
+
+			break;
+		case GTK_RESPONSE_DELETE_EVENT:
+			/* Dialog closed */		
+			gtk_widget_destroy (GTK_WIDGET (dialog));
+
+			break;
+		default:
+			g_assert_not_reached ();
+	}
+}
+
+static void
+mame_options_dialog_destroy (GtkObject *object)
+{
+	MameOptionsDialog *dlg;
+	
+GMAMEUI_DEBUG ("Destroying mame options dialog...");	
+	dlg = MAME_OPTIONS_DIALOG (object);
+	
+	if (dlg->priv->xml)
+		g_object_unref (dlg->priv->xml);
+	
+	if (dlg->priv->store) {
+		g_object_unref (dlg->priv->store);
+		dlg->priv->store = NULL;
+	}
+	
+	g_object_unref (dlg->priv);
+
+	GTK_OBJECT_CLASS (mame_options_dialog_parent_class)->destroy (object);
+	
+GMAMEUI_DEBUG ("Destroying mame options dialog... done");
+}
+
+static void
+mame_options_dialog_add_page (MameOptionsDialog *dlg, const gchar *widget_name,
+			      const gchar *title, const gchar *icon_filename)
 {
 	GtkTreeIter iter;
-	GtkTreeSelection* selection =
-		gtk_tree_view_get_selection (GTK_TREE_VIEW (dlg->priv->treeview));
-	GtkTreeIter first;	  
+	GtkTreeSelection* selection;
+	GtkTreeIter first;
+	GtkWidget *parent;
+	GtkWidget *page;
+	GdkPixbuf *icon;
+	
+	g_return_if_fail (dlg != NULL);
+	g_return_if_fail (dlg->priv->xml != NULL);
+	g_return_if_fail (dlg->priv->notebook != NULL);
+	g_return_if_fail (dlg->priv->store != NULL);
+	
+	page = glade_xml_get_widget (dlg->priv->xml, widget_name);
+	g_object_ref (page);
+	
+	g_return_if_fail (GTK_IS_WIDGET (page));
+	
 	gtk_widget_show (page);
 	
+	parent = gtk_widget_get_parent (page);
+	if (parent && GTK_IS_CONTAINER (parent))
+	{
+		if (GTK_IS_NOTEBOOK (parent)) {
+			gint page_num;
+			
+			page_num = gtk_notebook_page_num (GTK_NOTEBOOK (parent), page);
+			gtk_notebook_remove_page (GTK_NOTEBOOK (parent), page_num);
+		} else {
+			gtk_container_remove (GTK_CONTAINER (parent), page);
+		}
+	}
+	GMAMEUI_DEBUG ("Appending page to notebook for %s...", widget_name);
 	gtk_notebook_append_page (GTK_NOTEBOOK (dlg->priv->notebook), page, NULL);
+	GMAMEUI_DEBUG ("Appending page to notebook for %s... done", widget_name);
 
-	gtk_list_store_append (dlg->priv->store, &iter);
+	icon = gmameui_get_icon_from_stock (icon_filename);
 	
+	gtk_list_store_append (dlg->priv->store, &iter);
 	gtk_list_store_set (dlg->priv->store, &iter,
-			    COL_NAME, name,
+			    COL_NAME, widget_name,
 			    COL_TITLE, _(title),
 			    COL_PIXBUF, icon,
 			    COL_WIDGET, page,
 			    -1);
 	
-		gtk_tree_model_get_iter_first (GTK_TREE_MODEL (dlg->priv->store),
-									   &first);
-		gtk_tree_selection_select_iter (selection, &first);
+	gtk_tree_model_get_iter_first (GTK_TREE_MODEL (dlg->priv->store), &first);
+	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (dlg->priv->treeview));
+	gtk_tree_selection_select_iter (selection, &first);
+		
+	g_object_unref (icon);
 }

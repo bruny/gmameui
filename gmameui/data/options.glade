@@ -29,7 +29,7 @@
                 <property name="visible">True</property>
                 <property name="spacing">6</property>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Performance.autoframeskip">
+                  <widget class="GtkCheckButton" id="preferences_Performance-autoframeskip">
                     <property name="label" translatable="yes">Automatic frameskip</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -57,7 +57,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkSpinButton" id="preferences_spin:int:0:0:Performance.frameskip">
+                      <widget class="GtkSpinButton" id="preferences_Performance-frameskip">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="adjustment">0 0 12 1 10 10</property>
@@ -74,7 +74,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Performance.throttle">
+                  <widget class="GtkCheckButton" id="preferences_Performance-throttle">
                     <property name="label" translatable="yes">Throttle</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -89,7 +89,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Performance.sleep">
+                  <widget class="GtkCheckButton" id="preferences_Performance-sleep">
                     <property name="label" translatable="yes">Sleep</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -118,7 +118,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHScale" id="preferences_hscale:double:1.0:0:Performance.speed">
+                      <widget class="GtkHScale" id="preferences_Performance-speed">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">Control speed of gameplay; lower values are slower (-speed)</property>
@@ -136,7 +136,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Performance.refreshspeed">
+                  <widget class="GtkCheckButton" id="preferences_Performance-refreshspeed">
                     <property name="label" translatable="yes">Refresh speed</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -151,7 +151,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Performance.multithreading">
+                  <widget class="GtkCheckButton" id="preferences_Performance-multithreading">
                     <property name="label" translatable="yes">Enable multithreading</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -166,7 +166,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Performance.sdlvideofps">
+                  <widget class="GtkCheckButton" id="preferences_Performance-sdlvideofps">
                     <property name="label" translatable="yes">Show FPS</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -219,7 +219,7 @@
                 <property name="visible">True</property>
                 <property name="spacing">6</property>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Sound.sound">
+                  <widget class="GtkCheckButton" id="preferences_Sound-sound">
                     <property name="label" translatable="yes">Enable sound</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -242,7 +242,7 @@
                         <property name="visible">True</property>
                         <property name="spacing">6</property>
                         <child>
-                          <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Sound.samples">
+                          <widget class="GtkCheckButton" id="preferences_Sound-samples">
                             <property name="label" translatable="yes">Enable samples</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -273,13 +273,14 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkComboBox" id="preferences_combo:text:48000,44100,22050,11025:0:Sound.samplerate">
+                              <widget class="GtkComboBox" id="preferences_Sound-samplerate">
                                 <property name="visible">True</property>
                                 <property name="tooltip" translatable="yes">Sample rate</property>
                                 <property name="items" translatable="yes">48000
 44100
 22050
-11025</property>
+11025
+0</property>
                               </widget>
                               <packing>
                                 <property name="expand">False</property>
@@ -308,7 +309,7 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkHScale" id="preferences_hscale:double:1.0:0:Sound.volume">
+                              <widget class="GtkHScale" id="preferences_Sound-volume">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="tooltip" translatable="yes">Sound volume in decibels (-volume)</property>
@@ -350,7 +351,7 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkSpinButton" id="preferences_spin:int:3:0:Sound.audio_latency">
+                              <widget class="GtkSpinButton" id="preferences_Sound-audio_latency">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="tooltip" translatable="yes">Set audio latency (increase to reduce glitches, decrease for responsiveness (-audio_latency)</property>
@@ -420,7 +421,7 @@
                     <property name="visible">True</property>
                     <property name="spacing">6</property>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Debugging.log">
+                      <widget class="GtkCheckButton" id="preferences_Debugging-log">
                         <property name="label" translatable="yes">Enable logging</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -437,7 +438,7 @@
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
-                          <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Debugging.verbose">
+                          <widget class="GtkCheckButton" id="preferences_Debugging-verbose">
                             <property name="label" translatable="yes">Verbose logging</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -457,7 +458,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Debugging.update_in_pause">
+                  <widget class="GtkCheckButton" id="preferences_Debugging-update_in_pause">
                     <property name="label" translatable="yes">Update in pause</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -476,7 +477,7 @@
                     <property name="visible">True</property>
                     <property name="spacing">6</property>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Debugging.debug">
+                      <widget class="GtkCheckButton" id="preferences_Debugging-debug">
                         <property name="label" translatable="yes">Enable debugger</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -513,7 +514,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkEntry" id="preferences_entry:text:::Debugging.debugscript">
+                                  <widget class="GtkEntry" id="preferences_Debugging-debugscript">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="tooltip" translatable="yes">Script for debugger (-debugscript)</property>
@@ -530,7 +531,7 @@
                               </packing>
                             </child>
                             <child>
-                              <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Debugging.oslog">
+                              <widget class="GtkCheckButton" id="preferences_Debugging-oslog">
                                 <property name="label" translatable="yes">Output error.log data to debugger</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -611,7 +612,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkEntry" id="preferences_entry:text:::Misc.bios">
+                      <widget class="GtkEntry" id="preferences_Misc-bios">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </widget>
@@ -626,7 +627,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Misc.cheat">
+                  <widget class="GtkCheckButton" id="preferences_Misc-cheat">
                     <property name="label" translatable="yes">Enable cheat mode</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -641,7 +642,7 @@
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Misc.skip_gameinfo">
+                  <widget class="GtkCheckButton" id="preferences_Misc-skip_gameinfo">
                     <property name="label" translatable="yes">Skip gameinfo</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -686,7 +687,7 @@
                 <property name="visible">True</property>
                 <property name="spacing">6</property>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Playback.autosave">
+                  <widget class="GtkCheckButton" id="preferences_Playback-autosave">
                     <property name="label" translatable="yes">Automatically save and load state</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -708,7 +709,7 @@
                     <property name="column_spacing">6</property>
                     <property name="row_spacing">6</property>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Playback.mngwrite_toggle">
+                      <widget class="GtkCheckButton" id="preferences_Playback-mngwrite-toggle">
                         <property name="label" translatable="yes">Record MNG</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -722,7 +723,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Playback.aviwrite_toggle">
+                      <widget class="GtkCheckButton" id="preferences_Playback-aviwrite-toggle">
                         <property name="label" translatable="yes">Record AVI</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -738,7 +739,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Playback.wavwrite_toggle">
+                      <widget class="GtkCheckButton" id="preferences_Playback-wavwrite-toggle">
                         <property name="label" translatable="yes">Record WAV</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -754,7 +755,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkEntry" id="preferences_entry:toggletext:default.mng::Playback.mngwrite">
+                      <widget class="GtkEntry" id="preferences_Playback-mngwrite">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </widget>
@@ -765,7 +766,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkEntry" id="preferences_entry:toggletext:default.avi::Playback.aviwrite">
+                      <widget class="GtkEntry" id="preferences_Playback-aviwrite">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </widget>
@@ -778,7 +779,7 @@
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkEntry" id="preferences_entry:toggletext:default.wav::Playback.wavwrite">
+                      <widget class="GtkEntry" id="preferences_Playback-wavwrite">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                       </widget>
@@ -855,7 +856,7 @@
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkComboBox" id="preferences_combo:text:soft,opengl:0:Video.video">
+                          <widget class="GtkComboBox" id="preferences_Video-video">
                             <property name="visible">True</property>
                             <property name="tooltip" translatable="yes">Whether software (soft) or hardware (OpenGL) acceleration is used (-video)</property>
                             <property name="items" translatable="yes">Software
@@ -902,7 +903,7 @@ OpenGL</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Video.window">
+                      <widget class="GtkCheckButton" id="preferences_Video-window">
                         <property name="label" translatable="yes">Run in window</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -915,7 +916,7 @@ OpenGL</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Video.maximize">
+                      <widget class="GtkCheckButton" id="preferences_Video-maximize">
                         <property name="label" translatable="yes">Maximize</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -928,7 +929,7 @@ OpenGL</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Video.keepaspect">
+                      <widget class="GtkCheckButton" id="preferences_Video-keepaspect">
                         <property name="label" translatable="yes">Keep aspect ratio</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -941,7 +942,7 @@ OpenGL</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Video.unevenstretch">
+                      <widget class="GtkCheckButton" id="preferences_Video-unevenstretch">
                         <property name="label" translatable="yes">Allow uneven stretching</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -970,16 +971,10 @@ OpenGL</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkComboBox" id="preferences_combo:text:none,aperture1x2rb,aperture1x3rb,aperture2x4bg,aperture2x4rb,aperture4x6,scanlines:0:Video.effect">
+                          <widget class="GtkComboBox" id="preferences_Video-effect">
                             <property name="visible">True</property>
                             <property name="tooltip" translatable="yes">Name of a .png file in the Artwork directory to use for scanlines effect (-effect)</property>
-                            <property name="items" translatable="yes">none
-aperture1x2rb
-aperture1x3rb
-aperture2x4bg
-aperture2x4rb
-aperture4x6
-scanlines</property>
+                            <property name="items" translatable="yes"></property>
                           </widget>
                           <packing>
                             <property name="expand">False</property>
@@ -1014,7 +1009,7 @@ scanlines</property>
                                 <property name="visible">True</property>
                                 <property name="spacing">6</property>
                                 <child>
-                                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Video.centerh">
+                                  <widget class="GtkCheckButton" id="preferences_Video-centerh">
                                     <property name="label" translatable="yes">Horizontal</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -1028,7 +1023,7 @@ scanlines</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Video.centerv">
+                                  <widget class="GtkCheckButton" id="preferences_Video-centerv">
                                     <property name="label" translatable="yes">Vertical</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -1054,7 +1049,7 @@ scanlines</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Video.waitvsync">
+                      <widget class="GtkCheckButton" id="preferences_Video-waitvsync">
                         <property name="label" translatable="yes">Reduce tearing effects</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1083,7 +1078,7 @@ scanlines</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkComboBox" id="preferences_combo:text:none,async,yv12,yuy2,yv12x2,yuy2x2:0:Video.scalemode">
+                          <widget class="GtkComboBox" id="preferences_Video-scalemode">
                             <property name="visible">True</property>
                             <property name="has_tooltip">True</property>
                             <property name="tooltip" translatable="yes">Scale mode (-scalemode)</property>
@@ -1151,7 +1146,7 @@ yuy2x2</property>
                     <property name="visible">True</property>
                     <property name="spacing">6</property>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:Artwork.artwork_crop">
+                      <widget class="GtkCheckButton" id="preferences_Artwork-artwork_crop">
                         <property name="label" translatable="yes">Crop artwork</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1166,7 +1161,7 @@ yuy2x2</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Artwork.use_backdrops">
+                      <widget class="GtkCheckButton" id="preferences_Artwork-use_backdrops">
                         <property name="label" translatable="yes">Use backdrops</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1181,7 +1176,7 @@ yuy2x2</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Artwork.use_bezels">
+                      <widget class="GtkCheckButton" id="preferences_Artwork-use_bezels">
                         <property name="label" translatable="yes">Use bezels</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1196,7 +1191,7 @@ yuy2x2</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Artwork.use_overlays">
+                      <widget class="GtkCheckButton" id="preferences_Artwork-use_overlays">
                         <property name="label" translatable="yes">Use overlays</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1315,7 +1310,7 @@ yuy2x2</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHScale" id="preferences_hscale:double:1.0:0:Screen.brightness">
+                      <widget class="GtkHScale" id="preferences_Screen-brightness">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">Brightness correction (-brightness)</property>
@@ -1329,7 +1324,7 @@ yuy2x2</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHScale" id="preferences_hscale:double:1.0:0:Screen.contrast">
+                      <widget class="GtkHScale" id="preferences_Screen-contrast">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">Contrast correction (-contrast)</property>
@@ -1345,7 +1340,7 @@ yuy2x2</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHScale" id="preferences_hscale:double:1.0:0:Screen.gamma">
+                      <widget class="GtkHScale" id="preferences_Screen-gamma">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">Gamma correction (-gamma)</property>
@@ -1361,7 +1356,7 @@ yuy2x2</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkHScale" id="preferences_hscale:double:1.0:0:Screen.pause_brightness">
+                      <widget class="GtkHScale" id="preferences_Screen-pause_brightness">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">Brightness when paused (-pause_brightness)</property>
@@ -1430,7 +1425,7 @@ yuy2x2</property>
                         <property name="visible">True</property>
                         <property name="spacing">6</property>
                         <child>
-                          <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Rotation.rol">
+                          <widget class="GtkCheckButton" id="preferences_Rotation-rol">
                             <property name="label" translatable="yes">Rotate left</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -1444,7 +1439,7 @@ yuy2x2</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Rotation.ror">
+                          <widget class="GtkCheckButton" id="preferences_Rotation-ror">
                             <property name="label" translatable="yes">Rotate right</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -1486,7 +1481,7 @@ yuy2x2</property>
                                 <property name="visible">True</property>
                                 <property name="spacing">6</property>
                                 <child>
-                                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Rotation.autorol">
+                                  <widget class="GtkCheckButton" id="preferences_Rotation-autorol">
                                     <property name="label" translatable="yes">Rotate left</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -1499,7 +1494,7 @@ yuy2x2</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Rotation.autoror">
+                                  <widget class="GtkCheckButton" id="preferences_Rotation-autoror">
                                     <property name="label" translatable="yes">Rotate right</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
@@ -1636,7 +1631,7 @@ yuy2x2</property>
                     <property name="visible">True</property>
                     <property name="spacing">6</property>
                     <child>
-                      <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Vector.antialias">
+                      <widget class="GtkCheckButton" id="preferences_Vector-antialias">
                         <property name="label" translatable="yes">Antialias</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1680,7 +1675,7 @@ yuy2x2</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkHScale" id="preferences_hscale:double:1.0:0:Vector.beam">
+                          <widget class="GtkHScale" id="preferences_Vector-beam">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip" translatable="yes">Set vector beam width (-beam)</property>
@@ -1692,7 +1687,7 @@ yuy2x2</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkHScale" id="preferences_hscale:double:1.0:0:Vector.flicker">
+                          <widget class="GtkHScale" id="preferences_Vector-flicker">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip" translatable="yes">Set vector flicker effect (-flicker)</property>
@@ -1795,7 +1790,7 @@ yuy2x2</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Input.mouse">
+                  <widget class="GtkCheckButton" id="preferences_Input-mouse">
                     <property name="label" translatable="yes">Enable mouse</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -1809,7 +1804,7 @@ yuy2x2</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Input.joystick">
+                  <widget class="GtkCheckButton" id="preferences_Input-joystick">
                     <property name="label" translatable="yes">Enable joystick</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -1823,7 +1818,7 @@ yuy2x2</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Input.lightgun">
+                  <widget class="GtkCheckButton" id="preferences_Input-lightgun">
                     <property name="label" translatable="yes">Enable lightgun</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -1857,7 +1852,7 @@ yuy2x2</property>
                         <property name="visible">True</property>
                         <property name="spacing">6</property>
                         <child>
-                          <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Input.multimouse">
+                          <widget class="GtkCheckButton" id="preferences_Input-multimouse">
                             <property name="label" translatable="yes">Mouse</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -1871,7 +1866,7 @@ yuy2x2</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Input.multikeyboard">
+                          <widget class="GtkCheckButton" id="preferences_Input-multikeyboard">
                             <property name="label" translatable="yes">Keyboard</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -1912,7 +1907,7 @@ yuy2x2</property>
                         <property name="visible">True</property>
                         <property name="spacing">6</property>
                         <child>
-                          <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Input.steadykey">
+                          <widget class="GtkCheckButton" id="preferences_Input-steadykey">
                             <property name="label" translatable="yes">Enable steadykey support</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -1926,7 +1921,7 @@ yuy2x2</property>
                           </packing>
                         </child>
                         <child>
-                          <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:Input.offscreen_reload">
+                          <widget class="GtkCheckButton" id="preferences_Input-offscreen_reload">
                             <property name="label" translatable="yes">Convert lightgun button 2 to offscreen support</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -2001,7 +1996,7 @@ yuy2x2</property>
                 <property name="visible">True</property>
                 <property name="spacing">6</property>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:OpenGL.filter">
+                  <widget class="GtkCheckButton" id="preferences_OpenGL-filter">
                     <property name="label" translatable="yes">Filter</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2032,7 +2027,7 @@ yuy2x2</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkSpinButton" id="preferences_spin:int:1:0:OpenGL.prescale">
+                      <widget class="GtkSpinButton" id="preferences_OpenGL-prescale">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip" translatable="yes">Scale game graphics before rendering (-prescale)</property>
@@ -2050,7 +2045,7 @@ yuy2x2</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:OpenGL.gl_notexturerect">
+                  <widget class="GtkCheckButton" id="preferences_OpenGL-gl_notexturerect">
                     <property name="label" translatable="yes">Disable OpenGL GL_ARB_texture_rectangle</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2065,7 +2060,7 @@ yuy2x2</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:0:0:OpenGL.gl_forcepow2texture">
+                  <widget class="GtkCheckButton" id="preferences_OpenGL-gl_forcepow2texture">
                     <property name="label" translatable="yes">Force power of two textures</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2080,7 +2075,7 @@ yuy2x2</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:OpenGL.gl_vbo">
+                  <widget class="GtkCheckButton" id="preferences_OpenGL-gl_vbo">
                     <property name="label" translatable="yes">Enable OpenGL VBO</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2095,7 +2090,7 @@ yuy2x2</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:OpenGL.gl_pbo">
+                  <widget class="GtkCheckButton" id="preferences_OpenGL-gl_pbo">
                     <property name="label" translatable="yes">Enable OpenGL VBO</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2110,7 +2105,7 @@ yuy2x2</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:OpenGL.gl_glsl">
+                  <widget class="GtkCheckButton" id="preferences_OpenGL-gl_glsl">
                     <property name="label" translatable="yes">Enable OpenGL GLSL</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2140,7 +2135,7 @@ yuy2x2</property>
                       </packing>
                     </child>
                     <child>
-                      <widget class="GtkComboBox" id="preferences_combo:text:0,1,2:0:OpenGL.gl_glsl_filter">
+                      <widget class="GtkComboBox" id="preferences_OpenGL-gl_glsl_filter">
                         <property name="visible">True</property>
                         <property name="items" translatable="yes">No filter
 Bilinear
@@ -2158,7 +2153,7 @@ Gaussian blur</property>
                   </packing>
                 </child>
                 <child>
-                  <widget class="GtkCheckButton" id="preferences_toggle:bool:1:0:OpenGL.gl_glsl_vid_attr">
+                  <widget class="GtkCheckButton" id="preferences_OpenGL-gl_glsl_vid_attr">
                     <property name="label" translatable="yes">Let OpenGL manage brightness and contrast</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>

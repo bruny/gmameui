@@ -46,6 +46,7 @@
 #include "progression_window.h"
 #include "io.h"
 #include "gui_prefs_dialog.h"
+#include "mame_options_dialog.h"
 #include "mame_options_legacy_dialog.h"
 #include "gmameui-rominfo-dlg.h"
 
@@ -121,43 +122,22 @@ static void
 show_properties_dialog (gchar *rom_name)
 {
 	MameExec *exec;
+	GtkWidget *dlg;
 	
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	
 	g_return_if_fail (exec != NULL);
-	g_return_if_fail (rom_name != NULL);
 	
 	/* SDLMAME uses a different set of options to XMAME. If we are running
 	   XMAME, then use the legacy GXMAME method of maintaining the options */
 	if (mame_exec_get_exectype (exec) == XMAME_EXEC_WIN32) {
-		/* SDLMAME */
-		GtkWidget *options_dialog = mame_options_get_dialog (main_gui.options);
-
-		GladeXML *xml = glade_xml_new (GLADEDIR "options.glade", NULL, GETTEXT_PACKAGE);
-		mame_options_add_page (main_gui.options, xml, "DisplayVBox", _("Display"),
-		                       "gmameui-display-toolbar");
-		mame_options_add_page (main_gui.options, xml, "OpenGLVBox", _("OpenGL"),
-		                       "gmameui-display-toolbar");
-		mame_options_add_page (main_gui.options, xml, "SoundVBox", _("Sound"),
-		                       "gmameui-sound-toolbar");
-		mame_options_add_page (main_gui.options, xml, "InputVBox", _("Input"),
-		                       "gmameui-joystick-toolbar");
-		mame_options_add_page (main_gui.options, xml, "PerformanceVBox", _("Performance"),
-		                       "gmameui-general-toolbar");
-		mame_options_add_page (main_gui.options, xml, "MiscVBox", _("Miscellaneous"),
-		                       "gmameui-general-toolbar");
-		mame_options_add_page (main_gui.options, xml, "DebuggingVBox", _("Debugging"),
-		                       "gmameui-rom");
-
-		
-		gtk_dialog_run (GTK_DIALOG (options_dialog));
-		gtk_widget_destroy (GTK_WIDGET (options_dialog));
-
+		/* SDLMAME */	
+		dlg = mame_options_dialog_new ();
 	} else {		
-		GtkWidget *dlg;
 		dlg = mame_options_legacy_dialog_new ();
-		gtk_widget_show (dlg);
 	}
+
+	gtk_widget_show (dlg);
 }
 
 void

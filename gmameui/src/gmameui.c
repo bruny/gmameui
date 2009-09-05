@@ -41,6 +41,7 @@
 #include "gui.h"
 #include "io.h"
 #include "mame_options.h"
+#include "mame_options_legacy.h"
 #include "options_string.h"
 #include "progression_window.h"
 #include "gtkjoy.h"
@@ -165,6 +166,7 @@ gmameui_init (void)
 	g_timer_start (mytimer);
 #endif
 
+	/* FIXME TODO Move to mame_options_init () */
 	filename = g_build_filename (g_get_user_config_dir (), "gmameui", "options", NULL);
 	if (!g_file_test (filename, G_FILE_TEST_IS_DIR)) {
 		GMAMEUI_DEBUG ("no options directory creating one");

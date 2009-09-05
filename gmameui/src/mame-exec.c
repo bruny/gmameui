@@ -1278,6 +1278,7 @@ gboolean
 mame_has_option (MameExec *exec, const gchar *option_name)
 {
 	g_return_val_if_fail (exec != NULL, FALSE);
+	g_return_val_if_fail (option_name != NULL, FALSE);
 	
 	return mame_get_option (exec, option_name) != NULL;
 }

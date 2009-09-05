@@ -1,3 +1,12 @@
+2009-09-05 21:15 adburton
+
+	* data/options.glade, src/: callbacks.c, gmameui.c, interface.c,
+	  mame-exec.c, mame_options.c, mame_options.h, mame_options_dialog.c,
+	  mame_options_dialog.h, mame_options_legacy_dialog.c:
+	  Refactor mame_options and mame_options_dialog to be like legacy versions,
+	  add support for dynamically finding effect files (SF Feature Request
+	  2780394)
+
 2009-09-03 21:23 adburton
 
 	* src/: directories.c, gmameui-rominfo-dlg.c, callbacks.c, mame_options.c:
