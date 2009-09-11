@@ -1,3 +1,9 @@
+2009-09-11 20:17 adburton
+
+	* data/directories.builder, data/Makefile.am, po/POTFILES.in,
+	  src/directories.c: Migrate Directories dialog to GtkBuilder, add
+	  buttons to open homepages for various resource files
+
 2009-09-05 21:15 adburton
 
 	* data/options.glade, src/: callbacks.c, gmameui.c, interface.c,

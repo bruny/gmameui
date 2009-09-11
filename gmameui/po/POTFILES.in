@@ -37,7 +37,7 @@ src/gmameui-zip-utils.c
 src/xmame_options.c
 src/gmameui-ui.xml
 data/audit_window.glade
-data/directories.glade
+data/directories.builder
 data/filter_bar.glade
 data/gmameui_prefs.glade
 data/options.glade

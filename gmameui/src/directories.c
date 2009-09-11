@@ -23,7 +23,7 @@
 
 #include "common.h"
 
-#include <glade/glade.h>
+#include <string.h>
 #include <gio/gio.h>
 
 #include "gui.h"
@@ -42,16 +42,36 @@ static void remove_path_from_tree_view (GtkWidget *button, gpointer user_data);
 
 static void mame_directories_dialog_save_changes (MameDirectoriesDialog *dialog);
 
+typedef struct _url_prefs url_prefs;
+
+struct _url_prefs {
+	gchar *pref_name;
+	gchar *url;
+};
+
+url_prefs urls [] = {
+	{ "dir-artwork", "http://mrdo.mameworld.info/mame_artwork_ingame.html" },
+	{ "dir-flyers", "http://www.arcadeflyers.com" },
+	{ "dir-title", "http://www.mametitles.com/" },
+
+	{ "dir-icons", "http://icons.mameworld.info/" },
+	{ "file-mameinfo", "http://mameinfo.mameworld.info/" },
+	{ "file-history", "http://www.arcade-history.com" },
+	{ "file-cheat", "http://cheat.retrogames.com" },
+	{ "file-hiscore", "http://highscore.mameworld.info/" },
+	{ "file-catver", "http://www.progettoemma.net/?catlist" },
+};
+
 struct _MameDirectoriesDialogPrivate {
-	GladeXML *xml;
+	GtkBuilder *builder;
 	
-	GtkTreeView *xmame_execs_tree_view;
+	GtkTreeView  *xmame_execs_tree_view;
 	GtkTreeModel *xmame_execs_tree_model;
 
-	GtkTreeView *roms_path_tree_view;
+	GtkTreeView  *roms_path_tree_view;
 	GtkTreeModel *roms_path_tree_model;
 
-	GtkTreeView *samples_path_tree_view;
+	GtkTreeView  *samples_path_tree_view;
 	GtkTreeModel *samples_path_tree_model;
 
 	/* Value array containing the ROM paths when the dialog is
@@ -128,22 +148,36 @@ mame_directories_dialog_init (MameDirectoriesDialog *dialog)
 	GValueArray *va_sample_paths;
 	
 	GtkWidget *widget;
+	GSList *widgets;	/* For use with processing multiple widgets at once */
+	GSList *node;		/* For use with processing multiple widgets at once */
+
+	GError* error = NULL;
+
+	const gchar *object_names[] = {
+		"notebook1",	/* Dialog */
+	};
 
 	priv = G_TYPE_INSTANCE_GET_PRIVATE (dialog,
 					    MAME_TYPE_DIRECTORIES_DIALOG,
 					    MameDirectoriesDialogPrivate);
 
 	dialog->priv = priv;
-GMAMEUI_DEBUG ("Creating new directories dialog...");	
+GMAMEUI_DEBUG ("Creating new directories dialog...");
 	/* Build the UI and connect signals here */
-	priv->xml = glade_xml_new (GLADEDIR "directories.glade", "notebook1", GETTEXT_PACKAGE);
-	if (!priv->xml) {
-		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "directories.glade");
+	priv->builder = gtk_builder_new ();
+	gtk_builder_set_translation_domain (priv->builder, GETTEXT_PACKAGE);
+	
+	if (!gtk_builder_add_objects_from_file (priv->builder,
+	                                        GLADEDIR "directories.builder",
+	                                        (gchar **) object_names,
+	                                        &error)) {
+		g_warning ("Couldn't load builder file: %s", error->message);
+		g_error_free (error);
 		return;
 	}
 
 	/* Get the dialog contents */
-	widget = glade_xml_get_widget (priv->xml, "notebook1");
+	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "notebook1"));
 
 	/* Add our dialog contents to the vbox of the dialog class */
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox),
@@ -213,7 +247,7 @@ GMAMEUI_DEBUG ("Creating new directories dialog...");
 							   "text", 0,
 							   NULL);
 
-	priv->xmame_execs_tree_view = GTK_TREE_VIEW (glade_xml_get_widget (priv->xml, "xmame_execs_tree_view"));
+	priv->xmame_execs_tree_view = GTK_TREE_VIEW (gtk_builder_get_object (priv->builder, "xmame_execs_tree_view"));
 	gtk_tree_view_append_column (GTK_TREE_VIEW (priv->xmame_execs_tree_view), column);
 	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->xmame_execs_tree_view), GTK_TREE_MODEL (store));
 	g_object_set_data (G_OBJECT (priv->xmame_execs_tree_view), "SettingName", "executable-paths");
@@ -234,7 +268,7 @@ GMAMEUI_DEBUG ("Creating new directories dialog...");
 							   "text", 0,
 							   NULL);
 
-	priv->roms_path_tree_view = GTK_TREE_VIEW (glade_xml_get_widget (priv->xml, "roms_path_tree_view"));
+	priv->roms_path_tree_view = GTK_TREE_VIEW (gtk_builder_get_object (priv->builder, "roms_path_tree_view"));
 	gtk_tree_view_append_column (GTK_TREE_VIEW (priv->roms_path_tree_view), column);
 	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->roms_path_tree_view), GTK_TREE_MODEL (store));
 	g_object_set_data (G_OBJECT (priv->roms_path_tree_view), "SettingName", "rom-paths");
@@ -255,84 +289,104 @@ GMAMEUI_DEBUG ("Creating new directories dialog...");
 							   "text", 0,
 							   NULL);
 
-	priv->samples_path_tree_view = GTK_TREE_VIEW (glade_xml_get_widget (priv->xml, "samples_path_treeview"));
+	priv->samples_path_tree_view = GTK_TREE_VIEW (gtk_builder_get_object (priv->builder, "samples_path_tree_view"));
 	gtk_tree_view_append_column (GTK_TREE_VIEW (priv->samples_path_tree_view), column);
 	gtk_tree_view_set_model (GTK_TREE_VIEW (priv->samples_path_tree_view), GTK_TREE_MODEL (store));
 	g_object_set_data (G_OBJECT (priv->samples_path_tree_view), "SettingName", "sample-paths");
     
-	/* Set the GtkEntry widgets with the parameter values */
-	GList *widgets;
-	GList *node;
-	widgets = glade_xml_get_widget_prefix (priv->xml, "entry_");
-	node = widgets;
+	
+	widgets = gtk_builder_get_objects (priv->builder);
+	node = g_slist_nth (widgets, 0);
 
 	while (node)
 	{
 		const gchar *name;
 		gchar *val;
-		GtkWidget *widget;
+		GtkWidget *widget, *home_icon;
+		GError *error = NULL;
+		
 		widget = node->data;
-		
-		name = glade_get_widget_name (widget);
-		/*GMAMEUI_DEBUG ("Now processing widget %s", name);*/
-		name += 6;      /* Skip over entry_ */
-		
-		g_object_get (main_gui.gui_prefs, name, &val, NULL);
-		gtk_entry_set_text (GTK_ENTRY (widget), val);
-		g_free (val);
-				    
-		node = g_list_next (node);
-	}
-	
-	/* Set the callbacks for the GtkButtons for each GtkEntry */
-	widgets = glade_xml_get_widget_prefix (priv->xml, "button_");
-	node = widgets;
 
-	while (node)
-	{
-		const gchar *name;
-		GtkWidget *widget;
-		widget = node->data;
+		home_icon = gtk_image_new_from_stock (GTK_STOCK_HOME, GTK_ICON_SIZE_BUTTON);
 		
-		name = glade_get_widget_name (widget);
-		/*GMAMEUI_DEBUG ("Now processing widget %s", name);*/
-		name += 7;      /* Skip over button_ */
+		name = gtk_widget_get_name (widget);
+
+		/* Set the GtkEntry widgets with the parameter values */
+		if (g_ascii_strncasecmp (name, "entry_", 6) == 0) {
+			GMAMEUI_DEBUG ("Now processing widget %s", name);
+			name += 6;      /* Skip over entry_ */
+		
+			g_object_get (main_gui.gui_prefs, name, &val, NULL);
+			gtk_entry_set_text (GTK_ENTRY (widget), val);
+			g_free (val);
+		}
+
+		/* Set the callbacks for the GtkButtons for each GtkEntry */
+		if (g_ascii_strncasecmp (name, "button_", 7) == 0) {
+			/*GMAMEUI_DEBUG ("Now processing widget %s", name);*/
+			name += 7;      /* Skip over button_ */
 			
-		if (g_ascii_strncasecmp (name, "dir-", 4) == 0)
-			g_signal_connect (G_OBJECT (widget), "clicked",
-					  G_CALLBACK (on_dir_browse_button_clicked),
-					  dialog);
-		else
-			g_signal_connect (G_OBJECT (widget), "clicked",
-					  G_CALLBACK (on_file_browse_button_clicked),
-					  dialog);
-		
-		node = g_list_next (node);
+			if (g_ascii_strncasecmp (name, "dir-", 4) == 0)
+				g_signal_connect (G_OBJECT (widget), "clicked",
+						  G_CALLBACK (on_dir_browse_button_clicked),
+						  dialog);
+			else
+				g_signal_connect (G_OBJECT (widget), "clicked",
+						  G_CALLBACK (on_file_browse_button_clicked),
+						  dialog);
+		}
+
+		/* Configure the URL buttons */
+		if (g_ascii_strncasecmp (name, "link_", 5) == 0) {
+			/*GMAMEUI_DEBUG ("Now processing widget %s", name);*/
+			name += 5;      /* Skip over link_ */
+
+			/* Set stock button icon */
+			gtk_button_set_image (GTK_BUTTON (widget), home_icon);
+
+			for (i = 0; i < G_N_ELEMENTS (urls); i++) {
+				GMAMEUI_DEBUG ("Comparing %s and %s", urls[i].pref_name, name);
+				if (g_ascii_strcasecmp (urls[i].pref_name, name) == 0) {
+					GMAMEUI_DEBUG ("  Showing URL %s", urls[i].url);
+
+					gtk_link_button_set_uri (GTK_LINK_BUTTON (widget), urls[i].url);
+					if (error) {
+						GMAMEUI_DEBUG (error->message);
+						g_error_free (error);
+						error = NULL;
+					}
+				}
+
+			}
+
+		}
+				    
+		node = g_slist_next (node);
 	}
 	
 	/* FIXME TODO Hiscore dir */
 	
 	/* Callbacks for adding/removing executable */
-	widget = glade_xml_get_widget (priv->xml, "xmame_execs_add_button");
+	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "xmame_execs_add_button"));
 	g_signal_connect (G_OBJECT (widget), "clicked",
 			  G_CALLBACK (add_item_to_tree_view), priv->xmame_execs_tree_model);
-	widget = glade_xml_get_widget (priv->xml, "xmame_execs_remove_button");
+	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "xmame_execs_remove_button"));
 	g_signal_connect (G_OBJECT (widget), "clicked",
 			  G_CALLBACK (remove_path_from_tree_view), priv->xmame_execs_tree_view);
 
 	/* Callbacks for adding/removing ROM paths */
-	widget = glade_xml_get_widget (priv->xml, "roms_add_button");
+	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "roms_add_button"));
 	g_signal_connect (G_OBJECT (widget), "clicked",
 			  G_CALLBACK (add_path_to_tree_view), priv->roms_path_tree_model);
-	widget = glade_xml_get_widget (priv->xml, "roms_remove_button");
+	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "roms_remove_button"));
 	g_signal_connect (G_OBJECT (widget), "clicked",
 			  G_CALLBACK (remove_path_from_tree_view), priv->roms_path_tree_view);
 
 	/* Callbacks for adding/removing sample paths */
-	widget = glade_xml_get_widget (priv->xml, "samples_add_button");
+	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "samples_remove_button"));
 	g_signal_connect (G_OBJECT (widget), "clicked",
 			  G_CALLBACK (add_path_to_tree_view), priv->samples_path_tree_model);
-	widget = glade_xml_get_widget (priv->xml, "samples_remove_button");
+	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "samples_remove_button"));
 	g_signal_connect (G_OBJECT (widget), "clicked",
 			  G_CALLBACK (remove_path_from_tree_view), priv->samples_path_tree_view);
 	
@@ -457,8 +511,8 @@ mame_directories_dialog_destroy (GtkObject *object)
 GMAMEUI_DEBUG ("Destroying mame directories dialog...");	
 	dlg = MAME_DIRECTORIES_DIALOG (object);
 	
-	if (dlg->priv->xml)
-		g_object_unref (dlg->priv->xml);
+	if (dlg->priv->builder)
+		g_object_unref (dlg->priv->builder);
 
 	/* Empty models */
 	gtk_list_store_clear (GTK_LIST_STORE (dlg->priv->xmame_execs_tree_model));
@@ -510,7 +564,7 @@ static void update_other_entries (MameDirectoriesDialog *dialog, gchar *filename
 
 	/* If the parent folder is "MAME", look inside to see which other folders it has */
 	if (g_ascii_strcasecmp (parentfoldername, "mame") == 0) {
-		int i;
+		guint i;
 	
 		/* Look for other subfolders */
 		for (i = 0; i < G_N_ELEMENTS (directory_prefs); i++) {
@@ -542,7 +596,7 @@ static void update_other_entries (MameDirectoriesDialog *dialog, gchar *filename
 
 					/* Update the widget */
 					widgetname = g_strdup_printf ("entry_%s", directory_prefs[i].name);
-					widget = glade_xml_get_widget (dialog->priv->xml, widgetname);
+					widget = GTK_WIDGET (gtk_builder_get_object (dialog->priv->builder, widgetname));
 					if (widget)
 						gtk_entry_set_text (GTK_ENTRY (widget), testname);
 					g_free (widgetname);
@@ -579,13 +633,13 @@ on_dir_browse_button_clicked (GtkWidget *widget, gpointer user_data)
 
 	dialog = (MameDirectoriesDialog *) user_data;
 	
-	name = glade_get_widget_name (widget);
+	name = gtk_widget_get_name (widget);
 	name += 7;      /* Skip over button_ */
 	/* GMAMEUI_DEBUG ("Browsing for directory for path %s", name); */
 	
 	widget_name = g_strdup_printf ("entry_%s", name);
 	
-	path_entry = glade_xml_get_widget (dialog->priv->xml, widget_name);
+	path_entry = GTK_WIDGET (gtk_builder_get_object (dialog->priv->builder, widget_name));
 	
 	filechooser = gtk_file_chooser_dialog_new (_("Browse for Folder"),
 						   GTK_WINDOW (dialog),
@@ -628,13 +682,13 @@ on_file_browse_button_clicked (GtkWidget *widget, gpointer user_data)
 	
 	dialog = (MameDirectoriesDialog *) user_data;
 	
-	name = glade_get_widget_name (widget);
+	name = gtk_widget_get_name (widget);
 	name += 7;      /* Skip over button_ */
 	/* GMAMEUI_DEBUG ("Browsing for file for %s", name); */
 	
 	widget_name = g_strdup_printf ("entry_%s", name);
 	
-	path_entry = glade_xml_get_widget (dialog->priv->xml, widget_name);
+	path_entry = GTK_WIDGET (gtk_builder_get_object (dialog->priv->builder, widget_name));
 	
 	filechooser = gtk_file_chooser_dialog_new (_("Browse for File"),
 						   GTK_WINDOW (dialog),
