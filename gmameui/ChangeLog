@@ -1,3 +1,9 @@
+2009-09-22 20:40 adburton
+
+	* data/options.glade, src/: mame_options.c, mame_options_dialog.c,
+	  mame_options_legacy_dialog.c, xmame_options.c: Add support for -keymap
+	  and -keymap_file options (SF Bug 2847216)
+
 2009-09-11 20:17 adburton
 
 	* data/directories.builder, data/Makefile.am, po/POTFILES.in,

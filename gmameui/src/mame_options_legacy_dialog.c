@@ -49,7 +49,7 @@ enum {
 	LAST_COL
 };  /* Columns in the liststore */
 
-#define MAME_AUDIT_DIALOG_GET_PRIVATE(o)  (MAME_AUDIT_DIALOG (o)->priv)
+#define MAME_OPTIONS_LEGACY_DIALOG_GET_PRIVATE(o)  (MAME_OPTIONS_LEGACY_DIALOG (o)->priv)
 
 #define PREFERENCE_PROPERTY_PREFIX "preferences_"
 
@@ -96,7 +96,7 @@ typedef struct {
 	gchar *recorded_values;	/* Values to record and line up against the Items */
 } _combo_link;
 
-_combo_link combo_links[] = {
+static _combo_link combo_links[] = {
 	{ "Video-frameskip", "0:1:2:3:4:5:6:7:8:9:10:11:12" },
 	{ "Video-bpp", "0:8:15:16:32" },
 	{ "Video-effect", "0:1:2:3:4:5:6:7:8" },
@@ -218,7 +218,7 @@ get_property_value_as_string (GtkWidget *widget, gchar *key)
 		values = g_object_get_data (G_OBJECT (widget), "untranslated");
 		values_arr = g_strsplit (values, ":", -1);
 		idx = gtk_combo_box_get_active (GTK_COMBO_BOX (widget));
-		if (values_arr[idx] != NULL)
+		if ((idx > -1) && (values_arr[idx] != NULL))
 			text_value = g_strdup (values_arr[idx]);
 	} else
 		GMAMEUI_DEBUG ("get_property_value_as_string: Unsupported widget: %s", key);
@@ -319,7 +319,7 @@ update_property_on_change_double (GtkWidget *widget, gpointer user_data)
 	if (g_ascii_strcasecmp (key, "Sound-volume") == 0) {
 		/* Volume is an integer value but we are using a GtkHScale which
 		   defaults to using doubles as the value. */
-		GMAMEUI_DEBUG ("Setting value of widget for %s to %d", key, val);
+		GMAMEUI_DEBUG ("Setting value of widget for %s to %.2f", key, val);
 		mame_legacy_options_set_int (main_gui.legacy_options, key, val);
 	} else {
 		GMAMEUI_DEBUG ("Setting value of widget for %s to %.2f", key, val);
@@ -616,14 +616,13 @@ mame_legacy_options_register_property_from_string (MameOptionsLegacyDialog *dlg,
  * mame_options_register_all_properties_from_glade_xml:
  * @pr: a #MameOptions Object
  * @gxml: GladeXML object containing the properties widgets.
- * @parent: Parent widget in the gxml object
  *
  * This will register all the properties names of the format described above
  * without considering the UI. Useful if you have the widgets shown elsewhere
  * but you want them to be part of preferences system.
  */
 static void
-mame_legacy_options_dialog_register_all_properties_from_glade_xml (MameOptionsLegacyDialog *dlg, GtkWidget *parent)
+mame_legacy_options_dialog_register_all_properties_from_glade_xml (MameOptionsLegacyDialog *dlg)
 {
 	GList *widgets;
 	GList *node;
@@ -637,27 +636,9 @@ mame_legacy_options_dialog_register_all_properties_from_glade_xml (MameOptionsLe
 	while (node)
 	{
 		const gchar *name;
-		GtkWidget *widget, *p;
-		gboolean cont_flag = FALSE;
+		GtkWidget *widget;
 		
 		widget = node->data;
-		
-		p = gtk_widget_get_parent (widget);
-		/* Added only if it's a descendent child of the parent */
-		while (p != parent)
-		{
-			if (p == NULL)
-			{
-				cont_flag = TRUE;
-				break;
-			}
-			p = gtk_widget_get_parent (p);
-		}
-		if (cont_flag == TRUE)
-		{
-			node = g_list_next (node);
-			continue;
-		}
 		
 		name = glade_get_widget_name (widget);
 
@@ -837,6 +818,8 @@ mame_options_legacy_dialog_init (MameOptionsLegacyDialog *dlg)
 //	mame_options_legacy_dialog_add_page (dlg, "PerformanceVBox", _("Performance"), "gmameui-general-toolbar");
 	mame_options_legacy_dialog_add_page (dlg, "MiscVBox", _("Miscellaneous"), "gmameui-general-toolbar");
 //	mame_options_legacy_dialog_add_page (dlg, "DebuggingVBox", _("Debugging"), "gmameui-rom");
+
+	mame_legacy_options_dialog_register_all_properties_from_glade_xml (dlg);
 	
 	gtk_widget_show (hbox);
 }
@@ -950,8 +933,6 @@ mame_options_legacy_dialog_add_page (MameOptionsLegacyDialog *dlg, const gchar *
 	gtk_tree_model_get_iter_first (GTK_TREE_MODEL (dlg->priv->store), &first);
 	selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (dlg->priv->treeview));
 	gtk_tree_selection_select_iter (selection, &first);
-	
-	mame_legacy_options_dialog_register_all_properties_from_glade_xml (dlg, page);
 	
 	g_object_unref (icon);
 }

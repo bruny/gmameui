@@ -159,6 +159,8 @@ enum {
 	OPTION_INPUT_MULTIKEYBOARD,
 	OPTION_INPUT_STEADYKEY,
 	OPTION_INPUT_OFFSCREEN_RELOAD,
+	OPTION_INPUT_KEYMAP,
+	OPTION_INPUT_KEYMAP_FILE,
 	OPTION_OPENGL_FILTER,
 	OPTION_OPENGL_PRESCALE,
 	OPTION_OPENGL_NOTEXTURERECT,
@@ -239,6 +241,7 @@ static _MameSupportedOptionsBool MameSupportedOptionsBool[] =
 	{ OPTION_INPUT_MULTIKEYBOARD, "Input", "multikeyboard", TRUE, { 0, } },
 	{ OPTION_INPUT_STEADYKEY, "Input", "steadykey", TRUE, { 0, } },
 	{ OPTION_INPUT_OFFSCREEN_RELOAD, "Input", "offscreen_reload", TRUE, { 0, } },
+	{ OPTION_INPUT_KEYMAP, "Input", "keymap", FALSE, { 0, } },
 	{ OPTION_OPENGL_FILTER, "OpenGL", "filter", TRUE, { 0, } },
 	{ OPTION_OPENGL_NOTEXTURERECT, "OpenGL", "gl_notexturerect", TRUE, { 0, } },
 	{ OPTION_OPENGL_FORCEPOW2, "OpenGL", "gl_forcepow2texture", FALSE, { 0, } },
@@ -279,6 +282,9 @@ static _MameSupportedOptionsString MameSupportedOptionsString[] =
 	{ OPTION_VIDEO_SCALEMODE, "Video", "scalemode", "none", { 0, } },
 	{ OPTION_OPENGL_GLSLFILTER, "OpenGL", "gl_glsl_filter", "0", { 0, } },
 	{ OPTION_SOUND_SAMPLERATE, "Sound", "samplerate", "44100", { 0, } },
+
+	/* Filename entries */
+	{ OPTION_INPUT_KEYMAP_FILE, "Input", "keymap_file", "", { 0, } },
 
 };
 

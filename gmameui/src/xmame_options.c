@@ -125,6 +125,8 @@ xmame_options_init (void)
 	ADD_OPTION ("joystick_map");
 	ADD_OPTION ("joystick_deadzone");
 	ADD_OPTION ("joystick_saturation");
+	ADD_OPTION ("keymap");
+	ADD_OPTION ("keymap_file");
 	
 	/* Core input automatic enable options TODO */
 	

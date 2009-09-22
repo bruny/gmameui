@@ -83,16 +83,18 @@ typedef struct {
 
 static const WidgetRelationship widget_relationships[] =
 {
-	{ "Video.video", "Video.scalemode", "soft" },
-	{ "Video-autoframeskip", "Video-frameskip", "0" },	
-	{ "Sound.sound", "Sound.samples", "1" },
-	{ "Sound.sound", "Sound.samplerate", "1" },
-	{ "Sound.sound", "Sound.volume", "1" },
-	{ "Sound.sound", "Sound.audio_latency", "1" },
-	{ "Performance.autoframeskip", "Performance.frameskip", "0" },
-	{ "Debugging.log", "Debugging.verbose", "1" },
-	{ "Debugging.debug", "Debugging.debugscript", "1" },
-	{ "Debugging.debug", "Debugging.oslog", "1" },
+	{ "Video-video", "Video-scalemode", "soft" },
+	{ "Video-autoframeskip", "Video-frameskip", "0" },
+	{ "OpenGL-gl_glsl", "OpenGL-gl_glsl_filter", "0" },
+	{ "Sound-sound", "Sound-samples", "1" },
+	{ "Sound-sound", "Sound-samplerate", "1" },
+	{ "Sound-sound", "Sound-volume", "1" },
+	{ "Sound-sound", "Sound-audio_latency", "1" },
+	{ "Performance-autoframeskip", "Performance-frameskip", "0" },
+	{ "Debugging-log", "Debugging-verbose", "1" },
+	{ "Debugging-debug", "Debugging-debugscript", "1" },
+	{ "Debugging-debug", "Debugging-oslog", "1" },
+	{ "Input-keymap", "Input-keymap_file", "1" },
 };
 
 /* List of functions for handling custom functions. The key is defined in the
@@ -177,14 +179,12 @@ get_scanlines ()
 			gchar **s;
 			s = g_strsplit (current_file, ".", 0);  /* Want the name, but not the suffix */
 			scans = g_strconcat (scans, ":", s[0], NULL);
-			GMAMEUI_DEBUG ("SCANLINES IS NOW %s", scans);
 			g_strfreev (s);
 		}
 		
 		current_file = g_dir_read_name (dir);
 	}
 
-	GMAMEUI_DEBUG ("SCANLINES IS %s", scans);
 	return scans;
 }
 
@@ -255,6 +255,14 @@ get_property_value_as_string (GtkWidget *widget, gchar *key)
 		idx = gtk_combo_box_get_active (GTK_COMBO_BOX (widget));
 		if ((idx > -1) && (values_arr[idx] != NULL))
 			text_value = g_strdup (values_arr[idx]);
+	} else if (GTK_IS_FILE_CHOOSER (widget)) {
+GMAMEUI_DEBUG ("Getting file chooser value");
+		if (gtk_file_chooser_get_action (GTK_FILE_CHOOSER (widget)) == GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER) {
+			text_value = g_strdup (gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (widget)));
+		} else if (gtk_file_chooser_get_action (GTK_FILE_CHOOSER (widget)) == GTK_FILE_CHOOSER_ACTION_OPEN) {
+			text_value = g_strdup (gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (widget)));
+			GMAMEUI_DEBUG ("Getting file chooser value - %s", text_value);
+		}
 	} else
 		GMAMEUI_DEBUG ("get_property_value_as_string: Unsupported widget: %s", key);
 /*	switch (prop->object_type)
@@ -264,13 +272,7 @@ get_property_value_as_string (GtkWidget *widget, gchar *key)
 		text_value = gtk_editable_get_chars (GTK_EDITABLE (prop->object), 0, -1);
 		break;
 	case GMAMEUI_PROPERTY_OBJECT_TYPE_TEXT:
-	case GMAMEUI_PROPERTY_OBJECT_TYPE_FOLDER:
-	*case GMAMEUI_PROPERTY_OBJECT_TYPE_FILE:*
-		* Haven't catered for these yet
-		   Folder:
-		    text_value = gtk_file_chooser_get_current_folder (GTK_FILE_CHOOSER (prop->object));
-		   File:
-		    text_value = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (prop->object));
+
 		*
 		g_assert_not_reached ();
 		break;
@@ -451,6 +453,9 @@ register_callbacks (MameOptionsDialog *dlg, GtkWidget *widget, gchar *key)
 				  G_CALLBACK (update_property_on_change_str), key);
 		g_signal_connect (G_OBJECT (widget), "changed",
 				  G_CALLBACK (parent_widget_clicked), key);
+	} else if (GTK_IS_FILE_CHOOSER (widget)) {
+		g_signal_connect (G_OBJECT (widget), "file-set",
+				  G_CALLBACK (update_property_on_change_str), key);
 	}
 }
 
@@ -513,6 +518,12 @@ set_property_value_as_string (GtkWidget *widget, gchar *value)
 			gtk_entry_set_text (GTK_ENTRY (widget), value);
 		else
 			gtk_entry_set_text (GTK_ENTRY (widget), "");
+	} else if (GTK_IS_FILE_CHOOSER (widget)) {
+		if (gtk_file_chooser_get_action (GTK_FILE_CHOOSER (widget)) == GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER) {
+			gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (widget), value);
+		} else if (gtk_file_chooser_get_action (GTK_FILE_CHOOSER (widget)) == GTK_FILE_CHOOSER_ACTION_OPEN) {
+			gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (widget), value);
+		}
 	}
 
 }
@@ -539,6 +550,10 @@ connect_prop_to_object (MameOptionsDialog *dlg, GtkWidget *object, const gchar *
 	} else if (GTK_IS_HSCALE (object)) {
 		dbl_value = mame_options_get_dbl (main_gui.options, key);
 		value = g_strdup_printf ("%f", dbl_value);
+		set_property_value_as_string (object, value);
+		g_free (value);
+	} else if (GTK_IS_FILE_CHOOSER (object)) {
+		value = mame_options_get (main_gui.options, key);
 		set_property_value_as_string (object, value);
 		g_free (value);
 	} else if (GTK_IS_COMBO_BOX (object)) {
