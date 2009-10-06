@@ -20,11 +20,11 @@
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-#ifndef __ROM_ENTRY_H__
-#define __ROM_ENTRY_H__
+#ifndef __ZIP_UTILS_H__
+#define __ZIP_UTILS_H__
 
 
 GdkPixbuf *
 read_pixbuf_from_zip_file (gchar *zipfilename, gchar *romname);
 
-#endif /* __ROM_ENTRY_H__ */
+#endif /* __ZIP_UTILS__ */

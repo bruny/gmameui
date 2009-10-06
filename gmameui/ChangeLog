@@ -1,3 +1,8 @@
+2009-10-06 20:57 adburton
+
+	* src/gmameui-zip-utils.h: Fix #ifndef call referencing wrong file
+	  (Debian Bug 547699)
+
 2009-09-22 20:40 adburton
 
 	* data/options.glade, src/: mame_options.c, mame_options_dialog.c,
