@@ -312,12 +312,18 @@ GList* mame_gamelist_get_roms_glist (MameGamelist *gl) {
 
 GList* mame_gamelist_get_categories_glist (MameGamelist *gl) {
 	g_return_val_if_fail (gl != NULL, NULL);
+
+	g_return_val_if_fail (gl->priv->categories != NULL, NULL);
+	g_return_val_if_fail (g_list_length (gl->priv->categories) > 0, NULL);
 	
 	return gl->priv->categories;
 }
 
 GList* mame_gamelist_get_versions_glist (MameGamelist *gl) {
 	g_return_val_if_fail (gl != NULL, NULL);
+
+	g_return_val_if_fail (gl->priv->versions != NULL, NULL);
+	g_return_val_if_fail (g_list_length (gl->priv->versions) > 0, NULL);
 	
 	return gl->priv->versions;
 }

@@ -1,3 +1,7 @@
+2009-10-18 17:20 adburton
+
+	* src/game_list.c, src/io.c: Add additional g_return_val_if_fail checks
+
 2009-10-06 20:57 adburton
 
 	* src/gmameui-zip-utils.h: Fix #ifndef call referencing wrong file

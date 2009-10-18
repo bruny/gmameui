@@ -262,8 +262,7 @@ load_catver_ini (void)
 	
 	g_object_get (main_gui.gui_prefs, "file-catver", &filename, NULL);
 
-	if (!filename)
-		return FALSE;
+	g_return_val_if_fail (filename, FALSE);
 
 	GKeyFile *catver_file = g_key_file_new ();
 	g_key_file_load_from_file (catver_file, filename, G_KEY_FILE_KEEP_COMMENTS, &error);
