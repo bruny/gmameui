@@ -37,11 +37,11 @@ src/gmameui-zip-utils.c
 src/xmame_options.c
 src/gmameui-ui.xml
 data/audit_window.glade
-data/directories.builder
+[type: gettext/glade]data/directories.builder
 data/filter_bar.glade
 data/gmameui_prefs.glade
 data/options.glade
 data/options_legacy.glade
-data/rom_info.builder
+[type: gettext/glade]data/rom_info.builder
 data/sidebar.glade
 gmameui.desktop.in

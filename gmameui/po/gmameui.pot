@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-10-18 17:16+1100\n"
+"POT-Creation-Date: 2009-10-20 18:21+1100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -93,7 +93,7 @@ msgstr ""
 msgid "The pixbuf to render."
 msgstr ""
 
-#: ../src/directories.c:424
+#: ../src/directories.c:424 ../data/directories.builder.h:11
 msgid "Directories Selection"
 msgstr ""
 
@@ -246,7 +246,7 @@ msgid "Clones"
 msgstr ""
 
 #: ../src/filters_list.c:277 ../src/gmameui-gamelist-view.c:414
-#: ../data/gmameui_prefs.glade.h:16
+#: ../data/directories.builder.h:23 ../data/gmameui_prefs.glade.h:16
 msgid "Samples"
 msgstr ""
 
@@ -512,7 +512,7 @@ msgstr ""
 msgid "Game"
 msgstr ""
 
-#: ../src/gmameui-gamelist-view.c:412
+#: ../src/gmameui-gamelist-view.c:412 ../data/directories.builder.h:22
 msgid "ROMs"
 msgstr ""
 
@@ -597,7 +597,7 @@ msgstr ""
 msgid "Can't audit game"
 msgstr ""
 
-#: ../src/gmameui-rominfo-dlg.c:136
+#: ../src/gmameui-rominfo-dlg.c:136 ../data/rom_info.builder.h:23
 msgid "None required"
 msgstr ""
 
@@ -1098,6 +1098,94 @@ msgstr ""
 
 #: ../data/audit_window.glade.h:16
 msgid "gtk-stop"
+msgstr ""
+
+#: ../data/directories.builder.h:1
+msgid "<b>MAME Executables</b>"
+msgstr ""
+
+#: ../data/directories.builder.h:2
+msgid "<b>MAME Paths</b>"
+msgstr ""
+
+#: ../data/directories.builder.h:3
+msgid "<b>MAME Support Files</b>"
+msgstr ""
+
+#: ../data/directories.builder.h:4
+msgid "Artwork:"
+msgstr ""
+
+#: ../data/directories.builder.h:5
+msgid "Browse..."
+msgstr ""
+
+#: ../data/directories.builder.h:6
+msgid "Cabinets:"
+msgstr ""
+
+#: ../data/directories.builder.h:7
+msgid "Catver file:"
+msgstr ""
+
+#: ../data/directories.builder.h:8
+msgid "Cheat file:"
+msgstr ""
+
+#: ../data/directories.builder.h:9
+msgid "Control panels:"
+msgstr ""
+
+#: ../data/directories.builder.h:10
+msgid "Controller directory:"
+msgstr ""
+
+#: ../data/directories.builder.h:12
+msgid "Flyers:"
+msgstr ""
+
+#: ../data/directories.builder.h:13
+msgid "High score file:"
+msgstr ""
+
+#: ../data/directories.builder.h:14
+msgid "History file:"
+msgstr ""
+
+#: ../data/directories.builder.h:15
+msgid "Icons directory:"
+msgstr ""
+
+#: ../data/directories.builder.h:16
+msgid "MAME Main Paths"
+msgstr ""
+
+#: ../data/directories.builder.h:17
+msgid "MAME Paths"
+msgstr ""
+
+#: ../data/directories.builder.h:18
+msgid "MAME Support Files"
+msgstr ""
+
+#: ../data/directories.builder.h:19
+msgid "MAME executables"
+msgstr ""
+
+#: ../data/directories.builder.h:20
+msgid "MAME info file:"
+msgstr ""
+
+#: ../data/directories.builder.h:21
+msgid "Marquees:"
+msgstr ""
+
+#: ../data/directories.builder.h:24
+msgid "Snapshots:"
+msgstr ""
+
+#: ../data/directories.builder.h:25
+msgid "Title screenshots:"
 msgstr ""
 
 #: ../data/filter_bar.glade.h:2
@@ -2232,6 +2320,146 @@ msgstr ""
 
 #: ../data/options_legacy.glade.h:162
 msgid "frames"
+msgstr ""
+
+#: ../data/rom_info.builder.h:1
+msgid "<b>Audit Details</b>"
+msgstr ""
+
+#: ../data/rom_info.builder.h:2
+msgid "<b>Brothers</b>"
+msgstr ""
+
+#: ../data/rom_info.builder.h:3
+msgid "<b>Clones</b>"
+msgstr ""
+
+#: ../data/rom_info.builder.h:4
+msgid "<b>Emulation Status</b>"
+msgstr ""
+
+#: ../data/rom_info.builder.h:5
+msgid "<b>Input Details</b>"
+msgstr ""
+
+#: ../data/rom_info.builder.h:6
+msgid "<b>Main Details</b>"
+msgstr ""
+
+#: ../data/rom_info.builder.h:7
+msgid "<b>Screen Details</b>"
+msgstr ""
+
+#: ../data/rom_info.builder.h:8
+msgid "<b>Technical Details</b>"
+msgstr ""
+
+#: ../data/rom_info.builder.h:9
+msgid "About this ROM"
+msgstr ""
+
+#: ../data/rom_info.builder.h:10
+msgid "Associated ROMs"
+msgstr ""
+
+#: ../data/rom_info.builder.h:11
+msgid "Audit Details"
+msgstr ""
+
+#: ../data/rom_info.builder.h:12
+msgid "Buttons:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:13
+msgid "CPU:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:14
+msgid "Checking..."
+msgstr ""
+
+#: ../data/rom_info.builder.h:15
+msgid "Clone of:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:16
+msgid "Colors:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:17
+msgid "Colour:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:18
+msgid "Driver:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:19
+msgid "Emulation Status"
+msgstr ""
+
+#: ../data/rom_info.builder.h:20
+msgid "Emulation:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:21
+msgid "Graphics:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:22
+msgid "Manufacturer:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:24
+msgid "Open ROM"
+msgstr ""
+
+#: ../data/rom_info.builder.h:25
+msgid "Players:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:26
+msgid "Rom check:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:27
+msgid "Romset Name:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:28
+msgid "Sample Check:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:29
+msgid "Screen:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:30
+msgid "Sound:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:31
+msgid "The ROM has the following emulation support:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:32
+msgid "The following ROMs are clones of this ROM:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:33
+msgid "The following ROMs are supported by same driver:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:34
+msgid "Type:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:35
+msgid "Year:"
+msgstr ""
+
+#: ../data/rom_info.builder.h:36
+msgid "label"
 msgstr ""
 
 #: ../data/sidebar.glade.h:1
