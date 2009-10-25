@@ -1,3 +1,7 @@
+2009-10-25  adburton <adb@iinet.net.au>
+
+	* fr.po zv.po zh_TW.po: Updated translations for 0.2.12
+
 2009-10-20  adburton <adb@iinet.net.au>
 
 	* POTFILES.in, gmameui.pot: Update for string freeze, include

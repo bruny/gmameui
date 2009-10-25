@@ -1,3 +1,26 @@
+Overview of changes in GMAMEUI 0.2.12
+=====================================
+
+* Add support in SDLMAME for finding effect files. Any .png file in the
+  specified MAME artwork directory will be selectable in the MAME Options
+  dialog (SF Feature Request 2780394)
+
+* Enhancements to ROM Info dialog:
+  - Add additional details to ROM info screen (including ROMs sharing the same
+    driver and clones of the ROM)
+  - Add button to open the ROM's zip file
+
+* Start migration of screens to GtkBuilder from deprecated libglade
+
+* Fix Debian policy violation bug (Debian Bug 547699)
+
+* Bug fixes:
+  - Compilation errors (SF Bug 2848961)
+  - Support for -keymap and -keymap_file options (SF Bug 2847216)
+  - Locales using commas now work correctly with the gamelist version (SF
+    Bug 2847787)
+  
+
 Overview of changes in GMAMEUI 0.2.11
 =====================================
 
