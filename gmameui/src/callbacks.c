@@ -218,18 +218,12 @@ void
 on_preferences_activate             (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-	/*
-	GtkWidget *gui_prefs_window;
-	gui_prefs_window = create_gui_prefs_window ();
-	gtk_widget_show (gui_prefs_window);
-	*/
-	
 	MameGuiPrefsDialog *prefs_dialog;
 	prefs_dialog = mame_gui_prefs_dialog_new ();
 GMAMEUI_DEBUG("Running dialog");
-//	gtk_dialog_run (prefs_dialog);
+	gtk_dialog_run (prefs_dialog);
+	gtk_widget_destroy (prefs_dialog);
 GMAMEUI_DEBUG("Done running dialog");
-//	gtk_widget_destroy (prefs_dialog);
 }
 
 

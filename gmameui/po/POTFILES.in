@@ -39,7 +39,7 @@ src/gmameui-ui.xml
 data/audit_window.glade
 [type: gettext/glade]data/directories.builder
 data/filter_bar.glade
-data/gmameui_prefs.glade
+[type: gettext/glade]data/gmameui_prefs.builder
 data/options.glade
 data/options_legacy.glade
 [type: gettext/glade]data/rom_info.builder

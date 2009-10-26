@@ -2,7 +2,7 @@ gladedir = $(datadir)/gmameui/glade
 glade_DATA =    audit_window.glade \
 		directories.builder \
 		sidebar.glade \
-		gmameui_prefs.glade \
+		gmameui_prefs.builder \
 		options.glade \
 		options_legacy.glade \
 		rom_info.builder \

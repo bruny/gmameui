@@ -23,8 +23,6 @@
 
 G_BEGIN_DECLS
 
-#include <gtk/gtk.h>	/* TODO Move to gui_prefs_dialog.h, along with function prototype below */
-
 /* Preferences object */
 #define MAME_TYPE_GUI_PREFS            (mame_gui_prefs_get_type ())
 #define MAME_GUI_PREFS(o)            (G_TYPE_CHECK_INSTANCE_CAST((o), MAME_TYPE_GUI_PREFS, MameGuiPrefs))
@@ -188,10 +186,6 @@ static const directory_config directory_prefs [] = {
 
 GType mame_gui_prefs_get_type (void);
 MameGuiPrefs* mame_gui_prefs_new (void);
-
-/* FIXME TODO Move to gui_prefs_dialog.c */
-GtkWidget *
-create_gui_prefs_window (void);
 
 G_END_DECLS
 

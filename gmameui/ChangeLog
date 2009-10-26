@@ -1,3 +1,9 @@
+2009-10-26 20:10 adburton
+
+	* data/gmameui_prefs.builder, data/Makefile.am, po/POTFILES.in,
+	  src/: callbacks.c, gui_prefs.h, gui_prefs_dialog.c,
+	  gui_prefs_dialog.h: Migrate to GtkBuilder from libglade
+
 2009-10-26 17:20 adburton
 
  	* src/: directories.c, filter.c, filters_list.c, game_list.c,

@@ -21,8 +21,6 @@
 #ifndef __GUI_PREFS_DIALOG_H__
 #define __GUI_PREFS_DIALOG_H__
 
-
-
 G_BEGIN_DECLS
 
 #include <gtk/gtk.h>
