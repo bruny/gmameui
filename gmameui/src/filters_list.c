@@ -110,6 +110,12 @@ gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
 static void
 filters_list_select (GMAMEUIFiltersList *fl, GMAMEUIFilter *filter);
 
+static void
+filters_list_remove_filter_children (GMAMEUIFiltersList *fl, gchar *group);
+
+static void
+filters_list_add_catver_filters (GMAMEUIIOHandler *handler, gpointer user_data);
+
 G_DEFINE_TYPE (GMAMEUIFiltersList, gmameui_filters_list,
 			   GTK_TYPE_TREE_VIEW);
 
@@ -139,6 +145,9 @@ gmameui_filters_list_class_init (GMAMEUIFiltersListClass *class)
 	GObjectClass *object_class = G_OBJECT_CLASS (class);
 
 	object_class->finalize = (GObjectFinalizeFunc) gmameui_filters_list_finalize;
+
+
+
 }
 
 /* Creates the UI for the filters list */
@@ -147,7 +156,6 @@ gmameui_filters_list_init (GMAMEUIFiltersList *fl)
 {
 	GtkTreeModel *model;
 	guint i;
-	gchar *catver_file;
 	
 GMAMEUI_DEBUG ("Creating filters list");
 
@@ -243,7 +251,6 @@ GMAMEUI_DEBUG ("Creating filters list");
 	/* Recent versions of MAME use neodrvr */
 	MameExec *exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	static char *neogeo_value;
-	GList *listpointer;
 
 	if (mame_compare_raw_version (exec, "0.116") >= 0)
 		neogeo_value = "neodrvr";
@@ -332,59 +339,19 @@ GMAMEUI_DEBUG ("Creating filters list");
 	filters_list_select (fl, avail_folder_filter);
 	/* FIXME TODO Causes a segfault: g_object_unref (avail_folder_filter); */
 
-	/* Catver.ini filters - Category and Version */
-	g_object_get (main_gui.gui_prefs, "file-catver", &catver_file, NULL);
+	/* Don't load the catver.ini filters (Category and Version) here; load
+	   them when the catver.ini file has been known to be loaded, when the signal
+	   is triggered */
 
-	if (catver_file) {
-		GList *catlist, *verlist;
-		/* Categories */
-		catlist = mame_gamelist_get_categories_glist (gui_prefs.gl);
-		for (listpointer = g_list_first (catlist);
-		     (listpointer);
-		     listpointer = g_list_next (listpointer)) {
-			folder_filter = gmameui_filter_new ();
-			     g_object_set (folder_filter,
-					   "name", (gchar *)listpointer->data,
-					   "folderid", FILTER_CATEGORIES,
-					   "type", CATEGORY,
-					   "is", TRUE,
-					   "value", (gchar *)listpointer->data,
-					   "int_value", 0,
-					   "update_list", TRUE,
-					   NULL);
-			     gmameui_filters_list_add_filter (fl,
-							      folder_filter,
-							      _("Category"));
-			     g_object_unref (folder_filter);
-		}
-		
-		/* Version */
-		verlist = mame_gamelist_get_versions_glist (gui_prefs.gl);
-		for (listpointer = g_list_first (verlist);
-		     (listpointer);
-		     listpointer = g_list_next (listpointer)) {
-			     folder_filter = gmameui_filter_new ();
-			     g_object_set (folder_filter,
-					   "name", (gchar *)listpointer->data,
-					   "folderid", FILTER_VERSIONS,
-					   "type", MAMEVER,
-					   "is", TRUE,
-					   "value", (gchar *)listpointer->data,
-					   "int_value", 0,
-					   "update_list", TRUE,
-					   NULL);
-			     gmameui_filters_list_add_filter (fl,
-							      folder_filter,
-							      _("Version"));
-			     g_object_unref (folder_filter);
-		}
-		
-		/* AAA FIXME TODO unref the GLists */
-	}
 	gtk_widget_show (GTK_WIDGET (fl));
-	g_free (catver_file);
+
 	/* Finished setting up filters list */		
 
+	/* Handle whenever the catver file is re-loaded */
+	g_signal_connect (gui_prefs.io_handler, "catver-loaded",
+			  G_CALLBACK (filters_list_add_catver_filters), fl);
+
+	
 GMAMEUI_DEBUG ("Finished creating filters list");
 }
 
@@ -441,6 +408,8 @@ gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
 				    GMAMEUI_FILTER_LIST_MODEL_IS_SEPARATOR, FALSE,
 				    -1);
 
+		/* GMAMEUI_DEBUG ("Adding filter %s to group %s", filter_name, group); */
+		
 		g_free (filter_name);
 		if (filter_pixbuf != NULL)
 			g_object_unref (filter_pixbuf);
@@ -449,6 +418,25 @@ gmameui_filters_list_add_filter (GMAMEUIFiltersList *fl,
 			continue;
 
 	}
+}
+
+/* Remove all the children of the filter category (group), but leave the
+   category behind. Usually used when re-populating, especially for
+   category/version */
+static void
+filters_list_remove_filter_children (GMAMEUIFiltersList *fl, gchar *group)
+{
+	/* iter = specific filter
+	   iter_group = parent
+	   iter_separator = category */
+	GtkTreeIter iter, iter_group, iter_separator;
+	gboolean created;
+	
+	filters_list_get_group (fl, group, &iter_group, &iter_separator, &created);
+
+	while (gtk_tree_model_iter_children (GTK_TREE_MODEL (fl->priv->store), &iter, &iter_group))
+		gtk_tree_store_remove (fl->priv->store, &iter);
+
 }
 
 static gboolean
@@ -480,10 +468,93 @@ filters_list_get_group_foreach (GtkTreeModel *model,
 	return fg->found;
 }
 
+static void
+filters_list_add_catver_filters (GMAMEUIIOHandler *handler,
+                                 gpointer user_data)
+{
+	GMAMEUIFiltersList *fl;
+	gchar *catver_file;
+
+	fl = (gpointer) user_data;
+
+	g_return_if_fail (fl != NULL);
+
+	/* Delete any existing items in the catver headings */
+	filters_list_remove_filter_children (fl, _("Category"));
+	filters_list_remove_filter_children (fl, _("Version"));
+	
+	/* GMAMEUI_DEBUG ("HANDLER INVOKED - filters_list_add_catver_filters"); */
+
+	/* Catver.ini filters - Category and Version */
+	g_object_get (main_gui.gui_prefs, "file-catver", &catver_file, NULL);
+
+	if (catver_file) {
+		GList *catlist, *verlist;
+		GList *listpointer;
+		
+		/* Categories */
+		catlist = mame_gamelist_get_categories_glist (gui_prefs.gl);
+		for (listpointer = g_list_first (catlist);
+		     (listpointer);
+		     listpointer = g_list_next (listpointer)) {
+
+			GMAMEUIFilter *folder_filter;
+
+			folder_filter = gmameui_filter_new ();
+			     
+			g_object_set (folder_filter,
+			              "name", (gchar *)listpointer->data,
+			              "folderid", FILTER_CATEGORIES,
+			              "type", CATEGORY,
+			              "is", TRUE,
+			              "value", (gchar *)listpointer->data,
+			              "int_value", 0,
+			              "update_list", TRUE,
+			              NULL);
+
+			gmameui_filters_list_add_filter (fl,
+			                                 folder_filter,
+			                                 _("Category"));
+			g_object_unref (folder_filter);
+		}
+	
+		/* Version */
+		verlist = mame_gamelist_get_versions_glist (gui_prefs.gl);
+		for (listpointer = g_list_first (verlist);
+		     (listpointer);
+		     listpointer = g_list_next (listpointer)) {
+
+			GMAMEUIFilter *folder_filter;
+
+			folder_filter = gmameui_filter_new ();
+			     
+			g_object_set (folder_filter,
+			              "name", (gchar *)listpointer->data,
+			              "folderid", FILTER_VERSIONS,
+			              "type", MAMEVER,
+			              "is", TRUE,
+			              "value", (gchar *)listpointer->data,
+			              "int_value", 0,
+			              "update_list", TRUE,
+			              NULL);
+			     
+			gmameui_filters_list_add_filter (fl,
+			                                 folder_filter,
+			                                 _("Version"));
+			g_object_unref (folder_filter);
+		}
+
+	}
+
+	g_free (catver_file);
+
+	/* GMAMEUI_DEBUG ("HANDLER FINISHED - filters_list_add_catver_filters"); */
+}
+
 /* Sets the background colours of the row */
 static void
 filters_list_cell_set_background (GMAMEUIFiltersList  *list,
-				  GtkCellRenderer    *cell,
+				  GtkCellRenderer     *cell,
 				  gboolean            is_group,
 				  gboolean            is_active)
 {

@@ -1,6 +1,14 @@
+2009-10-26 17:20 adburton
+
+ 	* src/: directories.c, filter.c, filters_list.c, game_list.c,
+	  game_list.h, gmameui-marshallers.list, gmameui.c, gmameui.h,
+	  gui.c, gui_prefs.h, io.c, io.h: Create new GMAMEUIIOHandler
+	  GObject, emit signal when catver.ini file is loaded, update
+	  filters list with catver entries when the emitted signal is caught
+
 2009-10-25 14:05 adburton
 
-	* configure.ac, NEWS: Tagged for new release
+	* configure.ac, NEWS, AUTHORS: Tagged for new release
 
 2009-10-18 17:20 adburton
 

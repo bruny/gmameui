@@ -33,6 +33,7 @@
 #include "game_list.h"
 #include "filter.h"
 #include "audit.h"
+#include "io.h"
 
 #define SELECT_TIMEOUT 110
 #define ICON_TIMEOUT 100
@@ -171,6 +172,7 @@ struct gui_prefs_struct {
 	MameRomEntry *current_game;
 	MameGamelist *gl;
 	GmameuiAudit *audit;
+	GMAMEUIIOHandler *io_handler;
 };
 
 struct gui_prefs_struct gui_prefs;

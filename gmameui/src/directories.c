@@ -618,6 +618,17 @@ static void update_other_entries (MameDirectoriesDialog *dialog, gchar *filename
 	g_object_unref (parentfolder);
 }
 
+/* This function loads the catver file once as an idle function, and returns
+   FALSE so the file is not repeatedly loaded */
+static gboolean
+on_idle_load_catver ()
+{
+	load_catver_ini ();
+
+	/* Return FALSE so this function is not repeatedly called */
+	return FALSE;
+}
+
 /* Handle specifying a directory (excluding Exec, ROM or Sample directory).
    If a directory is chosen, update the associated GtkEntry, and update the
    associated preferences entry */
@@ -705,6 +716,20 @@ on_file_browse_button_clicked (GtkWidget *widget, gpointer user_data)
 		path = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filechooser));
 		
 		gtk_entry_set_text (GTK_ENTRY (path_entry), path);
+
+		/* If we are updating the catver file, this will need to trigger a refresh of the main screen */
+		if (g_ascii_strcasecmp (widget_name, "entry_file-catver") == 0) {
+			gchar *current_val;
+			
+			g_object_get (main_gui.gui_prefs, name, &current_val, NULL);
+			
+			/* If the values are different, trigger the catver file to be loaded */
+			if (g_ascii_strcasecmp (current_val, path) != 0)
+				g_idle_add (on_idle_load_catver, NULL);
+
+			g_free (current_val);
+		}
+		
 		g_object_set (main_gui.gui_prefs, name, path, NULL);
 
 		/* See if the other files can also be set based on this choice */
@@ -976,22 +1001,16 @@ mame_directories_dialog_save_changes (MameDirectoriesDialog *dialog)
 		      NULL);
 	
 	/* GMAMEUI */
-/* FIXME TODO
+/*
 	gchar *catver_path;
 	catver_path = gtk_editable_get_chars (GTK_EDITABLE (catver_path_entry), 0, -1);
-	g_object_set (main_gui.gui_prefs, "file-catver", catver_path, NULL);
 
-	if (g_ascii_strcasecmp (gui_prefs.catverDirectory, catver_path)) {
-		GMAMEUI_DEBUG ("catver path changed from %s to %s",
-			       gui_prefs.catverDirectory,
-			       catver_path);
-		g_free (gui_prefs.catverDirectory);
-		gui_prefs.catverDirectory = g_strdup (catver_path);
+	if (g_ascii_strcasecmp (catver_dir, catver_path) != 0) {
+
+		g_object_set (main_gui.gui_prefs, "file-catver", catver_path, NULL);
+		
 		* Updating with the new catver file *
-		g_list_foreach (game_list.versions, (GFunc)g_free, NULL);
-		g_list_free (game_list.versions);
-		game_list.versions = NULL;
-		load_catver_ini ();
+		g_idle_add (load_catver_ini, NULL);
 
 		* Updating the UI if necessary *
 		Columns_type type;
@@ -1009,8 +1028,8 @@ mame_directories_dialog_save_changes (MameDirectoriesDialog *dialog)
 
 	}
 
-	g_free (catver_path);
-		 */
+	g_free (catver_path);*/
+
 	/* If the ctrlr directory has changed, we reload the default options */
 /* FIXME TODO
 	if (!gtk_editable_get_chars (GTK_EDITABLE (ctrlr_directory_entry), 0, -1)

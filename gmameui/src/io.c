@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -29,6 +29,73 @@
 #include "gmameui.h"
 #include "io.h"
 #include "gui.h"
+#include "gmameui-marshaller.h"
+
+static void gmameui_io_handler_class_init (GMAMEUIIOHandlerClass *klass);
+static void gmameui_io_handler_init (GMAMEUIIOHandler *handler);
+static void gmameui_io_handler_finalize (GObject *obj);
+
+G_DEFINE_TYPE (GMAMEUIIOHandler, gmameui_io_handler, G_TYPE_OBJECT)
+
+/* Signals enumeration */
+enum
+{
+	IO_HANDLER_CATVER_LOADED,    /* Emitted when catver file is specified/toggled */
+	LAST_IO_HANDLER_SIGNAL
+};
+
+static guint signals[LAST_IO_HANDLER_SIGNAL] = { 0 };
+
+struct _GMAMEUIIOHandlerPrivate {
+};
+
+
+static void
+gmameui_io_handler_finalize (GObject *obj)
+{
+	GMAMEUI_DEBUG ("Finalising gmameui_io_handler object");
+	
+	GMAMEUIIOHandler *handler = GMAMEUI_IO_HANDLER (obj);
+	
+// FIXME TODO	g_free (handler->priv);
+	
+	GMAMEUI_DEBUG ("Finalising gmameui_io_handler object... done");
+
+}
+
+static void
+gmameui_io_handler_class_init (GMAMEUIIOHandlerClass *klass)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	
+	object_class->finalize = gmameui_io_handler_finalize;
+
+	/* Signal emitted when catver file is loaded */
+	signals[IO_HANDLER_CATVER_LOADED] = g_signal_new ("catver-loaded",
+						     G_OBJECT_CLASS_TYPE (object_class),
+						     G_SIGNAL_RUN_LAST,
+						     0,		     /* This signal is not handled by the class */
+						     NULL, NULL,     /* Accumulator and accumulator data */
+						     gmameui_marshaller_VOID__VOID,
+						     G_TYPE_NONE,    /* Return type */
+						     0		     /* No parameters */
+	                                             );
+}
+
+static void
+gmameui_io_handler_init (GMAMEUIIOHandler *handler)
+{
+	
+	GMAMEUI_DEBUG ("Creating IO Handler object");	
+	handler->priv = g_new0 (GMAMEUIIOHandlerPrivate, 1);
+
+	GMAMEUI_DEBUG ("Creating IO Handler object... done");
+}
+
+GMAMEUIIOHandler* gmameui_io_handler_new (void)
+{
+	return g_object_new (GMAMEUI_TYPE_IO_HANDLER, NULL);
+}
 
 /*
 converts a float to a string with precission 5.
@@ -221,13 +288,11 @@ save_games_ini (void)
 	return TRUE;
 }
 
-
 gboolean
 load_catver_ini (void)
 { 
 	gchar *filename;
 	GList *romlist, *listpointer;
-	GList *catlist, *verlist;
 	MameRomEntry *tmprom;
 	gchar *category;
 	gchar *version;
@@ -239,27 +304,11 @@ load_catver_ini (void)
 	g_timer_start (timer);
 	
 	romlist = mame_gamelist_get_roms_glist (gui_prefs.gl);
-	catlist = mame_gamelist_get_categories_glist (gui_prefs.gl);
-	verlist = mame_gamelist_get_versions_glist (gui_prefs.gl);
-	
-	/* Initialize categories */
-	if (!catlist) {
-		g_list_foreach (catlist, (GFunc) g_free, NULL);
-		g_list_free (catlist);
-	}
-	
-	/* Initialize versions */
-	if (!verlist) {
-		g_list_foreach (verlist, (GFunc) g_free, NULL);
-		g_list_free (verlist);
-	}
 
-	category = g_strdup (_("Unknown"));
-	catlist = g_list_append (NULL, category);
+	/* Initialize categories and versions */
+	mame_gamelist_clear_catver_lists (gui_prefs.gl);
 
-	version = g_strdup (_("Unknown"));
-	verlist = g_list_append (NULL, version);
-	
+	/* Load the catver file specified in the preferences */
 	g_object_get (main_gui.gui_prefs, "file-catver", &filename, NULL);
 
 	g_return_val_if_fail (filename, FALSE);
@@ -302,6 +351,10 @@ load_catver_ini (void)
 
 		mame_rom_entry_set_category_version (tmprom, category, version);
 	}
+
+	/* Emit signal that the catver file has been loaded to interested
+	   classes (specifically, the filters_list) */
+	g_signal_emit (gui_prefs.io_handler, signals[IO_HANDLER_CATVER_LOADED], 0, NULL);
 	
 	g_key_file_free (catver_file);
 	g_free (category);

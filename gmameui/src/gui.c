@@ -73,8 +73,7 @@ init_gui (void)
 
 	/* Create the main window */
 	MainWindow = create_MainWindow ();
-	if (!MainWindow)
-		return -1;
+	g_return_val_if_fail ((MainWindow != NULL), -1);
 
 	/* Show and hence realize mainwindow so that MainWindow->window is available */
 	gtk_widget_show_all (MainWindow);

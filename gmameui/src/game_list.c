@@ -121,19 +121,14 @@ mame_gamelist_finalize (GObject *obj)
 	GMAMEUI_DEBUG ("Finalising mame_gamelist object");
 	
 	MameGamelist *gl = MAME_GAMELIST (obj);
-	
-	if (gl->priv->name)
-		g_free (gl->priv->name);
-	if (gl->priv->version)
-		g_free (gl->priv->version);
 
-GMAMEUI_DEBUG ("Freeing roms");
+GMAMEUI_DEBUG ("  Freeing roms");
 	if (gl->priv->roms)
 	{
 		g_list_foreach (gl->priv->roms, (GFunc) g_object_unref, NULL);
 		g_list_free (gl->priv->roms);
 	}
-GMAMEUI_DEBUG ("Freeing roms... done");
+GMAMEUI_DEBUG ("  Freeing roms... done");
 	
 	if (gl->priv->years)
 	{
@@ -779,6 +774,23 @@ void mame_gamelist_add_category (MameGamelist *gl, gchar *category) {
 	g_return_if_fail (gl != NULL);
 	
 	glist_insert_unique (&gl->priv->categories, category);
+}
+
+/* This clears both the category and version GLists, usually prior to being reloaded */
+void mame_gamelist_clear_catver_lists (MameGamelist *gl) {
+	g_return_if_fail (gl != NULL);
+
+	if (gl->priv->versions) {
+		g_list_foreach (gl->priv->versions, (GFunc) g_free, NULL);
+		g_list_free (gl->priv->versions);
+		gl->priv->versions = NULL;
+	}
+
+	if (gl->priv->categories) {
+		g_list_foreach (gl->priv->categories, (GFunc) g_free, NULL);
+		g_list_free (gl->priv->categories);
+		gl->priv->categories = NULL;
+	}
 }
 
 void mame_gamelist_add_manufacturer (MameGamelist *gl, gchar *manufacturer) {

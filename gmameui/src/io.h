@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -23,10 +23,39 @@
 #ifndef __IO_H__
 #define __IO_H__
 
+G_BEGIN_DECLS
+
 #include "common.h"
 
 #include <glib.h>
 #include <stdio.h>
+
+#define GMAMEUI_TYPE_IO_HANDLER            (gmameui_io_handler_get_type ())
+#define GMAMEUI_IO_HANDLER(o)            (G_TYPE_CHECK_INSTANCE_CAST((o), GMAMEUI_TYPE_IO_HANDLER, GMAMEUIIOHandler))
+#define GMAMEUI_IO_HANDLER_CLASS(k)    (G_TYPE_CHECK_CLASS_CAST ((k), GMAMEUI_TYPE_IO_HANDLER, GMAMEUIIOHandlerClass))
+#define GMAMEUI_IS_IO_HANDLER(o)         (G_TYPE_CHECK_INSTANCE_TYPE ((o), GMAMEUI_TYPE_IO_HANDLER))
+#define GMAMEUI_IS_IO_HANDLER_CLASS(k) (G_TYPE_CHECK_CLASS_TYPE ((k), GMAMEUI_TYPE_IO_HANDLER))
+#define GMAMEUI_IO_HANDLER_GET_CLASS(o)  (G_TYPE_INSTANCE_GET_CLASS ((o), GMAMEUI_TYPE_IO_HANDLER, GMAMEUIIOHandlerClass))
+
+typedef struct _GMAMEUIIOHandler GMAMEUIIOHandler;
+typedef struct _GMAMEUIIOHandlerClass GMAMEUIIOHandlerClass;
+typedef struct _GMAMEUIIOHandlerPrivate GMAMEUIIOHandlerPrivate;
+
+struct _GMAMEUIIOHandler {
+	GObject parent;
+	
+	GMAMEUIIOHandlerPrivate *priv;
+	/* define public instance variables here */
+};
+
+struct _GMAMEUIIOHandlerClass {
+	GObjectClass parent;
+	/* define vtable methods and signals here */
+
+};
+
+GType gmameui_io_handler_get_type (void);
+GMAMEUIIOHandler* gmameui_io_handler_new (void);
 
 #define FLOAT_BUF_SIZE G_ASCII_DTOSTR_BUF_SIZE
 const gchar *
@@ -55,5 +84,7 @@ check_rom_exists_as_file (gchar *romname);
 
 gboolean
 check_samples_exists_as_file (gchar *samplename);
+
+G_END_DECLS
 
 #endif /* __IO_H__ */

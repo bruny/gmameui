@@ -101,6 +101,8 @@ main (int argc, char *argv[])
 
 		//g_message (_("Time to load games ini: %.02f seconds"), g_timer_elapsed (mytimer, NULL));
 
+		/* Loading the catver file triggers the filters to be added to the
+		   filter list, so the catver filters are added after the default ones */
 		if (!load_catver_ini ())
 			g_message (_("catver not loaded, using default values"));
 	}
@@ -223,6 +225,9 @@ g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NUL
 
 	/* Create a new audit object */
 	gui_prefs.audit = gmameui_audit_new ();
+
+	/* Create a new IO Handler object */
+	gui_prefs.io_handler = gmameui_io_handler_new ();
 	
 	/* Initialise the gamelist */
 	gui_prefs.gl = mame_gamelist_new ();
@@ -831,7 +836,7 @@ exit_gmameui (void)
 {
 	g_message (_("Exiting GMAMEUI..."));
 
-	save_games_ini ();
+	save_games_ini ();      /* FIXME TODO Remove when we save the gamelist after each update */
 
 	joystick_close (joydata);
 	joydata = NULL;

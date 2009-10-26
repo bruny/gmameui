@@ -23,7 +23,7 @@
 
 G_BEGIN_DECLS
 
-#include <gtk/gtk.h>
+#include <gtk/gtk.h>	/* TODO Move to gui_prefs_dialog.h, along with function prototype below */
 
 /* Preferences object */
 #define MAME_TYPE_GUI_PREFS            (mame_gui_prefs_get_type ())

@@ -74,11 +74,12 @@ gmameui_filter_finalize (GObject *obj)
 	GMAMEUIFilter *fl = GMAMEUI_FILTER (obj);
 	
 	g_free (fl->priv->name);
-	g_object_unref (fl->priv->pixbuf);
+	g_free (fl->priv->value);
+
+	/* pixbuf doesn't need to be unref'd as long as it is unref'd when being
+	   added to the GtkTreeModel */
 	
-	g_object_unref (fl->priv);
-	
-	((GObjectClass *) gmameui_filter_parent_class)->finalize (obj);
+//	((GObjectClass *) gmameui_filter_parent_class)->finalize (obj);
 	GMAMEUI_DEBUG ("Freeing filter - done");
 }
 
