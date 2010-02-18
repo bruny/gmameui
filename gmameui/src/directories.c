@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -383,7 +383,7 @@ GMAMEUI_DEBUG ("Creating new directories dialog...");
 			  G_CALLBACK (remove_path_from_tree_view), priv->roms_path_tree_view);
 
 	/* Callbacks for adding/removing sample paths */
-	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "samples_remove_button"));
+	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "samples_add_button"));
 	g_signal_connect (G_OBJECT (widget), "clicked",
 			  G_CALLBACK (add_path_to_tree_view), priv->samples_path_tree_model);
 	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "samples_remove_button"));
@@ -787,7 +787,8 @@ add_path_to_tree_view (GtkWidget *button, gpointer user_data)
 						    0, temp_text,
 						    -1);
 
-			}
+			} else
+				GMAMEUI_DEBUG ("Trying to add %s to the tree model but it already exists");
 
 			g_free (temp_text);
 			break;

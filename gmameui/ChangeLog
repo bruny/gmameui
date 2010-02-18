@@ -1,3 +1,11 @@
+2010-02-18 22:55 adburton
+
+	* data/directories.builder, src/directories.c: Fix Add Samples
+	  button in Directories window
+	* data/: sidebar.glade, sidebar.builder, Makefile.am: 
+	  po/POTFILES.in, src/gmameui-sidebar.c:
+	  Migrate to GtkBuilder from libglade
+
 2009-10-26 20:10 adburton
 
 	* data/gmameui_prefs.builder, data/Makefile.am, po/POTFILES.in,

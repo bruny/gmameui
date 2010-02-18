@@ -43,5 +43,5 @@ data/filter_bar.glade
 data/options.glade
 data/options_legacy.glade
 [type: gettext/glade]data/rom_info.builder
-data/sidebar.glade
+[type: gettext/glade]data/sidebar.builder
 gmameui.desktop.in

@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -24,7 +24,6 @@
 #include "common.h"
 
 #include <string.h>
-#include <glade/glade.h>
 
 #include "gmameui-sidebar.h"
 #include "gmameui.h"
@@ -51,6 +50,8 @@ typedef struct {
 
 
 struct _GMAMEUISidebarPrivate {
+
+	GtkBuilder *builder;
 
 	GtkWidget *screenshot_hist_vbox;
 	GtkWidget *screenshot_event_box;
@@ -596,12 +597,30 @@ on_image_container_resized (GtkWidget *widget, GtkAllocation *allocation, gpoint
 static void
 gmameui_sidebar_init (GMAMEUISidebar *sidebar)
 {
-	GladeXML *xml;
+	GtkBuilder *builder;
+	GError* error = NULL;
 	int i;
+	
+	const gchar *object_names[] = {
+		"screenshot_notebook",
+		"history_scrollwin"
+	};
 	
 GMAMEUI_DEBUG ("Creating sidebar");
 
 	sidebar->priv = g_new0 (GMAMEUISidebarPrivate, 1);
+
+	sidebar->priv->builder = gtk_builder_new ();
+	gtk_builder_set_translation_domain (sidebar->priv->builder, GETTEXT_PACKAGE);
+	
+	if (!gtk_builder_add_objects_from_file (sidebar->priv->builder,
+	                                        GLADEDIR "sidebar.builder",
+	                                        (gchar **) object_names,
+	                                        &error)) {
+		g_warning ("Couldn't load builder file: %s", error->message);
+		g_error_free (error);
+		return;
+	}
 	
 	sidebar->priv->main_screenshot = gmameui_get_image_from_stock ("gmameui-screen");
 /* FIXME TODO
@@ -614,7 +633,6 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	gtk_widget_show (sidebar->priv->screenshot_event_box);
 	gtk_widget_show (sidebar->priv->main_screenshot);
 */	
-	xml = glade_xml_new (GLADEDIR "sidebar.glade", "screenshot_notebook", GETTEXT_PACKAGE);
 	
 	sidebar->priv->screenshot_hist_vbox = gtk_vbox_new (FALSE, 6);
 	gtk_container_set_border_width (GTK_CONTAINER (sidebar->priv->screenshot_hist_vbox), 6);
@@ -622,7 +640,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 			   GTK_WIDGET (sidebar->priv->screenshot_hist_vbox));
 	gtk_widget_show (GTK_WIDGET (sidebar->priv->screenshot_hist_vbox));
 	
-	sidebar->priv->screenshot_notebook = glade_xml_get_widget (xml, "screenshot_notebook");
+	sidebar->priv->screenshot_notebook = GTK_WIDGET (gtk_builder_get_object (sidebar->priv->builder, "screenshot_notebook"));
 	gtk_box_pack_start (GTK_BOX (sidebar->priv->screenshot_hist_vbox),
 			    sidebar->priv->screenshot_notebook,
 			    TRUE, TRUE, 0);
@@ -635,7 +653,7 @@ GMAMEUI_DEBUG ("Creating sidebar");
 
 		/* Set a default picture */
 		sidebar->priv->gmameui_picture_type[i].image = gmameui_get_image_from_stock ("gmameui-screen");
-		sidebar->priv->gmameui_picture_type[i].image_box = glade_xml_get_widget (xml, widget_name);
+		sidebar->priv->gmameui_picture_type[i].image_box = GTK_WIDGET (gtk_builder_get_object (sidebar->priv->builder, widget_name));
 		
 		/* Add the GtkImage to the GtkBox container */
 		GMAMEUI_DEBUG ("Adding image to container %s", widget_name);
@@ -654,17 +672,15 @@ GMAMEUI_DEBUG ("Creating sidebar");
 	g_signal_connect (G_OBJECT (sidebar->priv->screenshot_notebook), "switch-page",
 			    G_CALLBACK (on_screenshot_notebook_switch_page),
 			    NULL);
-
-	xml = glade_xml_new (GLADEDIR "sidebar.glade", "history_scrollwin", GETTEXT_PACKAGE);
 	
 	/* here we create the history box that will be filled later */
-	sidebar->priv->history_scrollwin = glade_xml_get_widget (xml, "history_scrollwin");
+	sidebar->priv->history_scrollwin = GTK_WIDGET (gtk_builder_get_object (sidebar->priv->builder, "history_scrollwin"));
 	gtk_box_pack_end (GTK_BOX (sidebar->priv->screenshot_hist_vbox),
 			  sidebar->priv->history_scrollwin,
 			  TRUE, TRUE, 5);
 
 	sidebar->priv->history_buffer = gtk_text_buffer_new (NULL);
-	sidebar->priv->history_box = glade_xml_get_widget (xml, "history_box");
+	sidebar->priv->history_box = GTK_WIDGET (gtk_builder_get_object (sidebar->priv->builder, "history_box"));
 	gtk_text_view_set_buffer (GTK_TEXT_VIEW (sidebar->priv->history_box),
 				  sidebar->priv->history_buffer);
 	
