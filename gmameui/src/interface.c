@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -26,7 +26,6 @@
 #include <unistd.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtkvbox.h>
-#include <glade/glade.h>
 #include <glib-object.h>	/* For GParamSpec */
 
 #include "callbacks.h"
@@ -98,16 +97,16 @@ on_filter_btn_toggled (GtkWidget *widget, gpointer user_data)
 }
 
 static GtkWidget *
-get_filter_btn_by_id (GladeXML *xml, gint i)
+get_filter_btn_by_id (GtkBuilder *builder, gint i)
 {
 	GtkWidget *radio = NULL;
 	
 	if (i == 0)
-		radio = glade_xml_get_widget (xml, "filter_btn_all");
+		radio = GTK_WIDGET (gtk_builder_get_object (builder, "filter_btn_all"));
 	else if (i == 1)
-		radio = glade_xml_get_widget (xml, "filter_btn_avail");
+		radio = GTK_WIDGET (gtk_builder_get_object (builder, "filter_btn_avail"));
 	else if (i == 2)
-		radio = glade_xml_get_widget (xml, "filter_btn_unavail");
+		radio = GTK_WIDGET (gtk_builder_get_object (builder, "filter_btn_unavail"));
 
 	return radio;
 }
@@ -223,6 +222,7 @@ on_view_type_changed (GtkToggleAction *action, gpointer user_data)
 	}	 
 }
 
+/* FIXME TODO Move to GtkObject for main window */
 GtkWidget *
 create_MainWindow (void)
 {
@@ -231,18 +231,24 @@ create_MainWindow (void)
 	GtkTooltips *tooltips;
 	
 	GtkActionGroup *action_group;
-	GError *error = NULL;
-	
 	GtkWidget *menubar;
 	
 	GtkWidget *main_window;
 	GtkWidget *vbox;
+	GtkBuilder *builder;
 	
 	gint ui_width, ui_height;
 	gint xpos_filters, xpos_gamelist;
 	gint show_filters, show_screenshot, show_flyer;
 	gint show_statusbar, show_toolbar;
 	gint current_mode;
+
+	GError *error = NULL;
+
+	const gchar *object_names[] = {
+		"filter_hbox",
+	};
+	
 GMAMEUI_DEBUG ("Setting up main window...");
 	g_object_get (main_gui.gui_prefs,
 		      "ui-width", &ui_width,
@@ -256,12 +262,20 @@ GMAMEUI_DEBUG ("Setting up main window...");
 		      "xpos-filters", &xpos_filters,
 		      "xpos-gamelist", &xpos_gamelist,
 		      NULL);
+
+	builder = gtk_builder_new ();
+	gtk_builder_set_translation_domain (builder, GETTEXT_PACKAGE);
 	
-	GladeXML *xml = glade_xml_new (GLADEDIR "filter_bar.glade", "filter_hbox", GETTEXT_PACKAGE);
-	if (!xml) {
-		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "filter_bar.glade");
+	if (!gtk_builder_add_objects_from_file (builder,
+	                                        GLADEDIR "filter_bar.builder",
+	                                        (gchar **) object_names,
+	                                        &error))
+	{
+		g_warning ("Couldn't load builder file: %s", error->message);
+		g_error_free (error);
 		return NULL;
 	}
+	
 	main_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	g_object_set_data (G_OBJECT (main_window), "MainWindow", main_window);
 	
@@ -413,7 +427,7 @@ GMAMEUI_DEBUG ("Setting up main window...");
 	/* Set up the search field */
 GMAMEUI_DEBUG ("    Setting up search entry field...");
 	GtkWidget *search_box;
-	search_box = glade_xml_get_widget (xml, "filter_hbox");
+	search_box = GTK_WIDGET (gtk_builder_get_object (builder, "filter_hbox"));
 	main_gui.search_entry = mame_search_entry_new ();
 	
 	/* In order to pack before the filter buttons, their pack must be set to End */
@@ -423,27 +437,37 @@ GMAMEUI_DEBUG ("    Setting up search entry field... done");
 
 	/* Prepare the ROM availability filter buttons */
 GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons...");
-	GList *filter_btn_list, *list;
+	GSList *filter_btn_list, *list;
 	gint current_filter_btn;
 	
-	filter_btn_list = glade_xml_get_widget_prefix (xml, "filter_btn_");
+	filter_btn_list = gtk_builder_get_objects (builder);
+	list = g_slist_nth (filter_btn_list, 0);
 	g_object_get (main_gui.gui_prefs, "current-rom-filter", &current_filter_btn, NULL);
 
-	for (list = g_list_first (filter_btn_list);
-	     list != NULL;
-	     list = g_list_next (list)) {	
-		/* Hide the radio circle so only the button is visible */
-		gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (list->data), FALSE);
+	while (list) {
+		GtkWidget *widget;
+		const gchar *name;
+		
+		widget = list->data;
 
-		/* Set the signal callback */
-		g_signal_connect (G_OBJECT (list->data), "toggled",
-				  G_CALLBACK (on_filter_btn_toggled), NULL);
+		name = gtk_widget_get_name (widget);
+		
+		if (g_ascii_strncasecmp (name, "filter_btn_", 11) == 0) {
+			/* Hide the radio circle so only the button is visible */
+			gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (list->data), FALSE);
+
+			/* Set the signal callback */
+			g_signal_connect (G_OBJECT (list->data), "toggled",
+			                  G_CALLBACK (on_filter_btn_toggled), NULL);
+		}
+		
+		list = g_slist_next (list);
 	}
 
 	/* Set the button based on the preference */
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (get_filter_btn_by_id (xml,
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (get_filter_btn_by_id (builder,
 	                                                                       current_filter_btn)),
-				      TRUE);
+	                              TRUE);
 GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons... done");	
 	/* End ROM availability filter buttons */
 	

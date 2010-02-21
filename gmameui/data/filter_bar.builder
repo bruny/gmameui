@@ -1,58 +1,58 @@
 <?xml version="1.0"?>
-<glade-interface>
-  <!-- interface-requires gtk+ 2.16 -->
+<interface>
+  <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
-  <widget class="GtkWindow" id="window1">
+  <object class="GtkWindow" id="window1">
     <child>
-      <widget class="GtkHBox" id="filter_hbox">
+      <object class="GtkHBox" id="filter_hbox">
         <property name="visible">True</property>
         <property name="spacing">6</property>
         <child>
           <placeholder/>
         </child>
         <child>
-          <widget class="GtkRadioButton" id="filter_btn_unavail">
+          <object class="GtkRadioButton" id="filter_btn_unavail">
             <property name="label" translatable="yes">Unavailable ROMs</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="draw_indicator">True</property>
             <property name="group">filter_btn_all</property>
-          </widget>
+          </object>
           <packing>
             <property name="pack_type">end</property>
             <property name="position">4</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkRadioButton" id="filter_btn_avail">
+          <object class="GtkRadioButton" id="filter_btn_avail">
             <property name="label" translatable="yes">Available ROMs</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="draw_indicator">True</property>
             <property name="group">filter_btn_all</property>
-          </widget>
+          </object>
           <packing>
             <property name="pack_type">end</property>
             <property name="position">3</property>
           </packing>
         </child>
         <child>
-          <widget class="GtkRadioButton" id="filter_btn_all">
+          <object class="GtkRadioButton" id="filter_btn_all">
             <property name="label" translatable="yes">All ROMs</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="active">True</property>
             <property name="draw_indicator">True</property>
-          </widget>
+          </object>
           <packing>
             <property name="pack_type">end</property>
             <property name="position">2</property>
           </packing>
         </child>
-      </widget>
+      </object>
     </child>
-  </widget>
-</glade-interface>
+  </object>
+</interface>

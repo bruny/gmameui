@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2009-2010 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>
  *
  */
-#include <glade/glade.h>
 
 #include "common.h"
 #include "gmameui-search-entry.h"

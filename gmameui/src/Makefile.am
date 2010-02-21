@@ -38,6 +38,7 @@ gmameui_SOURCES = \
 	mame_options_dialog.c mame_options_dialog.h \
 	mame_options_legacy.c mame_options_legacy.h \
 	mame_options_legacy_dialog.c mame_options_legacy_dialog.h \
+	mame_options_dialog_helper.c mame_options_dialog_helper.h \
 	cell-renderer-captioned-image.c cell-renderer-captioned-image.h \
 	filters_list.c filters_list.h \
 	filter.c filter.h \

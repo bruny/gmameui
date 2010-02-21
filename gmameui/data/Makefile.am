@@ -3,9 +3,9 @@ glade_DATA =    audit_window.glade \
 		directories.builder \
 		sidebar.builder \
 		gmameui_prefs.builder \
-		options.glade \
-		options_legacy.glade \
+		options.builder \
+		options_legacy.builder \
 		rom_info.builder \
-		filter_bar.glade 
+		filter_bar.builder 
 
 EXTRA_DIST = $(glade_DATA)

@@ -597,9 +597,8 @@ on_image_container_resized (GtkWidget *widget, GtkAllocation *allocation, gpoint
 static void
 gmameui_sidebar_init (GMAMEUISidebar *sidebar)
 {
-	GtkBuilder *builder;
-	GError* error = NULL;
 	int i;
+	GError* error = NULL;
 	
 	const gchar *object_names[] = {
 		"screenshot_notebook",

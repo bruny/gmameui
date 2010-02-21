@@ -1,3 +1,19 @@
+2010-02-21 13:20 adburton
+
+	* data/: options.builder, options_legacy.builder, options.glade,
+	  options_legacy.glade, filter_bar.glade, filter_bar.builder, Makefile.am:
+	  po/: POTFILES.in:
+	  Delete redundant Glade files, add Builder files, migrate to GtkBuilder
+	  from libglade
+	* src/: mame_options_dialog_helper.h, mame_options_dialog_helper.c,
+	  mame_options_dialog.c, mame_options_legacy_dialog.c, interface.c,
+	  Makefile.am:
+	  Migrate to GtkBuilder from libglade, move common code to helper file
+	* src/gmameui-sidebar.c: Move GError declaration to avoid segfault
+	* src/gmameui-search-entry.c: Remove Glade header include
+	* data/: sidebar.builder
+	* INSTALL: Update list of library dependencies
+
 2010-02-18 22:55 adburton
 
 	* data/directories.builder, src/directories.c: Fix Add Samples
