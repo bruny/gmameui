@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -31,7 +31,6 @@
 #include <sys/wait.h>   /* For WIF* */
 #include <signal.h>      /* For SIGTERM */
 #include <gdk/gdkkeysyms.h>
-#include <glade/glade.h>
 
 #include "gui.h"
 #include "audit.h"
@@ -554,6 +553,7 @@ mame_audit_start_full (void)
 
 	if (!option_name) {
 		gmameui_message (ERROR, NULL, _("Don't know how to verify roms with this version of xmame."));
+		/* FIXME TODO Should return an error code so we can cancel the audit */
 		return;
 	}
 

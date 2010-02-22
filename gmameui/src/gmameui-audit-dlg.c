@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -23,8 +23,6 @@
 
 #include "common.h"
 
-#include <glade/glade.h>
-
 #include "gmameui.h"			/* Contains the GmameuiAudit object */
 #include "gui.h"			/* For main_gui */
 #include "audit.h"
@@ -32,7 +30,7 @@
 #include "gmameui-audit-dlg.h"
 
 struct _MameAuditDialogPrivate {
-	GladeXML *xml;
+	GtkBuilder *builder;
 
 	/* Label for presenting details of current audit activity */
 	GtkWidget *checking_games_label;
@@ -159,8 +157,13 @@ mame_audit_dialog_init (MameAuditDialog *dialog)
 	
 	gint size;
 	PangoFontDescription *font_desc;
-	
 	int i;
+
+	GError* error = NULL;
+
+	const gchar *object_names[] = {
+		"vbox1"
+	};
 	
 	priv = G_TYPE_INSTANCE_GET_PRIVATE (dialog,
 					    MAME_TYPE_AUDIT_DIALOG,
@@ -181,14 +184,20 @@ mame_audit_dialog_init (MameAuditDialog *dialog)
 	/* Done initialising private variables */
 	
 	/* Build the UI and connect signals here */
-	priv->xml = glade_xml_new (GLADEDIR "audit_window.glade", "vbox1", GETTEXT_PACKAGE);
-	if (!priv->xml) {
-		GMAMEUI_DEBUG ("Could not open Glade file %s", GLADEDIR "audit_window.glade");
+	priv->builder = gtk_builder_new ();
+	gtk_builder_set_translation_domain (priv->builder, GETTEXT_PACKAGE);
+	
+	if (!gtk_builder_add_objects_from_file (priv->builder,
+	                                        GLADEDIR "audit_window.builder",
+	                                        (gchar **) object_names,
+	                                        &error)) {
+		g_warning ("Couldn't load builder file: %s", error->message);
+		g_error_free (error);
 		return;
 	}
 
 	/* Get the dialog contents */
-	audit_vbox = glade_xml_get_widget (priv->xml, "vbox1");
+	audit_vbox = GTK_WIDGET (gtk_builder_get_object (priv->builder, "vbox1"));
 
 	/* Add our dialog contents to the vbox of the dialog class */
 	gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->vbox),
@@ -202,7 +211,7 @@ mame_audit_dialog_init (MameAuditDialog *dialog)
 	gtk_dialog_set_has_separator (GTK_DIALOG (dialog), FALSE);
 	
 	/* Set the main text in the dialog to be large and bold */
-	label1 = glade_xml_get_widget (priv->xml, "label1");
+	label1 = GTK_WIDGET (gtk_builder_get_object (priv->builder, "label1"));
 	size = pango_font_description_get_size (label1->style->font_desc);
 	font_desc = pango_font_description_new ();
 	pango_font_description_set_weight (font_desc, PANGO_WEIGHT_BOLD);
@@ -212,41 +221,42 @@ mame_audit_dialog_init (MameAuditDialog *dialog)
 
 	/* Text view for audit results */
 	priv->details_check_buffer = gtk_text_buffer_new (NULL);
-	priv->details_check_text = glade_xml_get_widget (priv->xml, "details_check_text");
+	priv->details_check_text = GTK_WIDGET (gtk_builder_get_object (priv->builder, "details_check_text"));
 	gtk_text_view_set_buffer (GTK_TEXT_VIEW (priv->details_check_text), priv->details_check_buffer);
 	
 	/* Label to present name of currently-processing ROM */
-	priv->checking_games_label = glade_xml_get_widget (priv->xml, "checking_games_label");
+	priv->checking_games_label = GTK_WIDGET (gtk_builder_get_object (priv->builder, "checking_games_label"));
 #if GTK_CHECK_VERSION(2,6,0)
 	gtk_label_set_ellipsize (GTK_LABEL (priv->checking_games_label), PANGO_ELLIPSIZE_MIDDLE);
 #endif
 	ngmameui_audit_window_set_details_label (dialog, _("Auditing MAME ROMs"));
 	
 	/* Labels for the running audit totals */
-	priv->correct_roms_value = glade_xml_get_widget (priv->xml, "correct_roms_value");
-	priv->bestavailable_roms_value = glade_xml_get_widget (priv->xml, "bestavailable_roms_value");
-	priv->incorrect_roms_value = glade_xml_get_widget (priv->xml, "incorrect_roms_value");
-	priv->notfound_roms_value = glade_xml_get_widget (priv->xml, "notfound_roms_value");
-	priv->total_roms_value = glade_xml_get_widget (priv->xml, "total_roms_value");
+	priv->correct_roms_value = GTK_WIDGET (gtk_builder_get_object (priv->builder, "correct_roms_value"));
+	priv->bestavailable_roms_value = GTK_WIDGET (gtk_builder_get_object (priv->builder, "bestavailable_roms_value"));
+	priv->incorrect_roms_value = GTK_WIDGET (gtk_builder_get_object (priv->builder, "incorrect_roms_value"));
+	priv->notfound_roms_value = GTK_WIDGET (gtk_builder_get_object (priv->builder, "notfound_roms_value"));
+	priv->total_roms_value = GTK_WIDGET (gtk_builder_get_object (priv->builder, "total_roms_value"));
 
-	priv->correct_samples_value = glade_xml_get_widget (priv->xml, "correct_samples_value");
-	priv->incorrect_samples_value = glade_xml_get_widget (priv->xml, "incorrect_samples_value");
-	priv->notfound_samples_value = glade_xml_get_widget (priv->xml, "notfound_samples_value");
-	priv->total_samples_value = glade_xml_get_widget (priv->xml, "total_samples_value");
+	priv->correct_samples_value = GTK_WIDGET (gtk_builder_get_object (priv->builder, "correct_samples_value"));
+	priv->incorrect_samples_value = GTK_WIDGET (gtk_builder_get_object (priv->builder, "incorrect_samples_value"));
+	priv->notfound_samples_value = GTK_WIDGET (gtk_builder_get_object (priv->builder, "notfound_samples_value"));
+	priv->total_samples_value = GTK_WIDGET (gtk_builder_get_object (priv->builder, "total_samples_value"));
 	
 	/* Set the progress bar to pulse every 100 ms. MAME no longer reports
 	   missing ROMs, so its harder to estimate total progress */
-	priv->pbar = (GtkProgressBar*) glade_xml_get_widget (priv->xml, "progressbar1");
+	priv->pbar = (GtkProgressBar*) GTK_WIDGET (gtk_builder_get_object (priv->builder, "progressbar1"));
 	priv->timer = gdk_threads_add_timeout (100, progress_timeout, priv->pbar);
 	
 	/* Buttons */
 	priv->stop_audit_button = gtk_dialog_add_button (GTK_DIALOG (dialog),
-													 GTK_STOCK_STOP,
-													 GTK_RESPONSE_REJECT);
+	                                                 GTK_STOCK_STOP,
+	                                                 GTK_RESPONSE_REJECT);
 		
 	priv->close_audit_button = gtk_dialog_add_button (GTK_DIALOG (dialog),
-													  GTK_STOCK_CLOSE,
-													  GTK_RESPONSE_CLOSE);
+	                                                  GTK_STOCK_CLOSE,
+	                                                  GTK_RESPONSE_CLOSE);
+	
 	gtk_widget_set_sensitive (priv->close_audit_button, FALSE);
 		
 	/* Signal emitted whenever the audit process processes a romset or sampleset line */
@@ -263,7 +273,8 @@ mame_audit_dialog_init (MameAuditDialog *dialog)
 	
 	/* We also need to initiate the audit process */
 	/* FIXME TODO Do this in g_idle_add? */
-	/* FIXME TODO Add return value which, if failed, stops the throbber, and shows an error message */
+	/* FIXME TODO Add return value which, if failed, stops the throbber, and shows an error message 
+	 this is required if the audit doesn't know which command to trigger it */
 	mame_audit_start_full ();
 }
 
@@ -352,8 +363,8 @@ mame_audit_dialog_destroy (GtkObject *object)
 GMAMEUI_DEBUG ("Destroying mame audit dialog...");	
 	dlg = MAME_AUDIT_DIALOG (object);
 	
-	if (dlg->priv->xml)
-		g_object_unref (dlg->priv->xml);
+	if (dlg->priv->builder)
+		g_object_unref (dlg->priv->builder);
 	
 	g_object_unref (dlg->priv);
 	

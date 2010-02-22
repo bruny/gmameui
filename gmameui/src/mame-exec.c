@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2008-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2008-2010 Andrew Burton <adb@iinet.net.au>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -693,10 +693,28 @@ const gchar *
 mame_get_option_name (const MameExec *exec,
 		       const gchar           *option_name)
 {
-	const MameOption *opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
-	if (!opt)
-		return NULL;
+	const MameOption *opt;
 
+	GMAMEUI_DEBUG ("Checking whether %s is supported under %s (%s)...",
+	               option_name,
+	               mame_exec_get_name (exec),
+	               mame_exec_get_version (exec));
+
+	/* If the Executable has no options hash table,
+	   then implicitly create it */
+	if (!exec->priv->supported_options)
+		exec->priv->supported_options = mame_get_options (exec);
+	
+	g_return_val_if_fail (exec->priv->supported_options != NULL, NULL);
+	
+	opt = g_hash_table_lookup (exec->priv->supported_options, option_name);
+	if (!opt) {
+		GMAMEUI_DEBUG ("    ... no");
+		return NULL;
+	}
+
+	GMAMEUI_DEBUG ("    ... yes");
+	
 	return opt->name;
 }
 
@@ -1194,9 +1212,11 @@ mame_get_options (MameExec *exec)
 
 	g_return_val_if_fail (exec != NULL, NULL);
 
+	/* If the hash table of supported options exists, return it */
 	if (exec->priv->supported_options)
 		return exec->priv->supported_options;
 
+	/* ... otherwise create it */
 	GMAMEUI_DEBUG (_("Getting list of valid MAME options using parameter %s"), exec->priv->showusage_option);
 	
 	xmame_pipe = mame_open_pipe (exec, "-%s", exec->priv->showusage_option);
@@ -1436,7 +1456,7 @@ mame_exec_init (MameExec *exec)
 	exec->priv->name = NULL;
 	exec->priv->version = NULL;
 	exec->priv->target = NULL;
-	exec->priv->target = NULL;
+	exec->priv->path = NULL;
 
 	exec->priv->noloadconfig_option = noloadconfig_option_name[0];
 	exec->priv->showusage_option = showusage_option_name[0];

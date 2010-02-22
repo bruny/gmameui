@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -26,8 +26,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
-
-#include <glade/glade.h>
 
 #include "gmameui.h"
 #include "gui.h"
@@ -338,11 +336,6 @@ gamelist_popupmenu_show (GdkEventButton *event)
 
 	popup_menu = gtk_ui_manager_get_widget (main_gui.manager, "/GameListPopup");
 	g_return_if_fail (popup_menu != NULL);
-
-	MameExec *exec = mame_exec_list_get_current_executable (main_gui.exec_list);
-	if (exec)
-		mame_get_options (exec);
-	
 
 	gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,
 			NULL, NULL,

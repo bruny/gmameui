@@ -36,12 +36,12 @@ src/rom_entry.h
 src/gmameui-zip-utils.c
 src/xmame_options.c
 src/gmameui-ui.xml
-data/audit_window.glade
+[type: gettext/glade]data/audit_window.builder
 [type: gettext/glade]data/directories.builder
-data/filter_bar.glade
+[type: gettext/glade]data/filter_bar.builder
 [type: gettext/glade]data/gmameui_prefs.builder
-data/options.glade
-data/options_legacy.glade
+[type: gettext/glade]data/options.builder
+[type: gettext/glade]data/options_legacy.builder
 [type: gettext/glade]data/rom_info.builder
 [type: gettext/glade]data/sidebar.builder
 gmameui.desktop.in

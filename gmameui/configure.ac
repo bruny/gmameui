@@ -30,10 +30,6 @@ PKG_CHECK_MODULES(VTE, vte, [], AC_MSG_ERROR([libvte-dev not found!]))
 AC_SUBST(VTE_CFLAGS)
 AC_SUBST(VTE_LIBS)
 
-PKG_CHECK_MODULES(GLADE2, libglade-2.0, [], AC_MSG_ERROR([*** libglade2 not found!]))
-AC_SUBST(GLADE2_CFLAGS)
-AC_SUBST(GLADE2_LIBS)
-
 dnl Need to add a way to not build using libgnome if user is using XFCE for e.g.
 dnl or if GTK2.13 is available, since libgnome is only used to spawn Help
 AC_ARG_ENABLE(libgnome,

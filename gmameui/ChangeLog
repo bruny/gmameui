@@ -1,3 +1,17 @@
+2010-02-22 20:20 adburton
+
+	* data/: audit_window.glade, audit_window.builder, Makefile.am:
+	  src/gmameui_audit_dlg.c, po/POTFILES.in:
+	  Migrate from libglade to GtkBuilder
+	* configure.ac: Remove libglade dependency
+	* src/gui.c: Remove Glade header include, move options hash table
+	  create from popup menu display
+	* src/audit.c: Remove Glade header include
+	* src/mame-exec.c: Create options hash table if it doesn't exist when
+	  checking whether executable supports option
+	* data/rom_info.builder, src/gmameui-rominfo-dlg.c: Move VteTerminal
+	  creation outside Glade/GtkBuilder into code (used to work... stupid Glade)
+
 2010-02-21 13:20 adburton
 
 	* data/: options.builder, options_legacy.builder, options.glade,

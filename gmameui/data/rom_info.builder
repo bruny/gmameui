@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <interface>
   <!-- interface-requires gtk+ 2.6 -->
-  <!-- interface-requires vte 0.0 -->
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkDialog" id="dialog1">
     <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -40,6 +39,7 @@
                   <object class="GtkNotebook" id="notebook1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="tab_hborder">6</property>
                     <child>
                       <object class="GtkVBox" id="vbox1">
                         <property name="visible">True</property>
@@ -689,21 +689,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkScrolledWindow" id="scrolledwindow1">
+                      <object class="GtkScrolledWindow" id="scrolledwindow_audit">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="hscrollbar_policy">automatic</property>
-                        <child>
-                          <object class="VteTerminal" id="vte_audit">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="background_tint_color">#000000000000</property>
-                            <property name="encoding">UTF-8</property>
-                            <property name="scrollback_lines">500</property>
-                            <property name="scroll_on_keystroke">True</property>
-                            <property name="scroll_on_output">False</property>
-                          </object>
-                        </child>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -967,22 +956,11 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkScrolledWindow" id="scrolledwindow2">
+                                  <object class="GtkScrolledWindow" id="scrolledwindow_brothers">
+                                    <property name="height_request">200</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="hscrollbar_policy">automatic</property>
-                                    <child>
-                                      <object class="VteTerminal" id="vte_brothers">
-                                        <property name="height_request">200</property>
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="background_tint_color">#000000000000</property>
-                                        <property name="encoding">UTF-8</property>
-                                        <property name="scrollback_lines">500</property>
-                                        <property name="scroll_on_keystroke">True</property>
-                                        <property name="scroll_on_output">False</property>
-                                      </object>
-                                    </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -1034,21 +1012,11 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkScrolledWindow" id="scrolledwindow3">
+                                  <object class="GtkScrolledWindow" id="scrolledwindow_clones">
+                                    <property name="height_request">200</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="hscrollbar_policy">automatic</property>
-                                    <child>
-                                      <object class="VteTerminal" id="vte_clones">
-                                        <property name="height_request">200</property>
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="background_tint_color">#000000000000</property>
-                                        <property name="encoding">UTF-8</property>
-                                        <property name="scroll_on_keystroke">True</property>
-                                        <property name="scroll_on_output">False</property>
-                                      </object>
-                                    </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>

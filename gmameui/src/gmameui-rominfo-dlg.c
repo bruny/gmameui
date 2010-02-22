@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -99,7 +99,7 @@ on_show_rom_clicked (GtkWidget *widget, gpointer user_data)
 			GMAMEUI_DEBUG ("Attempting to open file %s using default handler", path);
 			gtk_show_uri (NULL, g_file_get_uri (file), GDK_CURRENT_TIME, &error);
 			if (error) {
-				GMAMEUI_DEBUG (error->message);
+				GMAMEUI_DEBUG ("%s", error->message);
 				g_error_free (error);
 				error = NULL;
 			}
@@ -223,6 +223,8 @@ mame_rominfo_dialog_class_init (MameRomInfoDialogClass *class)
 static void
 mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 {
+	MameRomInfoDialogPrivate *priv;
+	
 	MameExec *exec;
 	GtkWidget *rominfo_vbox;
 	GtkWidget *label;
@@ -232,18 +234,19 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	gint num_colours;
 	gfloat freq;
 	char *title;
-	GError *error = NULL;
 	
 	GSList *widgets;  /* For use with processing multiple widgets at once */
 	GSList *node;	  /* For use with processing multiple widgets at once */
 
+	GError *error = NULL;
+	
 	const gchar *object_names[] = {
 		"vbox2",
-		"img_open_rom"
+		/* FIXME TODO"img_open_rom",
+		"adjustment1",
+		"adjustment2"*/
 	};
 	
-	MameRomInfoDialogPrivate *priv;
-
 	priv = G_TYPE_INSTANCE_GET_PRIVATE (dialog,
 					    MAME_TYPE_ROMINFO_DIALOG,
 					    MameRomInfoDialogPrivate);
@@ -265,7 +268,7 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	/* Build the UI and connect signals here */
 	priv->builder = gtk_builder_new ();
 	gtk_builder_set_translation_domain (priv->builder, GETTEXT_PACKAGE);
-	
+
 	if (!gtk_builder_add_objects_from_file (priv->builder,
 	                                        GLADEDIR "rom_info.builder",
 	                                        (gchar **) object_names,
@@ -407,7 +410,10 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	g_shell_parse_argv (command, &argc, &argv, NULL);
 	g_free (command);
 
-	vte_audit = GTK_WIDGET (gtk_builder_get_object (priv->builder, "vte_audit"));
+	vte_audit = vte_terminal_new ();
+	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (gtk_builder_get_object (priv->builder, "scrolledwindow_audit")),
+	                                       vte_audit);
+	gtk_widget_show (GTK_WIDGET (vte_audit));
 	vte_terminal_fork_command (VTE_TERMINAL (vte_audit),
 	                           mame_exec_get_path (exec),
 	                           argv,
@@ -424,7 +430,10 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	g_shell_parse_argv (command, &argc, &argv, NULL);
 	g_free (command);
 
-	vte_brothers = GTK_WIDGET (gtk_builder_get_object (priv->builder, "vte_brothers"));
+	vte_brothers = vte_terminal_new ();
+	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (gtk_builder_get_object (priv->builder, "scrolledwindow_brothers")),
+	                                       vte_brothers);
+	gtk_widget_show (GTK_WIDGET (vte_brothers));
 	vte_terminal_fork_command (VTE_TERMINAL (vte_brothers),
 	                           mame_exec_get_path (exec),
 	                           argv,
@@ -439,11 +448,14 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	g_shell_parse_argv (command, &argc, &argv, NULL);
 	g_free (command);
 
-	vte_clones = GTK_WIDGET (gtk_builder_get_object (priv->builder, "vte_clones"));
+	vte_clones = vte_terminal_new ();
+	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (gtk_builder_get_object (priv->builder, "scrolledwindow_clones")),
+	                                       vte_clones);
+	gtk_widget_show (GTK_WIDGET (vte_clones));
 	vte_terminal_fork_command (VTE_TERMINAL (vte_clones),
 	                           mame_exec_get_path (exec),
 	                           argv,
-	                           NULL, NULL, TRUE, TRUE,TRUE); 
+	                           NULL, NULL, TRUE, TRUE,TRUE);
 	
 	/* Show ROM button */
 	GtkWidget *button = GTK_OBJECT (gtk_builder_get_object (priv->builder, "btn_open_rom"));

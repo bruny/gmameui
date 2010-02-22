@@ -1,5 +1,5 @@
 gladedir = $(datadir)/gmameui/glade
-glade_DATA =    audit_window.glade \
+glade_DATA =    audit_window.builder \
 		directories.builder \
 		sidebar.builder \
 		gmameui_prefs.builder \
