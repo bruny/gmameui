@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -31,64 +31,82 @@
 #include <expat.h>
 #include <stdarg.h>
 
-#include "game_list.h"
-#include "gui.h"
-#include "progression_window.h"
-#include "rom_entry.h"
+#include "gmameui-listoutput.h"
+#include "gui.h"	/* FIXME TODO For gui_prefs */
+#include "gmameui-marshaller.h"
 
 #define BUFFER_SIZE 1000
-#define MAX_ELEMENT_NAME 32
+#define XML_BUFFER_SIZE 4096
 
-typedef struct 
-{
-	FILE *xmameHandle;
-	ProgressWindow *progress_window;
+static void gmameui_listoutput_class_init (GMAMEUIListOutputClass *klass);
+static void gmameui_listoutput_init (GMAMEUIListOutput *pr);
+static void gmameui_listoutput_finalize (GObject *obj);
 
-	XML_Parser xmlParser;
-	int character_count;
-	char text_buf[BUFFER_SIZE];
+G_DEFINE_TYPE (GMAMEUIListOutput, gmameui_listoutput, G_TYPE_OBJECT)
 
-	int game_count;
-	int total_games;
+struct _GMAMEUIListOutputPrivate {
+	MameExec *exec;
 
-	MameRomEntry *current_rom;
-	
+	gint total_games;		/* Total number of romsets reported by parser */
+	gint game_count;		/* Progress count of romsets parsed so far */
+
+	FILE *mameHandle;		/* Expat reference to the XML stream input */
+	XML_Parser xmlParser;		/* Expat XML parser */
+	gboolean stop;			/* Flag to handle user cancelling the process */
+
+	int character_count;		/* Handle XML input buffer */
+	char text_buf[BUFFER_SIZE];     /* Handle XML input buffer */
+
+	MameRomEntry *current_rom;      /* ROM being populated from the XML input */
 	int cpu_count;
 	int sound_count;
-} TCreateGameList;
 
-static void CreateGameListProgress(TCreateGameList *_this)
+	
+};
+
+/* Signals enumeration */
+enum
 {
-	float pos;
+	LISTOUTPUT_PARSE_STARTED,		/* Emitted when starting -listinfo or -listxml */
+	LISTOUTPUT_PARSE_FINISHED,		/* Emitted when parse is completed */
+	LISTOUTPUT_ROMSET_PARSED,		/* Emitted when a romset has been parsed */
+	LAST_SIGNAL
+};
 
-	pos = _this->game_count ? ((float) _this->game_count) / _this->total_games : 0.0;
+/* Audit class stuff */
+static guint signals[LAST_SIGNAL] = { 0 };
 
-	if(pos > 0 && pos <= 1)
-		progress_window_set_value(_this->progress_window, pos);
+void
+gmameui_listoutput_set_exec (GMAMEUIListOutput *parser, MameExec *exec)
+{
 
-	UPDATE_GUI;
+	g_return_if_fail (exec != NULL);
+
+	parser->priv->exec = exec;
 }
 
 /* Create a new ROM from the XML handling */
 static void
-CreateGameListGame(TCreateGameList *_this)
+create_gamelist_romset (GMAMEUIListOutput *parser)
 {
-	gchar *driver;
+	gchar *romname, *driver;
 	
-	MameRomEntry *rom = _this->current_rom;
+	MameRomEntry *rom = parser->priv->current_rom;
 
 	g_return_if_fail (rom != NULL);
 
-	++_this->game_count;
+	++parser->priv->game_count;
 	
-	g_object_get (rom, "driver", &driver, NULL);
+	g_object_get (rom, "romname", &romname, "driver", &driver, NULL);
 	
 	if (driver)
 		mame_gamelist_add (gui_prefs.gl, rom);
-	
-	CreateGameListProgress(_this);
 
-	// g_object_unref (_this->current_rom);	/* FIXME TODO Fails in compare_game_name */
+	g_signal_emit (parser, signals[LISTOUTPUT_ROMSET_PARSED],
+	               0, romname,
+	               parser->priv->game_count, parser->priv->total_games);
+
+	// g_object_unref (parser->priv->current_rom);	/* FIXME TODO Fails in compare_game_name */
 }
 
 static const
@@ -148,20 +166,20 @@ gint cpu_count;
 gint sound_count;
 
 static void
-XMLDataHandler (TCreateGameList *_this, const XML_Char *s, int len)
+XMLDataHandler (GMAMEUIListOutput *parser, const XML_Char *s, int len)
 {
 	char *p;
 
 	size_t chars_remain;
-	
-	chars_remain = BUFFER_SIZE - _this->character_count;
+
+	chars_remain = BUFFER_SIZE - parser->priv->character_count;
 	if (len == 0)
 		return;
 
 	if (chars_remain > 0) {
 		size_t copy_chars;
 		
-		p = &_this->text_buf[_this->character_count];
+		p = &parser->priv->text_buf[parser->priv->character_count];
 
 		copy_chars = (chars_remain > (size_t)len)? (size_t)len: chars_remain - 1;
 		
@@ -169,7 +187,7 @@ XMLDataHandler (TCreateGameList *_this, const XML_Char *s, int len)
 
 		p[copy_chars+1] = '\0';
 
-		_this->character_count += copy_chars;
+		parser->priv->character_count += copy_chars;
 	}
 }
 
@@ -277,23 +295,30 @@ XMLStartRomHandler (void *user_data, const XML_Char *name, const XML_Char **atts
 }
 
 static void
-XMLStartHandler (TCreateGameList *_this, const XML_Char *name, const XML_Char **atts)
+XMLStartHandler (GMAMEUIListOutput *parser, const XML_Char *name, const XML_Char **atts)
 {
 	MameRomEntry *rom;
 	int i;	
 
-	XML_SetCharacterDataHandler(_this->xmlParser, NULL);
+	/* Check to see if the user has requested to stop the parsing process */
+	if (parser->priv->stop) {
+		GMAMEUI_DEBUG ("Request made to stop the parsing...");
+		XML_StopParser (parser->priv->xmlParser, FALSE);
+		GMAMEUI_DEBUG ("... parsing stopped");
+	}
+
+	XML_SetCharacterDataHandler(parser->priv->xmlParser, NULL);
 
 	if(!strcmp(name, "game"))
 	{
 		char *p;
 		char *tmp;
 
-		_this->current_rom = mame_rom_entry_new ();
-		_this->cpu_count = 0;
-		_this->sound_count = 0;
+		parser->priv->current_rom = mame_rom_entry_new ();
+		parser->priv->cpu_count = 0;
+		parser->priv->sound_count = 0;
 
-		rom = _this->current_rom;
+		rom = parser->priv->current_rom;
 
 		mame_rom_entry_set_romname (rom, g_strdup (read_string_attribute (atts, "name")));
 		mame_rom_entry_set_cloneof (rom, g_strdup (read_string_attribute (atts, "cloneof")));
@@ -314,9 +339,9 @@ XMLStartHandler (TCreateGameList *_this, const XML_Char *name, const XML_Char **
 			}
 		}
 	}
-	else if (_this->current_rom)
+	else if (parser->priv->current_rom)
 	{
-		rom = _this->current_rom;
+		rom = parser->priv->current_rom;
 		
 		if(!strcmp(name, "rom")) {
 			mame_rom_entry_add_rom (rom);
@@ -361,50 +386,48 @@ XMLStartHandler (TCreateGameList *_this, const XML_Char *name, const XML_Char **
 			mame_rom_entry_add_sample (rom);
 		} else if(!strcmp(name, "year") || !strcmp(name, "description") || !strcmp(name, "manufacturer")) {
 
-			XML_SetCharacterDataHandler(_this->xmlParser, 
+			XML_SetCharacterDataHandler(parser->priv->xmlParser, 
 				(XML_CharacterDataHandler ) &XMLDataHandler);
 
-			_this->character_count = 0;
-			memset(_this->text_buf, 0, BUFFER_SIZE); 
+			parser->priv->character_count = 0;
+			memset(parser->priv->text_buf, 0, BUFFER_SIZE); 
 		}
 	}
 }
  
-static void XMLEndHandler(TCreateGameList *_this,
-			  const XML_Char *name)
+static void
+XMLEndHandler (GMAMEUIListOutput *parser, const XML_Char *name)
 {
 	if(!strcmp(name, "game")) {
-		CreateGameListGame(_this);
+		create_gamelist_romset (parser);
 	} 
-	else if (_this->text_buf[0] && name) {
-		MameRomEntry *rom = _this->current_rom;
+	else if (parser->priv->text_buf[0] && name) {
+		MameRomEntry *rom = parser->priv->current_rom;
 		
 		g_return_if_fail (rom != NULL);
 		
 		if (!strcmp(name, "year")) {
-			mame_rom_entry_set_year (rom, _this->text_buf);
+			mame_rom_entry_set_year (rom, parser->priv->text_buf);
 		} else if (!strcmp(name, "manufacturer")) {
-			mame_rom_entry_set_manufacturer (rom, _this->text_buf);
+			mame_rom_entry_set_manufacturer (rom, parser->priv->text_buf);
 		} else if (!strcmp(name, "description")) {
-			mame_rom_entry_set_name (rom, _this->text_buf);
+			mame_rom_entry_set_name (rom, parser->priv->text_buf);
 		}
 
 	}
 }
 
-#define XML_BUFFER_SIZE (4096)
-
 static gboolean
-CreateGameListRun (TCreateGameList *_this)
+start_gamelist_parse (GMAMEUIListOutput *parser)
 {
 	int len;
 	int final;
 	int bufferPos = 0;
 
-	XML_Parser xmlParser = _this->xmlParser;
-	FILE *xmameHandle = _this->xmameHandle;
+	XML_Parser xmlParser = parser->priv->xmlParser;
+	FILE *mameHandle = parser->priv->mameHandle;
 
-	_this->game_count = 0;
+	parser->priv->game_count = 0;
 	
 	for(;;)
     {
@@ -416,7 +439,12 @@ CreateGameListRun (TCreateGameList *_this)
 			GMAMEUI_DEBUG("Failed to allocate buffer.");
 		}
 
-		len = fread(buffer, 1, XML_BUFFER_SIZE, xmameHandle);
+		if (mameHandle == NULL) {
+			GMAMEUI_DEBUG ("The handle is no longer available");
+			break;
+		}
+
+		len = fread(buffer, 1, XML_BUFFER_SIZE, mameHandle);
 		final = !len;
 
 		if(len && !XML_ParseBuffer(xmlParser, len, final))
@@ -493,12 +521,110 @@ CreateGameListRun (TCreateGameList *_this)
 }
 
 /**
+ *  Create a gamelist (GList consisting of MameRomEntry objects) from the output
+ *  of -listxml. Triggered when rebuilding the gamelist.
+ */
+static gboolean
+create_gamelist_xmlinfo (GMAMEUIListOutput *parser)
+{
+	gboolean res;
+
+	g_return_val_if_fail (parser->priv->exec != NULL, FALSE);
+
+	if (gui_prefs.gl) {
+		g_object_unref (gui_prefs.gl);
+		gui_prefs.gl = NULL;
+		
+		gui_prefs.gl = mame_gamelist_new ();
+	}
+	g_object_set (gui_prefs.gl,
+		      "name", mame_exec_get_name (parser->priv->exec),
+		      "version", mame_exec_get_version (parser->priv->exec),
+		      NULL);
+
+	parser->priv->total_games = mame_exec_get_game_count (parser->priv->exec);
+
+	g_return_val_if_fail (parser->priv->total_games, FALSE);
+
+	parser->priv->mameHandle = mame_open_pipe (parser->priv->exec, "-%s",
+	                                           mame_get_option_name (parser->priv->exec, "listxml"));
+
+	g_return_val_if_fail (parser->priv->mameHandle, FALSE);
+
+	parser->priv->xmlParser = XML_ParserCreate (NULL);
+	XML_SetElementHandler (parser->priv->xmlParser, 
+	                       (XML_StartElementHandler) &XMLStartHandler,
+	                       (XML_EndElementHandler)   &XMLEndHandler);
+
+	/* Set the GMAMEUIListOutput object as user data so the priv object
+	   data can be used in the parser event callbacks */
+	XML_SetUserData (parser->priv->xmlParser, parser);
+
+	res = start_gamelist_parse (parser);
+
+	/* Clean up - also occurs if user Cancels the operation */
+	GMAMEUI_DEBUG ("Cleaning up parser...");
+	if (parser->priv->mameHandle) {
+		pclose (parser->priv->mameHandle);
+		parser->priv->mameHandle = NULL;
+	}
+
+	if (parser->priv->xmlParser);
+		XML_ParserFree (parser->priv->xmlParser);
+	GMAMEUI_DEBUG ("Cleaning up parser... done");
+	
+	return res;
+}
+
+gboolean
+gmameui_listoutput_parse (GMAMEUIListOutput *parser)
+{
+	gboolean ret;
+
+	g_return_val_if_fail (parser->priv->exec != NULL, FALSE);
+
+	/* Check if we will use listinfo or listxml. Later versions of XMAME and
+	   all versions of SDLMAME use listxml. */
+	if (mame_has_option (parser->priv->exec, "listinfo")) {
+#ifdef OBSOLETE_XMAME
+		GMAMEUI_DEBUG ("Recreating gamelist using -listinfo\n");
+		ret = create_gamelist_listinfo (parser->priv->exec);
+#else
+		GMAMEUI_DEBUG ("GMAMEUI does not support the obsolete option -listinfo");
+#endif
+	} else if (mame_has_option(parser->priv->exec, "listxml")) {
+		GMAMEUI_DEBUG("Recreating gamelist using -listxml\n");
+		ret = create_gamelist_xmlinfo (parser);
+	} else {
+		gmameui_message(ERROR, NULL, _("I don't know how to generate a gamelist for this version of MAME!"));
+		ret = FALSE;
+	}
+	
+	/* Emit signal indicating we are finished */
+	g_signal_emit (parser, signals[LISTOUTPUT_PARSE_FINISHED], 0, NULL);
+	
+	/* Hack - create_gamelist_xmlinfo and _listinfo unref the gui_prefs.gl
+	   object, which also destroys the current_game object. This is a short
+	   term hack to reset it */
+	gchar *current_rom;
+	g_object_get (main_gui.gui_prefs, "current-rom", &current_rom, NULL);
+	gui_prefs.current_game = get_rom_from_gamelist_by_name (gui_prefs.gl, current_rom);
+	/* End hack - once we push the gui_prefs as a g_object, we should be
+	   able to delete the hack */
+	return ret;
+}
+
+
+/**
  *  Update the ROM to include other information not contained in the gamelist
  *  file but which is available from the -listxml option. Usually triggered
  *  from the MAME ROM Information dialog.
  */
 MameRomEntry *
-create_gamelist_xmlinfo_for_rom (MameExec *exec, MameRomEntry *rom)
+gmameui_listoutput_parse_rom (GMAMEUIListOutput *parser,
+                              MameExec *exec,
+                              MameRomEntry *rom)
+
 {
 	XML_Parser xmlParser;
 	FILE *mame_handle;
@@ -551,73 +677,108 @@ create_gamelist_xmlinfo_for_rom (MameExec *exec, MameRomEntry *rom)
 }
 
 
-/**
- *  Create a gamelist (GList consisting of MameRomEntry objects) from the output
- *  of -listxml. Triggered when rebuilding the gamelist.
- */
-static gboolean
-create_gamelist_xmlinfo (MameExec *exec)
+/* Stop the parsing of the listxml output. This is usually triggered upon the
+   user clicking Cancel in the parsing dialog */
+gboolean gmameui_listoutput_parse_stop (GMAMEUIListOutput *parser)
 {
-	gboolean res;
-	TCreateGameList _this;
-	
-	memset(&_this, 0, sizeof(TCreateGameList));
+	GMAMEUI_DEBUG ("Stopping the listoutput parse...");
+	pclose (parser->priv->mameHandle);
+	parser->priv->mameHandle = NULL;
 
-	_this.progress_window = progress_window_new(FALSE);
-	progress_window_set_title(_this.progress_window, _("Creating game list..."));
-	progress_window_set_text(_this.progress_window, _("Creating game list, please wait"));
+	/* Set the flag to TRUE so that we can handle it in the appropriate XML
+	   handling callback - expat.h says we can only stop the parsing in
+	   a callback */
+	parser->priv->stop = TRUE;
 
-	progress_window_show(_this.progress_window);
-	UPDATE_GUI;
+	GMAMEUI_DEBUG ("Stopping the listoutput parse... done");
 
-	if (gui_prefs.gl) {
-		g_object_unref (gui_prefs.gl);
-		gui_prefs.gl = NULL;
-		
-		gui_prefs.gl = mame_gamelist_new ();
-	}
-
-	g_object_set (gui_prefs.gl,
-		      "name", mame_exec_get_name (exec),
-		      "version", mame_exec_get_version (exec),
-		      NULL);
-
-	_this.total_games = mame_exec_get_game_count(exec);
-	if (!_this.total_games) {
-		progress_window_destroy(_this.progress_window);
-		return FALSE;
-	}
-	
-	_this.xmameHandle = mame_open_pipe(exec, "-%s", mame_get_option_name(exec,"listxml"));
-	if (!_this.xmameHandle)
-		return FALSE;
-
-	_this.xmlParser = XML_ParserCreate(NULL);
-	XML_SetElementHandler(_this.xmlParser, 
-			(XML_StartElementHandler) &XMLStartHandler, 
-			(XML_EndElementHandler)   &XMLEndHandler);
-	XML_SetUserData(_this.xmlParser, &_this);
-
-	progress_window_set_title(_this.progress_window,
-		_("Creating game list (%d games)..."), _this.total_games);
-
-	UPDATE_GUI;
-
-	res = CreateGameListRun(&_this);
-
-	pclose(_this.xmameHandle);
-
-	XML_ParserFree(_this.xmlParser);
-
-	progress_window_destroy(_this.progress_window);
-	return res;
+	return TRUE;
 }
 
-/**
-* Listinfo parser
-*/
+static void
+gmameui_listoutput_finalize (GObject *obj)
+{
+	
+	GMAMEUIListOutput *parser = GMAMEUI_LISTOUTPUT (obj);
+
+	GMAMEUI_DEBUG ("Finalising gmameui_listoutput object...");
+
+	/* FIXME TODO Can't unref until this is a gobject
+	if (parser->priv->exec)
+		g_object_unref (parser->priv->exec);*/
+
+	/* FIXME TODO Causes segfault
+	if (parser->priv->current_rom)
+		g_object_unref (parser->priv->current_rom);*/
+	
+// FIXME TODO	g_free (parser->priv);
+
+	GMAMEUI_DEBUG ("Finalising gmameui_listoutput object... done");
+	
+
+}
+
+static void
+gmameui_listoutput_class_init (GMAMEUIListOutputClass *klass)
+{
+	
+	
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+	
+	object_class->finalize = gmameui_listoutput_finalize;
+	
+	signals[LISTOUTPUT_PARSE_STARTED] = g_signal_new ("listoutput-parse-started",
+						G_OBJECT_CLASS_TYPE (object_class),
+						G_SIGNAL_RUN_FIRST,
+						/*G_STRUCT_OFFSET (GMAMEUIListOutputClass, listoutput_start),*/
+	                    0,		/* This signal is not handled by the class */
+						NULL, NULL,     /* Accumulator and accumulator data */
+						g_cclosure_marshal_VOID__VOID,
+						G_TYPE_NONE,    /* Return type */
+						0	        /* No parameters */
+						);
+	
+	signals[LISTOUTPUT_PARSE_FINISHED] = g_signal_new ("listoutput-parse-finished",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_FIRST,
+						0,		/* This signal is not handled by the class */
+						NULL, NULL,     /* Accumulator and accumulator data */
+						g_cclosure_marshal_VOID__VOID,
+						G_TYPE_NONE,    /* Return type */
+						0	        /* No parameters */
+						);
+
+	signals[LISTOUTPUT_ROMSET_PARSED] = g_signal_new ("listoutput-romset-parsed",
+						G_TYPE_FROM_CLASS(klass),
+						G_SIGNAL_RUN_FIRST,
+						0,		/* This signal is not handled by the class */
+						NULL, NULL,     /* Accumulator and accumulator data */
+						gmameui_marshaller_VOID__STRING_INT_INT,
+						G_TYPE_NONE,    /* Return type */
+						3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT	/* Three parameters */
+						);
+}
+
+static void
+gmameui_listoutput_init (GMAMEUIListOutput *pr)
+{
+	pr->priv = g_new0 (GMAMEUIListOutputPrivate, 1);
+
+	pr->priv->stop = FALSE; /* Set to TRUE in XML handling callback to
+	 stop the XML parsing */
+}
+
+GMAMEUIListOutput* gmameui_listoutput_new (void)
+{
+	return g_object_new (GMAMEUI_TYPE_LISTOUTPUT, NULL);
+}
+
 
 #ifdef OBSOLETE_XMAME
+
+/* The following code is used for MAME versions (0.92 at least uses listxml)
+   that only support -listinfo. It is retained here for reference */
+
 /**
 * Gets a hash table with all supported drivers
 * Updates game count;
@@ -723,16 +884,6 @@ create_gamelist_listinfo (MameExec *exec)
 	int num_games = 0, total_games = 0;
 
 	GHashTable *driver_htable;
-	ProgressWindow *progress_window;
-	
-	/* display the progression window */
-	progress_window = progress_window_new(FALSE);
-	progress_window_set_title(progress_window,_("Creating game list..."));
-	progress_window_show(progress_window);
-
-	progress_window_set_text(progress_window, _("receiving data, please wait"));
-
-	while (gtk_events_pending()) gtk_main_iteration();
 
 	driver_htable = get_driver_table(exec, &total_games);
 
@@ -754,9 +905,6 @@ create_gamelist_listinfo (MameExec *exec)
 		      NULL);
 	
 	g_message(_("creating game list, Please wait:"));
-
-	progress_window_set_title(progress_window, _("Creating game list (%d games)..."), total_games);
-	while (gtk_events_pending()) gtk_main_iteration();
 		
 	/* Generate the list */
 	/* without including neither history nor mameinfo to have less to parse after*/
@@ -995,11 +1143,6 @@ create_gamelist_listinfo (MameExec *exec)
 
 			mame_gamelist_add (gui_prefs.gl, rom);
 
-			done = (gfloat) ((gfloat) (num_games) /
-					 (gfloat) (total_games));
-
-			progress_window_set_value(progress_window, done);
-			UPDATE_GUI;
 		}
 	}
 	
@@ -1007,52 +1150,10 @@ create_gamelist_listinfo (MameExec *exec)
 		
 	g_hash_table_destroy(driver_htable);
 	
-                
-	progress_window_destroy(progress_window);
-	
 	g_object_set (gui_prefs.gl, "num-games", num_games, NULL);
 
 	return TRUE;
 }
 #endif
 
-gboolean gamelist_parse(MameExec *exec)
-{
-	gboolean ret;
-	
-	if (!exec)
-	{
-		gmameui_message(ERROR, NULL, _("xmame not found"));
-		return FALSE;
-	}
-	
-	mame_get_options(exec);
 
-	/* Check if we will use listinfo or listxml. Later versions of XMAME and
-	   all versions of SDLMAME use listxml. */
-	if (mame_has_option(exec, "listinfo")) {
-#ifdef OBSOLETE_XMAME
-		GMAMEUI_DEBUG ("Recreating gamelist using -listinfo\n");
-		ret = create_gamelist_listinfo (exec);
-#else
-		GMAMEUI_DEBUG ("GMAMEUI does not support the obsolete option -listinfo");
-#endif
-	} else if (mame_has_option(exec, "listxml")) {
-		GMAMEUI_DEBUG("Recreating gamelist using -listxml\n");
-		ret = create_gamelist_xmlinfo (exec);
-	} else {
-		gmameui_message(ERROR, NULL, _("I don't know how to generate a gamelist for this version of MAME!"));
-		ret = FALSE;
-	}
-	
-	/* Hack - create_gamelist_xmlinfo and _listinfo unref the gui_prefs.gl
-	   object, which also destroys the current_game object. This is a short
-	   term hack to reset it */
-	gchar *current_rom;
-	g_object_get (main_gui.gui_prefs, "current-rom", &current_rom, NULL);
-	gui_prefs.current_game = get_rom_from_gamelist_by_name (gui_prefs.gl, current_rom);
-	/* End hack - once we push the gui_prefs as a g_object, we should be
-	   able to delete the hack */
-	
-	return ret;
-}

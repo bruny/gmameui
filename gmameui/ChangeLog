@@ -1,3 +1,14 @@
+2010-03-22 21:45 adburton
+
+	* data/: gmameui_listoutput.builder, Makefile.am
+	* po/POTFILES.in
+	* src/: game_list.h gmameui-rominfo-dlg.c mameio.c
+	  gmameui-gamelist-view.c gmameui-marshallers.list
+	  gmameui-listoutput-dlg.c gmameui-listoutput-dlg.h
+	  gmameui-listoutput.c gmameui-listoutput.h:
+	  Move gamelist parser to separate GtkObject/GObjects, add Cancel button to
+	  gamelist rebuild progress dialog
+
 2010-02-22 20:20 adburton
 
 	* data/: audit_window.glade, audit_window.builder, Makefile.am:

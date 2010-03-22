@@ -13,7 +13,8 @@ gmameui_SOURCES = \
 	io.c io.h \
 	game_list.h game_list.c \
 	rom_entry.h rom_entry.c \
-	mameio.c \
+	gmameui-listoutput.c gmameui-listoutput.h \
+	gmameui-listoutput-dlg.c gmameui-listoutput-dlg.h \
 	gui.c gui.h \
 	gmameui-gamelist-view.c gmameui-gamelist-view.h \
 	gmameui-sidebar.c gmameui-sidebar.h \

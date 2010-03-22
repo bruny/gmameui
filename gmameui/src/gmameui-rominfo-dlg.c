@@ -36,6 +36,7 @@
 #include "audit.h"
 #include "gui.h"
 #include "options_string.h"
+#include "gmameui-listoutput.h"
 
 struct _MameRomInfoDialogPrivate {
 	GtkBuilder *builder;
@@ -226,6 +227,7 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	MameRomInfoDialogPrivate *priv;
 	
 	MameExec *exec;
+	GMAMEUIListOutput *parser;
 	GtkWidget *rominfo_vbox;
 	GtkWidget *label;
 	GtkWidget *vte_audit, *vte_brothers, *vte_clones;
@@ -263,7 +265,9 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 
 	/* Get extra details about the ROM from -xmlinfo that aren't stored in
 	   the gamelist file */
-	priv->rom = create_gamelist_xmlinfo_for_rom (exec, priv->rom);
+	parser = gmameui_listoutput_new ();
+	priv->rom = gmameui_listoutput_parse_rom (parser, exec, priv->rom);
+	g_object_unref (parser);
 
 	/* Build the UI and connect signals here */
 	priv->builder = gtk_builder_new ();

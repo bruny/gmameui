@@ -80,13 +80,6 @@ void mame_gamelist_add_year (MameGamelist *gl, const gchar *year);
 void mame_gamelist_add_version (MameGamelist *gl, gchar *version);
 void mame_gamelist_add_category (MameGamelist *gl, gchar *category);
 void mame_gamelist_add_manufacturer (MameGamelist *gl, gchar *manufacturer);
-/*DELETEvoid mame_gamelist_set_not_checked_list (MameGamelist *gl, GList *source);*/
-
-/**
-* Creates a new gamelist using current_exec
-* Code in mameio.c
-*/
-gboolean gamelist_parse (MameExec *exec);
 
 /**
 * Loads the game list from the gamelist file.

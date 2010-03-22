@@ -6,6 +6,7 @@ glade_DATA =    audit_window.builder \
 		options.builder \
 		options_legacy.builder \
 		rom_info.builder \
-		filter_bar.builder 
+		filter_bar.builder \
+		gmameui_listoutput.builder
 
 EXTRA_DIST = $(glade_DATA)

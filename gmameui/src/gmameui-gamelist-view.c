@@ -31,9 +31,9 @@
 #include "gmameui.h"    /* For game_filtered */
 #include "rom_entry.h"
 #include "gui.h"	/* For main_gui struct */
-#include "io.h"         /* For gmameui_gamelist_rebuild */
 #include "gui_prefs.h"
 #include "audit.h"
+#include "gmameui-listoutput-dlg.h"
 
 static const int ROM_ICON_SIZE = 24;
 
@@ -1416,14 +1416,19 @@ on_romset_audited (GmameuiAudit *audit,
 		GdkPixbuf *pixbuf = NULL;
 		/*GMAMEUI_DEBUG ("  Now processing ROM %s", mame_rom_entry_get_romname (rom));*/
 		g_object_set (rom, "has-roms", auditresult, NULL);
-		pixbuf = get_icon_for_rom (rom, ROM_ICON_SIZE, icondir, iconzipfile, prefercustomicons);
-		GtkTreeIter iter = mame_rom_entry_get_position (rom);
 
+		/* Update the status icon for the ROM */
+		pixbuf = get_icon_for_rom (rom, ROM_ICON_SIZE, icondir, iconzipfile, prefercustomicons);
+
+		/* Update the liststore with the icon and whether the ROM is
+		   displayed based on the filter setting and the audit value */
+		GtkTreeIter iter = mame_rom_entry_get_position (rom);
 		gtk_list_store_set (GTK_LIST_STORE (gamelist_view->priv->curr_model), &iter,
 				    FILTERED, game_filtered (rom, rom_filter_opt),
 		                    PIXBUF,   pixbuf,
 				    -1);
 
+		/* Increment the status bar as appropriate */
 		set_status_bar_game_count (gamelist_view);
 		
 		if (pixbuf)
@@ -1464,7 +1469,7 @@ void
 gmameui_gamelist_rebuild (MameGamelistView *gamelist_view)
 {
 
-g_return_if_fail (gamelist_view != NULL);
+	g_return_if_fail (gamelist_view != NULL);
 	
 	gtk_widget_set_sensitive (main_gui.scrolled_window_games, FALSE);
 	UPDATE_GUI;
@@ -1473,14 +1478,9 @@ g_return_if_fail (gamelist_view != NULL);
 	gtk_tree_view_set_model (GTK_TREE_VIEW (gamelist_view), NULL);
 
 	GMAMEUI_DEBUG ("Parsing MAME output to recreate game list...");
-	gamelist_parse (mame_exec_list_get_current_executable (main_gui.exec_list));
-
-	/* Trigger the statusbar to show a progressbar */
-	/* FIXME TODO These should be controlled via g_signal_emit
-	   calls for loading the gamelist etc */
-	gmameui_statusbar_start_pulse (main_gui.statusbar);
-	gmameui_statusbar_set_progressbar_text (main_gui.statusbar,
-	                                        _("Auditing MAME ROMs..."));
+	GtkWidget *dlg = gmameui_listoutput_dialog_new (NULL);
+	gtk_widget_show (dlg);
+	GMAMEUI_DEBUG ("Parsing MAME output to recreate game list... done");
 	
 	mame_gamelist_save (gui_prefs.gl);
 
@@ -1499,14 +1499,21 @@ g_return_if_fail (gamelist_view != NULL);
 	
 	GMAMEUI_DEBUG ("Done rebuilding gamelist");
 
-	GMAMEUI_DEBUG ("Auditing");
+	GMAMEUI_DEBUG ("Starting auditing process...");
+	/* Trigger the statusbar to show a progressbar */
+	/* FIXME TODO These should be controlled via g_signal_emit
+	   calls for loading the gamelist etc */
+	gmameui_statusbar_start_pulse (main_gui.statusbar);
+	gmameui_statusbar_set_progressbar_text (main_gui.statusbar,
+	                                        _("Auditing MAME ROMs..."));
+
+	/* Handle ROMs being audited */
 	g_signal_connect (gui_prefs.audit, "romset-audited",
 			  G_CALLBACK (on_romset_audited), main_gui.displayed_list);
 	g_signal_connect (gui_prefs.audit, "rom-audit-complete",
 			  G_CALLBACK (on_audit_complete), main_gui.statusbar);
 	
 	mame_audit_start_full ();
-	GMAMEUI_DEBUG ("Done auditing");
 
 	/* Update the filter, since all ROMs will now be marked in
 	   mame_audit_start_full as UNAVAILABLE until audited and we want to hide
