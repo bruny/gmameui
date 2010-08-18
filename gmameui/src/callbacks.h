@@ -53,7 +53,10 @@ void     on_options_default_activate            (GtkAction        *action,
 
 void     on_audit_all_games_activate            (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
-
+#ifdef ENABLE_ROMVALIDATION
+void     on_rebuild_romsets_activate			(GtkAction       *action,
+			                                     gpointer        user_data);
+#endif
 void     on_exit_activate                       (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
 

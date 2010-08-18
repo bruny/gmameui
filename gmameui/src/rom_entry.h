@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "mame-exec.h"
+#include "gmameui-romfix-list.h"	/* FIXME TODO Included to reference structs - should we link to it here? */
 
 G_BEGIN_DECLS
 
@@ -51,7 +52,10 @@ typedef struct {
 typedef struct {
 	gchar *name;    /* Name */
 	gint uncomp_size;   /* Uncompressed size in bytes */
-	gchar *sha1;   /* SHA1 checksum */
+	gchar *sha1;   	/* SHA1 checksum - AAA FIXME TODO Don't use as we have to uncompress then pass to method to get this! */
+	gchar *crc;		/* CRC */
+	gchar *merge;	/* Name of ROM shared with parent */
+	gchar *status;	/* Status of the known ROM (e.g. baddump, nodump, good) */
 	gboolean present;
 } individual_rom;
 
@@ -212,6 +216,7 @@ const gchar * mame_rom_entry_get_gamename (MameRomEntry *rom);
 const gchar * mame_rom_entry_get_romname (MameRomEntry *rom);
 const gchar * mame_rom_entry_get_parent_romname (MameRomEntry *rom);
 const gchar * mame_rom_entry_get_year (MameRomEntry *rom);
+const gchar * mame_rom_entry_get_driver (MameRomEntry *rom);
 const gchar * mame_rom_entry_get_manufacturer (MameRomEntry *rom);
 RomStatus mame_rom_entry_get_rom_status (MameRomEntry *rom);
 RomStatus mame_rom_entry_get_sample_status (MameRomEntry *rom);
@@ -222,7 +227,7 @@ GtkTreeIter mame_rom_entry_get_position (MameRomEntry *rom);
 
 gchar **mame_rom_entry_get_manufacturers (MameRomEntry * rom);
 
-gchar **mame_rom_entry_get_brothers (MameRomEntry *rom);
+GList* mame_rom_entry_get_brothers (MameRomEntry *rom);
 gchar **mame_rom_entry_get_clones (MameRomEntry *rom);
 
 void mame_rom_entry_add_rom (MameRomEntry *rom);
@@ -245,6 +250,16 @@ ControlType get_control_type (gchar *control_type);
 DriverStatus get_driver_status (gchar *driver_status);
 
 MameRomEntry *create_gamelist_xmlinfo_for_rom (MameExec *exec, MameRomEntry *rom);
+
+GFile *mame_rom_entry_get_disk_location (gchar *romname);
+
+// AAA FIXME TODO - Once working, make static
+romset_fixes *
+mame_rom_entry_find_fixes (MameRomEntry *rom);
+GList *
+mame_rom_entry_get_roms (MameRomEntry *rom);
+void
+mame_rom_entry_add_roms_to_hashtable (MameRomEntry *romset);
 
 G_END_DECLS
 

@@ -8,12 +8,15 @@ src/filter.c
 src/filters_list.c
 src/game_list.c
 src/gmameui.c
+src/gmameui.h
 src/gmameui-audit-dlg.c
 src/gmameui-gamelist-view.c
+src/gmameui-listoutput.c
 src/gmameui-listoutput-dlg.c
 src/gmameui-sidebar.c
 src/gmameui-statusbar.c
 src/gmameui-rominfo-dlg.c
+src/gmameui-rommgr-dlg.c
 src/gmameui-search-entry.c
 src/gtkjoy.c
 src/gui.c
@@ -27,6 +30,7 @@ src/keyboard.c
 src/mame-exec.c
 src/mame_options.c
 src/mame_options_dialog.c
+src/mame_options_dialog_helper.c
 src/mame_options_legacy.c
 src/mame_options_legacy_dialog.c
 src/options_string.c
@@ -43,6 +47,7 @@ src/gmameui-ui.xml
 [type: gettext/glade]data/options.builder
 [type: gettext/glade]data/options_legacy.builder
 [type: gettext/glade]data/rom_info.builder
+[type: gettext/glade]data/romset_mgr.builder
 [type: gettext/glade]data/sidebar.builder
 [type: gettext/glade]data/gmameui_listoutput.builder
 gmameui.desktop.in

@@ -49,6 +49,7 @@
 #include "mame_options_dialog.h"
 #include "mame_options_legacy_dialog.h"
 #include "gmameui-rominfo-dlg.h"
+#include "gmameui-rommgr-dlg.h"
 
 void update_favourites_list (gboolean add);
 
@@ -190,6 +191,16 @@ on_audit_all_games_activate (GtkMenuItem     *menuitem,
 	gtk_widget_show (audit_dlg);	
 }
 
+#ifdef ENABLE_ROMVALIDATION
+void
+on_rebuild_romsets_activate (GtkAction *action,
+			     gpointer  user_data)
+{
+	GtkWidget *romsetsmgr_dlg;
+	romsetsmgr_dlg = gmameui_rommgr_dialog_new (NULL);
+	gtk_widget_show (romsetsmgr_dlg);
+}
+#endif
 
 void
 on_exit_activate (GtkMenuItem     *menuitem,

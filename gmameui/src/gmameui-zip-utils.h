@@ -27,4 +27,13 @@
 GdkPixbuf *
 read_pixbuf_from_zip_file (gchar *zipfilename, gchar *romname);
 
+GList *
+get_zip_contents (gchar *zipfilename);
+
+gchar *
+get_romname_from_zipfile (gchar *zipfile);
+
+void
+rename_rom_in_zip_file (gchar *zipfilename, gchar *oldname, gchar *newname);
+
 #endif /* __ZIP_UTILS__ */

@@ -71,6 +71,7 @@ void gmameui_listoutput_set_exec (GMAMEUIListOutput *parser, MameExec *exec);
 gboolean gmameui_listoutput_parse (GMAMEUIListOutput *parser);
 gboolean gmameui_listoutput_parse_stop (GMAMEUIListOutput *parser);
 MameRomEntry* gmameui_listoutput_parse_rom (GMAMEUIListOutput *parser, MameExec *exec, MameRomEntry *rom);
+gboolean gmameui_listoutput_generate_rom_hash (GMAMEUIListOutput *parser, MameExec *exec);
 
 G_END_DECLS
 

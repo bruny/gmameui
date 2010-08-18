@@ -76,44 +76,21 @@ static void
 on_show_rom_clicked (GtkWidget *widget, gpointer user_data)
 {
 	MameRomEntry *rom;
-	GValueArray *va_rom_paths;
-	gchar *romfilename;
+	GFile *romfile;
+	GError *error = NULL;
 
 	rom = (gpointer) user_data;
-	romfilename = g_strdup_printf ("%s.zip", mame_rom_entry_get_romname (rom));
+	romfile = mame_rom_entry_get_disk_location (mame_rom_entry_get_romname (rom));
 
-	/* Get the ROM paths */
-	g_object_get (main_gui.gui_prefs, "rom-paths", &va_rom_paths, NULL);
+	g_return_if_fail (romfile != NULL);
 
-	guint i;
-	for (i = 0; i < va_rom_paths->n_values; i++) {
-		GFile *file;
-		GError *error = NULL;
-		gchar *path;
-
-		path = g_build_filename (g_value_get_string (g_value_array_get_nth (va_rom_paths, i)),
-		                         romfilename,
-		                         NULL);
-		file = g_file_new_for_path (path);
-
-		if (g_file_test (path, G_FILE_TEST_EXISTS)) {
-			GMAMEUI_DEBUG ("Attempting to open file %s using default handler", path);
-			gtk_show_uri (NULL, g_file_get_uri (file), GDK_CURRENT_TIME, &error);
-			if (error) {
-				GMAMEUI_DEBUG ("%s", error->message);
-				g_error_free (error);
-				error = NULL;
-			}
-		} else
-			GMAMEUI_DEBUG ("Could not open file %s - file does not exist", path);
-		
-		g_free (path);
+	GMAMEUI_DEBUG ("Attempting to open file %s using default handler", g_file_get_uri (romfile));
+	gtk_show_uri (NULL, g_file_get_uri (romfile), GDK_CURRENT_TIME, &error);
+	if (error) {
+		GMAMEUI_DEBUG ("%s", error->message);
+		g_error_free (error);
+		error = NULL;
 	}
-
-	g_value_array_free (va_rom_paths);
-	va_rom_paths = NULL;
-
-	g_free (romfilename);
 }
 
 static void
@@ -262,7 +239,14 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
 	g_return_if_fail (exec != NULL);
-
+/* DELETE
+AAA FIXME TODO Works when we do this here, but not in our other location
+	 
+gui_prefs.rom_hashtable = g_hash_table_new (g_str_hash, g_str_equal);
+parser = gmameui_listoutput_new ();
+gmameui_listoutput_generate_rom_hash (parser, exec);
+g_object_unref (parser);
+	
 	/* Get extra details about the ROM from -xmlinfo that aren't stored in
 	   the gamelist file */
 	parser = gmameui_listoutput_new ();
@@ -476,9 +460,11 @@ mame_rominfo_dialog_init (MameRomInfoDialog *dialog)
 	
 	/* Add an idle callback to perform an audit of the ROM */
 	g_idle_add (audit_idle, dialog);
-		
+#ifdef ENABLE_ROMVALIDATION
+	mame_rom_entry_find_fixes (priv->rom);
+#endif
 	gtk_dialog_add_button (GTK_DIALOG (dialog), GTK_STOCK_CLOSE, GTK_RESPONSE_CLOSE);
-
+	
 	/* Free the GtkBuilder objects */
 	g_slist_free (widgets);
 }

@@ -32,8 +32,9 @@
 #include "rom_entry.h"
 #include "gmameui-gamelist-view.h"
 
-#define GAMELIST_DEFINED_VERSION 0.92   /* The version of the gamelist layout. If this
-					   changes, need to update the user's gamelist */
+/* The version of the gamelist layout. If this changes,
+   need to update the user's gamelist */
+#define GAMELIST_DEFINED_VERSION 0.92 
 #define FIELDS_PER_RECORD 20
 #define LINE_BUF 1024
 
@@ -284,9 +285,7 @@ void mame_gamelist_add (MameGamelist *gl, MameRomEntry *rom)
 		g_strfreev (manufacturer_fields);
 	}
 
-	
 	mame_rom_entry_set_default_fields (rom);
-
 
 	gl->priv->roms = g_list_insert_sorted (gl->priv->roms,
 					       (gpointer) rom,
@@ -734,6 +733,8 @@ get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname)
 {
 	GList *listpointer;
 	MameRomEntry *tmprom;
+
+	tmprom = NULL;
 	
 	g_return_val_if_fail ((gl != NULL), NULL);
 	g_return_val_if_fail ((romname != NULL), NULL);
@@ -745,11 +746,37 @@ get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname)
 		tmprom = (MameRomEntry *) listpointer->data;
 		if (!g_ascii_strcasecmp (mame_rom_entry_get_romname (tmprom), romname))
 		{
+			GMAMEUI_DEBUG ("  Found romset %s in gamelist", mame_rom_entry_get_romname (tmprom));
 			break;
 		}
 	}
 
 	return tmprom;
+}
+
+GList *
+mame_gamelist_get_roms_for_driver (MameGamelist *gl, gchar *driver)
+{
+	GList *listpointer;
+	GList *romlist = NULL;
+	MameRomEntry *tmprom;
+
+	g_return_val_if_fail ((gl != NULL), NULL);
+	g_return_val_if_fail ((driver != NULL), NULL);
+
+	for (listpointer = g_list_first (gl->priv->roms);
+	     (listpointer != NULL);
+	     listpointer = g_list_next (listpointer))
+	{
+		tmprom = (MameRomEntry *) listpointer->data;
+		if (!g_ascii_strcasecmp (mame_rom_entry_get_driver (tmprom), driver))
+		{
+			GMAMEUI_DEBUG ("BROTHER: %s", mame_rom_entry_get_romname (tmprom));
+			romlist = g_list_append (romlist, tmprom);
+		}
+	}
+	
+	return romlist;
 }
 
 void mame_gamelist_add_driver (MameGamelist *gl, const gchar *driver) {

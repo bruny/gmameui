@@ -1,8 +1,21 @@
+2010-08-18 19:15 adburton
+
+	* src/: Makefile.am, callbacks.c, callbacks.h, game_list.c, game_list.h,
+	  gmameui-listoutput.c, gmameui-listoutput.h, gmameui-marshallers.list,
+	  gmameui-romfix-list.c, gmameui-romfix-list.h, gmameui-rominfo-dlg.c,
+	  gmameui-rommgr-dlg.c, gmameui-rommgr-dlg.h, gmameui-ui.xml,
+	  gmameui-zip-utils.c, gmameui-zip-utils.h, gmameui.c, gmameui.h,
+	  gui.h, rom_entry.c, rom_entry.h:
+	  Addition of functionality to verify the status of romsets, with
+	  preliminary code to attempt to recommend and implement fixes. This code
+	  is highly experimental and requires configure flags to be set to enable.
+	* po/: POTFILES.in, gmameui.pot: Update translation sources
+
 2010-03-22 21:45 adburton
 
 	* data/: gmameui_listoutput.builder, Makefile.am
 	* po/POTFILES.in
-	* src/: game_list.h gmameui-rominfo-dlg.c mameio.c
+	* src/: game_list.h gmameui-rominfo-dlg.c mameio.c Makefile.am
 	  gmameui-gamelist-view.c gmameui-marshallers.list
 	  gmameui-listoutput-dlg.c gmameui-listoutput-dlg.h
 	  gmameui-listoutput.c gmameui-listoutput.h:

@@ -228,6 +228,9 @@ g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NUL
 
 	/* Create a new IO Handler object */
 	gui_prefs.io_handler = gmameui_io_handler_new ();
+
+	/* Create a new romset fix list */
+	gui_prefs.fixes = gmameui_romfix_list_new ();
 	
 	/* Initialise the gamelist */
 	gui_prefs.gl = mame_gamelist_new ();
@@ -847,6 +850,12 @@ exit_gmameui (void)
 	
 	g_object_unref (gui_prefs.audit);
 	gui_prefs.audit = NULL;
+
+	g_object_unref (gui_prefs.io_handler);
+	gui_prefs.io_handler = NULL;
+
+	g_object_unref (gui_prefs.fixes);
+	gui_prefs.fixes = NULL;
 
 	g_object_unref (main_gui.exec_list);
 	main_gui.exec_list = NULL;

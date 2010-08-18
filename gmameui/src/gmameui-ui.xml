@@ -15,6 +15,9 @@
       <menuitem name="FileOptionsMenu" action="FileOptions"/>
       <separator/>      
       <menuitem name="FileAuditAllGamesMenu" action="FileAuditAllGames"/>
+<!-- FIXME TODO Need a way to enable this when conditionally compiled
+      <menuitem name="FileRebuildRomsetsMenu" action="FileRebuildRomsets"/>
+-->
       <separator/>
 
       <menuitem name="FileQuitMenu" action="FileQuit"/>

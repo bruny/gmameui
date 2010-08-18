@@ -81,6 +81,9 @@ void mame_gamelist_add_version (MameGamelist *gl, gchar *version);
 void mame_gamelist_add_category (MameGamelist *gl, gchar *category);
 void mame_gamelist_add_manufacturer (MameGamelist *gl, gchar *manufacturer);
 
+GList *
+mame_gamelist_get_roms_for_driver (MameGamelist *gl, gchar *driver);
+
 /**
 * Loads the game list from the gamelist file.
 */

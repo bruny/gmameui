@@ -102,6 +102,10 @@ static const GtkActionEntry gmameui_exec_menu_entries[] =
 	  N_("Audit ROM and sample sets"), G_CALLBACK (on_audit_all_games_activate) },
 /*DELETE	{ "OptionRebuildGameList", NULL, N_("_Rebuild Game List"), NULL,
 	  N_("Rebuild the game list from executable information"), G_CALLBACK (on_rebuild_game_list_menu_activate) },*/
+#ifdef ENABLE_ROMVALIDATION
+	{ "FileRebuildRomsets", GTK_STOCK_FIND_AND_REPLACE, N_("_Rebuild Romsets"), NULL,
+	  N_("Rebuild and fix romsets"), G_CALLBACK (on_rebuild_romsets_activate) },
+#endif
 	{ "OptionDefaultOpts", NULL, N_("Default _Options..."), NULL,
 	  N_("Set default game options"), G_CALLBACK (on_options_default_activate) },
 };

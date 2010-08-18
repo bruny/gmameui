@@ -13,6 +13,7 @@ gmameui_SOURCES = \
 	io.c io.h \
 	game_list.h game_list.c \
 	rom_entry.h rom_entry.c \
+	gmameui-romfix-list.c gmameui-romfix-list.h \
 	gmameui-listoutput.c gmameui-listoutput.h \
 	gmameui-listoutput-dlg.c gmameui-listoutput-dlg.h \
 	gui.c gui.h \
@@ -25,6 +26,7 @@ gmameui_SOURCES = \
 	gmameui-audit-dlg.c gmameui-audit-dlg.h \
 	gmameui-statusbar.c gmameui-statusbar.h \
 	gmameui-rominfo-dlg.c gmameui-rominfo-dlg.h \
+	gmameui-rommgr-dlg.c gmameui-rommgr-dlg.h \
 	gmameui-search-entry.c gmameui-search-entry.h \
 	options_string.c options_string.h \
 	gtkjoy.c gtkjoy.h \
@@ -53,7 +55,7 @@ gmameui-marshaller.c: gmameui-marshallers.list
 	echo "#include \"gmameui-marshaller.h\"" > $@ && \
 	glib-genmarshal --prefix=gmameui_marshaller --body $< >> $@
 
-gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(VTE_LIBS) $(GNOME_LIBS) $(ARCHIVE_LIBS) $(INTLLIBS) 
+gmameui_LDADD = @GTK_LIBS@ $(GLADE2_LIBS) $(VTE_LIBS) $(GNOME_LIBS) $(ARCHIVE_LIBS) $(INTLLIBS) -lzip
 
 AM_CPPFLAGS = -g -Wall $(GTK_CFLAGS) $(GLADE2_CFLAGS) \
 		$(VTE_CFLAGS) $(GNOME_CFLAGS) \

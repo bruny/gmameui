@@ -31,6 +31,7 @@
 #include "gtkjoy.h"
 #include "mame-exec.h"
 #include "game_list.h"
+#include "gmameui-romfix-list.h"
 #include "filter.h"
 #include "audit.h"
 #include "io.h"
@@ -173,6 +174,8 @@ struct gui_prefs_struct {
 	MameGamelist *gl;
 	GmameuiAudit *audit;
 	GMAMEUIIOHandler *io_handler;
+	GHashTable *rom_hashtable;
+	GMAMEUIRomfixList *fixes;
 };
 
 struct gui_prefs_struct gui_prefs;

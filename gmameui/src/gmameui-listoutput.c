@@ -32,6 +32,7 @@
 #include <stdarg.h>
 
 #include "gmameui-listoutput.h"
+#include "mame-exec.h"
 #include "gui.h"	/* FIXME TODO For gui_prefs */
 #include "gmameui-marshaller.h"
 
@@ -58,6 +59,11 @@ struct _GMAMEUIListOutputPrivate {
 	char text_buf[BUFFER_SIZE];     /* Handle XML input buffer */
 
 	MameRomEntry *current_rom;      /* ROM being populated from the XML input */
+	gchar *current_romset_name;     /* Romset being processed from the XML input - used as
+					   lightweight alternative to current_rom when creating
+					   hashtable of ROM information */
+	gboolean processing_romset;     /* Are we in the middle of processing a ROM? */
+	
 	int cpu_count;
 	int sound_count;
 
@@ -192,6 +198,56 @@ XMLDataHandler (GMAMEUIListOutput *parser, const XML_Char *s, int len)
 }
 
 static void
+XMLStartRomHandler2 (void *user_data, const XML_Char *name, const XML_Char **atts)
+{
+	GMAMEUIListOutput *parser = (GMAMEUIListOutput *) user_data;
+
+	if(!strcmp(name, "game"))
+	{
+		gchar *romname;
+		romname = g_strdup (read_string_attribute (atts, "name"));
+/*GMAMEUI_DEBUG ("  Setting up romset %s", romname);*/
+		parser->priv->current_rom = get_rom_from_gamelist_by_name (gui_prefs.gl, romname);
+		g_free (romname);
+		
+		parser->priv->processing_romset = TRUE;
+	}
+	else if (g_ascii_strcasecmp (name, "rom") == 0)
+	{
+		/* Only start processing rom info if we are working on a romset */
+		if (parser->priv->processing_romset == TRUE) {
+			individual_rom *rom_value = (individual_rom *) g_malloc0 (sizeof (individual_rom));
+
+			rom_value->name = g_strdup (read_string_attribute (atts, "name"));
+			rom_value->sha1 = g_strdup (read_string_attribute (atts, "sha1"));
+			rom_value->crc = /*read_int_attribute (atts, "crc", 0);*/
+				g_strdup (read_string_attribute (atts, "crc"));
+			rom_value->merge = g_strdup (read_string_attribute (atts, "merge"));
+			rom_value->status = g_strdup (read_string_attribute (atts, "status"));
+
+			/*GMAMEUI_DEBUG ("    Reading information for %s in romset %s",
+				       rom_value->name, mame_rom_entry_get_romname (parser->priv->current_rom));*/
+		
+			/* FIXME TODO romset listing may be null */
+			/* FIXME TODO Pass the name and sha1 so we can hide individual_rom struct in rom_entry.c */
+			mame_rom_entry_add_rom_ref (parser->priv->current_rom, rom_value);
+		}
+
+	}
+}
+
+static void
+XMLEndRomHandler2 (void *user_data, const XML_Char *name, const XML_Char **atts)
+{
+	GMAMEUIListOutput *parser = (GMAMEUIListOutput *) user_data;
+
+	if(!strcmp(name, "game"))
+	{
+		parser->priv->processing_romset = FALSE;
+	}
+}
+
+static void
 XMLEndRomHandler (MameRomEntry *rom, const XML_Char *name)
 {
 	/* No need to do anything here */
@@ -210,10 +266,16 @@ XMLStartRomHandler (void *user_data, const XML_Char *name, const XML_Char **atts
 		individual_rom *rom_value = (individual_rom *) g_malloc0 (sizeof (individual_rom));
 
 		rom_value->name = g_strdup (read_string_attribute (atts, "name"));
-
 		rom_value->sha1 = g_strdup (read_string_attribute (atts, "sha1"));
+		rom_value->crc = g_strdup (read_string_attribute (atts, "crc"));
+		rom_value->merge = g_strdup (read_string_attribute (atts, "merge"));
+		rom_value->status = g_strdup (read_string_attribute (atts, "status"));
+
+		GMAMEUI_DEBUG ("  Reading information for %s in romset %s",
+		               rom_value->name, mame_rom_entry_get_romname (rom));
 		
 		/* FIXME TODO romset listing may be null */
+		/* FIXME TODO Pass the name and sha1 so we can hide individual_rom struct in rom_entry.c */
 		mame_rom_entry_add_rom_ref (rom, rom_value);
 
 	} else if(!strcmp(name, "chip")) {
@@ -292,6 +354,44 @@ XMLStartRomHandler (void *user_data, const XML_Char *name, const XML_Char **atts
 			      NULL);
 	}
 
+}
+
+// AAA FIXME TODO Not required
+static void
+XMLStartIndivRomHandler (void *user_data, const XML_Char *name, const XML_Char **atts)
+{
+	/* i.e. we are now processing the ROM data */
+
+	GMAMEUIListOutput *parser = (GMAMEUIListOutput *) user_data;
+	
+	if (g_ascii_strcasecmp (name, "game") == 0) {
+		parser->priv->current_romset_name = g_strdup (read_string_attribute (atts, "name"));
+		/*GMAMEUI_DEBUG ("  Processing romset %s", parser->priv->current_romset_name);*/
+	} else if (g_ascii_strcasecmp (name, "rom") == 0) {
+		gchar *sha1;
+		sha1 = g_strdup (read_string_attribute (atts, "sha1"));
+		if (sha1) {
+			/*GMAMEUI_DEBUG ("    Adding reference to %s from romset %s to hash table",
+				       read_string_attribute (atts, "sha1"),
+				       parser->priv->current_romset_name);*/
+/*AAA FIXME TODO - only insert if it doesn't exist; if it does, then existing entry will be leaked
+AAA FIXME TODO - only insert if ROM is available*/
+			g_hash_table_insert (gui_prefs.rom_hashtable,
+				             g_strdup (sha1),
+				             g_strdup (parser->priv->current_romset_name));
+			g_free (sha1);
+		} /*else {
+			GMAMEUI_DEBUG ("    Skipping %s from fromset %s - bad or no dump",
+			               read_string_attribute (atts, "name"),
+				       parser->priv->current_romset_name);
+		}*/
+	}
+}
+
+static void
+XMLEndIndivRomHandler (MameRomEntry *rom, const XML_Char *name)
+{
+	/* No need to do anything here */
 }
 
 static void
@@ -564,10 +664,11 @@ create_gamelist_xmlinfo (GMAMEUIListOutput *parser)
 
 	/* Clean up - also occurs if user Cancels the operation */
 	GMAMEUI_DEBUG ("Cleaning up parser...");
-	if (parser->priv->mameHandle) {
+	mame_close_pipe (parser->priv->exec, parser->priv->mameHandle);
+	/*DELETEif (parser->priv->mameHandle) {
 		pclose (parser->priv->mameHandle);
 		parser->priv->mameHandle = NULL;
-	}
+	}*/
 
 	if (parser->priv->xmlParser);
 		XML_ParserFree (parser->priv->xmlParser);
@@ -576,6 +677,10 @@ create_gamelist_xmlinfo (GMAMEUIListOutput *parser)
 	return res;
 }
 
+/**
+ *  Entry function to generate the -listxml or -listoutput for the full
+ *  romset
+ */
 gboolean
 gmameui_listoutput_parse (GMAMEUIListOutput *parser)
 {
@@ -587,6 +692,7 @@ gmameui_listoutput_parse (GMAMEUIListOutput *parser)
 	   all versions of SDLMAME use listxml. */
 	if (mame_has_option (parser->priv->exec, "listinfo")) {
 #ifdef OBSOLETE_XMAME
+		/* Only versions 0.83 and earlier used listinfo */
 		GMAMEUI_DEBUG ("Recreating gamelist using -listinfo\n");
 		ret = create_gamelist_listinfo (parser->priv->exec);
 #else
@@ -626,41 +732,41 @@ gmameui_listoutput_parse_rom (GMAMEUIListOutput *parser,
                               MameRomEntry *rom)
 
 {
-	XML_Parser xmlParser;
-	FILE *mame_handle;
+	//XML_Parser xmlParser;
+	//FILE *mame_handle;
 	
 	g_return_val_if_fail (rom != NULL, NULL);
 	
 	cpu_count = sound_count = 0;
 
 	GMAMEUI_DEBUG ("Starting parsing ROM");
-	mame_handle = mame_open_pipe(exec, "-%s %s",
+	parser->priv->mameHandle = mame_open_pipe(exec, "-%s %s",
 				     mame_get_option_name(exec, "listxml"),
 				     mame_rom_entry_get_romname (rom));
 
-	g_return_val_if_fail (mame_handle != NULL, FALSE);
+	g_return_val_if_fail (parser->priv->mameHandle != NULL, FALSE);
 	
-	xmlParser = XML_ParserCreate (NULL);
-	XML_SetElementHandler (xmlParser,
+	parser->priv->xmlParser = XML_ParserCreate (NULL);
+	XML_SetElementHandler (parser->priv->xmlParser,
 			       (XML_StartElementHandler) &XMLStartRomHandler,
 			       (XML_EndElementHandler)   &XMLEndRomHandler);
-	XML_SetUserData (xmlParser, rom);
+	XML_SetUserData (parser->priv->xmlParser, rom);
 	
 	int final;
 	int bytes_read;
 	for (;;) {
 		char *buffer;
 
-		buffer = XML_GetBuffer (xmlParser, XML_BUFFER_SIZE);
+		buffer = XML_GetBuffer (parser->priv->xmlParser, XML_BUFFER_SIZE);
 		
 		if (!buffer) {
 			GMAMEUI_DEBUG("Failed to allocate buffer.");
 		}
 
-		bytes_read = fread (buffer, 1, XML_BUFFER_SIZE, mame_handle);
+		bytes_read = fread (buffer, 1, XML_BUFFER_SIZE, parser->priv->mameHandle);
 		final = !bytes_read;
 
-		if (bytes_read && !XML_ParseBuffer(xmlParser, bytes_read, final))
+		if (bytes_read && !XML_ParseBuffer(parser->priv->xmlParser, bytes_read, final))
 		{
 			GMAMEUI_DEBUG ("Error!");
 		}
@@ -669,13 +775,61 @@ gmameui_listoutput_parse_rom (GMAMEUIListOutput *parser,
 			break;
 
 	}
-	
-	pclose (mame_handle);
-	XML_ParserFree (xmlParser);
+
+	mame_close_pipe (exec, parser->priv->mameHandle);
+	/*DELETEpclose (parser->priv->mameHandle);
+	parser->priv->mameHandle = NULL;*/
+	XML_ParserFree (parser->priv->xmlParser);
 	
 	return rom;
 }
 
+/**
+ *  Entry method to generate the hashtable containing the ROM SHA1 and romset
+ *  information. Used in fixing romsets (might be possible to merge this with the
+ *  listxml output above
+ */
+// AAA FIXME Rename since purpose is different
+gboolean
+gmameui_listoutput_generate_rom_hash (GMAMEUIListOutput *parser, MameExec *exec)
+{
+	GTimer *timer;
+
+	g_return_val_if_fail (parser != NULL, FALSE);
+	g_return_val_if_fail (exec != NULL, FALSE);
+//DELETE	g_return_val_if_fail (gui_prefs.rom_hashtable != NULL, FALSE);
+
+	timer = g_timer_new ();
+	
+	parser->priv->cpu_count = parser->priv->sound_count = 0;
+
+	GMAMEUI_DEBUG ("Starting parsing listxml for ROM information");
+	parser->priv->mameHandle = mame_open_pipe (exec, "-%s",
+				      mame_get_option_name(exec, "listxml"));
+
+	g_return_val_if_fail (parser->priv->mameHandle != NULL, FALSE);
+	
+	parser->priv->xmlParser = XML_ParserCreate (NULL);
+	XML_SetElementHandler (parser->priv->xmlParser,
+			       (XML_StartElementHandler) &XMLStartRomHandler2,
+			       (XML_EndElementHandler)   &XMLEndRomHandler2);
+	
+	/* Set the GMAMEUIListOutput object as user data so the priv object
+	   data can be used in the parser event callbacks */
+	XML_SetUserData (parser->priv->xmlParser, parser);
+
+	start_gamelist_parse (parser);
+
+	mame_close_pipe (exec, parser->priv->mameHandle);
+
+	XML_ParserFree (parser->priv->xmlParser);
+	
+	GMAMEUI_DEBUG ("Finished parsing listxml for ROM information in %0.2f seconds", g_timer_elapsed (timer, NULL));
+
+	g_timer_destroy (timer);
+	
+	return TRUE;
+}
 
 /* Stop the parsing of the listxml output. This is usually triggered upon the
    user clicking Cancel in the parsing dialog */
