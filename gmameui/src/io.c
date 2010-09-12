@@ -46,9 +46,11 @@ enum
 
 static guint signals[LAST_IO_HANDLER_SIGNAL] = { 0 };
 
+/*
 struct _GMAMEUIIOHandlerPrivate {
-};
 
+};
+*/
 
 static void
 gmameui_io_handler_finalize (GObject *obj)
@@ -87,7 +89,7 @@ gmameui_io_handler_init (GMAMEUIIOHandler *handler)
 {
 	
 	GMAMEUI_DEBUG ("Creating IO Handler object");	
-	handler->priv = g_new0 (GMAMEUIIOHandlerPrivate, 1);
+	/*handler->priv = g_new0 (GMAMEUIIOHandlerPrivate, 1);*/
 
 	GMAMEUI_DEBUG ("Creating IO Handler object... done");
 }

@@ -1,3 +1,8 @@
+2010-09012 19:30 adburton
+
+	* src/io.c: Comment out unused priv structure causing segfaults (SF
+	  Bug 3062642)
+
 2010-08-18 19:15 adburton
 
 	* src/: Makefile.am, callbacks.c, callbacks.h, game_list.c, game_list.h,
