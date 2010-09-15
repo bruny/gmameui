@@ -11,7 +11,7 @@
       <separator/>
       <menuitem name="FileSelectRandomMenu" action="FileSelectRandom"/>
       <separator/>
-      <menuitem name="FilePropertiesMenu" action="FileProperties"/>
+      <menuitem name="FileRomsetInfoMenu" action="FileRomsetInfo"/>
       <menuitem name="FileOptionsMenu" action="FileOptions"/>
       <separator/>      
       <menuitem name="FileAuditAllGamesMenu" action="FileAuditAllGames"/>
@@ -53,7 +53,7 @@
   
   <toolbar name="ToolBar">
     <toolitem action="FilePlayGame"/>
-    <toolitem action="FileProperties"/>
+    <toolitem action="FileRomsetInfo"/>
     <toolitem action="ViewRefresh"/>
     <separator/>
     <toolitem action="ViewFolderList"/>
@@ -73,7 +73,7 @@
     <separator/>
     <menuitem action="FileSelectRandom"/>
     <separator/>
-    <menuitem action="FileProperties"/>
+    <menuitem action="FileRomsetInfo"/>
     <menuitem action="FileOptions"/>
   </popup>
 

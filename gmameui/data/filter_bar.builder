@@ -8,7 +8,34 @@
         <property name="visible">True</property>
         <property name="spacing">6</property>
         <child>
-          <placeholder/>
+          <object class="GtkRadioButton" id="filter_btn_all">
+            <property name="label" translatable="yes">All ROMs</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="filter_btn_avail">
+            <property name="label" translatable="yes">Available ROMs</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">filter_btn_all</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
         </child>
         <child>
           <object class="GtkRadioButton" id="filter_btn_unavail">
@@ -20,35 +47,8 @@
             <property name="group">filter_btn_all</property>
           </object>
           <packing>
-            <property name="pack_type">end</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkRadioButton" id="filter_btn_avail">
-            <property name="label" translatable="yes">Available ROMs</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="draw_indicator">True</property>
-            <property name="group">filter_btn_all</property>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkRadioButton" id="filter_btn_all">
-            <property name="label" translatable="yes">All ROMs</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="active">True</property>
-            <property name="draw_indicator">True</property>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
             <property name="position">2</property>
           </packing>
         </child>

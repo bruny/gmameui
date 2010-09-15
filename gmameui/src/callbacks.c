@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -142,8 +142,7 @@ show_properties_dialog (gchar *rom_name)
 }
 
 void
-on_properties_activate (GtkAction *action,
-			gpointer  user_data)
+on_romset_info_activate (GtkAction *action, gpointer user_data)
 {
 	GtkWidget *rominfo_dialog;
 	rominfo_dialog = mame_rominfo_dialog_new ();
@@ -151,8 +150,7 @@ on_properties_activate (GtkAction *action,
 }
 
 void
-on_options_activate (GtkAction *action,
-		     gpointer  user_data)
+on_options_activate (GtkAction *action, gpointer user_data)
 {
 	gchar *current_rom;
 	g_object_get (main_gui.gui_prefs, "current-rom", &current_rom, NULL);

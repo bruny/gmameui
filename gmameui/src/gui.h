@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -113,8 +113,8 @@ static const GtkActionEntry gmameui_exec_menu_entries[] =
 /* The following menu entries are enabled when a ROM is selected */
 static const GtkActionEntry gmameui_rom_menu_entries[] =
 {
-	{ "FileProperties", GTK_STOCK_INFO, N_("Properties"), NULL,
-	  N_("Display the properties of the selected game"), G_CALLBACK (on_properties_activate) }, 
+	{ "FileRomsetInfo", GTK_STOCK_INFO, N_("Romset Information"), NULL,
+	  N_("Display the details of the selected romset"), G_CALLBACK (on_romset_info_activate) }, 
 };
 
 static const GtkActionEntry gmameui_favourite_menu_entries[] =

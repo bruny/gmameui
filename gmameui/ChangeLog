@@ -1,3 +1,8 @@
+2010-09-15 21:00 adburton
+
+	* src/: callbacks.c, callbacks.h, gui.h, gmameui-ui.xml: Rename Properties
+	  to Romset Information
+
 2010-09-15 20:00 adburton
 
 	* src/: gmameui-sidebar.c, gmameui-sidebar.h, gui_prefs.c, gui_prefs.h,
@@ -9,7 +14,8 @@
 	  GtkBuilder file
 	* configure.ac, src/Makefile.am: Add configure checks for GtkImageView,
 	  conditional compilation of ROM validation
-	* src/: interface.c: Move search field and filter buttons above widgets
+	* src/interface.c, data/filter_bar.builder: Move search field and filter
+	  buttons above widgets
 	* src/mame_options_dialog_helper.c: Add newline to end of file
 	* src/game_list.c: Comment out debugging line that swamps the console
 	* src/gmameui-search-entry.c: Fix GTK warnings about empty priv object

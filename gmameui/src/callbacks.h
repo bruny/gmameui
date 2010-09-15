@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2008 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -42,7 +42,7 @@ void     on_add_to_favorites_activate           (GtkMenuItem     *menuitem,
 void     on_remove_from_favorites_activate      (GtkMenuItem     *menuitem,
                                                  gpointer         user_data);
 
-void     on_properties_activate                 (GtkAction        *action,
+void     on_romset_info_activate                 (GtkAction        *action,
                                                  gpointer         user_data);
 
 void     on_options_activate                    (GtkAction        *action,
