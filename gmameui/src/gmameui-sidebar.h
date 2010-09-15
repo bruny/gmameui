@@ -59,7 +59,6 @@ GType gmameui_sidebar_get_type (void);
 GtkWidget *gmameui_sidebar_new (void);
 
 void gmameui_sidebar_set_with_rom (GMAMEUISidebar *sidebar, MameRomEntry *rom);
-void gmameui_sidebar_set_current_page (GMAMEUISidebar *sidebar, int page);
 
 /**** End Sidebar functionality ****/
 

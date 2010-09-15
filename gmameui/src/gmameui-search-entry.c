@@ -24,7 +24,7 @@
 #include "gmameui-marshaller.h"
 
 struct _MameSearchEntryPrivate {
-
+	gint search_timeout;
 };
 
 G_DEFINE_TYPE (MameSearchEntry, mame_search_entry, GTK_TYPE_ENTRY)
@@ -162,18 +162,18 @@ GMAMEUI_DEBUG ("Destroying mame search entry...");
 GMAMEUI_DEBUG ("Destroying mame search entry... done");
 }
 
-
-gint search_timeout;
-
 static gboolean
 search_entry_changed_timeout (GtkWidget *widget)
 {
+	MameSearchEntry *entry;
+
+	entry = (MameSearchEntry *) widget;
 	/* Emit the signal so that the gmameui-gamelist-view can handle it. */
 	gdk_threads_enter ();
 
 	g_signal_emit (G_OBJECT (widget), signals[SEARCH_TEXT_CHANGED], 0,
 				   gtk_entry_get_text (GTK_EDITABLE (widget)));
-	search_timeout = 0;
+	entry->priv->search_timeout = 0;
 	
 	gdk_threads_leave ();
 	
@@ -187,14 +187,14 @@ search_entry_changed (MameSearchEntry *entry, gpointer user_data)
 {
 	GtkTreeModelFilter *filter;
 	
-	if (search_timeout != 0) {
-		g_source_remove (search_timeout);
-		search_timeout = 0;
+	if (entry->priv->search_timeout != 0) {
+		g_source_remove (entry->priv->search_timeout);
+		entry->priv->search_timeout = 0;
 	}
 	
 	/* emit it now if we're clearing the entry */
 	if (gtk_entry_get_text (GTK_ENTRY (entry)))
-		search_timeout = g_timeout_add (300, (GSourceFunc) search_entry_changed_timeout, entry);
+		entry->priv->search_timeout = g_timeout_add (300, (GSourceFunc) search_entry_changed_timeout, entry);
 	else
 		search_entry_changed_timeout (entry);
  

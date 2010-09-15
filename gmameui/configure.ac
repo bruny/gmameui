@@ -21,7 +21,8 @@ dnl AC_DEFINE(GDK_DISABLE_DEPRECATED,,Do not support deprecated GDK widgets)
 dnl AC_DEFINE(GDK_PIXBUF_DISABLE_DEPRECATED,,Do not support deprecated GDK-pixbuf widgets) 
 
 dnl Require at least GTK 2.12 for GtkBuilder support
-AM_PATH_GTK_2_0(2.12.0, , AC_MSG_ERROR(Cannot find GTK2))
+dnl Require at least GTK 2.18 for gtk_widget_get_allocation () support
+AM_PATH_GTK_2_0(2.18.0, , AC_MSG_ERROR(Cannot find GTK2))
 
 dnl Check if the version of GTK supports gtk_show_uri for spawning Help
 AM_PATH_GTK_2_0(2.13.4,AC_DEFINE(ENABLE_GTKSHOWURI, 1, Enable gtk_show_uri to spawn Help),AC_MSG_WARN(Version of GTK does not support gtk_show_uri))
@@ -56,6 +57,13 @@ dnl AC_CHECK_LIB([archive], [archive_read_open_filename],, AC_MSG_ERROR([Cannot 
 AC_SEARCH_LIBS([archive_read_new], [archive],
     ARCHIVE_LIBS=-larchive AC_SUBST(ARCHIVE_LIBS),
     AC_MSG_ERROR([Cannot find libarchive]))
+
+dnl Check for the existence of libzip - TODO replace libarchive with libzip
+PKG_CHECK_MODULES([ZIP],[libzip])
+
+PKG_CHECK_MODULES(IMAGEVIEW, gtkimageview, [], AC_MSG_ERROR([gtkimageview-dev not found!]))
+AC_SUBST(IMAGEVIEW_CFLAGS)
+AC_SUBST(IMAGEVIEW_LIBS)
 
 AC_PATH_PROG(gmameuipath, gmameui)
 dnl Subst PACKAGE_PIXMAPS_DIR.
@@ -104,6 +112,10 @@ AC_ARG_ENABLE([joystick],
   AC_HELP_STRING([--enable-joystick],[compile with joystick support (default: auto)])
   ,,enable_joystick=auto)
 
+AC_ARG_ENABLE([romvalidation],
+  AC_HELP_STRING([--enable-romvalidation],[**EXPERIMENTAL** enable UI options to evaluate and fix broken romsets (default: no)])
+  ,,enable_fixroms=no)
+
 if test "$enable_debug" = yes ; then
 	if test "$GCC" = yes; then
 		CFLAGS="-Wall -Wchar-subscripts -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wcast-align -Wsign-compare -std=gnu89 -ggdb -g3 -O0"
@@ -131,10 +143,11 @@ if test "$enable_joystick" = auto ; then
 
 elif test "$enable_joystick" = yes ; then
     AC_CHECK_HEADERS([linux/joystick.h])
+    AC_DEFINE(ENABLE_JOYSTICK, 1, [Enable joystick support])
 fi
 
-if test "$enable_joystick" = yes; then
-    AC_DEFINE(ENABLE_JOYSTICK, 1, [Enable joystick support])
+if test "$enable_romvalidation" = yes; then
+    AC_DEFINE(ENABLE_ROMVALIDATION, 1, [Enable broken romset validation])
 fi
 
 AC_CONFIG_FILES([ Makefile

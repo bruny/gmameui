@@ -84,8 +84,6 @@ struct _MameGuiPrefsPrivate {
 	gint xpos_filters;		/* The position of the paned for the filters*/
 	gint xpos_gamelist;		/* The position of the paned for the gamelist */
 	
-	screenshot_type ShowFlyer;
-	
 	gint current_rom_filter;	/* Whether to show all, available or unavailable ROMs in selected filter */
 	ListMode current_mode;
 	ListMode previous_mode;
@@ -161,9 +159,6 @@ mame_gui_prefs_set_property (GObject *object,
 			break;
 		case PROP_SHOW_SCREENSHOT:
 			prefs->priv->show_screenshot = g_value_get_boolean (value);
-			break;
-		case PROP_SHOW_FLYER:
-			prefs->priv->ShowFlyer = g_value_get_int (value);
 			break;
 		case PROP_XPOS_FILTERS:
 			prefs->priv->xpos_filters = g_value_get_int (value);
@@ -316,9 +311,6 @@ mame_gui_prefs_get_property (GObject *object,
 		case PROP_SHOW_SCREENSHOT:
 			g_value_set_boolean (value, prefs->priv->show_screenshot);
 			break;
-		case PROP_SHOW_FLYER:
-			g_value_set_int (value, prefs->priv->ShowFlyer);
-			break;
 		case PROP_XPOS_FILTERS:
 			g_value_set_int (value, prefs->priv->xpos_filters);
 			break;
@@ -466,9 +458,6 @@ mame_gui_prefs_class_init (MameGuiPrefsClass *klass)
 	g_object_class_install_property (object_class,
 					 PROP_SHOW_SCREENSHOT,
 					 g_param_spec_boolean ("show-screenshot", "Show Sidebar", "Show the screenshot sidebar", TRUE, G_PARAM_READWRITE));
-	g_object_class_install_property (object_class,
-					 PROP_SHOW_FLYER,
-					 g_param_spec_int ("show-flyer", "Image Type", "Image type to display", 0, 5, 0, G_PARAM_READWRITE));
 	g_object_class_install_property (object_class,
 					 PROP_CURRENT_ROMFILTER,
 					 g_param_spec_int ("current-rom-filter", "Current ROM filter", "Current ROM filter", 0, 2, 0, G_PARAM_READWRITE));
@@ -622,7 +611,6 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	pr->priv->show_statusbar = mame_gui_prefs_get_bool_property_from_key_file (pr, "show-statusbar");
 	pr->priv->show_filterlist = mame_gui_prefs_get_bool_property_from_key_file (pr, "show-filterlist");
 	pr->priv->show_screenshot = mame_gui_prefs_get_bool_property_from_key_file (pr, "show-screenshot");
-	pr->priv->ShowFlyer = mame_gui_prefs_get_int_property_from_key_file (pr, "show-flyer");
 	pr->priv->current_rom_filter = mame_gui_prefs_get_int_property_from_key_file (pr, "current-rom-filter");
 	pr->priv->current_mode = mame_gui_prefs_get_int_property_from_key_file (pr, "current-mode");
 	pr->priv->previous_mode = mame_gui_prefs_get_int_property_from_key_file (pr, "previous-mode");
@@ -719,7 +707,6 @@ mame_gui_prefs_init (MameGuiPrefs *pr)
 	g_signal_connect (pr, "notify::show-statusbar", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::show-filterlist", (GCallback) mame_gui_prefs_save_bool, NULL);
 	g_signal_connect (pr, "notify::show-screenshot", (GCallback) mame_gui_prefs_save_bool, NULL);
-	g_signal_connect (pr, "notify::show-flyer", (GCallback) mame_gui_prefs_save_int, NULL);
 	g_signal_connect (pr, "notify::current-rom-filter", (GCallback) mame_gui_prefs_save_int, NULL);
 	g_signal_connect (pr, "notify::current-mode", (GCallback) mame_gui_prefs_save_int, NULL);
 	g_signal_connect (pr, "notify::previous-mode", (GCallback) mame_gui_prefs_save_int, NULL);

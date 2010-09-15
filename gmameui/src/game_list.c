@@ -746,7 +746,7 @@ get_rom_from_gamelist_by_name (MameGamelist *gl, gchar *romname)
 		tmprom = (MameRomEntry *) listpointer->data;
 		if (!g_ascii_strcasecmp (mame_rom_entry_get_romname (tmprom), romname))
 		{
-			GMAMEUI_DEBUG ("  Found romset %s in gamelist", mame_rom_entry_get_romname (tmprom));
+			/*GMAMEUI_DEBUG ("  Found romset %s in gamelist", mame_rom_entry_get_romname (tmprom));*/
 			break;
 		}
 	}

@@ -289,3 +289,4 @@ compare_pref_page_func (GtkTreeModel *model,
 	
 	return val;
 }
+

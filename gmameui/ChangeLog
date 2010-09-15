@@ -1,4 +1,20 @@
-2010-09012 19:30 adburton
+2010-09-15 20:00 adburton
+
+	* src/: gmameui-sidebar.c, gmameui-sidebar.h, gui_prefs.c, gui_prefs.h,
+	  gmameui.h, gui.c, interface.c: Build sidebar in code rather than
+	  GtkBuilder file, use GtkImageView library rather than custom code for
+	  resizing images, remove viewing different types of images in sidebar -
+	  default to screenshot
+	* data/Makefile.am, data/sidebar.builder, po/POTFILES.in: Remove
+	  GtkBuilder file
+	* configure.ac, src/Makefile.am: Add configure checks for GtkImageView,
+	  conditional compilation of ROM validation
+	* src/: interface.c: Move search field and filter buttons above widgets
+	* src/mame_options_dialog_helper.c: Add newline to end of file
+	* src/game_list.c: Comment out debugging line that swamps the console
+	* src/gmameui-search-entry.c: Fix GTK warnings about empty priv object
+
+2010-09-12 19:30 adburton
 
 	* src/io.c: Comment out unused priv structure causing segfaults (SF
 	  Bug 3062642)

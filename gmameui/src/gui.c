@@ -57,8 +57,6 @@ init_gui (void)
 {
 	GtkTooltips *tooltips;
 	gchar *filename;
-
-	screenshot_type show_flyer;
 	
 	tooltips = gtk_tooltips_new ();
 
@@ -89,10 +87,6 @@ init_gui (void)
 	                  "value-changed",
 	                  G_CALLBACK (adjustment_scrolled),
 	                  main_gui.displayed_list);
-
-	/* Need to set the notebook page here otherwise it segfault */
-	g_object_get (main_gui.gui_prefs, "show-flyer", &show_flyer, NULL);
-	gmameui_sidebar_set_current_page (main_gui.screenshot_hist_frame, show_flyer);
 
 	return 0;
 }

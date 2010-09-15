@@ -239,7 +239,7 @@ create_MainWindow (void)
 	
 	gint ui_width, ui_height;
 	gint xpos_filters, xpos_gamelist;
-	gint show_filters, show_screenshot, show_flyer;
+	gint show_filters, show_screenshot;
 	gint show_statusbar, show_toolbar;
 	gint current_mode;
 
@@ -255,7 +255,6 @@ GMAMEUI_DEBUG ("Setting up main window...");
 		      "ui-height", &ui_height,
 		      "show-filterlist", &show_filters,
 		      "show-screenshot", &show_screenshot,
-		      "show-flyer", &show_flyer,
 		      "show-statusbar", &show_statusbar,
 		      "show-toolbar", &show_toolbar,
 		      "current-mode", &current_mode,    /* FIXME TODO Rename to show-details */
@@ -427,16 +426,22 @@ GMAMEUI_DEBUG ("Setting up main window...");
 	/* Set up the search field */
 GMAMEUI_DEBUG ("    Setting up search entry field...");
 	GtkWidget *search_box;
-	search_box = GTK_WIDGET (gtk_builder_get_object (builder, "filter_hbox"));
+	search_box = gtk_hbox_new (FALSE, 6);
+
+	/* Search text entry */
 	main_gui.search_entry = mame_search_entry_new ();
-	
-	/* In order to pack before the filter buttons, their pack must be set to End */
+
+	/* Search radio buttons */
+	GtkWidget *search_rbtns;
+	search_rbtns = GTK_WIDGET (gtk_builder_get_object (builder, "filter_hbox"));
+
+	/* Pack it all in */
 	gtk_box_pack_start (GTK_BOX (search_box), main_gui.search_entry, FALSE, FALSE, 6);
-	gtk_widget_show (main_gui.search_entry);
-GMAMEUI_DEBUG ("    Setting up search entry field... done");
+	gtk_box_pack_start (GTK_BOX (search_box), search_rbtns, FALSE, FALSE, 6);
+	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (search_box), FALSE, FALSE, 6);
 
 	/* Prepare the ROM availability filter buttons */
-GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons...");
+GMAMEUI_DEBUG ("      Setting up ROM availability filter buttons...");
 	GSList *filter_btn_list, *list;
 	gint current_filter_btn;
 	
@@ -451,7 +456,7 @@ GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons...");
 		widget = list->data;
 
 		name = gtk_widget_get_name (widget);
-		
+
 		if (g_ascii_strncasecmp (name, "filter_btn_", 11) == 0) {
 			/* Hide the radio circle so only the button is visible */
 			gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (list->data), FALSE);
@@ -468,8 +473,9 @@ GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons...");
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (get_filter_btn_by_id (builder,
 	                                                                       current_filter_btn)),
 	                              TRUE);
-GMAMEUI_DEBUG ("    Setting up ROM availability filter buttons... done");	
+GMAMEUI_DEBUG ("      Setting up ROM availability filter buttons... done");	
 	/* End ROM availability filter buttons */
+GMAMEUI_DEBUG ("    Setting up search entry field... done");
 	
 	/* Enable keyboard shortcuts defined in the UI Manager */
 	gtk_window_add_accel_group (GTK_WINDOW (main_window), accel_group);     /* FIXME TODO Is this one required? */
@@ -493,11 +499,6 @@ GMAMEUI_DEBUG ("    Setting up LHS filters list... done");
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (main_gui.scrolled_window_games),
 	                                GTK_POLICY_AUTOMATIC,
 	                                GTK_POLICY_AUTOMATIC);
-
-	GtkWidget *box2 = gtk_vbox_new (FALSE, 0);
-	gtk_paned_pack1 (GTK_PANED (main_gui.hpanedRight), box2, TRUE, TRUE);
-
-	gtk_box_pack_start (GTK_BOX (box2), search_box, FALSE, FALSE, 6);
 	
 	/* Add screenshot and history sidebar on RHS */
 	GtkWidget *sidebar = gmameui_sidebar_new ();
@@ -511,7 +512,7 @@ GMAMEUI_DEBUG ("    Setting up gamelist view...");
 	gtk_container_add (GTK_CONTAINER (main_gui.scrolled_window_games), GTK_WIDGET (main_gui.displayed_list));
 	gtk_widget_show_all (main_gui.scrolled_window_games);
 GMAMEUI_DEBUG ("    Setting up gamelist view... done");
-	gtk_box_pack_start (GTK_BOX (box2), main_gui.scrolled_window_games, TRUE, TRUE, 6);
+	gtk_paned_pack1 (GTK_PANED (main_gui.hpanedRight), main_gui.scrolled_window_games, TRUE, TRUE);
 
 	gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET (main_gui.hpanedLeft), TRUE, TRUE, 6);
 	gtk_paned_add1 (GTK_PANED (main_gui.hpanedLeft), main_gui.scrolled_window_filters);

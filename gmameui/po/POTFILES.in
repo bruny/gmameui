@@ -48,6 +48,5 @@ src/gmameui-ui.xml
 [type: gettext/glade]data/options_legacy.builder
 [type: gettext/glade]data/rom_info.builder
 [type: gettext/glade]data/romset_mgr.builder
-[type: gettext/glade]data/sidebar.builder
 [type: gettext/glade]data/gmameui_listoutput.builder
 gmameui.desktop.in
