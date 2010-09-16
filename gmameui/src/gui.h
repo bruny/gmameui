@@ -196,9 +196,6 @@ struct main_gui_struct {
 
 struct main_gui_struct main_gui;
 
-void adjustment_scrolled (GtkAdjustment *adjustment,
-                          gpointer       user_data);
-
 /* New icon code */
 void gmameui_icons_init (void);
 GdkPixbuf * gmameui_get_icon_from_stock (const char *);
@@ -214,11 +211,8 @@ GtkWidget * gmameui_get_image_from_stock (const char *id);
 void get_status_icons (void);
 void gmameui_icons_init (void);
 
-
-void gamelist_popupmenu_show (GdkEventButton *event);
 void gmameui_ui_set_favourites_sensitive (gboolean rom_is_favourite);
 void gmameui_ui_set_items_sensitive (void);
-void gmameui_menu_set_view_mode_check (gint view_mode, gboolean state);
 
 void select_inp (gboolean play_record);
 void select_game (MameRomEntry *rom);

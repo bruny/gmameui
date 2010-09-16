@@ -1,3 +1,13 @@
+2010-09-16 21:10
+
+	* src/: gui.c, gui.h, gmameui-gamelist-view.c, gmameui-gamelist-view.h,
+	  gmameui.c, gmameui.h: Move functions out of 'generic' source files,
+	  remove redundant code
+	* po/POTFILES.in, src/: Makefile.am, about.c, about.h, callbacks.c: Use GTK
+	  functions to build About dialog, delete redundant about.[ch]
+	* src/: callbacks.c, common.c, gmameui-gamelist-view.c: Fix compilation
+	  warnings
+
 2010-09-15 21:00 adburton
 
 	* src/: callbacks.c, callbacks.h, gui.h, gmameui-ui.xml: Rename Properties

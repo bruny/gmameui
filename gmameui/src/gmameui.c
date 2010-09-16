@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -53,16 +53,6 @@
 
 static void
 gmameui_init (void);
-
-#ifdef ENABLE_SIGNAL_HANDLER
-static void
-gmameui_signal_handler (int signum)
-{
-	g_message ("Received signal %d. Quitting", signum);
-	signal (signum, SIG_DFL);
-	exit_gmameui ();
-}
-#endif
 
 int
 main (int argc, char *argv[])
@@ -117,11 +107,6 @@ main (int argc, char *argv[])
 	/* Load the default options */
 	main_gui.options = mame_options_new ();
 	main_gui.legacy_options = mame_options_legacy_new ();
-		
-#ifdef ENABLE_SIGNAL_HANDLER
-	signal (SIGHUP, gmameui_signal_handler);
-	signal (SIGINT, gmameui_signal_handler);
-#endif
 
 	/* If no executables were found, prompt the user to open the directories
 	   window to add at least one */
@@ -261,190 +246,6 @@ g_message (_("Time to initialise: %.02f seconds"), g_timer_elapsed (mytimer, NUL
 	/* doesn't matter if joystick is enabled or not but easier to handle after */
 	joy_focus_on ();
 
-}
-
-gboolean
-game_filtered (MameRomEntry * rom, gint rom_filter_opt)
-{
-	/* gchar **manufacturer; */
-	
-	gboolean is;
-	Columns_type type;
-	gchar *value;
-	gint int_value;
-	gboolean retval;
-
-	/* ROM information */
-	gboolean is_bios;
-	gboolean is_favourite;
-	gboolean is_clone;
-	gboolean is_vector;
-	
-	g_return_val_if_fail (selected_filter != NULL, FALSE);
-	g_return_val_if_fail (rom != NULL, FALSE);
-	
-	retval = FALSE;
-
-	g_object_get (selected_filter,
-		      "is", &is,
-		      "type", &type,
-		      "value", &value,
-		      "int_value", &int_value,
-		      NULL);
-
-	is_bios = mame_rom_entry_is_bios (rom);
-
-	/* Only display a BIOS rom if the BIOS filter is explicitly stated */
-	if (is_bios) { 
-		if (type == IS_BIOS) {
-			retval = ( (is && is_bios) ||
-				 (!is && !is_bios));
-		} else
-			retval = FALSE;
-	} else {
-		switch (type) {
-			
-			gchar *driver, *ver_added, *category;
-			DriverStatus driver_status;
-			DriverStatus driver_status_colour;
-			DriverStatus driver_status_sound;
-			DriverStatus driver_status_graphics;
-			gint timesplayed, num_channels;
-			RomStatus rom_status;
-			ControlType control;
-			
-			case DRIVER:
-				g_object_get (rom, "driver", &driver, NULL);
-				retval = ((is && !g_strcasecmp (driver,value)) ||
-					 (!is && g_strcasecmp (driver,value)));
-				g_free (driver);
-				break;
-			case CLONE:
-				is_clone = mame_rom_entry_is_clone (rom);
-				retval = ((is && !is_clone) || (!is && is_clone));
-				break;
-			case CONTROL:
-				g_object_get (rom, "control-type", &control, NULL);
-				retval = ((is && (control == (ControlType) int_value))  ||
-					 (!is && !(control == (ControlType) int_value)));
-				break;
-			case MAMEVER:				
-				g_object_get (rom, "version-added", &ver_added, NULL);
-				if (ver_added)
-					retval = (g_ascii_strcasecmp (ver_added, value) == 0);
-				g_free (ver_added);
-				break;
-			case CATEGORY:
-				g_object_get (rom, "category", &category, NULL);
-				if (category)
-					retval = (g_ascii_strcasecmp (category, value) == 0);
-				g_free (category);
-				break;
-			case FAVORITE:
-				is_favourite = mame_rom_entry_is_favourite (rom);
-				retval = ( (is && is_favourite) ||
-					 (!is && !is_favourite));
-				break;
-			case VECTOR:
-				is_vector = mame_rom_entry_is_vector (rom);
-				retval = ( (is && is_vector) ||
-					 (!is && !is_vector));
-				break;
-			case DRIVER_STATUS:
-				/* This is a summary of imperfect colour, sound, graphic
-				   and emulation */
-				g_object_get (rom, "driver-status", &driver_status, NULL);
-				retval = ( (is && driver_status == (DriverStatus)int_value) ||
-					 (!is && !driver_status == (DriverStatus)int_value));
-				break;
-			case COLOR_STATUS:
-				g_object_get (rom, "driver-status-colour", &driver_status_colour, NULL);
-				retval = ( (is && (driver_status_colour == (DriverStatus)int_value))  ||
-					 (!is && ! (driver_status_colour == (DriverStatus)int_value)));
-				break;
-			case SOUND_STATUS:
-				g_object_get (rom, "driver-status-sound", &driver_status_sound, NULL);
-				retval = ( (is && (driver_status_sound == (DriverStatus)int_value))  ||
-					 (!is && ! (driver_status_sound == (DriverStatus)int_value)));
-				break;
-			case GRAPHIC_STATUS:
-				g_object_get (rom, "driver-status-graphics", &driver_status_graphics, NULL);
-				retval = ( (is && (driver_status_graphics == (DriverStatus)int_value))  ||
-					 (!is && ! (driver_status_graphics == (DriverStatus)int_value)));
-				break;
-			case HAS_ROMS:
-				rom_status = mame_rom_entry_get_rom_status (rom);
-				retval = ((is && (rom_status == (RomStatus) int_value))  ||
-					 (!is && !(rom_status == (RomStatus) int_value)));
-				break;
-			case HAS_SAMPLES:
-				retval = ( (is && (mame_rom_entry_has_samples (rom) == int_value))  ||
-					 (!is && ! (mame_rom_entry_has_samples (rom) == int_value)));
-				break;
-			case TIMESPLAYED:
-				g_object_get (rom, "times-played", &timesplayed, NULL);
-				retval = ( (is && (timesplayed == int_value)) ||
-					 (!is && ! (timesplayed == int_value)));
-				break;
-			case CHANNELS:
-				g_object_get (rom, "num-channels", &num_channels, NULL);
-				retval = ( (is && (num_channels == int_value)) ||
-					 (!is && (num_channels != int_value)));
-				break;
-			/* We are not currently supporting the YEAR and MANUFACTURER filters
-			   since it makes the LHS filter list too long 
-		
-			case YEAR:
-				retval = ( (is && (rom->year == value)) ||
-					 (!is && (rom->year != value)));
-				break;
-				* comparing parsed text and text *
-			case MANU:
-				manufacturer = rom_entry_get_manufacturers (rom);
-				* we have now one or two clean manufacturer (s) we still need to differentiates sub companies*
-				if (manufacturer[1] != NULL) {
-					if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
-					     (!is && g_strncasecmp (manufacturer[0], value, 5)) ||
-					     (is && !g_strncasecmp (manufacturer[1], value, 5)) ||
-					     (!is && g_strncasecmp (manufacturer[1], value, 5))
-					     ) {
-						g_strfreev (manufacturer);
-						retval = TRUE;
-
-					}
-				} else {
-					if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
-					     (!is && g_strncasecmp (manufacturer[0], value, 5))
-					     ) {
-						g_strfreev (manufacturer);
-						retval = TRUE;
-					}
-				}
-				g_strfreev (manufacturer);
-				break;*/
-			default:
-				GMAMEUI_DEBUG ("Trying to filter, but filter type %d is not handled", type);
-				retval = FALSE;
-			}
-	}
-	g_free (value);
-	
-	/* Final additional check whether the ROM should be displayed based on the ROM
-	   filter settings and whether the ROM is available or unavailable */
-	if (retval) {
-		if (rom_filter_opt == 1) {
-			/* Only show Available */
-			retval = (mame_rom_entry_get_rom_status (rom) != NOT_AVAIL) ? TRUE : FALSE;
-		} else if (rom_filter_opt == 2) {
-			/* Only show Unavailable */
-			retval = (mame_rom_entry_get_rom_status (rom) == NOT_AVAIL) ? TRUE : FALSE;
-		} else {
-		/* No need to process for All ROMs */
-
-		}
-	}
-
-	return retval;
 }
 
 /* launch following the commandline prepared by play_game, playback_game and record_game 

@@ -22,7 +22,7 @@
  */
 
 #include "common.h"
-#include <gtk/gtkcolorseldialog.h>
+/*DELETE#include <gtk/gtkcolorseldialog.h>
 #include <gtk/gtkfontsel.h>
 #include <gtk/gtklabel.h>
 #include <gtk/gtkmain.h>
@@ -30,14 +30,13 @@
 
 #ifdef ENABLE_LIBGNOME
 #include <libgnome/libgnome.h>
-#endif
+#endif*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "callbacks.h"
 #include "interface.h"
-#include "about.h"
 #include "directories.h"
 #include "gmameui.h"
 #include "audit.h"
@@ -92,8 +91,6 @@ on_select_random_game_activate         (GtkMenuItem     *menuitem,
 }
 
 void update_favourites_list (gboolean add) {
-	Columns_type type;
-
 	g_object_set (gui_prefs.current_game, "is-favourite", add, NULL);
 
 	gmameui_ui_set_favourites_sensitive (add);
@@ -230,8 +227,8 @@ on_preferences_activate             (GtkMenuItem     *menuitem,
 	MameGuiPrefsDialog *prefs_dialog;
 	prefs_dialog = mame_gui_prefs_dialog_new ();
 GMAMEUI_DEBUG("Running dialog");
-	gtk_dialog_run (prefs_dialog);
-	gtk_widget_destroy (prefs_dialog);
+	gtk_dialog_run (GTK_DIALOG (prefs_dialog));
+	gtk_widget_destroy (GTK_WIDGET (prefs_dialog));
 GMAMEUI_DEBUG("Done running dialog");
 }
 
@@ -286,6 +283,35 @@ void
 on_about_activate                      (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-	about_window_show ();
+	GdkPixbuf *pixbuf;
+	
+	const char *authors [] = {
+		"Andrew Burton <adb@iinet.net.au>",
+		"Based on GXMame",
+		"Stephane Pontier <shadow_walker@users.sourceforge.net>",
+		"Benoit Dumont <vertigo17@users.sourceforge.net>",
+		"Nicos Panayides <anarxia@gmx.net>",
+		"Priit Laes <x-laes@users.sourceforge.net>",
+		"William Jon McCann <mccann@jhu.edu>",
+		NULL
+	};
+
+	const char *translators = _("translator-credits");
+
+	pixbuf = gmameui_get_icon_from_stock ("gmameui-screen");
+
+	gtk_show_about_dialog (GTK_WINDOW (MainWindow),
+			       "name", "GMAMEUI",
+			       "version", VERSION,
+			       "logo", pixbuf,
+			       "copyright", _("Copyright (c) 2007-2010 Andrew Burton"),
+			       "website", "http://gmameui.sourceforge.net",
+			       "comments", _("A program to play MAME under Linux"),
+			       "authors", authors,
+			       "translator-credits", translators,
+			       NULL);
+
+	g_object_unref (pixbuf);
+//DELETE	about_window_show ();
 }
 

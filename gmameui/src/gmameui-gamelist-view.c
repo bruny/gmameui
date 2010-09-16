@@ -2,7 +2,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -24,11 +24,9 @@
 #include "common.h"
 
 #include <gdk/gdkkeysyms.h>
-#include <string.h>
 
 #include "gmameui-gamelist-view.h"
 #include "game_list.h"
-#include "gmameui.h"    /* For game_filtered */
 #include "rom_entry.h"
 #include "gui.h"	/* For main_gui struct */
 #include "gui_prefs.h"
@@ -45,16 +43,12 @@ struct _MameGamelistViewPrivate {
 	GtkTreeModel *sort_model;       /* Implementation of GtkTreeModelSort */
 	GtkTreeModel *filter_model;     /* Implementation of GtkTreeModelFilter */
 
+	guint timeout_icon;
 };
 
 G_DEFINE_TYPE (MameGamelistView, mame_gamelist_view, GTK_TYPE_TREE_VIEW)
 
 #define MAME_GAMELIST_VIEW_GET_PRIVATE(o)  (MAME_GAMELIST_VIEW (o)->priv)
-
-enum {
-	LISTSTORE,
-	TREESTORE
-};
 
 /* Function prototypes */
 static void
@@ -397,6 +391,191 @@ GMAMEUI_DEBUG ("Destroying mame gamelist view... done");
 }
 /* End boilerplate functions */
 
+/* Determines whether a romset should be filtered (hidden from view)
+   based on the filter option passed in */
+static gboolean
+game_filtered (MameRomEntry * rom, gint rom_filter_opt)
+{
+	/* gchar **manufacturer; */
+	
+	gboolean is;
+	Columns_type type;
+	gchar *value;
+	gint int_value;
+	gboolean retval;
+
+	/* ROM information */
+	gboolean is_bios;
+	gboolean is_favourite;
+	gboolean is_clone;
+	gboolean is_vector;
+	
+	g_return_val_if_fail (selected_filter != NULL, FALSE);
+	g_return_val_if_fail (rom != NULL, FALSE);
+	
+	retval = FALSE;
+
+	g_object_get (selected_filter,
+		      "is", &is,
+		      "type", &type,
+		      "value", &value,
+		      "int_value", &int_value,
+		      NULL);
+
+	is_bios = mame_rom_entry_is_bios (rom);
+
+	/* Only display a BIOS rom if the BIOS filter is explicitly stated */
+	if (is_bios) { 
+		if (type == IS_BIOS) {
+			retval = ( (is && is_bios) ||
+				 (!is && !is_bios));
+		} else
+			retval = FALSE;
+	} else {
+		switch (type) {
+			
+			gchar *driver, *ver_added, *category;
+			DriverStatus driver_status;
+			DriverStatus driver_status_colour;
+			DriverStatus driver_status_sound;
+			DriverStatus driver_status_graphics;
+			gint timesplayed, num_channels;
+			RomStatus rom_status;
+			ControlType control;
+			
+			case DRIVER:
+				g_object_get (rom, "driver", &driver, NULL);
+				retval = ((is && !g_strcasecmp (driver,value)) ||
+					 (!is && g_strcasecmp (driver,value)));
+				g_free (driver);
+				break;
+			case CLONE:
+				is_clone = mame_rom_entry_is_clone (rom);
+				retval = ((is && !is_clone) || (!is && is_clone));
+				break;
+			case CONTROL:
+				g_object_get (rom, "control-type", &control, NULL);
+				retval = ((is && (control == (ControlType) int_value))  ||
+					 (!is && !(control == (ControlType) int_value)));
+				break;
+			case MAMEVER:				
+				g_object_get (rom, "version-added", &ver_added, NULL);
+				if (ver_added)
+					retval = (g_ascii_strcasecmp (ver_added, value) == 0);
+				g_free (ver_added);
+				break;
+			case CATEGORY:
+				g_object_get (rom, "category", &category, NULL);
+				if (category)
+					retval = (g_ascii_strcasecmp (category, value) == 0);
+				g_free (category);
+				break;
+			case FAVORITE:
+				is_favourite = mame_rom_entry_is_favourite (rom);
+				retval = ( (is && is_favourite) ||
+					 (!is && !is_favourite));
+				break;
+			case VECTOR:
+				is_vector = mame_rom_entry_is_vector (rom);
+				retval = ( (is && is_vector) ||
+					 (!is && !is_vector));
+				break;
+			case DRIVER_STATUS:
+				/* This is a summary of imperfect colour, sound, graphic
+				   and emulation */
+				g_object_get (rom, "driver-status", &driver_status, NULL);
+				retval = ( (is && driver_status == (DriverStatus)int_value) ||
+					 (!is && !driver_status == (DriverStatus)int_value));
+				break;
+			case COLOR_STATUS:
+				g_object_get (rom, "driver-status-colour", &driver_status_colour, NULL);
+				retval = ( (is && (driver_status_colour == (DriverStatus)int_value))  ||
+					 (!is && ! (driver_status_colour == (DriverStatus)int_value)));
+				break;
+			case SOUND_STATUS:
+				g_object_get (rom, "driver-status-sound", &driver_status_sound, NULL);
+				retval = ( (is && (driver_status_sound == (DriverStatus)int_value))  ||
+					 (!is && ! (driver_status_sound == (DriverStatus)int_value)));
+				break;
+			case GRAPHIC_STATUS:
+				g_object_get (rom, "driver-status-graphics", &driver_status_graphics, NULL);
+				retval = ( (is && (driver_status_graphics == (DriverStatus)int_value))  ||
+					 (!is && ! (driver_status_graphics == (DriverStatus)int_value)));
+				break;
+			case HAS_ROMS:
+				rom_status = mame_rom_entry_get_rom_status (rom);
+				retval = ((is && (rom_status == (RomStatus) int_value))  ||
+					 (!is && !(rom_status == (RomStatus) int_value)));
+				break;
+			case HAS_SAMPLES:
+				retval = ( (is && (mame_rom_entry_has_samples (rom) == int_value))  ||
+					 (!is && ! (mame_rom_entry_has_samples (rom) == int_value)));
+				break;
+			case TIMESPLAYED:
+				g_object_get (rom, "times-played", &timesplayed, NULL);
+				retval = ( (is && (timesplayed == int_value)) ||
+					 (!is && ! (timesplayed == int_value)));
+				break;
+			case CHANNELS:
+				g_object_get (rom, "num-channels", &num_channels, NULL);
+				retval = ( (is && (num_channels == int_value)) ||
+					 (!is && (num_channels != int_value)));
+				break;
+			/* We are not currently supporting the YEAR and MANUFACTURER filters
+			   since it makes the LHS filter list too long 
+		
+			case YEAR:
+				retval = ( (is && (rom->year == value)) ||
+					 (!is && (rom->year != value)));
+				break;
+				* comparing parsed text and text *
+			case MANU:
+				manufacturer = rom_entry_get_manufacturers (rom);
+				* we have now one or two clean manufacturer (s) we still need to differentiates sub companies*
+				if (manufacturer[1] != NULL) {
+					if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
+					     (!is && g_strncasecmp (manufacturer[0], value, 5)) ||
+					     (is && !g_strncasecmp (manufacturer[1], value, 5)) ||
+					     (!is && g_strncasecmp (manufacturer[1], value, 5))
+					     ) {
+						g_strfreev (manufacturer);
+						retval = TRUE;
+
+					}
+				} else {
+					if ( (is && !g_strncasecmp (manufacturer[0], value, 5)) ||
+					     (!is && g_strncasecmp (manufacturer[0], value, 5))
+					     ) {
+						g_strfreev (manufacturer);
+						retval = TRUE;
+					}
+				}
+				g_strfreev (manufacturer);
+				break;*/
+			default:
+				GMAMEUI_DEBUG ("Trying to filter, but filter type %d is not handled", type);
+				retval = FALSE;
+			}
+	}
+	g_free (value);
+	
+	/* Final additional check whether the ROM should be displayed based on the ROM
+	   filter settings and whether the ROM is available or unavailable */
+	if (retval) {
+		if (rom_filter_opt == 1) {
+			/* Only show Available */
+			retval = (mame_rom_entry_get_rom_status (rom) != NOT_AVAIL) ? TRUE : FALSE;
+		} else if (rom_filter_opt == 2) {
+			/* Only show Unavailable */
+			retval = (mame_rom_entry_get_rom_status (rom) == NOT_AVAIL) ? TRUE : FALSE;
+		} else {
+		/* No need to process for All ROMs */
+
+		}
+	}
+
+	return retval;
+}
 
 static guint timeoutid;
 static gint ColumnHide_selected;
@@ -619,8 +798,8 @@ set_status_bar_game_count (MameGamelistView *gamelist_view)
 
 	message = g_strdup_printf ("%d %s", visible_games, visible_games == 1 ? _("game") : _("games"));
 
-	gtk_statusbar_pop (main_gui.statusbar, 1);
-	gtk_statusbar_push (main_gui.statusbar, 1, message);
+	gtk_statusbar_pop (GTK_STATUSBAR (main_gui.statusbar), 1);
+	gtk_statusbar_push (GTK_STATUSBAR (main_gui.statusbar), 1, message);
 	
 	g_free (message);
 }
@@ -817,6 +996,19 @@ mame_gamelist_view_scroll_to_selected_game (MameGamelistView *gamelist_view)
 	g_free (current_rom_name);
 }
 
+static void
+gamelist_popupmenu_show (GdkEventButton *event)
+{
+	GtkWidget *popup_menu;
+
+	popup_menu = gtk_ui_manager_get_widget (main_gui.manager, "/GameListPopup");
+	g_return_if_fail (popup_menu != NULL);
+
+	gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,
+			NULL, NULL,
+			event->button, event->time);
+}
+
 static gboolean
 delayed_row_selected (GtkTreeSelection *selection)
 {
@@ -843,7 +1035,7 @@ on_row_selected (GtkTreeSelection *selection,
 {
 	if (timeoutid)
 		g_source_remove (timeoutid);
-	
+GMAMEUI_DEBUG ("!!! on_row_selected");	
 	timeoutid = g_timeout_add (SELECT_TIMEOUT,
 				   (GSourceFunc) delayed_row_selected,
 				   selection);
@@ -875,7 +1067,7 @@ on_list_clicked (GtkWidget      *widget,
 	GValue val = { 0, };
 	MameRomEntry *game_data;
 	gint x,y;
-
+GMAMEUI_DEBUG ("!!! on_list_clicked");	
 	/* Here we figure out which node was clicked */
 	myclick = gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW (widget),
 						 event->x, event->y,
@@ -1185,7 +1377,7 @@ filter_func (GtkTreeModel *model,
 		return filtered;
 	
 	/*GMAMEUI_DEBUG ("Comparing search criteria %s against %s", needle, haystack);*/
-	if ((strcasestr (haystack, needle) != NULL) && filtered) {
+	if ((g_strrstr (haystack, needle) != NULL) && filtered) {
 		return TRUE;
 		visible_games++;
 	} else
@@ -1414,7 +1606,7 @@ on_romset_audited (GmameuiAudit *audit,
 
 	if (type == AUDIT_TYPE_ROM) {
 		GdkPixbuf *pixbuf = NULL;
-		/*GMAMEUI_DEBUG ("  Now processing ROM %s", mame_rom_entry_get_romname (rom));*/
+		/*GMAMEUI_DEBUG ("  Now processing ROM %s with result %d", mame_rom_entry_get_romname (rom), auditresult);*/
 		g_object_set (rom, "has-roms", auditresult, NULL);
 
 		/* Update the status icon for the ROM */
@@ -1479,7 +1671,12 @@ gmameui_gamelist_rebuild (MameGamelistView *gamelist_view)
 
 	GMAMEUI_DEBUG ("Parsing MAME output to recreate game list...");
 	GtkWidget *dlg = gmameui_listoutput_dialog_new (NULL);
-	gtk_widget_show (dlg);
+
+	/* Need to run the dialog, rather than show it since we need to save
+	   the gamelist only when done, otherwise we have a race condition and
+	   the save only captures the first few romsets processed; the dialog
+	   takes care of destroying itself */
+	gtk_dialog_run (GTK_DIALOG (dlg));
 	GMAMEUI_DEBUG ("Parsing MAME output to recreate game list... done");
 	
 	mame_gamelist_save (gui_prefs.gl);
@@ -1638,5 +1835,21 @@ GMAMEUI_DEBUG ("Entering adjustment_scrolled_delayed");
 	g_free (icondir);
 GMAMEUI_DEBUG ("Leaving adjustment_scrolled_delayed");
 	return FALSE;
+}
+
+void
+adjustment_scrolled (GtkAdjustment *adjustment,
+		     gpointer       user_data)
+{
+	MameGamelistView *view = (gpointer) user_data;
+
+	if (view->priv->timeout_icon)
+		g_source_remove (view->priv->timeout_icon);
+
+	else
+		view->priv->timeout_icon = g_timeout_add (ICON_TIMEOUT,
+					      (GSourceFunc) adjustment_scrolled_delayed,
+					      view);
+	view->priv->timeout_icon = 0;
 }
 

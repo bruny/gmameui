@@ -21,10 +21,10 @@
  *
  */
 
+#include "common.h"
+
 #include <stdarg.h>
 #include <string.h>
-
-#include "common.h"
 
 void
 gmameui_message (GtkDialogFlags type,

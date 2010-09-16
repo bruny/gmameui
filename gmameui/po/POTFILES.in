@@ -1,4 +1,3 @@
-src/about.c
 src/audit.c
 src/callbacks.c
 src/cell-renderer-captioned-image.c

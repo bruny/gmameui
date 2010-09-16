@@ -34,24 +34,6 @@
 #include "gmameui-sidebar.h"
 #include "gmameui-zip-utils.h"
 
-static guint timeout_icon;
-
-void
-adjustment_scrolled (GtkAdjustment *adjustment,
-		     gpointer       user_data)
-{
-	MameGamelistView *gamelist_view = (gpointer) user_data;
-
-	if (timeout_icon)
-		g_source_remove (timeout_icon);
-		
-	else
-		timeout_icon = g_timeout_add (ICON_TIMEOUT,
-					      (GSourceFunc) adjustment_scrolled_delayed,
-					      gamelist_view);
-	timeout_icon = 0;
-}
-
 int
 init_gui (void)
 {
@@ -321,19 +303,6 @@ void gmameui_ui_set_items_sensitive () {
 	/* Set the Add/Remove Favourites depending whether the game is a favourite */
 	if (gui_prefs.current_game != NULL)
 		gmameui_ui_set_favourites_sensitive (mame_rom_entry_is_favourite (gui_prefs.current_game));
-}
-
-void
-gamelist_popupmenu_show (GdkEventButton *event)
-{
-	GtkWidget *popup_menu;
-
-	popup_menu = gtk_ui_manager_get_widget (main_gui.manager, "/GameListPopup");
-	g_return_if_fail (popup_menu != NULL);
-
-	gtk_menu_popup (GTK_MENU (popup_menu), NULL, NULL,
-			NULL, NULL,
-			event->button, event->time);
 }
 
 /* Gets the pixbuf representing a ROM's icon (if the icon directory is
@@ -718,6 +687,8 @@ get_status_icons (void)
 	}
 }
 
+/* FIXME TODO Invoke this function via a signal handler, rather than calling
+   directly */
 void
 select_game (MameRomEntry *rom)
 {
@@ -740,6 +711,7 @@ select_game (MameRomEntry *rom)
 	gmameui_ui_set_items_sensitive ();
 }
 
+/* FIXME TODO Move to callbacks.c */
 void
 select_inp (gboolean play_record)
 {

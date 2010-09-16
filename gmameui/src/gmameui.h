@@ -54,7 +54,8 @@ typedef enum {
 	NUMBER_COLUMN   /* 10 */
 } Columns_type;
 
-/* Those are also columns. The only difference is that they are hidden */
+/* Those are also columns. The only difference is that they are hidden and used
+   for filtering */
 typedef enum {
 	ROMENTRY = NUMBER_COLUMN,
 TEXTSTYLE,
@@ -69,20 +70,12 @@ FILTERED,
 	GRAPHIC_STATUS,	/* Good | Imperfect | Preliminary */
 	CONTROL,
 	VECTOR,
-	CPU1,
-	CPU2,
-	CPU3,
-	CPU4,
-	SOUND1,
-	SOUND2,
-	SOUND3,
-	SOUND4,
 	NUMPLAYERS,
 	NUMBUTTONS,
 	FAVORITE,
 	IS_BIOS,
 	CHANNELS,
-	NUMBER_COLUMN_TOTAL /* 35 */
+	NUMBER_COLUMN_TOTAL
 } Columns_type_hidden;
 
 typedef enum  {
@@ -139,13 +132,7 @@ typedef enum  {
 
 typedef enum {
 	LIST,
-#ifdef TREESTORE
-	LIST_TREE,
-#endif
 	DETAILS,
-#ifdef TREESTORE
-	DETAILS_TREE
-#endif
 } ListMode;
 
 /* FIXME TODO Try and get rid of this struct */
@@ -168,7 +155,6 @@ GdkPixbuf *Status_Icons[NUMBER_STATUS];
 gboolean dirty_icon_cache;
 
 /* Others Functions */
-gboolean game_filtered (MameRomEntry * rom, gint rom_filter_opt);
 
 void process_inp_function (MameRomEntry *rom, gchar *file, int action);
 
@@ -177,10 +163,5 @@ void launch_emulation (MameRomEntry *rom, const gchar *command_line);
 void play_game (MameRomEntry *rom);
 
 void exit_gmameui (void);
-
-#if 0
-GList*
-get_columns_shown_list (void);
-#endif
 
 #endif /* __GMAMEUI_H__ */

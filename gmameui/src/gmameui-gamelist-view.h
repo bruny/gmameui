@@ -1,7 +1,7 @@
 /*
  * GMAMEUI
  *
- * Copyright 2007-2009 Andrew Burton <adb@iinet.net.au>
+ * Copyright 2007-2010 Andrew Burton <adb@iinet.net.au>
  * based on GXMame code
  * 2002-2005 Stephane Pontier <shadow_walker@users.sourceforge.net>
  * 
@@ -71,7 +71,9 @@ void on_column_hide_activate                (GtkMenuItem      *menuitem,
 MameRomEntry* gamelist_get_selected_game (void);
 
 void gmameui_gamelist_rebuild (MameGamelistView *gamelist_view);
+
 gboolean adjustment_scrolled_delayed (MameGamelistView *gamelist_view);
+void adjustment_scrolled (GtkAdjustment *adjustment, gpointer user_data);
 
 void mame_gamelist_view_scroll_to_selected_game (MameGamelistView *gamelist_view);
 
