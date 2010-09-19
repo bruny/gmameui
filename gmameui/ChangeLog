@@ -1,4 +1,14 @@
-2010-09-16 21:10
+2010-09-19 14:40 adburton
+
+	* src/: Makefile.am, gmameui-main-win.c, gmameui-main-win.h: Add new file
+	  to handle presentation and callbacks for main window
+	* src/: callbacks.c, callbacks.h, interface.c, interface.h: Remove and move
+	  code into gmameui-main-win.[ch]
+	* src/: gui.c, gui.h: Move code into gmameui-main-win.[ch]
+	* po/POTFILES.in: Update with new and removed files
+	* src/gmameui-ui.xml: Rename some menu entries
+
+2010-09-16 21:10 adburton
 
 	* src/: gui.c, gui.h, gmameui-gamelist-view.c, gmameui-gamelist-view.h,
 	  gmameui.c, gmameui.h: Move functions out of 'generic' source files,

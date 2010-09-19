@@ -30,6 +30,7 @@
 #include "gmameui.h"
 #include "gui.h"
 #include "io.h"
+#include "gmameui-main-win.h"
 #include "gmameui-gamelist-view.h"
 #include "gmameui-sidebar.h"
 #include "gmameui-zip-utils.h"
@@ -50,7 +51,8 @@ init_gui (void)
 	gmameui_icons_init ();	
 
 	/* Create the main window */
-	MainWindow = create_MainWindow ();
+	//MainWindow = create_MainWindow ();
+	MainWindow = gmameui_main_win_new ();
 	g_return_val_if_fail ((MainWindow != NULL), -1);
 
 	/* Show and hence realize mainwindow so that MainWindow->window is available */
@@ -138,6 +140,7 @@ on_executable_selected (GtkRadioAction *action,
 }
 
 /* Dynamically create the executables menu. */
+/* FIXME TODO Handle in signal event */
 void
 add_exec_menu (void)
 {
@@ -268,42 +271,7 @@ add_exec_menu (void)
 	g_free (current_exec);
 }
 
-void gmameui_ui_set_favourites_sensitive (gboolean rom_is_favourite)
-{
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/MenuBar/FileMenu/FileFavesAddMenu"),
-				  !rom_is_favourite);
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/MenuBar/FileMenu/FileFavesRemoveMenu"),
-				  rom_is_favourite);
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/GameListPopup/FileFavesAdd"),
-				  !rom_is_favourite);
-	gtk_widget_set_sensitive (gtk_ui_manager_get_widget (main_gui.manager,
-							     "/GameListPopup/FileFavesRemove"),
-				  rom_is_favourite);
-}
 
-void gmameui_ui_set_items_sensitive () {
-
-	gboolean rom_and_exec;  /* TRUE if both an executable exists and a ROM is selected */
-	rom_and_exec = (gui_prefs.current_game) && (mame_exec_list_size (main_gui.exec_list) > 0);
-
-	gtk_action_group_set_sensitive (main_gui.gmameui_rom_exec_action_group,
-					rom_and_exec);
-	gtk_action_group_set_sensitive (main_gui.gmameui_exec_action_group,
-					mame_exec_list_size (main_gui.exec_list));
-
-	/* Disable ROM and Favourites UI items if no current game */
-	gtk_action_group_set_sensitive (main_gui.gmameui_rom_action_group,
-					(gui_prefs.current_game != NULL));
-	gtk_action_group_set_sensitive (main_gui.gmameui_favourite_action_group,
-					(gui_prefs.current_game != NULL));
-	
-	/* Set the Add/Remove Favourites depending whether the game is a favourite */
-	if (gui_prefs.current_game != NULL)
-		gmameui_ui_set_favourites_sensitive (mame_rom_entry_is_favourite (gui_prefs.current_game));
-}
 
 /* Gets the pixbuf representing a ROM's icon (if the icon directory is
    specified). Search first for the .ico file for the ROM, then for the parent

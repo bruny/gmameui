@@ -8,8 +8,7 @@ BUILT_SOURCES = \
 gmameui_SOURCES = \
 	common.c common.h \
 	gmameui.c gmameui.h \
-	interface.c interface.h \
-	callbacks.c callbacks.h \
+	gmameui-main-win.c gmameui-main-win.h \
 	io.c io.h \
 	game_list.h game_list.c \
 	rom_entry.h rom_entry.c \
@@ -21,7 +20,6 @@ gmameui_SOURCES = \
 	gmameui-sidebar.c gmameui-sidebar.h \
 	progression_window.c progression_window.h \
 	directories.c directories.h \
-	about.c about.h \
 	audit.c audit.h \
 	gmameui-audit-dlg.c gmameui-audit-dlg.h \
 	gmameui-statusbar.c gmameui-statusbar.h \

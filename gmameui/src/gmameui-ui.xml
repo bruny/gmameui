@@ -26,7 +26,7 @@
     <menu name="ViewMenu" action="View">
       <menuitem name="ViewToolbarMenu" action="ViewToolbar"/>
       <menuitem name="ViewStatusBarMenu" action="ViewStatusBar"/>
-      <menuitem name="ViewFolderListMenu" action="ViewFolderList"/>
+      <menuitem name="ViewFilterListMenu" action="ViewFilterList"/>
       <menuitem name="ViewSidebarPanelMenu" action="ViewSidebarPanel"/>
       <separator/>
       <menuitem name="ViewDetailsListViewMenu" action="ViewDetailsListView"/>
@@ -56,7 +56,7 @@
     <toolitem action="FileRomsetInfo"/>
     <toolitem action="ViewRefresh"/>
     <separator/>
-    <toolitem action="ViewFolderList"/>
+    <toolitem action="ViewFilterList"/>
     <toolitem action="ViewSidebarPanel"/>
     <separator/>
     <toolitem action="ViewDetailsListView"/>

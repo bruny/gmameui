@@ -36,126 +36,22 @@
 #include <gtk/gtktoolbar.h>
 
 #include "gmameui.h"
-#include "callbacks.h"
 #include "mame_options.h"
 #include "mame_options_legacy.h"
 #include "filters_list.h"
 #include "gui_prefs.h"
-#include "interface.h"
 #include "gmameui-sidebar.h"
 #include "gmameui-gamelist-view.h"
 #include "mame-exec-list.h"
 #include "gmameui-gamelist-view.h"
 #include "gmameui-statusbar.h"
 
-/* The following menu entries are always enabled */
-static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
-{
-	/* Toplevel */
-	{ "File", NULL, N_("_File") },
-	{ "View", NULL, N_("_View") },
-	{ "Options", NULL, N_("_Options") },
-	{ "Help", NULL, N_("_Help") },
-
-	/* File menu */
-	{ "FileSelectRandom", NULL, N_("_Select Random Game"), NULL,
-	  N_("Play currently selected game"), G_CALLBACK (on_select_random_game_activate) },
-	{ "FileQuit", GTK_STOCK_QUIT, N_("_Quit"), "<control>Q",
-	  N_("Quit GMAMEUI"), G_CALLBACK (on_exit_activate) },
-
-	/* View menu */
-	{ "ViewRefresh", GTK_STOCK_REFRESH, N_("Refresh"), "F5",
-	  N_("Refresh game list"), G_CALLBACK (on_refresh_activate) },
-
-	/* Option menu */
-	{ "OptionDirs", GTK_STOCK_DIRECTORY, N_("_Directories..."), NULL,
-	  N_("Set directory configuration"), G_CALLBACK (on_directories_menu_activate) },  
-	{ "OptionPreferences", GTK_STOCK_PREFERENCES, N_("_GMAMEUI Preferences..."), NULL,
-	  N_("Set GMAMEUI preferences"), G_CALLBACK (on_preferences_activate) },  
-	  	  
-	/* Help menu */
-	{"HelpContents", GTK_STOCK_HELP, N_("_Contents"), "F1",
-	 N_("Open the GMAMEUI manual"), G_CALLBACK (on_help_activate) },
-	{ "HelpAbout", GTK_STOCK_ABOUT, NULL, NULL,
-	 N_("About this application"), G_CALLBACK (on_about_activate) }
-};
-
-/* The following menu entries are enabled when a ROM is selected and a MAME
-   executable exists */
-static const GtkActionEntry gmameui_rom_and_exec_menu_entries[] =
-{
-	/* File menu */
-	{ "FilePlayGame", GTK_STOCK_EXECUTE, N_("Play"), NULL,
-	  N_("Play currently selected game"), G_CALLBACK (on_play_activate) },
-	{ "FilePlayRecord", GTK_STOCK_SAVE, N_("Play and Record Input..."), NULL,
-	  N_("Record a game for later playback"), G_CALLBACK (on_play_and_record_input_activate) },
-	{ "FilePlaybackRecord", GTK_STOCK_OPEN, N_("Playback Input..."), NULL,
-	  N_("Playback a recorded game"), G_CALLBACK (on_playback_input_activate) },
-	{ "FileOptions", GTK_STOCK_PROPERTIES, N_("Options"), NULL,
-	  N_("Change the options of the selected game"), G_CALLBACK (on_options_activate) }, 
-};
-
-/* The following menu entries are enabled when MAME executable exists */
-static const GtkActionEntry gmameui_exec_menu_entries[] =
-{
-	{ "FileAuditAllGames", NULL, N_("_Audit All Games"), NULL,
-	  N_("Audit ROM and sample sets"), G_CALLBACK (on_audit_all_games_activate) },
-/*DELETE	{ "OptionRebuildGameList", NULL, N_("_Rebuild Game List"), NULL,
-	  N_("Rebuild the game list from executable information"), G_CALLBACK (on_rebuild_game_list_menu_activate) },*/
-#ifdef ENABLE_ROMVALIDATION
-	{ "FileRebuildRomsets", GTK_STOCK_FIND_AND_REPLACE, N_("_Rebuild Romsets"), NULL,
-	  N_("Rebuild and fix romsets"), G_CALLBACK (on_rebuild_romsets_activate) },
-#endif
-	{ "OptionDefaultOpts", NULL, N_("Default _Options..."), NULL,
-	  N_("Set default game options"), G_CALLBACK (on_options_default_activate) },
-};
-
-/* The following menu entries are enabled when a ROM is selected */
-static const GtkActionEntry gmameui_rom_menu_entries[] =
-{
-	{ "FileRomsetInfo", GTK_STOCK_INFO, N_("Romset Information"), NULL,
-	  N_("Display the details of the selected romset"), G_CALLBACK (on_romset_info_activate) }, 
-};
-
-static const GtkActionEntry gmameui_favourite_menu_entries[] =
-{
-	{ "FileFavesAdd", GTK_STOCK_ADD, N_("Add to 'Favorites'"), NULL,
-	  N_("Add this game to your 'Favorites' game folder"), G_CALLBACK (on_add_to_favorites_activate) },
-	{ "FileFavesRemove", GTK_STOCK_REMOVE, N_("Remove from 'Favorites'"), NULL,
-	  N_("Remove this game from your 'Favorites' game folder"), G_CALLBACK (on_remove_from_favorites_activate) },
-};
-
-static const GtkToggleActionEntry gmameui_view_toggle_menu_entries[] = 
-{
-	{ "ViewToolbar", NULL, N_("_Toolbar"), "<alt>T",
-	  N_("Show or hide the toolbar"),
-	  G_CALLBACK (on_toolbar_view_menu_activate), TRUE },
-	{ "ViewStatusBar", NULL, N_("_Status Bar"), "<alt>S",
-	  N_("Show or hide the status bar"),
-	  G_CALLBACK (on_status_bar_view_menu_activate), TRUE },  
-	{ "ViewFolderList", NULL, N_("Fold_er List"), "<alt>D",
-	  N_("Show or hide the folder list"),
-	  G_CALLBACK (on_folder_list_activate), TRUE },  
-	{ "ViewSidebarPanel", NULL, N_("Scree_nshot Panel"), "<alt>N",
-	  N_("Show or hide the screenshot panel"),
-	  G_CALLBACK (on_screen_shot_activate), TRUE },   
-
-	{ "ViewDetailsListView", NULL, N_("_Details"), NULL,
-	  N_("Displays detailed information about each item"),
-	  G_CALLBACK (on_view_type_changed), TRUE },
-};
-
-static const GtkActionEntry gmameui_column_entries[] =
-{
-	{ "ColumnHide", NULL, N_("Hide Column"), NULL,
-	  N_("Hide Column"), G_CALLBACK (on_column_hide_activate) },
-};
-
 GtkWidget *MainWindow;
 
+/* FIXME TODO Move these to the priv and have functions to request from the main window */
 struct main_gui_struct {
 
-	GtkToolbar *toolbar;
+	GtkWidget *toolbar;
 
 	GtkWidget *combo_progress_bar;
 	GtkStatusbar *status_progress_bar;
@@ -210,9 +106,6 @@ GdkPixbuf * gmameui_get_icon_from_stock (const char *id);
 GtkWidget * gmameui_get_image_from_stock (const char *id);
 void get_status_icons (void);
 void gmameui_icons_init (void);
-
-void gmameui_ui_set_favourites_sensitive (gboolean rom_is_favourite);
-void gmameui_ui_set_items_sensitive (void);
 
 void select_inp (gboolean play_record);
 void select_game (MameRomEntry *rom);

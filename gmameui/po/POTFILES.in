@@ -1,5 +1,4 @@
 src/audit.c
-src/callbacks.c
 src/cell-renderer-captioned-image.c
 src/common.c
 src/directories.c
@@ -8,6 +7,8 @@ src/filters_list.c
 src/game_list.c
 src/gmameui.c
 src/gmameui.h
+src/gmameui-main-win.c
+src/gmameui-main-win.h
 src/gmameui-audit-dlg.c
 src/gmameui-gamelist-view.c
 src/gmameui-listoutput.c
@@ -22,8 +23,6 @@ src/gui.c
 src/gui.h
 src/gui_prefs.c
 src/gui_prefs_dialog.c
-src/interface.c
-src/interface.h
 src/io.c
 src/keyboard.c
 src/mame-exec.c
