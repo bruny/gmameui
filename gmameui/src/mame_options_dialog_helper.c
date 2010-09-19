@@ -45,7 +45,7 @@ get_widget_with_suffix (GtkBuilder *builder, gchar *suffix)
 		
 		widget = node->data;
 		if (GTK_IS_WIDGET (widget)) {
-			name = gtk_widget_get_name (widget);
+			name = gtk_buildable_get_name (GTK_BUILDABLE (widget));
 
 			/* Return widget if it starts with the property prefix
 			   and ends with the specified suffix */

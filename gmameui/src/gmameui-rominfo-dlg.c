@@ -304,7 +304,8 @@ g_object_unref (parser);
 		GtkWidget *widget;
 		widget = node->data;
 		
-		name = gtk_widget_get_name (widget);
+		name = gtk_buildable_get_name (GTK_BUILDABLE (widget));
+		
 		if (g_ascii_strncasecmp (name, "lbl_details-", 12) == 0) {
 			name += 12;      /* Skip over lbl_details- */
 		

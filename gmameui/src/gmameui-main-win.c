@@ -548,7 +548,7 @@ GMAMEUI_DEBUG ("      Setting up ROM availability filter buttons...");
 		
 		widget = list->data;
 
-		name = gtk_widget_get_name (widget);
+		name = gtk_buildable_get_name (GTK_BUILDABLE (widget));
 
 		if (g_ascii_strncasecmp (name, "filter_btn_", 11) == 0) {
 			/* Hide the radio circle so only the button is visible */

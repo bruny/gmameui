@@ -1,3 +1,11 @@
+2010-09-19 19:30 adburton
+
+	* src/: directories.c, gmameui-main-win.c, mame_options_dialog.c,
+	  mame_options_legacy_dialog.c, mame_options_dialog_helper.c,
+	  gmameui-rominfo-dlg.c: GTK 2.20 and GtkBuilder apparently doesn't set the
+	  widget name so it can be retrieved using gtk_widget_get_name, so
+	  replaced with gtk_buildable_get_name
+
 2010-09-19 14:40 adburton
 
 	* src/: Makefile.am, gmameui-main-win.c, gmameui-main-win.h: Add new file

@@ -309,7 +309,7 @@ GMAMEUI_DEBUG ("Creating new directories dialog...");
 
 		home_icon = gtk_image_new_from_stock (GTK_STOCK_HOME, GTK_ICON_SIZE_BUTTON);
 		
-		name = gtk_widget_get_name (widget);
+		name = gtk_buildable_get_name (GTK_BUILDABLE (widget));
 
 		/* Set the GtkEntry widgets with the parameter values */
 		if (g_ascii_strncasecmp (name, "entry_", 6) == 0) {

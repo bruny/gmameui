@@ -413,7 +413,7 @@ mame_legacy_options_dialog_register_all_properties_from_builder_xml (MameOptions
 		widget = node->data;
 		
 		if (GTK_IS_WIDGET (widget)) {
-			name = gtk_widget_get_name (widget);
+			name = gtk_buildable_get_name (GTK_BUILDABLE (widget));
 			
 			if (g_ascii_strncasecmp (name, PREFERENCE_PROPERTY_PREFIX,
 		             strlen (PREFERENCE_PROPERTY_PREFIX)) == 0)
