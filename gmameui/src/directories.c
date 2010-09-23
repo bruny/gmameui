@@ -29,6 +29,7 @@
 #include "gui.h"
 #include "directories.h"
 #include "gmameui-gamelist-view.h"
+#include "gmameui-main-win.h"   /* For gmameui_ui_set_items_sensitive */
 
 /* Callbacks */
 static void on_dir_browse_button_clicked (GtkWidget *widget, gpointer user_data);
@@ -351,7 +352,7 @@ GMAMEUI_DEBUG ("Creating new directories dialog...");
 
 					gtk_link_button_set_uri (GTK_LINK_BUTTON (widget), urls[i].url);
 					if (error) {
-						GMAMEUI_DEBUG (error->message);
+						GMAMEUI_DEBUG ("%s", error->message);
 						g_error_free (error);
 						error = NULL;
 					}
@@ -644,7 +645,7 @@ on_dir_browse_button_clicked (GtkWidget *widget, gpointer user_data)
 
 	dialog = (MameDirectoriesDialog *) user_data;
 	
-	name = gtk_widget_get_name (widget);
+	name = gtk_buildable_get_name (GTK_BUILDABLE (widget));
 	name += 7;      /* Skip over button_ */
 	/* GMAMEUI_DEBUG ("Browsing for directory for path %s", name); */
 	
@@ -693,7 +694,7 @@ on_file_browse_button_clicked (GtkWidget *widget, gpointer user_data)
 	
 	dialog = (MameDirectoriesDialog *) user_data;
 	
-	name = gtk_widget_get_name (widget);
+	name = gtk_buildable_get_name (GTK_BUILDABLE (widget));
 	name += 7;      /* Skip over button_ */
 	/* GMAMEUI_DEBUG ("Browsing for file for %s", name); */
 	
@@ -788,7 +789,7 @@ add_path_to_tree_view (GtkWidget *button, gpointer user_data)
 						    -1);
 
 			} else
-				GMAMEUI_DEBUG ("Trying to add %s to the tree model but it already exists");
+				GMAMEUI_DEBUG ("Trying to add %s to the tree model but it already exists", temp_text);
 
 			g_free (temp_text);
 			break;
@@ -854,6 +855,18 @@ add_item_to_tree_view (GtkWidget *button, gpointer user_data)
 					gtk_list_store_set (GTK_LIST_STORE (model), &iter,
 							    0, temp_text,
 							    -1);
+				} else {
+					/* This was not a valid executable */
+					GtkWidget *dlg;
+					dlg = gtk_message_dialog_new (NULL,
+					                              GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+					                              GTK_MESSAGE_ERROR,
+					                              GTK_BUTTONS_CLOSE,
+					                              _("Not a valid MAME executable"));
+					gtk_message_dialog_format_secondary_text (GTK_MESSAGE_DIALOG (dlg),
+					                                          _("The selected executable is not a valid MAME executable"));
+					gtk_dialog_run (GTK_DIALOG (dlg));
+					gtk_widget_destroy (dlg);
 				}
 			}
 

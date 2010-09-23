@@ -155,8 +155,7 @@ static const GtkActionEntry gmameui_always_sensitive_menu_entries[] =
 	  N_("Quit GMAMEUI"), G_CALLBACK (on_exit_activate) },
 
 	/* View menu */
-	{ "ViewRefresh", GTK_STOCK_REFRESH, N_("Refresh"), "F5",
-	  N_("Refresh game list"), G_CALLBACK (on_refresh_activate) },
+
 
 	/* Option menu */
 	{ "OptionDirs", GTK_STOCK_DIRECTORY, N_("_Directories..."), NULL,
@@ -182,8 +181,8 @@ static const GtkActionEntry gmameui_rom_and_exec_menu_entries[] =
 	  N_("Record a game for later playback"), G_CALLBACK (on_play_and_record_input_activate) },
 	{ "FilePlaybackRecord", GTK_STOCK_OPEN, N_("Playback Input..."), NULL,
 	  N_("Playback a recorded game"), G_CALLBACK (on_playback_input_activate) },
-	{ "FileOptions", GTK_STOCK_PROPERTIES, N_("Options"), NULL,
-	  N_("Change the options of the selected game"), G_CALLBACK (on_options_activate) }, 
+	/*{ "FileOptions", GTK_STOCK_PROPERTIES, N_("Romset MAME Options"), NULL,
+	  N_("Change the MAME options of the selected romset"), G_CALLBACK (on_options_activate) },*/ 
 };
 
 /* The following menu entries are enabled when MAME executable exists */
@@ -197,8 +196,11 @@ static const GtkActionEntry gmameui_exec_menu_entries[] =
 	{ "FileRebuildRomsets", GTK_STOCK_FIND_AND_REPLACE, N_("_Rebuild Romsets"), NULL,
 	  N_("Rebuild and fix romsets"), G_CALLBACK (on_rebuild_romsets_activate) },
 #endif
-	{ "OptionDefaultOpts", NULL, N_("Default _Options..."), NULL,
-	  N_("Set default game options"), G_CALLBACK (on_options_default_activate) },
+	{ "ViewRefresh", GTK_STOCK_REFRESH, N_("Refresh"), "F5",
+	  N_("Refresh game list"), G_CALLBACK (on_refresh_activate) },
+	
+	{ "OptionDefaultOpts", NULL, N_("Default MAME _Options..."), NULL,
+	  N_("Set default MAME options"), G_CALLBACK (on_options_default_activate) },
 };
 
 /* The following menu entries are enabled when a ROM is selected */
@@ -860,7 +862,7 @@ on_view_type_changed (GtkToggleAction *action, gpointer user_data)
 static void
 on_filter_btn_toggled (GtkWidget *widget, gpointer user_data)
 {
-	const gchar *widgetname = gtk_widget_get_name (widget);
+	const gchar *widgetname = gtk_buildable_get_name (GTK_BUILDABLE (widget));
 	GMAMEUI_DEBUG ("Filter for widget %s clicked", widgetname);
 	if (g_ascii_strcasecmp (widgetname, "filter_btn_all") == 0) {
 		g_object_set (main_gui.gui_prefs, "current-rom-filter", 0, NULL);

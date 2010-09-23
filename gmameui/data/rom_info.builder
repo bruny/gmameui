@@ -43,6 +43,7 @@
                     <child>
                       <object class="GtkVBox" id="vbox1">
                         <property name="visible">True</property>
+                        <property name="border_width">6</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">6</property>
                         <child>
@@ -692,6 +693,7 @@
                       <object class="GtkScrolledWindow" id="scrolledwindow_audit">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="border_width">6</property>
                         <property name="hscrollbar_policy">automatic</property>
                       </object>
                       <packing>
@@ -711,6 +713,7 @@
                     <child>
                       <object class="GtkVBox" id="vbox6">
                         <property name="visible">True</property>
+                        <property name="border_width">6</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">6</property>
                         <child>
@@ -919,6 +922,7 @@
                     <child>
                       <object class="GtkVBox" id="vbox3">
                         <property name="visible">True</property>
+                        <property name="border_width">6</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">6</property>
                         <child>

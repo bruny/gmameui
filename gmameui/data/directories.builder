@@ -24,6 +24,7 @@
               <object class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="border_width">6</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
@@ -322,6 +323,7 @@
               <object class="GtkVBox" id="vbox3">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="border_width">6</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
@@ -760,6 +762,7 @@
               <object class="GtkVBox" id="vbox4">
                 <property name="visible">True</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="border_width">6</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
@@ -1290,16 +1293,16 @@
   </object>
   <object class="GtkSizeGroup" id="sizegroup1">
     <widgets>
-      <widget name="label42"/>
-      <widget name="label16"/>
-      <widget name="label19"/>
-      <widget name="label20"/>
-      <widget name="label21"/>
-      <widget name="label22"/>
-      <widget name="label5"/>
-      <widget name="lbl_samples"/>
-      <widget name="lbl_roms"/>
       <widget name="lbl_mame_execs"/>
+      <widget name="lbl_roms"/>
+      <widget name="lbl_samples"/>
+      <widget name="label5"/>
+      <widget name="label22"/>
+      <widget name="label21"/>
+      <widget name="label20"/>
+      <widget name="label19"/>
+      <widget name="label16"/>
+      <widget name="label42"/>
     </widgets>
   </object>
 </interface>

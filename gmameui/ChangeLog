@@ -1,3 +1,19 @@
+2010-09-23 21:40 adburton
+
+	* src/: gmameui-main-win.c, directories.c: Replace calls to
+	  gtk_widget_get_name with gtk_buildable_get_name (fixes Filter buttons)
+	* src/gmameui-main-win.c: Only enable Refresh when an exec is
+	  available, otherwise possible segfault
+	* src/: gmameui-main-win.c, gmameui-ui.xml: Remove romset-specific MAME
+	  options menu entry as this feature is not yet supported
+	* src/gmameui-gamelist-view.c: Search criteria should not be case
+	  sensitive, when search criteria text is changed update the number of
+	  romsets matching
+	* src/directories.c: Add error message when adding an invalid MAME exec,
+	  fix compile warnings
+	* data/: rom_info.builder, directories.builder: Add border spacing around
+	  vbox elements in notebook
+
 2010-09-19 19:30 adburton
 
 	* src/: directories.c, gmameui-main-win.c, mame_options_dialog.c,

@@ -12,7 +12,7 @@
       <menuitem name="FileSelectRandomMenu" action="FileSelectRandom"/>
       <separator/>
       <menuitem name="FileRomsetInfoMenu" action="FileRomsetInfo"/>
-      <menuitem name="FileOptionsMenu" action="FileOptions"/>
+      <!--<menuitem name="FileOptionsMenu" action="FileOptions"/>-->
       <separator/>      
       <menuitem name="FileAuditAllGamesMenu" action="FileAuditAllGames"/>
 <!-- FIXME TODO Need a way to enable this when conditionally compiled
@@ -74,7 +74,7 @@
     <menuitem action="FileSelectRandom"/>
     <separator/>
     <menuitem action="FileRomsetInfo"/>
-    <menuitem action="FileOptions"/>
+    <!--<menuitem action="FileOptions"/>-->
   </popup>
 
   <popup name="ColumnPopup" action="ColumnPopupAction">

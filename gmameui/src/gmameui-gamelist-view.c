@@ -24,6 +24,7 @@
 #include "common.h"
 
 #include <gdk/gdkkeysyms.h>
+#include <string.h> /* For strcasestr */
 
 #include "gmameui-gamelist-view.h"
 #include "game_list.h"
@@ -1377,9 +1378,9 @@ filter_func (GtkTreeModel *model,
 		return filtered;
 	
 	/*GMAMEUI_DEBUG ("Comparing search criteria %s against %s", needle, haystack);*/
-	if ((g_strrstr (haystack, needle) != NULL) && filtered) {
-		return TRUE;
+	if ((strcasestr (haystack, needle) != NULL) && filtered) {
 		visible_games++;
+		return TRUE;
 	} else
 		return FALSE;
 
@@ -1393,7 +1394,7 @@ static void
 on_search_changed (GtkEntry *entry, gchar *criteria, gpointer user_data)
 {
 	GtkTreeModelSort *sort;
-
+	
 	/*
 	   The model structure is set as:
 	      Sortable
@@ -1407,6 +1408,9 @@ on_search_changed (GtkEntry *entry, gchar *criteria, gpointer user_data)
 	sort = GTK_TREE_MODEL_SORT (gtk_tree_view_get_model (GTK_TREE_VIEW (main_gui.displayed_list)));
 
 	gtk_tree_model_filter_refilter (GTK_TREE_MODEL_FILTER (gtk_tree_model_sort_get_model (sort)));
+
+	/* Update number of visible games */
+	set_status_bar_game_count (main_gui.displayed_list);
 }
 
 static void
