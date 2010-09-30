@@ -246,7 +246,7 @@ gui_prefs.rom_hashtable = g_hash_table_new (g_str_hash, g_str_equal);
 parser = gmameui_listoutput_new ();
 gmameui_listoutput_generate_rom_hash (parser, exec);
 g_object_unref (parser);
-	
+	*/
 	/* Get extra details about the ROM from -xmlinfo that aren't stored in
 	   the gamelist file */
 	parser = gmameui_listoutput_new ();
@@ -450,6 +450,22 @@ g_object_unref (parser);
 	GtkWidget *button = GTK_OBJECT (gtk_builder_get_object (priv->builder, "btn_open_rom"));
 	g_signal_connect (button, "clicked",
 	                  G_CALLBACK (on_show_rom_clicked), priv->rom);
+
+	/* Set up URLs on the Link buttons */
+	gchar *maws_url, *caesar_url;
+	GtkWidget *lnk_maws, *lnk_caesar;
+
+	maws_url = g_strdup_printf ("http://maws.mameworld.info/maws/romset/%s",
+	                            mame_rom_entry_get_romname (priv->rom));
+	lnk_maws = GTK_OBJECT (gtk_builder_get_object (priv->builder, "lnk_maws"));
+	gtk_link_button_set_uri (GTK_LINK_BUTTON (lnk_maws), maws_url);
+	g_free (maws_url);
+
+	caesar_url = g_strdup_printf ("http://caesar.logiqx.com/php/emulator_game.php?id=mame&game=%s",
+	                              mame_rom_entry_get_romname (priv->rom));
+	lnk_caesar = GTK_OBJECT (gtk_builder_get_object (priv->builder, "lnk_caesar"));
+	gtk_link_button_set_uri (GTK_LINK_BUTTON (lnk_caesar), caesar_url);
+	g_free (caesar_url);
 	
 	/* Get the ROM audit result labels so that they can be set later */
 	priv->rom_check_result = GTK_WIDGET (gtk_builder_get_object (priv->builder, "rom_check_result"));

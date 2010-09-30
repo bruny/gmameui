@@ -1,3 +1,9 @@
+2010-09-30 20:00 adburton
+
+	* src/gmameui-rominfo-dlg.c, data/rom_info.builder: Add URLs for CAESAR
+	  and MAWS online resources
+	* src/gmameui-main-win.c: Remove redundant code
+
 2010-09-23 21:40 adburton
 
 	* src/: gmameui-main-win.c, directories.c: Replace calls to

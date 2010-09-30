@@ -969,13 +969,8 @@ on_audit_all_games_activate (GtkMenuItem *menuitem, gpointer user_data)
 	GtkWidget *audit_dlg;
 	
 	exec = mame_exec_list_get_current_executable (main_gui.exec_list);
-	
-	if (!exec) {
-		gmameui_message (ERROR, NULL, _("No xmame executables defined"));
-		/* reenable joystick */
-		joy_focus_on ();
-		return;
-	}
+
+	g_return_if_fail (exec != NULL);
 
 	gamelist_check (exec);
 
