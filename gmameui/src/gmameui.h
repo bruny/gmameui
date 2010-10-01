@@ -36,10 +36,6 @@
 #include "audit.h"
 #include "io.h"
 
-#define SELECT_TIMEOUT 110
-#define ICON_TIMEOUT 100
-#define SEARCH_TIMEOUT 1000
-
 typedef enum {
 	GAMENAME,
 	HAS_SAMPLES,
@@ -150,7 +146,6 @@ struct gui_prefs_struct gui_prefs;
 GMAMEUIFilter *selected_filter;
 
 Joystick *joydata;
-GdkPixbuf *Status_Icons[NUMBER_STATUS];
 
 gboolean dirty_icon_cache;
 

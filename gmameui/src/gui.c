@@ -271,7 +271,18 @@ add_exec_menu (void)
 	g_free (current_exec);
 }
 
+static GdkPixbuf *
+Status_Icons[NUMBER_STATUS];
 
+GdkPixbuf *
+gmameui_icon_mgr_get_pixbuf_for_status (gint status)
+{
+	GdkPixbuf *pixbuf;
+
+	pixbuf = gdk_pixbuf_copy (Status_Icons [status]);
+
+	return pixbuf;
+}
 
 /* Gets the pixbuf representing a ROM's icon (if the icon directory is
    specified). Search first for the .ico file for the ROM, then for the parent
@@ -459,20 +470,10 @@ add_composite_icon_from_stock (const char *new_id,
 
 static void
 add_composite_icons (void)
-{
-	add_composite_icon_from_stock ("gmameui-folder-favorite", "gmameui-folder", "gmameui-emblem-favorite");
-	add_composite_icon_from_stock ("gmameui-folder-sound", "gmameui-folder", "gmameui-emblem-sound");
-	add_composite_icon_from_stock ("gmameui-folder-available", "gmameui-folder", "gmameui-emblem-correct");
-	add_composite_icon_from_stock ("gmameui-folder-unavailable", "gmameui-folder", "gmameui-emblem-unavailable");
-    	add_composite_icon_from_stock ("gmameui-folder-incorrect", "gmameui-folder", "gmameui-emblem-incorrect");
-	add_composite_icon_from_stock ("gmameui-folder-played", "gmameui-folder", "gmameui-emblem-played");
-    	add_composite_icon_from_stock ("gmameui-folder-working", "gmameui-folder", "gmameui-emblem-correct");
-	add_composite_icon_from_stock ("gmameui-folder-not-working", "gmameui-folder", "gmameui-emblem-not-working");
-	add_composite_icon_from_stock ("gmameui-folder-date", "gmameui-folder", "gmameui-emblem-date");
-	add_composite_icon_from_stock ("gmameui-folder-manufacturer", "gmameui-folder", "gmameui-emblem-manufacturer");
-
+{	
 	add_composite_icon_from_stock ("gmameui-rom-correct", "gmameui-rom", "gmameui-emblem-correct");
 	add_composite_icon_from_stock ("gmameui-rom-unavailable", "gmameui-rom", "gmameui-emblem-unavailable");
+	add_composite_icon_from_stock ("gmameui-rom-bestavail", "gmameui-rom", "gmameui-emblem-bestavail");
 	add_composite_icon_from_stock ("gmameui-rom-incorrect", "gmameui-rom", "gmameui-emblem-incorrect");
 	add_composite_icon_from_stock ("gmameui-rom-problems", "gmameui-rom", "gmameui-emblem-not-working");
 	add_composite_icon_from_stock ("gmameui-rom-unknown", "gmameui-rom", "gmameui-emblem-unknown");
@@ -481,37 +482,36 @@ add_composite_icons (void)
 void
 gmameui_icons_init (void)
 {
-	GtkIconTheme *theme;
 	int i;
 	static char *items[][4] = {
 		/* { gmameui-stock-id, size-string, theme-stock-id, fallback-stock-id } */
+
+		/* Displayed as toolbar and menu icons */
 		{ "gmameui-view-list", GMAMEUI_ICON_SIZE_MENU, "stock_list_enum-off", "gmameui-view-list" },
-		{ "gmameui-view-tree", GMAMEUI_ICON_SIZE_MENU, "stock_navigator-levels", "gmameui-view-tree" },
-		{ "gmameui-view-folders", GMAMEUI_ICON_SIZE_MENU, "stock_toggle-preview", "gmameui-view-folders" },
+		{ "gmameui-view-filters", GMAMEUI_ICON_SIZE_TOOLBAR, "stock_filter-navigator", "gmameui-view-filters" },
 		{ "gmameui-view-screenshot", GMAMEUI_ICON_SIZE_MENU, "stock_toggle-preview", "gmameui-view-screenshot" },
+
+		/* Displayed as icons in MAME Options Dialogs */
 		{ "gmameui-general-toolbar", GMAMEUI_ICON_SIZE_TOOLBAR, "gmameui-general", NULL },
 		{ "gmameui-sound-toolbar", GMAMEUI_ICON_SIZE_TOOLBAR, "stock_volume", "gmameui-sound" },
 		{ "gmameui-display-toolbar", GMAMEUI_ICON_SIZE_TOOLBAR, "display", "gmameui-sound" },
 		{ "gmameui-joystick-toolbar", GMAMEUI_ICON_SIZE_TOOLBAR, "gnome-joystick", "gmameui-joystick" },
-		{ "gmameui-joystick", GMAMEUI_ICON_SIZE_DIALOG, "gnome-joystick", "gmameui-joystick" },
-		{ "gmameui-mouse", GMAMEUI_ICON_SIZE_DIALOG, "gnome-dev-mouse-optical", "gmameui-mouse" },
-		{ "gmameui-keyboard", GMAMEUI_ICON_SIZE_DIALOG, "gnome-dev-keyboard", "gmameui-keyboard" },
-		{ "gmameui-folder", GMAMEUI_ICON_SIZE_FOLDER, "stock_folder", "gmameui-folder" },
-		{ "gmameui-folder-open", GMAMEUI_ICON_SIZE_FOLDER, "stock_open", "gmameui-folder-open" },
+		
+		/* Displayed to represent the romset status */
 		{ "gmameui-rom", GMAMEUI_ICON_SIZE_FOLDER, "gnome-dev-media-ms", "gmameui-rom" },
 		{ "gmameui-emblem-favorite", GMAMEUI_ICON_SIZE_EMBLEM, "emblem-favorite", "gmameui-emblem-favorite" },
 		{ "gmameui-emblem-played", GMAMEUI_ICON_SIZE_EMBLEM, "emblem-distinguished", "gmameui-emblem-played" },
 		{ "gmameui-emblem-correct", GMAMEUI_ICON_SIZE_EMBLEM, "emblem-default", "gmameui-emblem-correct" },
-		{ "gmameui-emblem-incorrect", GMAMEUI_ICON_SIZE_EMBLEM, "emblem-urgent", "gmameui-emblem-incorrect" },
+		{ "gmameui-emblem-incorrect", GMAMEUI_ICON_SIZE_EMBLEM, GTK_STOCK_DIALOG_ERROR, "gmameui-emblem-incorrect" },
+		{ "gmameui-emblem-bestavail", GMAMEUI_ICON_SIZE_EMBLEM, GTK_STOCK_DIALOG_WARNING, "gmameui-emblem-bestavail" },
 		{ "gmameui-emblem-unavailable", GMAMEUI_ICON_SIZE_EMBLEM, "emblem-noread", "gmameui-emblem-unavailable" },
 		{ "gmameui-emblem-sound", GMAMEUI_ICON_SIZE_EMBLEM, "emblem-sound", "gmameui-emblem-sound" },
-		{ "gmameui-emblem-not-working", GMAMEUI_ICON_SIZE_EMBLEM, "emblem-important", "gmameui-emblem-not-working" },
-		{ "gmameui-emblem-date", GMAMEUI_ICON_SIZE_EMBLEM, "stock_calendar-view-year", "gmameui-emblem-date" },
+		{ "gmameui-emblem-not-working", GMAMEUI_ICON_SIZE_EMBLEM, GTK_STOCK_DIALOG_WARNING, "gmameui-emblem-not-working" },
 		{ "gmameui-emblem-unknown", GMAMEUI_ICON_SIZE_EMBLEM, "stock_unknown", "gmameui-emblem-unknown" },
-		{ "gmameui-emblem-manufacturer", GMAMEUI_ICON_SIZE_EMBLEM, "gnome-run", "gmameui-emblem-menufacturer" },
 	};
-
-	theme = gtk_icon_theme_get_default ();
+	
+	/* init globals */
+	memset (Status_Icons, 0, sizeof (GdkPixbuf *) * NUMBER_STATUS);
 
 	if (icons_table == NULL) {
 		icons_table = g_hash_table_new (g_str_hash, g_str_equal);
@@ -571,8 +571,10 @@ gmameui_icons_init (void)
 
 	/* build the composite icons */
 	add_composite_icons ();
+
 }
 
+/* FIXME TODO - should be renamed to get_pixbuf_from_stock */
 GdkPixbuf *
 gmameui_get_icon_from_stock (const char *id)
 {
@@ -649,7 +651,7 @@ get_status_icons (void)
 	 	if (Status_Icons [PROBLEMS] == NULL)
 			Status_Icons [PROBLEMS] = gmameui_get_icon_from_stock ("gmameui-rom-problems");
 	 	if (Status_Icons [BEST_AVAIL] == NULL)
-			Status_Icons [BEST_AVAIL] = gmameui_get_icon_from_stock ("gmameui-rom-problems");
+			Status_Icons [BEST_AVAIL] = gmameui_get_icon_from_stock ("gmameui-rom-bestavail");
 		if (Status_Icons [NOT_AVAIL] == NULL)
 			Status_Icons [NOT_AVAIL] = gmameui_get_icon_from_stock ("gmameui-rom-unavailable");
 	}

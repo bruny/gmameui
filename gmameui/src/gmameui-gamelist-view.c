@@ -51,6 +51,9 @@ G_DEFINE_TYPE (MameGamelistView, mame_gamelist_view, GTK_TYPE_TREE_VIEW)
 
 #define MAME_GAMELIST_VIEW_GET_PRIVATE(o)  (MAME_GAMELIST_VIEW (o)->priv)
 
+#define SELECT_TIMEOUT 110
+#define ICON_TIMEOUT 100
+
 /* Function prototypes */
 static void
 mame_gamelist_view_finalize              (GObject *object);
@@ -1458,7 +1461,7 @@ populate_model_from_gamelist (MameGamelistView *gamelist_view, MameGamelist *gl)
 		/* Set the pixbuf for the status icon - start as being the status icon,
 		   then look for the custom icon in the adjustment_scrolled_delayed
 		   callback since we don't want to load icons from zips for EVERY ROM */
-		pixbuf = gdk_pixbuf_copy (Status_Icons [mame_rom_entry_get_rom_status (tmprom)]);
+		pixbuf = gmameui_icon_mgr_get_pixbuf_for_status (mame_rom_entry_get_rom_status (tmprom));
 
 		gchar *romname, *manu, *year, *cloneof, *driver, *category, *version;
 		gint timesplayed;

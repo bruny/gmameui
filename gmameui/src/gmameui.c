@@ -161,9 +161,6 @@ gmameui_init (void)
 	}
 	g_free (filename);
 
-	/* init globals */
-	memset (Status_Icons, 0, sizeof (GdkPixbuf *) * NUMBER_STATUS);
-
 	GMAMEUI_DEBUG (_("Initialising list of possible MAME executable options"));
 	xmame_options_init ();
 	
@@ -576,7 +573,7 @@ play_game (MameRomEntry *rom)
 void process_inp_function (MameRomEntry *rom, gchar *file, int action)
 {
 	MameExec *exec;
-	char *filename;
+	gchar *filename;
 	gchar *opt, *opts_string;
 
 	g_return_if_fail (rom != NULL);	

@@ -93,19 +93,20 @@ struct main_gui_struct {
 struct main_gui_struct main_gui;
 
 /* New icon code */
-void gmameui_icons_init (void);
 GdkPixbuf * gmameui_get_icon_from_stock (const char *);
 GtkWidget * gmameui_get_image_from_stock (const char *);
 
 void add_exec_menu(void);
 int init_gui(void);
 
+GdkPixbuf *
+gmameui_icon_mgr_get_pixbuf_for_status (gint status);
 GdkPixbuf * get_icon_for_rom (MameRomEntry *rom, guint size, gchar *icon_dir,
 							  gchar *zipfilename, gboolean usecustomicons);
 GdkPixbuf * gmameui_get_icon_from_stock (const char *id);
 GtkWidget * gmameui_get_image_from_stock (const char *id);
 void get_status_icons (void);
-void gmameui_icons_init (void);
+
 
 void select_inp (gboolean play_record);
 void select_game (MameRomEntry *rom);
