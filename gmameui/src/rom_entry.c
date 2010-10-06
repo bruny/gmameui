@@ -412,6 +412,8 @@ destroy_rom (gpointer data, gpointer user_data)
 		g_free (rom->merge);
 	if (rom->status)
 		g_free (rom->status);
+	if (rom->region)
+		g_free (rom->region);
 }
 
 static void
@@ -1273,6 +1275,7 @@ enum {
 	INPARENT,  /* Missing, but available in parent romset */
 	DUPEPARENT,/* Available in parent romset as well (i.e. duplicate) */
 	COPY,	   /* Available in another (present) romset */
+	BIOS,	   /* Either is a BIOS or is contained in a BIOS */
 };
 
 static gint
@@ -1290,22 +1293,13 @@ find_rom_in_zip_file (gchar *romname, individual_rom *romref, GList *zroms)
 
 		if ((g_ascii_strcasecmp (zromref->name, romref->name) == 0) &&
 		    (g_ascii_strcasecmp (zromref->crc, romref->crc) == 0)) {
-			GMAMEUI_DEBUG ("    OK");
+			//GMAMEUI_DEBUG ("    OK");
 			result = OK;    // AAA FIXME TODO Should return the name of the found rom; if different then it indicates a rename is required
 			// g_signal_emit ("ROM found in zip");
-		} else if (g_ascii_strcasecmp (zromref->crc, romref->crc) == 0) {
-			GFile *file;
-			gchar *filepath;
-			
+		} else if (g_ascii_strcasecmp (zromref->crc, romref->crc) == 0) {			
 			GMAMEUI_DEBUG ("    OK - FOUND ROM %s WITH MATCHING CRC", zromref->name);
 			// g_signal_emit ("ROM needs renaming");
 			result = RENAME;
-
-			file = mame_rom_entry_get_disk_location (romname);
-			filepath = g_file_get_parse_name (file);
-			
-			rename_rom_in_zip_file (filepath, zromref->name, romref->name);
-			
 		}
 
 		if (result)
@@ -1323,7 +1317,7 @@ mame_rom_entry_add_roms_to_hashtable (MameRomEntry *romset)
 
 	g_return_if_fail (romset != NULL);
 	
-	GMAMEUI_DEBUG ("  Getting list of all available ROMs in available romset %s", romset->priv->romname);
+	//GMAMEUI_DEBUG ("  Getting list of all available ROMs in available romset %s", romset->priv->romname);
 	
 	zroms = get_roms_in_zip_file (romset->priv->romname);
 
@@ -1335,7 +1329,7 @@ mame_rom_entry_add_roms_to_hashtable (MameRomEntry *romset)
 
 		zromref = (individual_rom *) zromptr->data;
 		crc = g_strdup_printf ("%s", zromref->crc);
-		GMAMEUI_DEBUG ("    Adding rom %s with crc %s, value %s to hashtable", zromref->name, crc, romset->priv->romname);
+		//GMAMEUI_DEBUG ("    Adding rom %s with crc %s, value %s to hashtable", zromref->name, crc, romset->priv->romname);
 
 		/* Add ROM info to the hash table *
 		* FIXME Don't add if it already exists - memory leak */
@@ -1346,7 +1340,7 @@ mame_rom_entry_add_roms_to_hashtable (MameRomEntry *romset)
 		                     g_strdup (romset->priv->romname));
 	}
 
-	GMAMEUI_DEBUG ("  Getting list of all available ROMs in available romset %s... done", romset->priv->romname);
+	//GMAMEUI_DEBUG ("  Getting list of all available ROMs in available romset %s... done", romset->priv->romname);
 
 	/* Emit signal - romset ROMs added to hash table */
 }
@@ -1365,7 +1359,7 @@ mame_rom_entry_find_fixes (MameRomEntry *romset)
 	g_return_val_if_fail (romset != NULL, NULL);
 	g_return_val_if_fail (g_list_length (romset->priv->roms) > 0, NULL);
 
-	GMAMEUI_DEBUG ("    Processing romset %s", romset->priv->romname);
+	//GMAMEUI_DEBUG ("    Processing romset %s", romset->priv->romname);
 
 	fixes = (romset_fixes *) g_malloc0 (sizeof (romset_fixes));
 	fixes->romset_name = g_strdup (romset->priv->romname);
@@ -1373,7 +1367,7 @@ mame_rom_entry_find_fixes (MameRomEntry *romset)
 	fixes->status = OK;
 	
 	if ((romset->priv->has_roms == CORRECT) || (romset->priv->has_roms == BEST_AVAIL)) {
-		GMAMEUI_DEBUG ("      Romset is CORRECT or BEST AVAILABLE - no need to do anything");
+		//GMAMEUI_DEBUG ("      Romset is CORRECT or BEST AVAILABLE - no need to do anything");
 		return fixes;
 	}
 
@@ -1415,9 +1409,17 @@ mame_rom_entry_find_fixes (MameRomEntry *romset)
 		aromfix = (romfix *) g_malloc0 (sizeof (romfix));
 
 		aromfix->romname = g_strdup (romref->name);
+		aromfix->region = g_strdup (romref->region);
 
 		if (romref->sha1 == NULL) {
 			GMAMEUI_DEBUG ("      ROM %s DOES NOT HAVE SHA1 - NODUMP ASSUMED", romref->name);
+			fixable = TRUE;
+			continue;
+		}
+
+		if ((g_strrstr (romref->region, "bios") != NULL) ||
+		    (g_strrstr (romref->region, "zoomy") != NULL)) {
+			GMAMEUI_DEBUG ("      ROM %s is contained in a BIOS", romref->name);
 			fixable = TRUE;
 			continue;
 		}
@@ -1462,6 +1464,8 @@ mame_rom_entry_find_fixes (MameRomEntry *romset)
 			continue;       /* Move to next expected ROM */
 		}
 
+		/* Look in other available romsets (stored in the hashtable) to see
+		   whether the rom is available in other romset */
 		if ((!found) && (!foundpar)) {
 			gchar *container;       /* Romset that contains the missing rom */
 			gchar *crcval;
@@ -1491,6 +1495,7 @@ mame_rom_entry_find_fixes (MameRomEntry *romset)
 
 		}
 
+		/* If we still haven't found it, give up */
 		if (!found) {
 			fixable = FALSE;
 

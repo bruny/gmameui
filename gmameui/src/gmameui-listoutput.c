@@ -224,6 +224,7 @@ XMLStartRomHandler2 (void *user_data, const XML_Char *name, const XML_Char **att
 				g_strdup (read_string_attribute (atts, "crc"));
 			rom_value->merge = g_strdup (read_string_attribute (atts, "merge"));
 			rom_value->status = g_strdup (read_string_attribute (atts, "status"));
+			rom_value->region = g_strdup (read_string_attribute (atts, "region"));
 
 			/*GMAMEUI_DEBUG ("    Reading information for %s in romset %s",
 				       rom_value->name, mame_rom_entry_get_romname (parser->priv->current_rom));*/

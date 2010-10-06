@@ -55,6 +55,7 @@ typedef struct {
 	gchar *sha1;   	/* SHA1 checksum - AAA FIXME TODO Don't use as we have to uncompress then pass to method to get this! */
 	gchar *crc;		/* CRC */
 	gchar *merge;	/* Name of ROM shared with parent */
+	gchar *region;	/* Type of ROM, i.e. mainbios, maincpu, fixed, fixedbios, zoomy, audiobios, audiocpu, ym, sprites */
 	gchar *status;	/* Status of the known ROM (e.g. baddump, nodump, good) */
 	gboolean present;
 } individual_rom;

@@ -1029,7 +1029,9 @@ delayed_row_selected (GtkTreeSelection *selection)
 
 //		select_game (rom);
 	}
-select_game (rom);
+	
+	select_game (rom);
+	
 	return FALSE;
 }
 
@@ -1039,7 +1041,7 @@ on_row_selected (GtkTreeSelection *selection,
 {
 	if (timeoutid)
 		g_source_remove (timeoutid);
-GMAMEUI_DEBUG ("!!! on_row_selected");	
+
 	timeoutid = g_timeout_add (SELECT_TIMEOUT,
 				   (GSourceFunc) delayed_row_selected,
 				   selection);

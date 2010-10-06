@@ -44,14 +44,69 @@ void gmameui_romfix_list_add (GMAMEUIRomfixList *fixeslist, romset_fixes *romset
 {
 	g_return_if_fail (romset_fixes != NULL);
 	
-	GMAMEUI_DEBUG ("Added item %s to list", romset_fixes->romset_name);
+	//GMAMEUI_DEBUG ("Added item %s to list", romset_fixes->romset_name);
 
 	fixeslist->priv->fixes = g_list_append (fixeslist->priv->fixes, romset_fixes);
 
-	GMAMEUI_DEBUG ("Emitting signal!");
+	//GMAMEUI_DEBUG ("Emitting signal!");
 	g_signal_emit (fixeslist, signals[ROMFIX_LIST_ADDED],
 	               0, romset_fixes->romset_name, romset_fixes);
-	GMAMEUI_DEBUG ("Emitting signal done!");
+	//GMAMEUI_DEBUG ("Emitting signal done!");
+}
+
+static void
+process_romset_fixes (gpointer data, gpointer user_data)
+{
+	GList *list;
+	
+	romset_fixes *set_fixes = (romset_fixes *) data;
+
+	GMAMEUI_DEBUG ("  Processing fixes for %s", set_fixes->romset_name);
+
+	list = g_list_first (set_fixes->romfixes);
+
+	while (list != NULL) {
+		romfix *aromfix = (romfix *) list->data;
+		
+		if (aromfix->status != 1) {
+			GMAMEUI_DEBUG ("    Fixing %s", aromfix->romname);
+
+			/* Fix any renaming */
+			if (aromfix->status == 2) {
+				GFile *file;
+				gchar *filepath;
+
+				/* FIXME TODO The following info should be held in the romset info GObject */
+				file = mame_rom_entry_get_disk_location (set_fixes->romset_name);
+				filepath = g_file_get_parse_name (file);
+
+#ifdef MAKE_FIXES			
+				rename_rom_in_zip_file (filepath, aromfix->romname, aromfix->container);
+#else
+				GMAMEUI_DEBUG ("      Renaming rom from %s to %s", aromfix->romname, aromfix->container);
+#endif
+			}
+
+			if (aromfix->status == 5) {
+#ifdef MAKE_FIXES
+#else
+				GMAMEUI_DEBUG ("      Copying rom %s from romset %s", aromfix->romname, aromfix->container);
+#endif
+			}
+			
+		}
+
+		/* Get the next rom fix in the romset */
+		list = g_list_next (list);
+	}
+}
+
+void
+gmameui_romfix_list_process_fixes (GMAMEUIRomfixList *fixeslist)
+{
+	g_return_if_fail (fixeslist != NULL);
+
+	g_list_foreach (fixeslist->priv->fixes, (GFunc) process_romset_fixes, NULL);
 }
 
 static void

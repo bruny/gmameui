@@ -65,7 +65,10 @@ typedef struct {
 
 typedef struct {
 	gchar *romname;
+	gchar *romset;		/* Name of the romset that this relates to */
 	gchar *container;	/* Name of the romset that is a source for a missing ROM */
+						/* AAA FIXME TODO Also need to use this (or another variable) as the target romname for renaming */
+	gchar *region;
 	gint status;
 } romfix;
 
@@ -82,6 +85,7 @@ GType gmameui_romfix_list_get_type (void);
 GMAMEUIRomfixList* gmameui_romfix_list_new (void);
 
 void gmameui_romfix_list_add (GMAMEUIRomfixList *, romset_fixes *);
+void gmameui_romfix_list_process_fixes (GMAMEUIRomfixList *fixeslist);
 
 G_END_DECLS
 

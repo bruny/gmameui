@@ -1,3 +1,10 @@
+2010-10-06 19:20 adburton
+
+	* src/: gmameui-gamelist-view.c, gmameui-listoutput.c, gmameui-main-win.c,
+	  gmameui-romfix-list.c, gmameui-romfix-list.h, gmameui-rommgr-dlg.c,
+	  rom_entry.c, rom_entry.h: Update code for romset fixing - still
+	  experimental, still not available in default configure flags
+
 2010-10-06 19:00 adburton
 
 	* data/romset_mgr.builder: Add missing file

@@ -29,12 +29,24 @@
 #include "game_list.h"
 
 /* Improvements:
-	DONE- toggle to hide all correct ROMs
-	DONE- toggle to hide all correct ROMsets
 	- button to fix ROM where available
     - processing count list
-    - display window from start of processing and have g_idle_add to update
+    - don't hang while generating --listxml
+
+	needs to sort roms and clones
+	needs to add labels
+	needs to have re-sizable column headings
+	neogeo roms are coming up as incorrect (e.g. nam1975), even though they are fine
+	some roms are reporting more errors than there are (e.g. ghoulsu)
+
 */
+
+enum {
+	COL_NAME,
+	COL_REGION,
+	COL_STATUSTXT,
+	COL_STATUS,
+};
 
 struct _GMAMEUIRomMgrDialogPrivate {
 	GtkBuilder *builder;
@@ -133,24 +145,32 @@ add_romset_contents_to_hashtable (gpointer data, gpointer user_data)
 }
 
 static gchar *
-get_romfix_status (gint i)
+get_romfix_status (romfix *fix)
 {
+	int i;
+	gchar *msg;
+
+	i = fix->status;
+	
 	/* AAA FIXME TODO matches enum in rom_entry.c */
 	if (i == 0)
-		return _("Incorrect");
+		msg = g_strdup (_("Incorrect"));
 	else if (i == 1)
-		return _("OK");
+		msg = g_strdup (_("OK"));
 	else if (i == 2)
-		return _("should be renamed to");
+		msg = g_strdup (_("should be renamed to"));
 	else if (i == 3)
-		return _("available in parent");
+		msg = g_strdup_printf (_("available in parent %s"), fix->container);
 	else if (i == 4)
-		return _("duplicated in parent");
+		msg = g_strdup_printf (_("duplicated in parent %s"), fix->container);
 	else if (i == 5)
-		return _("available in romset");
+		msg = g_strdup_printf (_("available in romset %s"), fix->container);
+	else if (i == 6)
+		msg = g_strdup (_("contained in a BIOS"));
 	else
 		g_assert_not_reached ();
 
+	return msg;
 }
 
 /* This callback handles when the GMAMEUIRomfixList emits that a romset fixlist
@@ -173,9 +193,10 @@ on_romset_fix_found (GMAMEUIRomfixList *fixlist,
 	                                fixes->romset_fullname, fixes->romset_name);
 	gtk_tree_store_append (dialog->priv->treestore, &iter, NULL);
 	gtk_tree_store_set (dialog->priv->treestore, &iter,
-	                    0, rom_fullname,
-	                    1, get_romfix_status (fixes->status),
-	                    2, fixes->status,	/* If status is OK, set to 1, for filtering */
+	                    COL_NAME, rom_fullname,
+	                    COL_REGION, "",
+	                    COL_STATUSTXT, /*get_romfix_status (fixes->status)*/"",
+	                    COL_STATUS, fixes->status,	/* If status is OK, set to 1, for filtering */
 	                    -1);
 	g_free (rom_fullname);
 
@@ -186,9 +207,10 @@ on_romset_fix_found (GMAMEUIRomfixList *fixlist,
 
 		gtk_tree_store_append (dialog->priv->treestore, &child_iter, &iter);
 		gtk_tree_store_set (dialog->priv->treestore, &child_iter,
-		                    0, fix->romname,
-		                    1, get_romfix_status (fix->status),
-		                    2, fix->status,	/* If status is OK, set to 1, for filtering */
+		                    COL_NAME, fix->romname,
+		                    COL_REGION, fix->region,
+		                    COL_STATUSTXT, get_romfix_status (fix),
+		                    COL_STATUS, fix->status,	/* If status is OK, set to 1, for filtering */
 		                    -1);
 		
 		roms = g_list_next (roms);
@@ -215,7 +237,7 @@ romset_find_fixes (gpointer data, gpointer user_data)
 	
 	romset = get_rom_from_gamelist_by_name (gui_prefs.gl, romname);
 
-	GMAMEUI_DEBUG ("  Looking for fixes for %s", romname);
+	//GMAMEUI_DEBUG ("  Looking for fixes for %s", romname);
 	
 	g_return_val_if_fail (romset != NULL, TRUE);
 
@@ -254,6 +276,7 @@ start_scan_process (gpointer *data)
 {
 	GMAMEUIListOutput *parser;
 	MameExec *exec;
+	GtkWidget *widget;
 
 	GTimer *timer;
 
@@ -294,6 +317,9 @@ start_scan_process (gpointer *data)
 
 	/* Ask user whether they want to have more detailed look for missing ROMs */
 
+	/* Enable fix button */
+	widget = GTK_WIDGET (gtk_builder_get_object (dialog->priv->builder, "btn_fix"));
+	gtk_widget_set_sensitive (widget, TRUE);
 	
 	/* Destroy hash table */
 	GMAMEUI_DEBUG ("Destroying rom hashtable...");
@@ -366,10 +392,14 @@ filter_func (GtkTreeModel *model,
 	gint romset_status;
 
 	/* Get the gamename, and whether it is filtered by ROM, from the iter */
-	gtk_tree_model_get (model, iter, 2, &romset_status, -1);
+	gtk_tree_model_get (model, iter, COL_STATUS, &romset_status, -1);
 
 	toggled = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (chk));
 
+	/* Automatically hide romsets that are in the parent */
+	if (romset_status == 3)
+		return FALSE;
+	
 	if (toggled) {
 		/* If toggled, hide romsets and ROMs that are marked as "OK" */
 		return (romset_status != 1);
@@ -379,6 +409,18 @@ filter_func (GtkTreeModel *model,
 	}
 
 } 
+
+static void
+on_btn_fixes_clicked (GtkWidget *widget, gpointer user_data)
+{
+	GMAMEUIRomMgrDialog *dialog;
+
+	dialog = (GMAMEUIRomMgrDialog *) user_data;
+
+	GMAMEUI_DEBUG ("Clicked!");
+gmameui_romfix_list_process_fixes (gui_prefs.fixes);
+	GMAMEUI_DEBUG ("Done!");
+}
 
 static void
 on_hidecorrectromsets_toggled (GtkWidget *widget, gpointer user_data)
@@ -462,6 +504,7 @@ gmameui_rommgr_dialog_init (GMAMEUIRomMgrDialog *dialog)
 	GtkTreeSelection *select;	/* Handle rows in the treeview being selected */
 	GtkWidget *rommgr_vbox;
 	GtkWidget *chk_hidecorrectromsets;
+	GtkWidget *widget;
 
 	GError *error = NULL;
 	
@@ -542,6 +585,11 @@ gmameui_rommgr_dialog_init (GMAMEUIRomMgrDialog *dialog)
 	
 	dialog->priv->avail_romsets = NULL;
 
+	widget = GTK_WIDGET (gtk_builder_get_object (priv->builder, "btn_fix"));
+	g_signal_connect (G_OBJECT (widget), "clicked",
+	                  G_CALLBACK (on_btn_fixes_clicked), dialog);
+	gtk_widget_set_sensitive (widget, FALSE);
+	
 	/* Initialise the counts */
 	dialog->priv->total_romsets = 0;
 	dialog->priv->total_ok = 0;

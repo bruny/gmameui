@@ -188,7 +188,7 @@ static const GtkActionEntry gmameui_rom_and_exec_menu_entries[] =
 /* The following menu entries are enabled when MAME executable exists */
 static const GtkActionEntry gmameui_exec_menu_entries[] =
 {
-	{ "FileAuditAllGames", NULL, N_("_Audit All Games"), NULL,
+	{ "FileAuditAllGames", GTK_STOCK_FIND, N_("_Audit All Games"), NULL,
 	  N_("Audit ROM and sample sets"), G_CALLBACK (on_audit_all_games_activate) },
 /*DELETE	{ "OptionRebuildGameList", NULL, N_("_Rebuild Game List"), NULL,
 	  N_("Rebuild the game list from executable information"), G_CALLBACK (on_rebuild_game_list_menu_activate) },*/
