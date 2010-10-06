@@ -1,3 +1,8 @@
+2010-10-06 19:30 adburton
+
+	* configure.ac, src/gmameui-main-win.c: Remove dependency on libgnome,
+	  bump version for release
+
 2010-10-06 19:20 adburton
 
 	* src/: gmameui-gamelist-view.c, gmameui-listoutput.c, gmameui-main-win.c,

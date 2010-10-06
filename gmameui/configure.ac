@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([gmameui], [0.2.12])
+AC_INIT([gmameui], [0.2.13])
 AC_PREREQ(2.5)
 
 AM_INIT_AUTOMAKE
@@ -30,26 +30,6 @@ AM_PATH_GTK_2_0(2.13.4,AC_DEFINE(ENABLE_GTKSHOWURI, 1, Enable gtk_show_uri to sp
 PKG_CHECK_MODULES(VTE, vte, [], AC_MSG_ERROR([libvte-dev not found!]))
 AC_SUBST(VTE_CFLAGS)
 AC_SUBST(VTE_LIBS)
-
-dnl Need to add a way to not build using libgnome if user is using XFCE for e.g.
-dnl or if GTK2.13 is available, since libgnome is only used to spawn Help
-AC_ARG_ENABLE(libgnome,
-  AC_HELP_STRING([--enable-libgnome],[include libgnome support (default: yes)])
-  ,,enable_libgnome=yes)
-
-AC_MSG_CHECKING(whether libgnome support should be included)
-if test ${enable_libgnome} = no; then
-   AC_MSG_RESULT([no])
-else
-   AC_MSG_RESULT([yes])
-
-   dnl libgnome support included, needed to check for modules, and define
-   dnl it so that IFDEF code can be built
-   PKG_CHECK_MODULES(GNOME, libgnome-2.0, AC_DEFINE(ENABLE_LIBGNOME, 1, libgnome support will be built), AC_MSG_ERROR([*** libgnome2 not found!]))
-   AC_SUBST(GNOME_CFLAGS)
-   AC_SUBST(GNOME_LIBS)
-fi
-
 
 dnl Check for the existence of libarchive, to support reading and writing
 dnl compressed (zip) files

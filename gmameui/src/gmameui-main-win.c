@@ -1037,11 +1037,6 @@ on_help_activate (GtkAction *action, gpointer user_data)
 	
 	timestamp = gtk_get_current_event_time ();	
 	gtk_show_uri (NULL, "ghelp:gmameui", timestamp, &error);
-#elif ENABLE_LIBGNOME
-	/* The following requires libgnome to be compiled in (which it is
-	   by default) */
-	gboolean ret;
-	ret = gnome_url_show ("ghelp:gmameui", &error);
 #else
 	/* GTK2.13 is not available and the user has not compiled in
 	   libgnome (may be a XFCE or KDE user) */
