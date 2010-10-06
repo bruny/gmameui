@@ -1,3 +1,14 @@
+2010-10-06 19:00 adburton
+
+	* data/romset_mgr.builder: Add missing file
+
+2010-10-01 22:15 adburton
+
+	* src/: gui.c, gui.h, gmameui.c, gmameui.h, gmameui-gamelist-view.c: Hide
+	  internals of status icons
+	* src/gui.c: Change icons used to represent incorrect or best available
+	  romsets
+
 2010-09-30 20:00 adburton
 
 	* src/gmameui-rominfo-dlg.c, data/rom_info.builder: Add URLs for CAESAR
