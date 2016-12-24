@@ -2,7 +2,7 @@
 
 ## WARNING
 
-This code is migrated from the original SourceForge page. It is old and has issues with more recent versions of MAME. It is unmaintained (due to time and because I no longer run Linux). A more recent fork is available <a href=" https://github.com/sergiomb2/gmameui">here</a>.
+This code is migrated from the original SourceForge page. It is old and has issues with more recent versions of MAME. It is unmaintained (due to time and because I no longer run Linux). A more recent fork is available [here](https://github.com/sergiomb2/gmameui).
 
 ## About GMAMEUI
 
