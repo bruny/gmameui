@@ -1,5 +1,11 @@
 # GMAMEUI - It's MAME! On Linux!
 
+## WARNING
+
+This code is migrated from the original SourceForge page. It is old and has issues with more recent versions of MAME. It is unmaintained (due to time and because I no longer run Linux). A more recent fork is available <a href=" https://github.com/sergiomb2/gmameui">here</a>.
+
+## About GMAMEUI
+
 GMAMEUI is a front-end program that helps you run MAME on non-Windows platforms, allowing you to run your arcade games quickly and easily.
 
 GMAMEUI is a fork of the defunct <a href="http://gxmame.sourceforge.net">GXMame project</a>.
